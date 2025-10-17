@@ -75,17 +75,17 @@ tabs:
 
 ### 3. Use Panel Features
 
-**Live Preview:** See real-time Google/Twitter/Facebook appearance
-**AI Generator:** Click "Generate with AI" button to create optimized descriptions
-**Languages:** Auto-detects language (de, en, fr, es, it)
+* **Live Preview:** See real-time Google/Twitter/Facebook appearance
+* **AI Generator:** Click "Generate with AI" button to create optimized descriptions
+* **Languages:** Auto-detects language (de, en, fr, es, it)
 
 ## What's Included
 
-**Sitemap:** `/sitemap.xml` with styled view, exclusions, priorities
-**Schema.org:** Organization, WebSite, WebPage, BreadcrumbList
-**Meta Tags:** Title, description, keywords, canonical, noindex
-**Social Media:** OG tags, Twitter Cards, optimized images (1200×630px)
-**Multilanguage:** Hreflang tags, og:locale, per-language content
+* **Sitemap:** `/sitemap.xml` with styled view, exclusions, priorities
+* **Schema.org:** Organization, WebSite, WebPage, BreadcrumbList
+* **Meta Tags:** Title, description, keywords, canonical, noindex
+* **Social Media:** OG tags, Twitter Cards, optimized images (1200×630px)
+* **Multilanguage:** Hreflang tags, og:locale, per-language content
 
 ## Programmatic Usage
 
