@@ -81,6 +81,48 @@ Kirby::plugin('tearoom1/meta-kit', [
         }
     ],
     'hooks' => [
+        'system.loadPlugins:after' => function () {
+            // Initialize site SEO objects on first load if they don't exist
+            $site = site();
+            $needsUpdate = false;
+            $updates = [];
+            
+            // Check if objects need initialization
+            if ($site->seo()->isEmpty()) {
+                $updates['seo'] = [
+                    'appendSiteName' => 'true',
+                    'titleSeparator' => '|',
+                ];
+                $needsUpdate = true;
+            }
+            
+            if ($site->openrouter()->isEmpty()) {
+                $updates['openrouter'] = [
+                    'model' => 'meta-llama/llama-3.2-3b-instruct:free',
+                    'temperature' => '0.7',
+                ];
+                $needsUpdate = true;
+            }
+            
+            if ($site->sitemap()->isEmpty()) {
+                $updates['sitemap'] = [
+                    'priorityHome' => '1.0',
+                    'priorityDefault' => '0.8',
+                ];
+                $needsUpdate = true;
+            }
+            
+            // Only update if needed and not already being updated
+            if ($needsUpdate && !defined('KIRBY_META_KIT_INITIALIZING')) {
+                define('KIRBY_META_KIT_INITIALIZING', true);
+                try {
+                    kirby()->impersonate('kirby');
+                    $site->update($updates);
+                } catch (\Exception $e) {
+                    // Silently fail - site might be read-only or in a context where updates aren't allowed
+                }
+            }
+        },
         'page.update:after' => function ($newPage, $oldPage) {
             // Auto-generate description if enabled and field is empty
             $autoGenerate = option('tearoom1.meta-kit.autoGenerate', false);
