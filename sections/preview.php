@@ -9,42 +9,27 @@ return [
     'computed' => [
         'meta' => function () {
             $page = $this->model();
-            
+
             try {
                 // Get the changes version if it exists (unsaved changes)
                 $changesVersion = $page->version('changes');
                 if ($changesVersion->exists('current')) {
                     $page = $page->clone(['content' => $changesVersion->content()->toArray()]);
                 }
-                
+
                 // Get SEO data from object field
                 $seoData = $page->seo()->toObject();
-                
-                // Build meta object with site settings
-                $separator = site()->titleSeparator()->or('|')->value();
-                $appendSiteName = site()->appendSiteName()->or('true')->toBool();
-                
-                $title = $seoData && $seoData->metatitle()->isNotEmpty() 
-                    ? $seoData->metatitle()->value() 
-                    : $page->title()->value();
-                
-                // Append site name if enabled and not already included
-                if ($appendSiteName && !str_contains($title, site()->title()->value())) {
-                    $title = $title . ' ' . $separator . ' ' . site()->title()->value();
-                }
-                
-                $description = $seoData && $seoData->metadescription()->isNotEmpty()
-                    ? $seoData->metadescription()->value()
-                    : 'No description';
+
+                // Build title and descriptions using helper
+                $title = \TearoomOne\MetaHelper::buildTitle($page, site(), $seoData);
+                $description = \TearoomOne\MetaHelper::buildDescription($page, site(), $seoData);
                 
                 $ogTitle = $seoData && $seoData->ogtitle()->isNotEmpty()
                     ? $seoData->ogtitle()->value()
                     : $title;
-                
-                $ogDescription = $seoData && $seoData->ogdescription()->isNotEmpty()
-                    ? $seoData->ogdescription()->value()
-                    : $description;
-                
+
+                $ogDescription = \TearoomOne\MetaHelper::buildOgDescription($page, site(), $seoData, $description);
+
                 $ogImage = null;
                 if ($seoData && $seoData->ogimage()->isNotEmpty()) {
                     // Get the first file from the files field
@@ -55,14 +40,14 @@ return [
                         $ogImage = $image ? $image->crop(1200, 630)->url() : null;
                     }
                 }
-                
+
                 // Fallback to site default OG image
                 if (!$ogImage && site()->ogImage()->isNotEmpty()) {
                     $siteImage = site()->ogImage()->toFile();
                     // Resize to OG dimensions (1200x630)
                     $ogImage = $siteImage ? $siteImage->crop(1200, 630)->url() : null;
                 }
-                
+
                 return [
                     'url' => $page->url(),
                     'title' => $title,

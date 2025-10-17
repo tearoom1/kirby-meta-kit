@@ -13,34 +13,13 @@ $enableSchema = option('tearoom1.meta-kit.schema.enabled', true);
 // Get SEO data from object field
 $seoData = $page->seo()->toObject();
 
-// Get site settings
-$separator = $site->titleSeparator()->or('|')->value();
-$appendSiteName = $site->appendSiteName()->or('true')->toBool();
-
 // ==============================================================
 // Build Common Data
 // ==============================================================
 
-// Get meta title
-if ($seoData && $seoData->metaTitle()->isNotEmpty()) {
-    $metaTitle = $seoData->metaTitle()->value();
-} else {
-    $metaTitle = $page->title()->value();
-}
-
-// Append site name if enabled and not already included
-if ($appendSiteName && !str_contains($metaTitle, $site->title()->value())) {
-    $metaTitle = $metaTitle . ' ' . $separator . ' ' . $site->title()->value();
-}
-
-// Get meta description
-if ($seoData && $seoData->metaDescription()->isNotEmpty()) {
-    $metaDescription = $seoData->metaDescription()->excerpt(160);
-} elseif ($site->metaDescription()->isNotEmpty()) {
-    $metaDescription = $site->metaDescription()->excerpt(160);
-} else {
-    $metaDescription = $page->text()->excerpt(160);
-}
+// Build meta title and description using helper
+$metaTitle = \TearoomOne\MetaHelper::buildTitle($page, $site, $seoData);
+$metaDescription = \TearoomOne\MetaHelper::buildDescription($page, $site, $seoData);
 
 // Get canonical URL
 if ($seoData && $seoData->canonicalUrl()->isNotEmpty()) {
@@ -52,26 +31,15 @@ if ($seoData && $seoData->canonicalUrl()->isNotEmpty()) {
 // Check noIndex
 $noIndex = $seoData && $seoData->noIndex()->isTrue();
 
-// Get OG title
+// Get OG title (use custom OG title or fall back to meta title)
 if ($seoData && $seoData->ogTitle()->isNotEmpty()) {
-    $ogTitle = $seoData->ogTitle()->value();
+    $ogTitle = \TearoomOne\MetaHelper::buildTitle($page, $site, $seoData);
 } else {
-    $ogTitle = $page->title()->value();
+    $ogTitle = $metaTitle;
 }
 
-// Append site name for OG title
-if ($appendSiteName && !str_contains($ogTitle, $site->title()->value())) {
-    $ogTitle = $ogTitle . ' ' . $separator . ' ' . $site->title()->value();
-}
-
-// Get OG description
-if ($seoData && $seoData->ogDescription()->isNotEmpty()) {
-    $ogDescription = $seoData->ogDescription()->excerpt(160);
-} elseif ($seoData && $seoData->metaDescription()->isNotEmpty()) {
-    $ogDescription = $seoData->metaDescription()->excerpt(160);
-} else {
-    $ogDescription = $metaDescription;
-}
+// Get OG description using helper
+$ogDescription = \TearoomOne\MetaHelper::buildOgDescription($page, $site, $seoData, $metaDescription);
 
 // Get OG image
 $ogImage = null;

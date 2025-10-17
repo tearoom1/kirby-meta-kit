@@ -8,6 +8,7 @@ use Kirby\Http\Response;
 load([
     'TearoomOne\MetaKit' => 'src/MetaKit.php',
     'TearoomOne\Sitemap' => 'src/Sitemap.php',
+    'TearoomOne\MetaHelper' => 'src/MetaHelper.php',
 ], __DIR__);
 
 Kirby::plugin('tearoom1/meta-kit', [
