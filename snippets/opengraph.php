@@ -13,10 +13,19 @@ $separator = $site->titleSeparator()->or('|')->value();
 $appendSiteName = $site->appendSiteName()->or('true')->toBool();
 
 // Get the featured image or fallback to site image
+$ogImage = null;
 if ($seoData && $seoData->ogImage()->isNotEmpty()) {
-    $ogImage = $seoData->ogImage()->toFile();
+    $ogImageFile = $seoData->ogImage()->toFile();
+    if ($ogImageFile) {
+        // Resize/crop to OG dimensions (1200x630)
+        $ogImage = $ogImageFile->crop(1200, 630);
+    }
 } else {
-    $ogImage = $site->ogImage()->toFile() ?? null;
+    $ogImageFile = $site->ogImage()->toFile();
+    if ($ogImageFile) {
+        // Resize/crop to OG dimensions (1200x630)
+        $ogImage = $ogImageFile->crop(1200, 630);
+    }
 }
 
 // Get OpenGraph title

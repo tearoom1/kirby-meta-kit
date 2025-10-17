@@ -172,12 +172,24 @@ class SeoAi
             return false;
         }
 
-        // Check noIndex field
-        if ($page->noIndex()->isTrue()) {
+        // Check page's noIndex field
+        $seoData = $page->seo()->toObject();
+        if ($seoData && $seoData->noIndex()->toBool() === true) {
             return false;
         }
 
-        // Check against exclude patterns
+        // Check site blueprint's sitemapExclude field (pages selector)
+        $siteExclude = $this->kirby->site()->sitemapExclude();
+        if ($siteExclude->isNotEmpty()) {
+            $excludedPages = $siteExclude->toPages();
+            foreach ($excludedPages as $excludedPage) {
+                if ($excludedPage->id() === $page->id()) {
+                    return false;
+                }
+            }
+        }
+
+        // Check config exclude patterns
         $excludePatterns = $this->options['sitemap.exclude'] ?? [];
         $id = $page->id();
         
@@ -202,7 +214,21 @@ class SeoAi
 
     protected function getPriority(Page $page): float
     {
-        // Priority based on page depth
+        // Use site settings if available
+        $site = $this->kirby->site();
+        
+        // Homepage gets priority from site settings or 1.0
+        if ($page->isHomePage()) {
+            return $site->sitemapPriorityHome()->toFloat() ?? 1.0;
+        }
+        
+        // Other pages get default priority from site settings
+        $defaultPriority = $site->sitemapPriorityDefault()->toFloat() ?? null;
+        if ($defaultPriority !== null) {
+            return $defaultPriority;
+        }
+        
+        // Fallback: Priority based on page depth
         $depth = $page->depth();
         
         if ($depth <= 1) return 1.0;

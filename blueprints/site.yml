@@ -1,4 +1,4 @@
-title: SEO & Social Media
+label: SEO & Social Media
 sections:
   seo:
     type: fields
@@ -18,7 +18,7 @@ sections:
         default: '|'
         width: 1/2
         help: Separator between page title and site name
-      
+
       appendSiteName:
         label: Append Site Name to Titles
         type: toggle

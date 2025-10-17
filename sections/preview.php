@@ -51,8 +51,16 @@ return [
                     $files = $seoData->ogimage()->toFiles();
                     if ($files && $files->count() > 0) {
                         $image = $files->first();
-                        $ogImage = $image ? $image->url() : null;
+                        // Resize to OG dimensions (1200x630)
+                        $ogImage = $image ? $image->crop(1200, 630)->url() : null;
                     }
+                }
+                
+                // Fallback to site default OG image
+                if (!$ogImage && site()->ogImage()->isNotEmpty()) {
+                    $siteImage = site()->ogImage()->toFile();
+                    // Resize to OG dimensions (1200x630)
+                    $ogImage = $siteImage ? $siteImage->crop(1200, 630)->url() : null;
                 }
                 
                 return [

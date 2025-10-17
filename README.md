@@ -143,6 +143,23 @@ The AI respects your site's language and generates descriptions in German, Engli
 
 #### Site Blueprint
 
+The plugin provides site-wide SEO settings accessible in **Site → SEO & Social Media**:
+
+**SEO Tab:**
+- Title Separator (|, -, etc.)
+- Append Site Name toggle
+- Default meta title, description, keywords
+- Default social media image
+
+**Social Media Tab:**
+- Social profiles (Facebook, Twitter, Instagram, etc.)
+- Used in Schema.org JSON-LD for `sameAs` property
+
+**Sitemap Tab:**
+- Exclude pages from sitemap (page selector)
+- Homepage priority (0.1-1.0)
+- Default page priority (0.1-1.0)
+
 Extend your site blueprint with SEO fields:
 
 ```yaml
