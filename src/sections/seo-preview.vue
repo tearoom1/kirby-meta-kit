@@ -17,9 +17,9 @@
         </div>
       </div>
 
-      <!-- Twitter Preview -->
+      <!-- Share Preview -->
       <div class="k-seo-preview k-seo-preview--twitter">
-        <h3 class="k-seo-preview__title">Twitter Card Preview</h3>
+        <h3 class="k-seo-preview__title">Share / Card Preview</h3>
         <div class="k-seo-preview__content">
           <div class="k-twitter-preview">
             <div v-if="meta.ogImage" class="k-twitter-preview__image" :style="{ backgroundImage: 'url(' + meta.ogImage + ')' }"></div>
@@ -31,23 +31,8 @@
           </div>
         </div>
       </div>
-
-      <!-- Facebook Preview -->
-      <div class="k-seo-preview k-seo-preview--facebook">
-        <h3 class="k-seo-preview__title">Facebook Share Preview</h3>
-        <div class="k-seo-preview__content">
-          <div class="k-facebook-preview">
-            <div v-if="meta.ogImage" class="k-facebook-preview__image" :style="{ backgroundImage: 'url(' + meta.ogImage + ')' }"></div>
-            <div class="k-facebook-preview__body">
-              <cite class="k-facebook-preview__url">{{ displayUrl(meta.url).toUpperCase() }}</cite>
-              <h4 class="k-facebook-preview__title">{{ meta.ogTitle || meta.title || 'Page Title' }}</h4>
-              <p class="k-facebook-preview__description">{{ truncate(meta.ogDescription || meta.description, 120) || 'No description' }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
-    
+
     <div v-else class="k-seo-preview-loading">
       Loading preview...
     </div>
@@ -70,7 +55,7 @@ export default {
   async mounted() {
     console.log('SEO Preview Section Mounted');
     await this.load();
-    
+
     // Listen to input events on the entire document (catches all field changes)
     document.addEventListener('input', this.handleInputChange, true);
     document.addEventListener('change', this.handleInputChange, true);
@@ -109,17 +94,17 @@ export default {
     },
     updatePreviewFromData(seoData, pageTitle) {
       console.log('Updating preview from data:', seoData, pageTitle);
-      
+
       // Build meta object from passed data
       const siteName = this.$store?.state?.system?.title || 'Site Name';
       const separator = '|';
-      
+
       const metaTitle = seoData.metatitle || pageTitle || 'Page Title';
       const fullTitle = metaTitle + ' ' + separator + ' ' + siteName;
-      
+
       // Preserve existing ogImage if we're just updating text fields
       const currentOgImage = this.meta?.ogImage || null;
-      
+
       this.meta = {
         url: window.location.origin,
         title: fullTitle,
@@ -128,7 +113,7 @@ export default {
         ogDescription: seoData.ogdescription || seoData.metadescription || 'No description',
         ogImage: currentOgImage // Preserve existing image
       };
-      
+
       console.log('Preview updated:', this.meta);
     },
     loadFromFormState() {
@@ -138,18 +123,18 @@ export default {
         while (parent && !parent.value) {
           parent = parent.$parent;
         }
-        
+
         if (!parent || !parent.value) {
           console.log('Could not find parent form values');
           return false;
         }
-        
+
         console.log('Loading from form state:', parent.value);
-        
+
         // Extract SEO data
         const seoData = parent.value.seo || {};
         const pageTitle = parent.value.title || 'Page Title';
-        
+
         // Use the shared update method
         this.updatePreviewFromData(seoData, pageTitle);
         return true;
@@ -161,7 +146,7 @@ export default {
     async load() {
       try {
         const response = await this.$api.get(this.parent + '/sections/' + this.name);
-        
+
         // Try different possible locations
         if (response.meta) {
           this.meta = response.meta;

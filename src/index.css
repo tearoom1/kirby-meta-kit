@@ -1,7 +1,7 @@
 /* SEO Preview Section */
 .k-seo-preview-section {
   padding: 1rem;
-  background: var(--color-white);
+  background: var(--color-back);
   border-radius: var(--rounded);
 }
 
@@ -11,7 +11,7 @@
 }
 
 .k-seo-preview {
-  border: 1px solid var(--color-border);
+  border: 5px solid var(--color-border);
   border-radius: var(--rounded);
   overflow: hidden;
 }
@@ -20,7 +20,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   padding: 0.75rem 1rem;
-  background: var(--color-gray-200);
+  background: var(--color-border);
   border-bottom: 1px solid var(--color-border);
   margin: 0;
 }
