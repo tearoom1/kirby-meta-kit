@@ -5,6 +5,8 @@ AI-powered SEO and OpenGraph management for Kirby CMS with automatic meta descri
 ## Features
 
 - 🤖 **AI-Powered Meta Descriptions** - Generate SEO-optimized descriptions using Mistral via OpenRouter
+- 👁️ **Panel Preview** - Live preview of how pages appear on Google, Twitter, and Facebook
+- 🎯 **One-Click AI Generation** - Generate descriptions directly in the panel with a button
 - 🌍 **Multilanguage Support** - Full support for multilingual sites with hreflang tags
 - 🗺️ **XML Sitemap** - Automatic sitemap generation with multilanguage support
 - 📱 **Social Media Ready** - OpenGraph and Twitter Card meta tags
@@ -80,6 +82,29 @@ Add the SEO snippets to your template's `<head>` section:
 </body>
 </html>
 ```
+
+### Panel Features
+
+The plugin provides powerful panel features for managing SEO:
+
+#### SEO Preview
+
+The plugin automatically shows live previews of how your page will appear on:
+- **Google Search** - See the title, URL, and description as they appear in search results
+- **Twitter** - Preview the Twitter Card with image, title, and description
+- **Facebook** - Preview the OpenGraph share with image, title, and description
+
+The preview updates in real-time as you edit your content!
+
+#### AI Description Generator
+
+Generate meta descriptions with a single click:
+1. Click the **"Generate with AI"** button
+2. The plugin analyzes your page content
+3. AI generates an optimized description in the current language
+4. Description is automatically inserted into the meta description field
+
+The AI respects your site's language and generates descriptions in German, English, French, Spanish, or Italian.
 
 ### Blueprint Integration
 

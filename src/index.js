@@ -1,3 +1,6 @@
+
+import './index.css';
+
 panel.plugin('tearoom1/seo-ai', {
   sections: {
     'seo-preview': {
@@ -13,7 +16,7 @@ panel.plugin('tearoom1/seo-ai', {
           <header class="k-section-header">
             <h2 class="k-headline">{{ label }}</h2>
           </header>
-          
+
           <div class="k-seo-previews">
             <!-- Google Preview -->
             <div class="k-seo-preview k-seo-preview--google">
@@ -26,7 +29,7 @@ panel.plugin('tearoom1/seo-ai', {
                 </div>
               </div>
             </div>
-            
+
             <!-- Twitter Preview -->
             <div class="k-seo-preview k-seo-preview--twitter">
               <h3 class="k-seo-preview__title">Twitter Card Preview</h3>
@@ -41,7 +44,7 @@ panel.plugin('tearoom1/seo-ai', {
                 </div>
               </div>
             </div>
-            
+
             <!-- Facebook Preview -->
             <div class="k-seo-preview k-seo-preview--facebook">
               <h3 class="k-seo-preview__title">Facebook Share Preview</h3>
@@ -101,8 +104,8 @@ panel.plugin('tearoom1/seo-ai', {
       },
       template: `
         <k-field v-bind="$props" class="k-seo-ai-generator-field">
-          <k-button 
-            icon="ai" 
+          <k-button
+            icon="ai"
             :text="buttonText"
             @click="generate"
             :disabled="loading"
@@ -130,32 +133,32 @@ panel.plugin('tearoom1/seo-ai', {
           this.loading = true;
           this.error = null;
           this.success = false;
-          
+
           try {
             // Get the source field value
             const sourceValue = this.$store.getters['content/values']()[this.sourceField];
-            
+
             if (!sourceValue || sourceValue.trim() === '') {
               throw new Error('No content available to generate description');
             }
-            
+
             // Get current language
             const language = this.$language || 'en';
-            
+
             // Call the API
             const response = await this.$api.post('seo-ai/generate', {
               text: sourceValue,
               language: language
             });
-            
+
             if (response.status === 'success' && response.description) {
               // Update the target field
               this.$store.dispatch('content/update', {
                 [this.targetField]: response.description
               });
-              
+
               this.success = true;
-              
+
               // Clear success message after 3 seconds
               setTimeout(() => {
                 this.success = false;

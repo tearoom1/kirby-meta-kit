@@ -1,10 +1,21 @@
 title: Page SEO
 sections:
+  preview:
+    type: seo-preview
+    label: SEO Preview
+  
   seo:
     type: fields
     label: SEO
     icon: seo
     fields:
+      aiGenerator:
+        type: seo-ai-generator
+        label: AI Description Generator
+        help: Generate a meta description automatically using AI
+        sourceField: text
+        targetField: metaDescription
+      
       metaTitle:
         label: Meta Title
         type: text

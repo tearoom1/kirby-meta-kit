@@ -25,6 +25,12 @@ Kirby::plugin('tearoom1/seo-ai', [
         'seo-ai/page' => __DIR__ . '/blueprints/page.yml',
         'seo-ai/fields/og-image' => __DIR__ . '/blueprints/fields/og-image.php',
     ],
+    'sections' => [
+        'seo-preview' => __DIR__ . '/sections/preview.php',
+    ],
+    'fields' => [
+        'seo-ai-generator' => [],
+    ],
     'snippets' => [
         'seo/meta' => __DIR__ . '/snippets/meta.php',
         'seo/opengraph' => __DIR__ . '/snippets/opengraph.php',
@@ -37,9 +43,9 @@ Kirby::plugin('tearoom1/seo-ai', [
                 'auth' => true,
                 'action' => function () {
                     $kirby = kirby();
-                    $request = $kirby->request();
-                    $text = $request->get('text', '');
-                    $language = $request->get('language', $kirby->language()?->code() ?? 'en');
+                    $data = $kirby->request()->body()->toArray();
+                    $text = $data['text'] ?? '';
+                    $language = $data['language'] ?? ($kirby->language()?->code() ?? 'en');
                     
                     if (empty($text)) {
                         return [
@@ -154,5 +160,13 @@ Kirby::plugin('tearoom1/seo-ai', [
                 kirby()->log('SEO-AI auto-generate error: ' . $e->getMessage());
             }
         }
+    ],
+    'assets' => [
+        'js' => [
+            __DIR__ . '/src/index.js',
+        ],
+        'css' => [
+            __DIR__ . '/src/index.css',
+        ]
     ]
 ]);
