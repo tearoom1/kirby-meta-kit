@@ -74,24 +74,89 @@ export default {
     // Listen to input events on the entire document (catches all field changes)
     document.addEventListener('input', this.handleInputChange, true);
     document.addEventListener('change', this.handleInputChange, true);
+    // Also listen for custom SEO field updates from AI generator
+    document.addEventListener('seo-field-updated', this.handleSeoFieldUpdate, true);
   },
   beforeDestroy() {
     // Clean up event listeners
     document.removeEventListener('input', this.handleInputChange, true);
     document.removeEventListener('change', this.handleInputChange, true);
+    document.removeEventListener('seo-field-updated', this.handleSeoFieldUpdate, true);
   },
   methods: {
     handleInputChange(event) {
       // Update on any input change
       this.handleUpdate();
     },
+    handleSeoFieldUpdate(event) {
+      console.log('SEO field updated:', event.detail);
+      // Use data passed in event detail
+      if (event.detail && event.detail.seoData) {
+        this.updatePreviewFromData(event.detail.seoData, event.detail.pageTitle);
+      } else {
+        // Fallback to loading from form state or API
+        this.loadFromFormState() || this.load();
+      }
+    },
     handleUpdate() {
       // Debounce updates to avoid too many API calls
       clearTimeout(this.updateTimeout);
       this.updateTimeout = setTimeout(() => {
         console.log('Updating preview...');
-        this.load();
+        // Try to load from form state first (instant), fall back to API
+        this.loadFromFormState() || this.load();
       }, 1000);
+    },
+    updatePreviewFromData(seoData, pageTitle) {
+      console.log('Updating preview from data:', seoData, pageTitle);
+      
+      // Build meta object from passed data
+      const siteName = this.$store?.state?.system?.title || 'Site Name';
+      const separator = '|';
+      
+      const metaTitle = seoData.metatitle || pageTitle || 'Page Title';
+      const fullTitle = metaTitle + ' ' + separator + ' ' + siteName;
+      
+      // Preserve existing ogImage if we're just updating text fields
+      const currentOgImage = this.meta?.ogImage || null;
+      
+      this.meta = {
+        url: window.location.origin,
+        title: fullTitle,
+        description: seoData.metadescription || 'No description',
+        ogTitle: seoData.ogtitle || fullTitle,
+        ogDescription: seoData.ogdescription || seoData.metadescription || 'No description',
+        ogImage: currentOgImage // Preserve existing image
+      };
+      
+      console.log('Preview updated:', this.meta);
+    },
+    loadFromFormState() {
+      try {
+        // Try to find the parent form/view with current values
+        let parent = this.$parent;
+        while (parent && !parent.value) {
+          parent = parent.$parent;
+        }
+        
+        if (!parent || !parent.value) {
+          console.log('Could not find parent form values');
+          return false;
+        }
+        
+        console.log('Loading from form state:', parent.value);
+        
+        // Extract SEO data
+        const seoData = parent.value.seo || {};
+        const pageTitle = parent.value.title || 'Page Title';
+        
+        // Use the shared update method
+        this.updatePreviewFromData(seoData, pageTitle);
+        return true;
+      } catch (error) {
+        console.error('Error loading from form state:', error);
+        return false;
+      }
     },
     async load() {
       try {

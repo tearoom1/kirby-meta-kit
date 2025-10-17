@@ -37,7 +37,7 @@ class SeoAi
     public function generateDescription(string $content, array $context = []): ?string
     {
         $apiKey = $this->options['api.key'] ?? null;
-        
+
         if (empty($apiKey)) {
             throw new Exception('OpenRouter API key is not configured');
         }
@@ -56,8 +56,8 @@ class SeoAi
         // Limit content length to avoid token limits
         $contentPreview = mb_substr(strip_tags($content), 0, 1000);
 
-        $prompt = "Write a concise, engaging meta description (max 160 characters) in {$languageName} for the following content:\n\n" . 
-                 $contentPreview . "\n\n" . 
+        $prompt = "Write a concise, engaging meta description (max 160 characters) in {$languageName} for the following content:\n\n" .
+                 $contentPreview . "\n\n" .
                  "Focus on the main topic and include relevant keywords. " .
                  "Make it compelling for search results. " .
                  "Write ONLY the description, nothing else.\n\n" .
@@ -82,24 +82,24 @@ class SeoAi
 
             $body = $response->getBody()->getContents();
             $data = json_decode($body, true);
-            
+
             // Log the response for debugging
             kirbylog('OpenRouter Response: ' . substr($body, 0, 500));
-            
+
             if (!isset($data['choices'][0]['message']['content'])) {
                 $errorMsg = $data['error']['message'] ?? 'Unknown API error';
                 kirbylog('OpenRouter API Error: ' . $errorMsg);
                 throw new Exception('OpenRouter API error: ' . $errorMsg);
             }
-            
+
             $description = $data['choices'][0]['message']['content'];
-            
+
             if ($description) {
                 return $this->sanitizeDescription($description);
             }
-            
+
             return null;
-            
+
         } catch (\Exception $e) {
             kirbylog('SEO AI Error: ' . $e->getMessage());
             throw $e; // Re-throw to show error to user
@@ -111,11 +111,11 @@ class SeoAi
         $description = strip_tags($description);
         $description = preg_replace('/\s+/', ' ', $description);
         $description = trim($description, " \t\n\r\0\x0B\"'`");
-        
+
         if (mb_strlen($description) > $this->options['maxDescriptionLength']) {
             $description = mb_substr($description, 0, $this->options['maxDescriptionLength'] - 3) . '...';
         }
-        
+
         return $description;
     }
 
@@ -124,16 +124,16 @@ class SeoAi
         $sitemap = [];
         $pages = $this->kirby->site()->index();
         $isMultilang = $this->kirby->multilang();
-        
+
         foreach ($pages as $page) {
             if (!$this->shouldIncludeInSitemap($page)) {
                 continue;
             }
-            
+
             // For multilanguage sites, add entry for each language
             if ($isMultilang) {
                 $defaultLanguage = $this->kirby->defaultLanguage();
-                
+
                 // Get alternates for all languages
                 $alternates = [];
                 foreach ($this->kirby->languages() as $language) {
@@ -142,7 +142,7 @@ class SeoAi
                         'url' => $page->url($language->code())
                     ];
                 }
-                
+
                 // Add URL for default language
                 $sitemap[] = [
                     'url' => $page->url($defaultLanguage->code()),
@@ -161,7 +161,7 @@ class SeoAi
                 ];
             }
         }
-        
+
         return $sitemap;
     }
 
@@ -192,13 +192,13 @@ class SeoAi
         // Check config exclude patterns
         $excludePatterns = $this->options['sitemap.exclude'] ?? [];
         $id = $page->id();
-        
+
         foreach ($excludePatterns as $pattern) {
             if (preg_match("#{$pattern}#", $id)) {
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -206,7 +206,7 @@ class SeoAi
     {
         // Default change frequency based on page depth
         $depth = $page->depth();
-        
+
         if ($depth <= 1) return 'weekly';
         if ($depth === 2) return 'monthly';
         return 'yearly';
@@ -216,21 +216,21 @@ class SeoAi
     {
         // Use site settings if available
         $site = $this->kirby->site();
-        
+
         // Homepage gets priority from site settings or 1.0
         if ($page->isHomePage()) {
             return $site->sitemapPriorityHome()->toFloat() ?? 1.0;
         }
-        
+
         // Other pages get default priority from site settings
         $defaultPriority = $site->sitemapPriorityDefault()->toFloat() ?? null;
         if ($defaultPriority !== null) {
             return $defaultPriority;
         }
-        
+
         // Fallback: Priority based on page depth
         $depth = $page->depth();
-        
+
         if ($depth <= 1) return 1.0;
         if ($depth === 2) return 0.8;
         if ($depth === 3) return 0.6;

@@ -11,6 +11,7 @@ columns:
 
   seodata:
     width: 2/3
+    sticky: true
     type: fields
     label: SEO Settings
     icon: seo

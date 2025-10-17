@@ -29,21 +29,70 @@
       await this.load();
       document.addEventListener("input", this.handleInputChange, true);
       document.addEventListener("change", this.handleInputChange, true);
+      document.addEventListener("seo-field-updated", this.handleSeoFieldUpdate, true);
     },
     beforeDestroy() {
       document.removeEventListener("input", this.handleInputChange, true);
       document.removeEventListener("change", this.handleInputChange, true);
+      document.removeEventListener("seo-field-updated", this.handleSeoFieldUpdate, true);
     },
     methods: {
       handleInputChange(event) {
         this.handleUpdate();
       },
+      handleSeoFieldUpdate(event) {
+        console.log("SEO field updated:", event.detail);
+        if (event.detail && event.detail.seoData) {
+          this.updatePreviewFromData(event.detail.seoData, event.detail.pageTitle);
+        } else {
+          this.loadFromFormState() || this.load();
+        }
+      },
       handleUpdate() {
         clearTimeout(this.updateTimeout);
         this.updateTimeout = setTimeout(() => {
           console.log("Updating preview...");
-          this.load();
+          this.loadFromFormState() || this.load();
         }, 1e3);
+      },
+      updatePreviewFromData(seoData, pageTitle) {
+        var _a, _b, _c, _d;
+        console.log("Updating preview from data:", seoData, pageTitle);
+        const siteName = ((_c = (_b = (_a = this.$store) == null ? void 0 : _a.state) == null ? void 0 : _b.system) == null ? void 0 : _c.title) || "Site Name";
+        const separator = "|";
+        const metaTitle = seoData.metatitle || pageTitle || "Page Title";
+        const fullTitle = metaTitle + " " + separator + " " + siteName;
+        const currentOgImage = ((_d = this.meta) == null ? void 0 : _d.ogImage) || null;
+        this.meta = {
+          url: window.location.origin,
+          title: fullTitle,
+          description: seoData.metadescription || "No description",
+          ogTitle: seoData.ogtitle || fullTitle,
+          ogDescription: seoData.ogdescription || seoData.metadescription || "No description",
+          ogImage: currentOgImage
+          // Preserve existing image
+        };
+        console.log("Preview updated:", this.meta);
+      },
+      loadFromFormState() {
+        try {
+          let parent = this.$parent;
+          while (parent && !parent.value) {
+            parent = parent.$parent;
+          }
+          if (!parent || !parent.value) {
+            console.log("Could not find parent form values");
+            return false;
+          }
+          console.log("Loading from form state:", parent.value);
+          const seoData = parent.value.seo || {};
+          const pageTitle = parent.value.title || "Page Title";
+          this.updatePreviewFromData(seoData, pageTitle);
+          return true;
+        } catch (error) {
+          console.error("Error loading from form state:", error);
+          return false;
+        }
       },
       async load() {
         try {
@@ -293,10 +342,19 @@
                       seo: parent.value.seo
                     });
                   }
+                  setTimeout(() => {
+                    const event = new CustomEvent("seo-field-updated", {
+                      bubbles: true,
+                      detail: {
+                        field: "metadescription",
+                        value: response.description,
+                        seoData: parent.value.seo,
+                        pageTitle: parent.value.title
+                      }
+                    });
+                    document.dispatchEvent(event);
+                  }, 100);
                 }
-                setTimeout(() => {
-                  this.generatedText = null;
-                }, 1e4);
               } else {
                 console.error("API returned error:", response);
                 throw new Error(response.message || "Failed to generate description");

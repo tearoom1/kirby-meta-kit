@@ -290,12 +290,27 @@ panel.plugin('tearoom1/seo-ai', {
                     seo: parent.value.seo
                   });
                 }
+
+                // Trigger a change event to notify the preview section
+                setTimeout(() => {
+                  // Dispatch a custom event with full SEO data for the preview
+                  const event = new CustomEvent('seo-field-updated', {
+                    bubbles: true,
+                    detail: {
+                      field: 'metadescription',
+                      value: response.description,
+                      seoData: parent.value.seo,
+                      pageTitle: parent.value.title
+                    }
+                  });
+                  document.dispatchEvent(event);
+                }, 100);
               }
 
               // Clear displayed text after 10 seconds
-              setTimeout(() => {
-                this.generatedText = null;
-              }, 10000);
+              // setTimeout(() => {
+              //   this.generatedText = null;
+              // }, 10000);
             } else {
               console.error('API returned error:', response);
               throw new Error(response.message || 'Failed to generate description');
