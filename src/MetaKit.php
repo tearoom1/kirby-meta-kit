@@ -8,7 +8,7 @@ use Kirby\Exception\Exception;
 use GuzzleHttp\Client;
 use Kirby\Http\Response;
 
-class SeoAi
+class MetaKit
 {
     protected $kirby;
     protected $options;
@@ -113,22 +113,22 @@ class SeoAi
         $description = trim($description, " \t\n\r\0\x0B\"'`");
 
         $maxLength = $this->options['maxDescriptionLength'];
-        
+
         if (mb_strlen($description) > $maxLength) {
             // Try to truncate at sentence boundary
             $shortened = mb_substr($description, 0, $maxLength - 3);
-            
+
             // Look for last sentence ending (. ! ?)
             if (preg_match('/^(.+[.!?])\s+/u', $shortened, $matches)) {
                 $description = $matches[1];
             } else {
                 // No sentence boundary, look for last word boundary
                 $lastSpace = mb_strrpos($shortened, ' ');
-                
+
                 if ($lastSpace !== false && $lastSpace > $maxLength * 0.8) {
                     // Cut at last space (but only if we're not losing too much text)
                     $description = mb_substr($shortened, 0, $lastSpace);
-                    
+
                     // Clean up trailing punctuation if incomplete
                     $description = rtrim($description, ',-:;');
                     $description .= '...';

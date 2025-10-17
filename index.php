@@ -1,12 +1,12 @@
 <?php
 
-use TearoomOne\SeoAi;
+use TearoomOne\MetaKit;
 use Kirby\Http\Response;
 
 @include_once __DIR__ . '/vendor/autoload.php';
 
 load([
-    'TearoomOne\SeoAi' => 'src/SeoAi.php',
+    'TearoomOne\MetaKit' => 'src/MetaKit.php',
 ], __DIR__);
 
 Kirby::plugin('tearoom1/meta-kit', [
@@ -32,6 +32,8 @@ Kirby::plugin('tearoom1/meta-kit', [
         'meta-kit-generator' => [],
     ],
     'snippets' => [
+        'meta-kit/seo' => __DIR__ . '/snippets/seo.php',
+        // Legacy snippets (deprecated, use meta-kit/seo instead)
         'seo/meta' => __DIR__ . '/snippets/meta.php',
         'seo/opengraph' => __DIR__ . '/snippets/opengraph.php',
         'seo/schema' => __DIR__ . '/snippets/schema.php',
@@ -47,7 +49,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                     $data = $kirby->request()->body()->toArray();
                     $text = $data['text'] ?? '';
                     $language = $data['language'] ?? ($kirby->language()?->code() ?? 'en');
-                    
+
                     if (empty($text)) {
                         return [
                             'status' => 'error',
@@ -56,16 +58,16 @@ Kirby::plugin('tearoom1/meta-kit', [
                     }
 
                     try {
-                        $seoAi = new SeoAi($kirby);
+                        $seoAi = new MetaKit($kirby);
                         $description = $seoAi->generateDescription($text, ['language' => $language]);
-                        
+
                         if (empty($description)) {
                             return [
                                 'status' => 'error',
                                 'message' => 'AI returned empty description. Check your API key and logs.'
                             ];
                         }
-                        
+
                         return [
                             'status' => 'success',
                             'description' => $description
@@ -73,7 +75,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                     } catch (Exception $e) {
                         // Log the error
                         kirbylog('SEO-AI API Error: ' . $e->getMessage());
-                        
+
                         return [
                             'status' => 'error',
                             'message' => $e->getMessage()
@@ -103,61 +105,61 @@ Kirby::plugin('tearoom1/meta-kit', [
                 if (option('tearoom1.meta-kit.sitemap.enabled', true) === false) {
                     return new Response('Sitemap is disabled', 'text/plain', 404);
                 }
-                
-                $seoAi = new SeoAi(kirby());
+
+                $seoAi = new MetaKit(kirby());
                 $sitemap = $seoAi->getSitemap();
-                
+
                 $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
                 $xml .= '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>' . "\n";
-                
+
                 // Check if multilanguage site
                 if (kirby()->multilang()) {
                     $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
                 } else {
                     $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
                 }
-                
+
                 foreach ($sitemap as $item) {
                     $xml .= "\n    <url>";
                     $xml .= "\n        <loc>" . htmlspecialchars($item['url']) . "</loc>";
                     $xml .= "\n        <lastmod>" . $item['lastmod'] . "</lastmod>";
                     $xml .= "\n        <changefreq>" . $item['changefreq'] . "</changefreq>";
                     $xml .= "\n        <priority>" . $item['priority'] . "</priority>";
-                    
+
                     // Add alternate language links
                     if (!empty($item['alternates'])) {
                         foreach ($item['alternates'] as $alternate) {
-                            $xml .= "\n        <xhtml:link rel=\"alternate\" hreflang=\"" . 
-                                   htmlspecialchars($alternate['lang']) . "\" href=\"" . 
+                            $xml .= "\n        <xhtml:link rel=\"alternate\" hreflang=\"" .
+                                   htmlspecialchars($alternate['lang']) . "\" href=\"" .
                                    htmlspecialchars($alternate['url']) . "\" />";
                         }
                     }
-                    
+
                     $xml .= "\n    </url>";
                 }
-                
+
                 $xml .= "\n</urlset>";
-                
+
                 return new Response($xml, 'application/xml');
             }
         ]
     ],
     'pageMethods' => [
         'generateSeoDescription' => function (string $content = null, string $languageCode = null) {
-            $seoAi = new SeoAi(kirby());
+            $seoAi = new MetaKit(kirby());
             $languageCode = $languageCode ?? kirby()->language()?->code() ?? 'en';
             $content = $content ?? $this->text()->toString();
-            
+
             if (empty($content)) {
                 return null;
             }
-            
+
             return $seoAi->generateDescription($content, ['language' => $languageCode]);
         }
     ],
     'fieldMethods' => [
         'toSeoDescription' => function ($field) {
-            $seoAi = new SeoAi(kirby());
+            $seoAi = new MetaKit(kirby());
             $languageCode = kirby()->language()?->code() ?? 'en';
             return $seoAi->generateDescription($field->value(), ['language' => $languageCode]);
         }
@@ -166,29 +168,29 @@ Kirby::plugin('tearoom1/meta-kit', [
         'page.update:after' => function ($newPage, $oldPage) {
             // Auto-generate description if enabled and field is empty
             $autoGenerate = option('tearoom1.meta-kit.autoGenerate', false);
-            
+
             if (!$autoGenerate || $newPage->intendedTemplate()->name() === 'error') {
                 return;
             }
-            
+
             try {
                 // Check if SEO object exists and if metadescription is empty
                 $seoData = $newPage->seo()->toObject();
                 if (!$seoData || $seoData->metadescription()->isNotEmpty()) {
                     return;
                 }
-                
+
                 $content = $newPage->text()->toString();
                 if (!empty($content)) {
-                    $seoAi = new SeoAi(kirby());
+                    $seoAi = new MetaKit(kirby());
                     $languageCode = kirby()->language()?->code() ?? 'en';
                     $description = $seoAi->generateDescription($content, ['language' => $languageCode]);
-                    
+
                     if ($description) {
                         // Get existing SEO data and update metadescription
                         $existingSeo = $newPage->seo()->yaml();
                         $existingSeo['metadescription'] = $description;
-                        
+
                         $newPage->update([
                             'seo' => $existingSeo
                         ], kirby()->language()?->code());
@@ -199,13 +201,5 @@ Kirby::plugin('tearoom1/meta-kit', [
                 kirbylog('SEO-AI auto-generate error: ' . $e->getMessage());
             }
         }
-    ],
-    'assets' => [
-        'js' => [
-            __DIR__ . '/src/index.js',
-        ],
-        'css' => [
-            __DIR__ . '/src/index.css',
-        ]
     ]
 ]);

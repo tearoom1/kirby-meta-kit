@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "AI-powered SEO plugin for Kirby with meta descriptions, previews, and Schema.org",
   "scripts": {
-    "dev": "npx -y kirbyup src/index.js --watch",
-    "build": "npx -y kirbyup src/index.js"
+    "dev": "npx -y kirbyup js/index.js --watch",
+    "build": "npx -y kirbyup js/index.js"
   },
   "keywords": [
     "kirby",

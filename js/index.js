@@ -1,6 +1,6 @@
 
 import './index.css';
-import SeoPreview from './sections/seo-preview.vue';
+import SeoPreview from '../src/sections/seo-preview.vue';
 
 panel.plugin('tearoom1/meta-kit', {
   sections: {

@@ -52,8 +52,14 @@ return [
         ],
 
         // ============================================
-        // Schema.org Settings
+        // Feature Toggles
         // ============================================
+
+        // Enable/disable meta tags (title, description, canonical, etc.)
+        'meta.enabled' => true,
+
+        // Enable/disable OpenGraph & Twitter Card tags
+        'opengraph.enabled' => true,
 
         // Enable/disable Schema.org JSON-LD structured data
         'schema.enabled' => true,

@@ -93,14 +93,27 @@ Page SEO field → Site default description → Auto-generated → Empty
 
 ## Quick Start
 
-### 1. Add Snippets to Template
+### 1. Add Snippet to Template
 
 ```php
 <head>
-    <?php snippet('seo/meta') ?>
-    <?php snippet('seo/opengraph') ?>
-    <?php snippet('seo/schema') ?>
+    <?php snippet('meta-kit/seo') ?>
 </head>
+```
+
+This single snippet includes:
+- Meta tags (title, description, canonical, keywords)
+- OpenGraph & Twitter Cards
+- Schema.org JSON-LD structured data
+
+**Control what's included:**
+```php
+// In site/config/config.php
+'tearoom1.meta-kit' => [
+    'meta.enabled' => true,       // Meta tags
+    'opengraph.enabled' => true,  // OG & Twitter
+    'schema.enabled' => true,     // Schema.org
+]
 ```
 
 ### 2. Extend Blueprints
@@ -129,11 +142,13 @@ tabs:
 
 ## What's Included
 
+* **Unified Snippet:** Single `meta-kit/seo` snippet for all SEO needs
+* **Meta Tags:** Title, description, keywords, canonical, noindex, hreflang
+* **Social Media:** OpenGraph & Twitter Cards with optimized images (1200×630px)
+* **Schema.org:** Organization, WebSite, WebPage, BreadcrumbList (JSON-LD)
 * **Sitemap:** `/sitemap.xml` with styled view, exclusions, priorities
-* **Schema.org:** Organization, WebSite, WebPage, BreadcrumbList
-* **Meta Tags:** Title, description, keywords, canonical, noindex
-* **Social Media:** OG tags, Twitter Cards, optimized images (1200×630px)
-* **Multilanguage:** Hreflang tags, og:locale, per-language content
+* **Multilanguage:** Full support with hreflang tags and og:locale
+* **Configurable:** Toggle meta/opengraph/schema individually
 
 ## Programmatic Usage
 
