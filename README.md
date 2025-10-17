@@ -80,16 +80,14 @@ Content-focused settings managed in **Site → SEO & Social Media**:
 
 ### How Settings Merge
 
-The plugin combines both layers:
+**API & Sitemap Settings:** Plugin defaults → Site panel → `config.php` (highest priority)
 
-1. **Config file** provides defaults and API credentials
-2. **Site settings** override with content-specific values
-3. **Page fields** override everything for that specific page
+**Page Metadata:** Site defaults → Page fields (highest priority)
 
-Example: Meta description priority
-```
-Page SEO field → Site default description → Auto-generated → Empty
-```
+Examples:
+- AI model: Set in panel, but `config.php` overrides it
+- Meta description: Page field overrides site default
+- Sitemap exclusions: Visual panel selector + `config.php` regex patterns work together
 
 ## Quick Start
 
