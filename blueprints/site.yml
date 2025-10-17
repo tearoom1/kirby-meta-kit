@@ -5,6 +5,17 @@ sections:
     label: SEO
     icon: seo
     fields:
+
+      appendSiteName:
+        label: Append Site Name to Titles
+        type: toggle
+        text:
+          - 'No'
+          - 'Yes'
+        default: true
+        width: 1/2
+        help: Automatically add site name to all page titles (e.g., "Page Title | Site Name")
+
       titleSeparator:
         label: Title Separator
         type: select
@@ -18,24 +29,18 @@ sections:
         default: '|'
         width: 1/2
         help: Separator between page title and site name
-
-      appendSiteName:
-        label: Append Site Name to Titles
-        type: toggle
-        text:
-          - 'No'
-          - 'Yes'
-        default: true
-        width: 1/2
-        help: Automatically add site name to all page titles (e.g., "Page Title | Site Name")
+        when:
+          appendSiteName: true
 
       metaTitle:
-        label: Default Meta Title
+        label: Default Site Name
         type: text
-        placeholder: "{{ site.title }} | {{ site.slogan }}"
+        placeholder: "{{ site.title }}"
         help: >
-          Default title for all pages. Use placeholders like {{ site.title }}.
-          Will be used if no page-specific title is set.
+          Overwrite the site name.
+          Will be used if to be appended on pages.
+        when:
+          appendSiteName: true
 
       metaDescription:
         label: Default Meta Description
