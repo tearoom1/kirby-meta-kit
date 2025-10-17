@@ -20,23 +20,30 @@
     },
     data() {
       return {
-        meta: null
+        meta: null,
+        updateTimeout: null
       };
     },
     async mounted() {
       console.log("SEO Preview Section Mounted");
       await this.load();
-      this.$panel.events.on("model.update", this.handleUpdate);
+      document.addEventListener("input", this.handleInputChange, true);
+      document.addEventListener("change", this.handleInputChange, true);
     },
     beforeDestroy() {
-      this.$panel.events.off("model.update", this.handleUpdate);
+      document.removeEventListener("input", this.handleInputChange, true);
+      document.removeEventListener("change", this.handleInputChange, true);
     },
     methods: {
+      handleInputChange(event) {
+        this.handleUpdate();
+      },
       handleUpdate() {
         clearTimeout(this.updateTimeout);
         this.updateTimeout = setTimeout(() => {
+          console.log("Updating preview...");
           this.load();
-        }, 500);
+        }, 1e3);
       },
       async load() {
         try {

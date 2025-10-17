@@ -11,6 +11,12 @@ return [
             $page = $this->model();
             
             try {
+                // Get the changes version if it exists (unsaved changes)
+                $changesVersion = $page->version('changes');
+                if ($changesVersion->exists('current')) {
+                    $page = $page->clone(['content' => $changesVersion->content()->toArray()]);
+                }
+                
                 // Get SEO data from object field
                 $seoData = $page->seo()->toObject();
                 
