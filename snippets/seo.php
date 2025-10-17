@@ -48,10 +48,13 @@ if ($seoData && $seoData->ogImage()->isNotEmpty()) {
     if ($ogImageFile) {
         $ogImage = $ogImageFile->crop(1200, 630);
     }
-} elseif ($site->ogImage()->isNotEmpty()) {
-    $ogImageFile = $site->ogImage()->toFile();
-    if ($ogImageFile) {
-        $ogImage = $ogImageFile->crop(1200, 630);
+} else {
+    $siteSeo = $site->seo()->toObject();
+    if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
+        $ogImageFile = $siteSeo->ogImage()->toFile();
+        if ($ogImageFile) {
+            $ogImage = $ogImageFile->crop(1200, 630);
+        }
     }
 }
 ?>

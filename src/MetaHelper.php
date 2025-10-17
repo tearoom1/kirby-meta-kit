@@ -9,9 +9,16 @@ class MetaHelper
 {
     public static function buildTitle(Page $page, Site $site, $seoData = null): string
     {
+        // Get site SEO settings object
+        $siteSeo = $site->seo()->toObject();
+        
         // Get site settings
-        $separator = $site->titleSeparator()->or('|')->value();
-        $appendSiteName = $site->appendSiteName()->or('true')->toBool();
+        $separator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty() 
+            ? $siteSeo->titleSeparator()->value() 
+            : '|';
+        $appendSiteName = $siteSeo && $siteSeo->appendSiteName()->isNotEmpty() 
+            ? $siteSeo->appendSiteName()->toBool() 
+            : true;
 
         // Get page title
         if ($seoData && method_exists($seoData, 'metaTitle') && $seoData->metaTitle()->isNotEmpty()) {
@@ -21,8 +28,8 @@ class MetaHelper
         }
 
         // Get site meta title (with fallback to site title)
-        if ($site->metaTitle()->isNotEmpty()) {
-            $siteMetaTitle = $site->metaTitle()->value();
+        if ($siteSeo && $siteSeo->metaTitle()->isNotEmpty()) {
+            $siteMetaTitle = $siteSeo->metaTitle()->value();
         } else {
             $siteMetaTitle = $site->title()->value();
         }
@@ -37,18 +44,25 @@ class MetaHelper
 
     public static function getSeparator(Site $site): string
     {
-        return $site->titleSeparator()->or('|')->value();
+        $siteSeo = $site->seo()->toObject();
+        return $siteSeo && $siteSeo->titleSeparator()->isNotEmpty() 
+            ? $siteSeo->titleSeparator()->value() 
+            : '|';
     }
 
     public static function shouldAppendSiteName(Site $site): bool
     {
-        return $site->appendSiteName()->or('true')->toBool();
+        $siteSeo = $site->seo()->toObject();
+        return $siteSeo && $siteSeo->appendSiteName()->isNotEmpty() 
+            ? $siteSeo->appendSiteName()->toBool() 
+            : true;
     }
 
     public static function getSiteMetaTitle(Site $site): string
     {
-        if ($site->metaTitle()->isNotEmpty()) {
-            return $site->metaTitle()->value();
+        $siteSeo = $site->seo()->toObject();
+        if ($siteSeo && $siteSeo->metaTitle()->isNotEmpty()) {
+            return $siteSeo->metaTitle()->value();
         }
         return $site->title()->value();
     }
@@ -60,9 +74,12 @@ class MetaHelper
             return $seoData->metaDescription()->excerpt($maxLength);
         }
 
+        // Get site SEO settings object
+        $siteSeo = $site->seo()->toObject();
+        
         // Fall back to site default description
-        if ($site->metaDescription()->isNotEmpty()) {
-            return $site->metaDescription()->excerpt($maxLength);
+        if ($siteSeo && $siteSeo->metaDescription()->isNotEmpty()) {
+            return $siteSeo->metaDescription()->excerpt($maxLength);
         }
 
         // Final fallback to page text excerpt
@@ -86,9 +103,12 @@ class MetaHelper
             return $metaDescription;
         }
 
+        // Get site SEO settings object
+        $siteSeo = $site->seo()->toObject();
+        
         // Fall back to site OG description
-        if ($site->ogDescription()->isNotEmpty()) {
-            return $site->ogDescription()->excerpt($maxLength);
+        if ($siteSeo && $siteSeo->ogDescription()->isNotEmpty()) {
+            return $siteSeo->ogDescription()->excerpt($maxLength);
         }
 
         // Final fallback to page text

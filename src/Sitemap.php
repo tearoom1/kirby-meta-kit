@@ -76,9 +76,9 @@ class Sitemap
         }
 
         // Check site blueprint's sitemapExclude field (pages selector)
-        $siteExclude = $this->kirby->site()->sitemapExclude();
-        if ($siteExclude->isNotEmpty()) {
-            $excludedPages = $siteExclude->toPages();
+        $siteSitemap = $this->kirby->site()->sitemap()->toObject();
+        if ($siteSitemap && $siteSitemap->exclude()->isNotEmpty()) {
+            $excludedPages = $siteSitemap->exclude()->toPages();
             foreach ($excludedPages as $excludedPage) {
                 if ($excludedPage->id() === $page->id()) {
                     return false;
@@ -113,16 +113,19 @@ class Sitemap
     {
         // Use site settings if available
         $site = $this->kirby->site();
+        $siteSitemap = $site->sitemap()->toObject();
 
         // Homepage gets priority from site settings or 1.0
         if ($page->isHomePage()) {
-            return $site->sitemapPriorityHome()->toFloat() ?? 1.0;
+            if ($siteSitemap && $siteSitemap->priorityHome()->isNotEmpty()) {
+                return $siteSitemap->priorityHome()->toFloat();
+            }
+            return 1.0;
         }
 
         // Other pages get default priority from site settings
-        $defaultPriority = $site->sitemapPriorityDefault()->toFloat() ?? null;
-        if ($defaultPriority !== null) {
-            return $defaultPriority;
+        if ($siteSitemap && $siteSitemap->priorityDefault()->isNotEmpty()) {
+            return $siteSitemap->priorityDefault()->toFloat();
         }
 
         // Fallback: Priority based on page depth

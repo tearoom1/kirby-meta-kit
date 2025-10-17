@@ -42,10 +42,13 @@ return [
                 }
 
                 // Fallback to site default OG image
-                if (!$ogImage && site()->ogImage()->isNotEmpty()) {
-                    $siteImage = site()->ogImage()->toFile();
-                    // Resize to OG dimensions (1200x630)
-                    $ogImage = $siteImage ? $siteImage->crop(1200, 630)->url() : null;
+                if (!$ogImage) {
+                    $siteSeo = site()->seo()->toObject();
+                    if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
+                        $siteImage = $siteSeo->ogImage()->toFile();
+                        // Resize to OG dimensions (1200x630)
+                        $ogImage = $siteImage ? $siteImage->crop(1200, 630)->url() : null;
+                    }
                 }
 
                 return [

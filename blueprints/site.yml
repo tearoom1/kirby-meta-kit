@@ -1,68 +1,76 @@
 label: SEO & Social Media
-sections:
+columns:
   seo:
     type: fields
     label: SEO
     icon: seo
     fields:
-
-      appendSiteName:
-        label: Append Site Name to Titles
-        type: toggle
-        text:
-          - 'No'
-          - 'Yes'
-        default: true
-        width: 1/2
-        help: Automatically add site name to all page titles (e.g., "Page Title | Site Name")
-
-      titleSeparator:
-        label: Title Separator
-        type: select
-        options:
-          - { value: '|', text: '| (pipe)' }
-          - { value: '-', text: '- (dash)' }
-          - { value: '–', text: '– (en dash)' }
-          - { value: '—', text: '— (em dash)' }
-          - { value: '•', text: '• (bullet)' }
-          - { value: '/', text: '/ (slash)' }
-        default: '|'
-        width: 1/2
-        help: Separator between page title and site name
-        when:
+      seo:
+        label: SEO Settings
+        type: object
+        empty: false
+        default:
           appendSiteName: true
+          titleSeparator: '|'
+        fields:
+          appendSiteName:
+            label: Append Site Name to Titles
+            type: toggle
+            text:
+              - 'No'
+              - 'Yes'
+            default: true
+            width: 1/2
+            help: Automatically add site name to all page titles (e.g., "Page Title | Site Name")
 
-      metaTitle:
-        label: Default Site Name
-        type: text
-        placeholder: "{{ site.title }}"
-        help: >
-          Overwrite the site name.
-          Will be used if to be appended on pages.
-        when:
-          appendSiteName: true
+          titleSeparator:
+            label: Title Separator
+            type: select
+            options:
+              - { value: '|', text: '| (pipe)' }
+              - { value: '-', text: '- (dash)' }
+              - { value: '–', text: '– (en dash)' }
+              - { value: '—', text: '— (em dash)' }
+              - { value: '•', text: '• (bullet)' }
+              - { value: '/', text: '/ (slash)' }
+            default: '|'
+            width: 1/2
+            help: Separator between page title and site name
+            when:
+              appendSiteName: true
 
-      metaDescription:
-        label: Default Meta Description
-        type: textarea
-        buttons: false
-        help: Default description for all pages. Max 160 characters.
+          metaTitle:
+            label: Overwrite Site Name
+            type: text
+            placeholder: "{{ site.title }}"
+            help: >
+              Overwrite the site name.
+              Will be used if to be appended on pages.
+            when:
+              appendSiteName: true
 
-      metaKeywords:
-        label: Default Keywords
-        type: tags
-        help: Comma-separated list of default keywords for all pages.
+          metaDescription:
+            label: Default Meta Description
+            type: textarea
+            buttons: false
+            help: Default description for all pages. Max 160 characters.
 
-      ogImage:
-        label: Default Social Media Image
-        type: files
-        max: 1
-        layout: cards
-        size: small
-        query: page.images
-        help: Default image for social media sharing (1200×630px recommended)
+          metaKeywords:
+            label: Default Keywords
+            type: tags
+            help: Comma-separated list of default keywords for all pages.
+
+          ogImage:
+            label: Default Social Media Image
+            type: files
+            max: 1
+            layout: cards
+            size: small
+            query: page.images
+            help: Default image for social media sharing (1200×630px recommended)
 
   social:
+    width: 1/2
     type: fields
     label: Social Media
     icon: share
@@ -88,57 +96,75 @@ sections:
             type: url
 
   ai:
+    width: 1/2
     type: fields
     label: AI Settings
     icon: ai
     fields:
-      openrouterKey:
-        label: OpenRouter API Key
-        type: text
-        help: Your OpenRouter API key for AI-generated descriptions
-        width: 1/2
-      aiModel:
-        label: AI Model
-        type: select
-        options:
-          - { value: 'mistralai/mistral-7b-instruct', text: 'Mistral 7B' }
-          - { value: 'openai/gpt-3.5-turbo', text: 'GPT-3.5 Turbo' }
-          - { value: 'anthropic/claude-2', text: 'Claude 2' }
-        default: 'mistralai/mistral-7b-instruct'
-        width: 1/2
-      aiTemperature:
-        label: Creativity Level
-        type: range
-        min: 0.1
-        max: 1.0
-        step: 0.1
-        default: 0.7
-        width: 1/2
-        help: Higher values make output more random, lower values more focused
+      openrouter:
+        label: OpenRouter Settings
+        type: object
+        empty: false
+        default:
+          model: 'meta-llama/llama-3.2-3b-instruct:free'
+          temperature: 0.7
+        fields:
+          apiKey:
+            label: OpenRouter API Key
+            type: text
+            help: Your OpenRouter API key for AI-generated descriptions
+            width: 1/2
+          model:
+            label: AI Model
+            type: select
+            options:
+              - { value: 'mistralai/mistral-7b-instruct', text: 'Mistral 7B' }
+              - { value: 'openai/gpt-3.5-turbo', text: 'GPT-3.5 Turbo' }
+              - { value: 'anthropic/claude-2', text: 'Claude 2' }
+            default: 'mistralai/mistral-7b-instruct'
+            width: 1/2
+          temperature:
+            label: Creativity Level
+            type: range
+            min: 0.1
+            max: 1.0
+            step: 0.1
+            default: 0.7
+            width: 1/2
+            help: Higher values make output more random, lower values more focused
 
   sitemap:
+    width: 1/2
     type: fields
     label: Sitemap
     icon: sitemap
     fields:
-      sitemapExclude:
-        label: Exclude from Sitemap
-        type: pages
-        multiple: true
-        help: Pages to exclude from the sitemap
-      sitemapPriorityHome:
-        label: Homepage Priority
-        type: range
-        min: 0.1
-        max: 1.0
-        step: 0.1
-        default: 1.0
-        width: 1/2
-      sitemapPriorityDefault:
-        label: Default Page Priority
-        type: range
-        min: 0.1
-        max: 1.0
-        step: 0.1
-        default: 0.8
-        width: 1/2
+      sitemap:
+        label: Sitemap Settings
+        type: object
+        empty: false
+        default:
+          priorityHome: 1.0
+          priorityDefault: 0.8
+        fields:
+          exclude:
+            label: Exclude from Sitemap
+            type: pages
+            multiple: true
+            help: Pages to exclude from the sitemap
+          priorityHome:
+            label: Homepage Priority
+            type: range
+            min: 0.1
+            max: 1.0
+            step: 0.1
+            default: 1.0
+            width: 1/2
+          priorityDefault:
+            label: Default Page Priority
+            type: range
+            min: 0.1
+            max: 1.0
+            step: 0.1
+            default: 0.8
+            width: 1/2
