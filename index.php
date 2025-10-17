@@ -58,11 +58,21 @@ Kirby::plugin('tearoom1/seo-ai', [
                         $seoAi = new SeoAi($kirby);
                         $description = $seoAi->generateDescription($text, ['language' => $language]);
                         
+                        if (empty($description)) {
+                            return [
+                                'status' => 'error',
+                                'message' => 'AI returned empty description. Check your API key and logs.'
+                            ];
+                        }
+                        
                         return [
                             'status' => 'success',
                             'description' => $description
                         ];
                     } catch (Exception $e) {
+                        // Log the error
+                        kirbylog('SEO-AI API Error: ' . $e->getMessage());
+                        
                         return [
                             'status' => 'error',
                             'message' => $e->getMessage()

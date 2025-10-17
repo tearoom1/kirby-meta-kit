@@ -132,14 +132,18 @@
             if (depth > 5) return "";
             if (value == null) return "";
             if (typeof value === "string") {
-              return value;
+              const skipValues = ["none", "full", "default", "1/1", "1/2", "1/3", "2/3", "1/4", "3/4"];
+              if (skipValues.includes(value.trim().toLowerCase())) {
+                return "";
+              }
+              return value.trim().length > 2 ? value : "";
             }
             if (Array.isArray(value)) {
               return value.map((item) => this.extractTextFromValue(item, depth + 1)).join(" ");
             }
             if (typeof value === "object") {
               let texts = [];
-              const textProps = ["text", "content", "heading", "headline", "subheadline", "title", "description", "caption"];
+              const textProps = ["text", "content", "heading", "headline", "subheadline", "title", "description", "caption", "body"];
               for (const prop of textProps) {
                 if (value[prop]) {
                   texts.push(this.extractTextFromValue(value[prop], depth + 1));
@@ -147,7 +151,7 @@
               }
               if (texts.length === 0) {
                 for (const [key, val] of Object.entries(value)) {
-                  if (key.startsWith("_") || key.startsWith("$") || key === "__ob__" || key === "id" || key === "type") {
+                  if (key.startsWith("_") || key.startsWith("$") || key === "__ob__" || key === "id" || key === "type" || key === "attrs" || key === "width" || key === "location") {
                     continue;
                   }
                   texts.push(this.extractTextFromValue(val, depth + 1));
@@ -164,8 +168,33 @@
                 try {
                   blocks = JSON.parse(blocks);
                 } catch {
-                  return blocks;
+                  return blocks.trim().length > 10 ? blocks : "";
                 }
+              }
+              if (Array.isArray(blocks)) {
+                let texts = [];
+                for (const layout of blocks) {
+                  if (layout.columns && Array.isArray(layout.columns)) {
+                    for (const column of layout.columns) {
+                      if (column.blocks && Array.isArray(column.blocks)) {
+                        for (const block of column.blocks) {
+                          if (block.content) {
+                            const blockText = this.extractTextFromValue(block.content);
+                            if (blockText && blockText.length > 3) {
+                              texts.push(blockText);
+                            }
+                          }
+                        }
+                      }
+                    }
+                  } else {
+                    const text = this.extractTextFromValue(layout);
+                    if (text && text.length > 3) {
+                      texts.push(text);
+                    }
+                  }
+                }
+                return texts.join(" ");
               }
               return this.extractTextFromValue(blocks);
             } catch (e) {
@@ -188,9 +217,15 @@
             for (const [key, value] of Object.entries(values)) {
               if (key.includes("layout") || key.includes("blocks") || key.includes("builder")) {
                 console.log(`Found ${key} field:`, value);
+                if (value && value[0]) {
+                  console.log("First block structure:", JSON.stringify(value[0], (k, v) => {
+                    if (k === "__ob__") return void 0;
+                    return v;
+                  }, 2));
+                }
                 const extracted = this.extractTextFromBlocks(value);
+                console.log(`Extracted from ${key} (${extracted.length} chars):`, extracted);
                 if (extracted) {
-                  console.log(`Extracted from ${key}:`, extracted.substring(0, 100));
                   texts.push(extracted);
                 }
               }
@@ -222,10 +257,13 @@
                 throw new Error(`No content available to generate description. Available fields: ${availableFields}`);
               }
               const language = ((_a = this.$language) == null ? void 0 : _a.code) || "en";
+              console.log("Calling API with text:", allText.substring(0, 100));
+              console.log("Language:", language);
               const response = await this.$api.post("seo-ai/generate", {
                 text: allText,
                 language
               });
+              console.log("API Response:", response);
               if (response.status === "success" && response.description) {
                 this.$emit("input", response.description);
                 if (parent.update) {
@@ -238,6 +276,7 @@
                   this.success = false;
                 }, 3e3);
               } else {
+                console.error("API returned error:", response);
                 throw new Error(response.message || "Failed to generate description");
               }
             } catch (error) {

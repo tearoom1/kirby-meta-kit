@@ -80,8 +80,19 @@ class SeoAi
                 ]
             ]);
 
-            $data = json_decode($response->getBody(), true);
-            $description = $data['choices'][0]['message']['content'] ?? null;
+            $body = $response->getBody()->getContents();
+            $data = json_decode($body, true);
+            
+            // Log the response for debugging
+            kirbylog('OpenRouter Response: ' . substr($body, 0, 500));
+            
+            if (!isset($data['choices'][0]['message']['content'])) {
+                $errorMsg = $data['error']['message'] ?? 'Unknown API error';
+                kirbylog('OpenRouter API Error: ' . $errorMsg);
+                throw new Exception('OpenRouter API error: ' . $errorMsg);
+            }
+            
+            $description = $data['choices'][0]['message']['content'];
             
             if ($description) {
                 return $this->sanitizeDescription($description);
@@ -91,7 +102,7 @@ class SeoAi
             
         } catch (\Exception $e) {
             kirbylog('SEO AI Error: ' . $e->getMessage());
-            return null;
+            throw $e; // Re-throw to show error to user
         }
     }
 

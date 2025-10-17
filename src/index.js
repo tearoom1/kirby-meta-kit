@@ -138,7 +138,13 @@ panel.plugin('tearoom1/seo-ai', {
           
           // Handle strings
           if (typeof value === 'string') {
-            return value;
+            // Skip common metadata values
+            const skipValues = ['none', 'full', 'default', '1/1', '1/2', '1/3', '2/3', '1/4', '3/4'];
+            if (skipValues.includes(value.trim().toLowerCase())) {
+              return '';
+            }
+            // Only return strings with at least 3 characters
+            return value.trim().length > 2 ? value : '';
           }
           
           // Handle arrays
@@ -151,7 +157,7 @@ panel.plugin('tearoom1/seo-ai', {
             let texts = [];
             
             // Common text properties in Kirby blocks
-            const textProps = ['text', 'content', 'heading', 'headline', 'subheadline', 'title', 'description', 'caption'];
+            const textProps = ['text', 'content', 'heading', 'headline', 'subheadline', 'title', 'description', 'caption', 'body'];
             
             for (const prop of textProps) {
               if (value[prop]) {
@@ -162,8 +168,15 @@ panel.plugin('tearoom1/seo-ai', {
             // If no text props found, try all properties
             if (texts.length === 0) {
               for (const [key, val] of Object.entries(value)) {
-                // Skip internal Vue/Kirby properties
-                if (key.startsWith('_') || key.startsWith('$') || key === '__ob__' || key === 'id' || key === 'type') {
+                // Skip internal Vue/Kirby properties and layout metadata
+                if (key.startsWith('_') || 
+                    key.startsWith('$') || 
+                    key === '__ob__' || 
+                    key === 'id' || 
+                    key === 'type' ||
+                    key === 'attrs' ||
+                    key === 'width' ||
+                    key === 'location') {
                   continue;
                 }
                 texts.push(this.extractTextFromValue(val, depth + 1));
@@ -185,9 +198,41 @@ panel.plugin('tearoom1/seo-ai', {
               try {
                 blocks = JSON.parse(blocks);
               } catch {
-                // Not JSON, return as is
-                return blocks;
+                // Not JSON, return as is if it's meaningful text
+                return blocks.trim().length > 10 ? blocks : '';
               }
+            }
+            
+            // Handle Kirby layout structure: [{columns: [{blocks: [{content: {...}}]}]}]
+            if (Array.isArray(blocks)) {
+              let texts = [];
+              
+              for (const layout of blocks) {
+                // Check if this is a layout with columns
+                if (layout.columns && Array.isArray(layout.columns)) {
+                  for (const column of layout.columns) {
+                    if (column.blocks && Array.isArray(column.blocks)) {
+                      for (const block of column.blocks) {
+                        if (block.content) {
+                          // Extract text from block content
+                          const blockText = this.extractTextFromValue(block.content);
+                          if (blockText && blockText.length > 3) {
+                            texts.push(blockText);
+                          }
+                        }
+                      }
+                    }
+                  }
+                } else {
+                  // Not a layout structure, try generic extraction
+                  const text = this.extractTextFromValue(layout);
+                  if (text && text.length > 3) {
+                    texts.push(text);
+                  }
+                }
+              }
+              
+              return texts.join(' ');
             }
             
             return this.extractTextFromValue(blocks);
@@ -218,9 +263,18 @@ panel.plugin('tearoom1/seo-ai', {
           for (const [key, value] of Object.entries(values)) {
             if (key.includes('layout') || key.includes('blocks') || key.includes('builder')) {
               console.log(`Found ${key} field:`, value);
+              
+              // Deep log first block to see structure
+              if (value && value[0]) {
+                console.log('First block structure:', JSON.stringify(value[0], (k, v) => {
+                  if (k === '__ob__') return undefined;
+                  return v;
+                }, 2));
+              }
+              
               const extracted = this.extractTextFromBlocks(value);
+              console.log(`Extracted from ${key} (${extracted.length} chars):`, extracted);
               if (extracted) {
-                console.log(`Extracted from ${key}:`, extracted.substring(0, 100));
                 texts.push(extracted);
               }
             }
@@ -273,10 +327,15 @@ panel.plugin('tearoom1/seo-ai', {
             const language = this.$language?.code || 'en';
 
             // Call the API with extracted text
+            console.log('Calling API with text:', allText.substring(0, 100));
+            console.log('Language:', language);
+            
             const response = await this.$api.post('seo-ai/generate', {
               text: allText,
               language: language
             });
+
+            console.log('API Response:', response);
 
             if (response.status === 'success' && response.description) {
               // Update the target field value
@@ -296,6 +355,7 @@ panel.plugin('tearoom1/seo-ai', {
                 this.success = false;
               }, 3000);
             } else {
+              console.error('API returned error:', response);
               throw new Error(response.message || 'Failed to generate description');
             }
           } catch (error) {
