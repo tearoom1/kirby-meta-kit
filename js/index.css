@@ -1,6 +1,6 @@
 /* SEO Preview Section */
 .k-seo-preview-section {
-  padding: 1rem;
+  /*padding: 1rem;*/
   background: var(--color-back);
   border-radius: var(--rounded);
 }
