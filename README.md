@@ -119,4 +119,11 @@ POST /api/seo-ai/generate
 
 ## License
 
-MIT
+This plugin is licensed under the [MIT License](LICENSE)
+
+## Credits
+
+- Developed by Mathis Koblin
+- Assisted by AI Claude 4.5 Sonnet
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://coff.ee/tearoom1)
