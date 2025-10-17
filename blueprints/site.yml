@@ -1,0 +1,115 @@
+title: SEO & Social Media
+sections:
+  seo:
+    type: fields
+    label: SEO
+    icon: seo
+    fields:
+      metaTitle:
+        label: Default Meta Title
+        type: text
+        placeholder: "{{ site.title }} | {{ site.slogan }}"
+        help: >
+          Default title for all pages. Use placeholders like {{ site.title }}.
+          Will be used if no page-specific title is set.
+
+      metaDescription:
+        label: Default Meta Description
+        type: textarea
+        buttons: false
+        help: Default description for all pages. Max 160 characters.
+
+      metaKeywords:
+        label: Default Keywords
+        type: tags
+        help: Comma-separated list of default keywords for all pages.
+
+      ogImage:
+        label: Default Social Media Image
+        type: files
+        max: 1
+        layout: cards
+        size: small
+        query: page.images
+        help: Default image for social media sharing (1200×630px recommended)
+
+  social:
+    type: fields
+    label: Social Media
+    icon: share
+    fields:
+      socialSites:
+        label: Social Media Profiles
+        type: structure
+        fields:
+          platform:
+            label: Platform
+            type: select
+            options:
+              - { value: 'facebook', text: 'Facebook' }
+              - { value: 'twitter', text: 'X (Twitter)' }
+              - { value: 'instagram', text: 'Instagram' }
+              - { value: 'linkedin', text: 'LinkedIn' }
+              - { value: 'youtube', text: 'YouTube' }
+              - { value: 'tiktok', text: 'TikTok' }
+              - { value: 'pinterest', text: 'Pinterest' }
+              - { value: 'github', text: 'GitHub' }
+          url:
+            label: Profile URL
+            type: url
+
+  ai:
+    type: fields
+    label: AI Settings
+    icon: ai
+    fields:
+      openrouterKey:
+        label: OpenRouter API Key
+        type: text
+        help: Your OpenRouter API key for AI-generated descriptions
+        width: 1/2
+      aiModel:
+        label: AI Model
+        type: select
+        options:
+          - { value: 'mistralai/mistral-7b-instruct', text: 'Mistral 7B' }
+          - { value: 'openai/gpt-3.5-turbo', text: 'GPT-3.5 Turbo' }
+          - { value: 'anthropic/claude-2', text: 'Claude 2' }
+        default: 'mistralai/mistral-7b-instruct'
+        width: 1/2
+      aiTemperature:
+        label: Creativity Level
+        type: range
+        min: 0.1
+        max: 1.0
+        step: 0.1
+        default: 0.7
+        width: 1/2
+        help: Higher values make output more random, lower values more focused
+
+  sitemap:
+    type: fields
+    label: Sitemap
+    icon: sitemap
+    fields:
+      sitemapExclude:
+        label: Exclude from Sitemap
+        type: pages
+        multiple: true
+        help: Pages to exclude from the sitemap
+      sitemapPriorityHome:
+        label: Homepage Priority
+        type: range
+        min: 0.1
+        max: 1.0
+        step: 0.1
+        default: 1.0
+        width: 1/2
+      sitemapPriorityDefault:
+        label: Default Page Priority
+        type: range
+        min: 0.1
+        max: 1.0
+        step: 0.1
+        default: 0.8
+        width: 1/2

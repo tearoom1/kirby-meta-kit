@@ -1,0 +1,29 @@
+{
+  "name": "tearoom1/kirby-seo-ai",
+  "description": "AI-powered SEO and OpenGraph management for Kirby CMS",
+  "type": "kirby-plugin",
+  "version": "1.0.0",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Your Name",
+      "email": "your@email.com"
+    }
+  ],
+  "require": {
+    "php": "^8.1",
+    "getkirby/composer-installer": "^1.2",
+    "guzzlehttp/guzzle": "^7.0"
+  },
+  "config": {
+    "optimize-autoloader": true
+  },
+  "extra": {
+    "installer-name": "seo-ai"
+  },
+  "autoload": {
+    "psr-4": {
+      "KirbySeoAi\\": "src/"
+    }
+  }
+}

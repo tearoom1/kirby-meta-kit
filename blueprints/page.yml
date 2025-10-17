@@ -1,0 +1,59 @@
+title: Page SEO
+sections:
+  seo:
+    type: fields
+    label: SEO
+    icon: seo
+    fields:
+      metaTitle:
+        label: Meta Title
+        type: text
+        placeholder: "{{ page.title }} | {{ site.title }}"
+        help: >
+          Custom title for search engines. Leave empty to use the page title.
+          Use {{ page.title }} and {{ site.title }} placeholders.
+        width: 2/3
+      metaDescription:
+        label: Meta Description
+        type: textarea
+        buttons: false
+        maxlength: 160
+        counter: true
+        help: >
+          Custom description for search engines (max 160 characters).
+          Leave empty to use AI auto-generation on the frontend.
+      metaKeywords:
+        label: Keywords
+        type: tags
+        help: Comma-separated list of keywords for this page
+        width: 2/3
+      canonicalUrl:
+        label: Canonical URL
+        type: url
+        help: Custom canonical URL for this page
+        width: 2/3
+      noIndex:
+        label: Hide from search engines
+        type: toggle
+        text: [yes, no]
+        width: 1/3
+  social:
+    type: fields
+    label: Social Media
+    icon: share
+    fields:
+      ogTitle:
+        label: Social Media Title
+        type: text
+        placeholder: "{{ page.title }}"
+        help: Title for social media shares (defaults to page title)
+      ogDescription:
+        label: Social Media Description
+        type: textarea
+        buttons: false
+        placeholder: "{{ page.metaDescription }}"
+        help: Description for social media shares (defaults to meta description)
+      ogImage:
+        label: Social Media Image
+        extends: seo-ai/fields/og-image
+        help: Image to display when sharing on social media (1200×630px recommended)
