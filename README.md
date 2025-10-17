@@ -29,18 +29,66 @@ composer require tearoom1/kirby-seo-ai
 
 ## Configuration
 
-Add to `site/config/config.php` (see `config.example.php` for all options):
+The plugin uses two configuration layers that work together:
+
+### 1. Config File (`site/config/config.php`)
+
+Core plugin settings, API credentials, and feature toggles:
 
 ```php
 'tearoom1.meta-stuff' => [
-    'api.key' => 'sk-or-v1-YOUR-KEY',  // Required
-    'api.model' => 'mistralai/mistral-7b-instruct',  // Optional
-    'maxDescriptionLength' => 160,
-    'sitemap.enabled' => true,
-    'sitemap.exclude' => ['error'],
-    'schema.enabled' => true,
-    'autoGenerate' => false,  // Auto-generate on save
+    // AI Generation (Required for AI features)
+    'api.key' => 'sk-or-v1-YOUR-KEY',         // Your OpenRouter API key
+    'api.model' => 'mistralai/mistral-7b-instruct',  // AI model to use
+    'api.temperature' => 0.7,                  // Creativity: 0.1 (focused) to 1.0 (creative)
+    
+    // SEO Settings
+    'maxDescriptionLength' => 160,             // Max meta description length
+    
+    // Feature Toggles
+    'sitemap.enabled' => true,                 // Enable/disable sitemap generation
+    'sitemap.exclude' => ['error', 'drafts'],  // Page IDs to exclude from sitemap
+    'schema.enabled' => true,                  // Enable/disable Schema.org JSON-LD
+    'autoGenerate' => false,                   // Auto-generate descriptions on page save
 ]
+```
+
+**Key Options Explained:**
+
+- **`api.temperature`** (0.1-1.0): Controls AI creativity. Lower values (0.3) = consistent, factual. Higher values (0.9) = varied, creative. Default 0.7 is balanced.
+- **`autoGenerate`**: When `true`, automatically generates descriptions when saving pages. Recommended: `false` (use panel button instead for control).
+- **`sitemap.exclude`**: Array of page IDs or regex patterns. Pages matching these won't appear in sitemap.
+
+### 2. Site Settings (Panel)
+
+Content-focused settings managed in **Site → SEO & Social Media**:
+
+**SEO Tab:**
+- Title separator (|, -, •, etc.)
+- Auto-append site name toggle
+- Default meta title, description, keywords
+- Default social media image
+
+**Social Media Tab:**
+- Social profile URLs (Facebook, Twitter, LinkedIn, etc.)
+- Added to Schema.org for `sameAs` property
+
+**Sitemap Tab:**
+- Visual page selector to exclude from sitemap
+- Homepage priority (0.1-1.0)
+- Default page priority (0.1-1.0)
+
+### How Settings Merge
+
+The plugin combines both layers:
+
+1. **Config file** provides defaults and API credentials
+2. **Site settings** override with content-specific values
+3. **Page fields** override everything for that specific page
+
+Example: Meta description priority
+```
+Page SEO field → Site default description → Auto-generated → Empty
 ```
 
 ## Quick Start
