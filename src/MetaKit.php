@@ -101,7 +101,7 @@ class MetaKit
             return null;
 
         } catch (\Exception $e) {
-            kirbylog('SEO AI Error: ' . $e->getMessage());
+            kirbylog('Meta Kit Error: ' . $e->getMessage());
             throw $e; // Re-throw to show error to user
         }
     }

@@ -44,109 +44,23 @@ Kirby::plugin('tearoom1/meta-kit', [
                 'pattern' => 'meta-kit/generate',
                 'method' => 'POST',
                 'auth' => true,
-                'action' => function () {
-                    $kirby = kirby();
-                    $data = $kirby->request()->body()->toArray();
-                    $text = $data['text'] ?? '';
-                    $language = $data['language'] ?? ($kirby->language()?->code() ?? 'en');
-
-                    if (empty($text)) {
-                        return [
-                            'status' => 'error',
-                            'message' => 'No text provided'
-                        ];
-                    }
-
-                    try {
-                        $seoAi = new MetaKit($kirby);
-                        $description = $seoAi->generateDescription($text, ['language' => $language]);
-
-                        if (empty($description)) {
-                            return [
-                                'status' => 'error',
-                                'message' => 'AI returned empty description. Check your API key and logs.'
-                            ];
-                        }
-
-                        return [
-                            'status' => 'success',
-                            'description' => $description
-                        ];
-                    } catch (Exception $e) {
-                        // Log the error
-                        kirbylog('SEO-AI API Error: ' . $e->getMessage());
-
-                        return [
-                            'status' => 'error',
-                            'message' => $e->getMessage()
-                        ];
-                    }
-                }
+                'action' => require __DIR__ . '/src/api/generate.php'
             ]
         ]
     ],
     'routes' => [
         [
             'pattern' => 'sitemap.xsl',
-            'action' => function () {
-                $file = __DIR__ . '/sitemap.xsl';
-                if (file_exists($file)) {
-                    return new Response(file_get_contents($file), 'application/xslt+xml', 200, [
-                        'Content-Type' => 'application/xslt+xml; charset=utf-8'
-                    ]);
-                }
-                return new Response('XSL file not found', 'text/plain', 404);
-            }
+            'action' => require __DIR__ . '/src/routes/sitemap-xsl.php'
         ],
         [
             'pattern' => 'sitemap.xml',
-            'action' => function () {
-                // Check if sitemap is enabled in config
-                if (option('tearoom1.meta-kit.sitemap.enabled', true) === false) {
-                    return new Response('Sitemap is disabled', 'text/plain', 404);
-                }
-
-                $seoAi = new MetaKit(kirby());
-                $sitemap = $seoAi->getSitemap();
-
-                $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-                $xml .= '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>' . "\n";
-
-                // Check if multilanguage site
-                if (kirby()->multilang()) {
-                    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
-                } else {
-                    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-                }
-
-                foreach ($sitemap as $item) {
-                    $xml .= "\n    <url>";
-                    $xml .= "\n        <loc>" . htmlspecialchars($item['url']) . "</loc>";
-                    $xml .= "\n        <lastmod>" . $item['lastmod'] . "</lastmod>";
-                    $xml .= "\n        <changefreq>" . $item['changefreq'] . "</changefreq>";
-                    $xml .= "\n        <priority>" . $item['priority'] . "</priority>";
-
-                    // Add alternate language links
-                    if (!empty($item['alternates'])) {
-                        foreach ($item['alternates'] as $alternate) {
-                            $xml .= "\n        <xhtml:link rel=\"alternate\" hreflang=\"" .
-                                   htmlspecialchars($alternate['lang']) . "\" href=\"" .
-                                   htmlspecialchars($alternate['url']) . "\" />";
-                        }
-                    }
-
-                    $xml .= "\n    </url>";
-                }
-
-                $xml .= "\n</urlset>";
-
-                return new Response($xml, 'application/xml');
-            }
+            'action' => require __DIR__ . '/src/routes/sitemap.php'
         ]
     ],
     'pageMethods' => [
         'generateSeoDescription' => function (string $content = null, string $languageCode = null) {
-            $seoAi = new MetaKit(kirby());
+            $metaKit = new MetaKit(kirby());
             $languageCode = $languageCode ?? kirby()->language()?->code() ?? 'en';
             $content = $content ?? $this->text()->toString();
 
@@ -154,14 +68,14 @@ Kirby::plugin('tearoom1/meta-kit', [
                 return null;
             }
 
-            return $seoAi->generateDescription($content, ['language' => $languageCode]);
+            return $metaKit->generateDescription($content, ['language' => $languageCode]);
         }
     ],
     'fieldMethods' => [
         'toSeoDescription' => function ($field) {
-            $seoAi = new MetaKit(kirby());
+            $metaKit = new MetaKit(kirby());
             $languageCode = kirby()->language()?->code() ?? 'en';
-            return $seoAi->generateDescription($field->value(), ['language' => $languageCode]);
+            return $metaKit->generateDescription($field->value(), ['language' => $languageCode]);
         }
     ],
     'hooks' => [
@@ -182,9 +96,9 @@ Kirby::plugin('tearoom1/meta-kit', [
 
                 $content = $newPage->text()->toString();
                 if (!empty($content)) {
-                    $seoAi = new MetaKit(kirby());
+                    $metaKit = new MetaKit(kirby());
                     $languageCode = kirby()->language()?->code() ?? 'en';
-                    $description = $seoAi->generateDescription($content, ['language' => $languageCode]);
+                    $description = $metaKit->generateDescription($content, ['language' => $languageCode]);
 
                     if ($description) {
                         // Get existing SEO data and update metadescription
@@ -198,7 +112,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                 }
             } catch (Exception $e) {
                 // Silently fail - don't break the save operation
-                kirbylog('SEO-AI auto-generate error: ' . $e->getMessage());
+                kirbylog('Meta Kit auto-generate error: ' . $e->getMessage());
             }
         }
     ]
