@@ -5,12 +5,14 @@ AI-powered SEO and OpenGraph management for Kirby CMS with automatic meta descri
 ## Features
 
 - 🤖 **AI-Powered Meta Descriptions** - Generate SEO-optimized descriptions using Mistral via OpenRouter
-- 👁️ **Panel Preview** - Live preview of how pages appear on Google, Twitter, and Facebook
+- 👁️ **Live Panel Preview** - Real-time preview of Google, Twitter, and Facebook appearance
 - 🎯 **One-Click AI Generation** - Generate descriptions directly in the panel with a button
+- 🏗️ **Schema.org JSON-LD** - Automatic structured data for Organization, WebSite, WebPage, and BreadcrumbList
 - 🌍 **Multilanguage Support** - Full support for multilingual sites with hreflang tags
 - 🗺️ **XML Sitemap** - Automatic sitemap generation with multilanguage support
-- 📱 **Social Media Ready** - OpenGraph and Twitter Card meta tags
-- 🎯 **SEO Optimization** - Meta titles, descriptions, keywords, canonical URLs
+- 📱 **Social Media Ready** - OpenGraph and Twitter Card meta tags with 1200×630px image previews
+- 🎯 **SEO Optimization** - Meta titles with configurable separators, descriptions, keywords, canonical URLs
+- 🎨 **Customizable Title Format** - Choose separator (|, -, –, —, •, /) and auto-append site name
 - 🔧 **Panel Integration** - Blueprint fields for easy content management
 - ⚡ **Kirby 5 Compatible** - Built for the latest Kirby version
 
@@ -32,6 +34,8 @@ composer require tearoom1/kirby-seo-ai
 
 Add your OpenRouter API key to `site/config/config.php`:
 
+> **Tip:** See `config.example.php` in the plugin directory for a complete configuration example with all available options.
+
 ```php
 return [
     'tearoom1.seo-ai' => [
@@ -50,8 +54,14 @@ return [
         // Optional: Max description length (default: 160)
         'maxDescriptionLength' => 160,
         
+        // Optional: Enable/disable sitemap generation (default: true)
+        'sitemap.enabled' => true,
+        
         // Optional: Pages to exclude from sitemap (array of page IDs)
         'sitemap.exclude' => ['error'],
+        
+        // Optional: Enable/disable Schema.org JSON-LD (default: true)
+        'schema.enabled' => true,
         
         // Optional: Auto-generate descriptions on page save (default: false)
         'autoGenerate' => false,
@@ -74,6 +84,7 @@ Add the SEO snippets to your template's `<head>` section:
     
     <?php snippet('seo/meta') ?>
     <?php snippet('seo/opengraph') ?>
+    <?php snippet('seo/schema') ?>
     
     <!-- Your other head elements -->
 </head>
@@ -82,6 +93,28 @@ Add the SEO snippets to your template's `<head>` section:
 </body>
 </html>
 ```
+
+### Schema.org Structured Data
+
+The `seo/schema` snippet automatically generates JSON-LD structured data for:
+- **Organization** - Your site's organization info with logo and social profiles
+- **WebSite** - Website schema with search action
+- **WebPage** - Current page schema with name, description, and image
+- **BreadcrumbList** - Breadcrumb navigation (automatically generated for child pages)
+
+This helps search engines better understand your content and may enable rich results in search.
+
+#### Enable/Disable Schema.org
+
+You can disable Schema.org JSON-LD generation if not needed:
+
+```php
+'tearoom1.seo-ai' => [
+    'schema.enabled' => false,
+]
+```
+
+The snippet will simply return without generating any markup if disabled.
 
 ### Panel Features
 
@@ -170,11 +203,29 @@ $description = $page->text()->toSeoDescription();
 
 ### Sitemap
 
-The plugin automatically generates a sitemap at:
+The plugin automatically generates a styled sitemap at:
 
 ```
 https://yourdomain.com/sitemap.xml
 ```
+
+#### Enable/Disable Sitemap
+
+You can disable sitemap generation if not needed:
+
+```php
+'tearoom1.seo-ai' => [
+    'sitemap.enabled' => false,
+]
+```
+
+#### Styled Sitemap View
+
+The sitemap includes an XSL stylesheet that provides a beautiful, human-readable view:
+- Color-coded priority badges
+- Statistics (total URLs, last update)
+- Responsive table layout
+- Clickable URLs
 
 #### Multilanguage Sitemap
 

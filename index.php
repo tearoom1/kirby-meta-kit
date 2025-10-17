@@ -34,6 +34,7 @@ Kirby::plugin('tearoom1/seo-ai', [
     'snippets' => [
         'seo/meta' => __DIR__ . '/snippets/meta.php',
         'seo/opengraph' => __DIR__ . '/snippets/opengraph.php',
+        'seo/schema' => __DIR__ . '/snippets/schema.php',
     ],
     'api' => [
         'routes' => [
@@ -84,12 +85,30 @@ Kirby::plugin('tearoom1/seo-ai', [
     ],
     'routes' => [
         [
+            'pattern' => 'sitemap.xsl',
+            'action' => function () {
+                $file = __DIR__ . '/sitemap.xsl';
+                if (file_exists($file)) {
+                    return new Response(file_get_contents($file), 'application/xslt+xml', 200, [
+                        'Content-Type' => 'application/xslt+xml; charset=utf-8'
+                    ]);
+                }
+                return new Response('XSL file not found', 'text/plain', 404);
+            }
+        ],
+        [
             'pattern' => 'sitemap.xml',
             'action' => function () {
+                // Check if sitemap is enabled in config
+                if (option('tearoom1.seo-ai.sitemap.enabled', true) === false) {
+                    return new Response('Sitemap is disabled', 'text/plain', 404);
+                }
+                
                 $seoAi = new SeoAi(kirby());
                 $sitemap = $seoAi->getSitemap();
                 
                 $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+                $xml .= '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>' . "\n";
                 
                 // Check if multilanguage site
                 if (kirby()->multilang()) {
