@@ -8,6 +8,10 @@ $page = $page ?? page();
 // Get SEO data from object field
 $seoData = $page->seo()->toObject();
 
+// Get site settings
+$separator = $site->titleSeparator()->or('|')->value();
+$appendSiteName = $site->appendSiteName()->or('true')->toBool();
+
 // Get the featured image or fallback to site image
 if ($seoData && $seoData->ogImage()->isNotEmpty()) {
     $ogImage = $seoData->ogImage()->toFile();
@@ -19,7 +23,12 @@ if ($seoData && $seoData->ogImage()->isNotEmpty()) {
 if ($seoData && $seoData->ogTitle()->isNotEmpty()) {
     $ogTitle = $seoData->ogTitle()->value();
 } else {
-    $ogTitle = $page->title()->value() . ' | ' . $site->title()->value();
+    $ogTitle = $page->title()->value();
+}
+
+// Append site name if enabled and not already included
+if ($appendSiteName && !str_contains($ogTitle, $site->title()->value())) {
+    $ogTitle = $ogTitle . ' ' . $separator . ' ' . $site->title()->value();
 }
 
 // Get OpenGraph description

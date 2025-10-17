@@ -8,11 +8,20 @@ $page = $page ?? page();
 // Get SEO data from object field
 $seoData = $page->seo()->toObject();
 
+// Get site settings
+$separator = $site->titleSeparator()->or('|')->value();
+$appendSiteName = $site->appendSiteName()->or('true')->toBool();
+
 // Get meta title
 if ($seoData && $seoData->metaTitle()->isNotEmpty()) {
     $metaTitle = $seoData->metaTitle()->value();
 } else {
-    $metaTitle = $page->title()->value() . ' | ' . $site->title()->value();
+    $metaTitle = $page->title()->value();
+}
+
+// Append site name if enabled and not already included
+if ($appendSiteName && !str_contains($metaTitle, $site->title()->value())) {
+    $metaTitle = $metaTitle . ' ' . $separator . ' ' . $site->title()->value();
 }
 
 // Get meta description

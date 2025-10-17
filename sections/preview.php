@@ -20,10 +20,18 @@ return [
                 // Get SEO data from object field
                 $seoData = $page->seo()->toObject();
                 
-                // Build meta object
+                // Build meta object with site settings
+                $separator = site()->titleSeparator()->or('|')->value();
+                $appendSiteName = site()->appendSiteName()->or('true')->toBool();
+                
                 $title = $seoData && $seoData->metatitle()->isNotEmpty() 
                     ? $seoData->metatitle()->value() 
-                    : ($page->title()->value() . ' | ' . site()->title()->value());
+                    : $page->title()->value();
+                
+                // Append site name if enabled and not already included
+                if ($appendSiteName && !str_contains($title, site()->title()->value())) {
+                    $title = $title . ' ' . $separator . ' ' . site()->title()->value();
+                }
                 
                 $description = $seoData && $seoData->metadescription()->isNotEmpty()
                     ? $seoData->metadescription()->value()
@@ -39,8 +47,12 @@ return [
                 
                 $ogImage = null;
                 if ($seoData && $seoData->ogimage()->isNotEmpty()) {
-                    $image = $seoData->ogimage()->toFile();
-                    $ogImage = $image ? $image->url() : null;
+                    // Get the first file from the files field
+                    $files = $seoData->ogimage()->toFiles();
+                    if ($files && $files->count() > 0) {
+                        $image = $files->first();
+                        $ogImage = $image ? $image->url() : null;
+                    }
                 }
                 
                 return [
