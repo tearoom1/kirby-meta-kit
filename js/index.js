@@ -180,7 +180,6 @@ panel.plugin('tearoom1/meta-kit', {
             if (values[field]) {
               const extracted = this.extractTextFromBlocks(values[field]);
               if (extracted) {
-                console.log(`Extracted from ${field}:`, extracted.substring(0, 100));
                 texts.push(extracted);
               }
             }
@@ -189,18 +188,7 @@ panel.plugin('tearoom1/meta-kit', {
           // Check for layout/blocks fields
           for (const [key, value] of Object.entries(values)) {
             if (key.includes('layout') || key.includes('blocks') || key.includes('builder')) {
-              console.log(`Found ${key} field:`, value);
-
-              // Deep log first block to see structure
-              if (value && value[0]) {
-                console.log('First block structure:', JSON.stringify(value[0], (k, v) => {
-                  if (k === '__ob__') return undefined;
-                  return v;
-                }, 2));
-              }
-
               const extracted = this.extractTextFromBlocks(value);
-              console.log(`Extracted from ${key} (${extracted.length} chars):`, extracted);
               if (extracted) {
                 texts.push(extracted);
               }
@@ -214,7 +202,6 @@ panel.plugin('tearoom1/meta-kit', {
             .replace(/\s+/g, ' ')
             .trim();
 
-          console.log('Final extracted text:', result.substring(0, 200));
           return result;
         },
 
@@ -234,15 +221,8 @@ panel.plugin('tearoom1/meta-kit', {
               throw new Error('Cannot access form values');
             }
 
-            // Debug: Log all available field names
-            console.log('Available fields:', Object.keys(parent.value));
-            console.log('All values:', parent.value);
-
             // Extract all text content from the page
             const allText = this.extractAllText(parent.value);
-
-            console.log('Extracted text length:', allText.length);
-            console.log('Extracted text preview:', allText.substring(0, 200));
 
             if (!allText || allText.trim() === '') {
               // Show user what fields are available
@@ -254,21 +234,14 @@ panel.plugin('tearoom1/meta-kit', {
             const language = this.$language?.code || 'en';
 
             // Call the API with extracted text
-            console.log('Calling API with text:', allText.substring(0, 100));
-            console.log('Language:', language);
-
             const response = await this.$api.post('meta-kit/generate', {
               text: allText,
               language: language
             });
 
-            console.log('API Response:', response);
-
             if (response.status === 'success' && response.description) {
               // Show the generated text
               this.generatedText = response.description;
-
-              console.log('Generated description:', response.description);
 
               // Update the nested object fields directly
               if (parent && parent.value) {
@@ -280,9 +253,6 @@ panel.plugin('tearoom1/meta-kit', {
                 // Update descriptions directly on reactive object (lowercase field names!)
                 this.$set(parent.value.seo, 'metadescription', response.description);
                 this.$set(parent.value.seo, 'ogdescription', response.description);
-
-                console.log('Updated SEO object to:', parent.value.seo);
-                console.log('metadescription value:', parent.value.seo.metadescription);
 
                 // Also trigger form update
                 if (parent.update) {

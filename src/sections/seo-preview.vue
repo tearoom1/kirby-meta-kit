@@ -55,7 +55,6 @@ export default {
     }
   },
   async mounted() {
-    console.log('SEO Preview Section Mounted');
     await this.load();
 
     // Listen to input events on the entire document (catches all field changes)
@@ -76,7 +75,6 @@ export default {
       this.handleUpdate();
     },
     handleSeoFieldUpdate(event) {
-      console.log('SEO field updated:', event.detail);
       // Use data passed in event detail
       if (event.detail && event.detail.seoData) {
         this.updatePreviewFromData(event.detail.seoData, event.detail.pageTitle);
@@ -89,14 +87,11 @@ export default {
       // Debounce updates to avoid too many API calls
       clearTimeout(this.updateTimeout);
       this.updateTimeout = setTimeout(() => {
-        console.log('Updating preview...');
         // Try to load from form state first (instant), fall back to API
         this.loadFromFormState() || this.load();
       }, 1000);
     },
     updatePreviewFromData(seoData, pageTitle) {
-      console.log('Updating preview from data:', seoData, pageTitle);
-
       // Use stored site name and separator (extracted from initial load)
       const siteName = this.siteName || this.$store?.state?.system?.title || 'Site Name';
       const separator = this.separator || '|';
@@ -115,8 +110,6 @@ export default {
         ogDescription: seoData.ogdescription || seoData.metadescription || 'No description',
         ogImage: currentOgImage // Preserve existing image
       };
-
-      console.log('Preview updated:', this.meta);
     },
     loadFromFormState() {
       try {
@@ -127,11 +120,8 @@ export default {
         }
 
         if (!parent || !parent.value) {
-          console.log('Could not find parent form values');
           return false;
         }
-
-        console.log('Loading from form state:', parent.value);
 
         // Extract SEO data
         const seoData = parent.value.seo || {};
@@ -175,7 +165,6 @@ export default {
             const parts = this.meta.title.split(` ${sep} `);
             if (parts.length > 1) {
               this.siteName = parts[parts.length - 1].trim();
-              console.log('Extracted site name:', this.siteName, 'separator:', this.separator);
             }
             break;
           }

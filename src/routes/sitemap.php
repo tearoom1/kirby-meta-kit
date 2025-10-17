@@ -1,6 +1,6 @@
 <?php
 
-use TearoomOne\MetaKit;
+use TearoomOne\Sitemap;
 use Kirby\Http\Response;
 
 return function () {
@@ -9,8 +9,8 @@ return function () {
         return new Response('Sitemap is disabled', 'text/plain', 404);
     }
 
-    $metaKit = new MetaKit(kirby());
-    $sitemap = $metaKit->getSitemap();
+    $sitemapGenerator = new Sitemap(kirby());
+    $sitemap = $sitemapGenerator->generate();
 
     $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     $xml .= '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>' . "\n";
