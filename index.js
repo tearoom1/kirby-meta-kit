@@ -1,84 +1,88 @@
 (function() {
   "use strict";
-  panel.plugin("tearoom1/seo-ai", {
-    sections: {
-      "seo-preview": {
-        props: {
-          label: String,
-          metaTitle: String,
-          metaDescription: String,
-          ogImage: String,
-          pageUrl: String
-        },
-        template: `
-        <section class="k-seo-preview-section">
-          <header class="k-section-header">
-            <h2 class="k-headline">{{ label }}</h2>
-          </header>
-
-          <div class="k-seo-previews">
-            <!-- Google Preview -->
-            <div class="k-seo-preview k-seo-preview--google">
-              <h3 class="k-seo-preview__title">Google Search Preview</h3>
-              <div class="k-seo-preview__content">
-                <div class="k-google-preview">
-                  <cite class="k-google-preview__url">{{ displayUrl }}</cite>
-                  <h3 class="k-google-preview__title">{{ metaTitle || 'Page Title' }}</h3>
-                  <p class="k-google-preview__description">{{ metaDescription || 'No description available' }}</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Twitter Preview -->
-            <div class="k-seo-preview k-seo-preview--twitter">
-              <h3 class="k-seo-preview__title">Twitter Card Preview</h3>
-              <div class="k-seo-preview__content">
-                <div class="k-twitter-preview">
-                  <div v-if="ogImage" class="k-twitter-preview__image" :style="{ backgroundImage: 'url(' + ogImage + ')' }"></div>
-                  <div class="k-twitter-preview__body">
-                    <cite class="k-twitter-preview__url">{{ displayUrl }}</cite>
-                    <h4 class="k-twitter-preview__title">{{ metaTitle || 'Page Title' }}</h4>
-                    <p class="k-twitter-preview__description">{{ truncate(metaDescription, 140) || 'No description' }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Facebook Preview -->
-            <div class="k-seo-preview k-seo-preview--facebook">
-              <h3 class="k-seo-preview__title">Facebook Share Preview</h3>
-              <div class="k-seo-preview__content">
-                <div class="k-facebook-preview">
-                  <div v-if="ogImage" class="k-facebook-preview__image" :style="{ backgroundImage: 'url(' + ogImage + ')' }"></div>
-                  <div class="k-facebook-preview__body">
-                    <cite class="k-facebook-preview__url">{{ displayUrl }}</cite>
-                    <h4 class="k-facebook-preview__title">{{ metaTitle || 'Page Title' }}</h4>
-                    <p class="k-facebook-preview__description">{{ truncate(metaDescription, 120) || 'No description' }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      `,
-        computed: {
-          displayUrl() {
-            if (!this.pageUrl) return "example.com";
-            try {
-              const url = new URL(this.pageUrl);
-              return url.hostname + url.pathname;
-            } catch {
-              return this.pageUrl;
-            }
+  function normalizeComponent(scriptExports, render, staticRenderFns, functionalTemplate, injectStyles, scopeId, moduleIdentifier, shadowMode) {
+    var options = typeof scriptExports === "function" ? scriptExports.options : scriptExports;
+    if (render) {
+      options.render = render;
+      options.staticRenderFns = staticRenderFns;
+      options._compiled = true;
+    }
+    return {
+      exports: scriptExports,
+      options
+    };
+  }
+  const _sfc_main = {
+    props: {
+      label: String,
+      parent: String,
+      name: String
+    },
+    data() {
+      return {
+        meta: null
+      };
+    },
+    async mounted() {
+      console.log("SEO Preview Section Mounted");
+      await this.load();
+      this.$panel.events.on("model.update", this.handleUpdate);
+    },
+    beforeDestroy() {
+      this.$panel.events.off("model.update", this.handleUpdate);
+    },
+    methods: {
+      handleUpdate() {
+        clearTimeout(this.updateTimeout);
+        this.updateTimeout = setTimeout(() => {
+          this.load();
+        }, 500);
+      },
+      async load() {
+        try {
+          const response = await this.$api.get(this.parent + "/sections/" + this.name);
+          if (response.meta) {
+            this.meta = response.meta;
+          } else if (response.data && response.data.meta) {
+            this.meta = response.data.meta;
+          } else {
+            console.warn("No meta found in response");
           }
-        },
-        methods: {
-          truncate(text, length) {
-            if (!text) return "";
-            return text.length > length ? text.substring(0, length) + "..." : text;
-          }
+        } catch (error) {
+          console.error("Error loading section:", error);
+        }
+      },
+      truncate(text, length) {
+        if (!text) return "";
+        return text.length > length ? text.substring(0, length) + "..." : text;
+      },
+      displayUrl(url) {
+        if (!url) return "example.com";
+        try {
+          const urlObj = new URL(url);
+          return urlObj.hostname + urlObj.pathname;
+        } catch {
+          return url;
         }
       }
+    }
+  };
+  var _sfc_render = function render() {
+    var _vm = this, _c = _vm._self._c;
+    return _c("section", { staticClass: "k-seo-preview-section" }, [_c("header", { staticClass: "k-section-header" }, [_c("h2", { staticClass: "k-headline" }, [_vm._v(_vm._s(_vm.label || "SEO Preview"))])]), _vm.meta ? _c("div", { staticClass: "k-seo-previews" }, [_c("div", { staticClass: "k-seo-preview k-seo-preview--google" }, [_c("h3", { staticClass: "k-seo-preview__title" }, [_vm._v("Google Search Preview")]), _c("div", { staticClass: "k-seo-preview__content" }, [_c("div", { staticClass: "k-google-preview" }, [_c("cite", { staticClass: "k-google-preview__url" }, [_vm._v(_vm._s(_vm.displayUrl(_vm.meta.url)))]), _c("h3", { staticClass: "k-google-preview__title" }, [_vm._v(_vm._s(_vm.meta.title || "Page Title"))]), _c("p", { staticClass: "k-google-preview__description" }, [_vm._v(_vm._s(_vm.meta.description || "No description available"))])])])]), _c("div", { staticClass: "k-seo-preview k-seo-preview--twitter" }, [_c("h3", { staticClass: "k-seo-preview__title" }, [_vm._v("Twitter Card Preview")]), _c("div", { staticClass: "k-seo-preview__content" }, [_c("div", { staticClass: "k-twitter-preview" }, [_vm.meta.ogImage ? _c("div", { staticClass: "k-twitter-preview__image", style: { backgroundImage: "url(" + _vm.meta.ogImage + ")" } }) : _vm._e(), _c("div", { staticClass: "k-twitter-preview__body" }, [_c("cite", { staticClass: "k-twitter-preview__url" }, [_vm._v(_vm._s(_vm.displayUrl(_vm.meta.url)))]), _c("h4", { staticClass: "k-twitter-preview__title" }, [_vm._v(_vm._s(_vm.meta.ogTitle || _vm.meta.title || "Page Title"))]), _c("p", { staticClass: "k-twitter-preview__description" }, [_vm._v(_vm._s(_vm.truncate(_vm.meta.ogDescription || _vm.meta.description, 140) || "No description"))])])])])]), _c("div", { staticClass: "k-seo-preview k-seo-preview--facebook" }, [_c("h3", { staticClass: "k-seo-preview__title" }, [_vm._v("Facebook Share Preview")]), _c("div", { staticClass: "k-seo-preview__content" }, [_c("div", { staticClass: "k-facebook-preview" }, [_vm.meta.ogImage ? _c("div", { staticClass: "k-facebook-preview__image", style: { backgroundImage: "url(" + _vm.meta.ogImage + ")" } }) : _vm._e(), _c("div", { staticClass: "k-facebook-preview__body" }, [_c("cite", { staticClass: "k-facebook-preview__url" }, [_vm._v(_vm._s(_vm.displayUrl(_vm.meta.url).toUpperCase()))]), _c("h4", { staticClass: "k-facebook-preview__title" }, [_vm._v(_vm._s(_vm.meta.ogTitle || _vm.meta.title || "Page Title"))]), _c("p", { staticClass: "k-facebook-preview__description" }, [_vm._v(_vm._s(_vm.truncate(_vm.meta.ogDescription || _vm.meta.description, 120) || "No description"))])])])])])]) : _c("div", { staticClass: "k-seo-preview-loading" }, [_vm._v(" Loading preview... ")])]);
+  };
+  var _sfc_staticRenderFns = [];
+  _sfc_render._withStripped = true;
+  var __component__ = /* @__PURE__ */ normalizeComponent(
+    _sfc_main,
+    _sfc_render,
+    _sfc_staticRenderFns
+  );
+  __component__.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/kirby-seo-ai/src/sections/seo-preview.vue";
+  const SeoPreview = __component__.exports;
+  panel.plugin("tearoom1/seo-ai", {
+    sections: {
+      "seo-preview": SeoPreview
     },
     fields: {
       "seo-ai-generator": {
@@ -98,7 +102,7 @@
           return {
             loading: false,
             error: null,
-            success: false
+            generatedText: null
           };
         },
         template: `
@@ -117,8 +121,10 @@
           <div v-if="error" class="k-seo-ai-generator__error">
             {{ error }}
           </div>
-          <div v-if="success" class="k-seo-ai-generator__success">
-            ✓ Description generated successfully!
+          <div v-if="generatedText" class="k-seo-ai-generator__result">
+            <strong>✓ Description generated and filled:</strong>
+            <div class="k-seo-ai-generator__text">{{ generatedText }}</div>
+            <small>The description has been added to both Meta Description and OG Description fields below. Scroll down to review and save.</small>
           </div>
         </k-field>
       `,
@@ -265,16 +271,25 @@
               });
               console.log("API Response:", response);
               if (response.status === "success" && response.description) {
-                this.$emit("input", response.description);
-                if (parent.update) {
-                  parent.update({
-                    [this.targetField]: response.description
-                  });
+                this.generatedText = response.description;
+                console.log("Generated description:", response.description);
+                if (parent && parent.value) {
+                  if (!parent.value.seo) {
+                    this.$set(parent.value, "seo", {});
+                  }
+                  this.$set(parent.value.seo, "metadescription", response.description);
+                  this.$set(parent.value.seo, "ogdescription", response.description);
+                  console.log("Updated SEO object to:", parent.value.seo);
+                  console.log("metadescription value:", parent.value.seo.metadescription);
+                  if (parent.update) {
+                    parent.update({
+                      seo: parent.value.seo
+                    });
+                  }
                 }
-                this.success = true;
                 setTimeout(() => {
-                  this.success = false;
-                }, 3e3);
+                  this.generatedText = null;
+                }, 1e4);
               } else {
                 console.error("API returned error:", response);
                 throw new Error(response.message || "Failed to generate description");

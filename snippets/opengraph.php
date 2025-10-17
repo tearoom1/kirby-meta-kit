@@ -5,19 +5,28 @@
 $site = $site ?? site();
 $page = $page ?? page();
 
+// Get SEO data from object field
+$seoData = $page->seo()->toObject();
+
 // Get the featured image or fallback to site image
-$ogImage = $page->ogImage()->toFile() ?? $site->ogImage()->toFile() ?? null;
+if ($seoData && $seoData->ogImage()->isNotEmpty()) {
+    $ogImage = $seoData->ogImage()->toFile();
+} else {
+    $ogImage = $site->ogImage()->toFile() ?? null;
+}
 
 // Get OpenGraph title
-$ogTitle = $page->ogTitle()->isNotEmpty() 
-    ? $page->ogTitle()->value() 
-    : ($page->title()->value() . ' | ' . $site->title()->value());
+if ($seoData && $seoData->ogTitle()->isNotEmpty()) {
+    $ogTitle = $seoData->ogTitle()->value();
+} else {
+    $ogTitle = $page->title()->value() . ' | ' . $site->title()->value();
+}
 
 // Get OpenGraph description
-if ($page->ogDescription()->isNotEmpty()) {
-    $ogDescription = $page->ogDescription()->excerpt(160);
-} elseif ($page->metaDescription()->isNotEmpty()) {
-    $ogDescription = $page->metaDescription()->excerpt(160);
+if ($seoData && $seoData->ogDescription()->isNotEmpty()) {
+    $ogDescription = $seoData->ogDescription()->excerpt(160);
+} elseif ($seoData && $seoData->metaDescription()->isNotEmpty()) {
+    $ogDescription = $seoData->metaDescription()->excerpt(160);
 } elseif ($site->ogDescription()->isNotEmpty()) {
     $ogDescription = $site->ogDescription()->excerpt(160);
 } else {

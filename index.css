@@ -204,7 +204,7 @@
   color: var(--color-red-600);
 }
 
-.k-seo-ai-generator__success {
+.k-seo-ai-generator__result {
   margin-top: 0.5rem;
   padding: 0.75rem;
   background: var(--color-green-100);
@@ -213,10 +213,22 @@
   color: var(--color-green-600);
 }
 
+.k-seo-ai-generator__text {
+  margin: 0.5rem 0;
+  padding: 0.75rem;
+  background: var(--color-white);
+  border-radius: var(--rounded);
+  color: var(--color-black);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  user-select: all;
+  cursor: text;
+}
+
 /* Responsive adjustments */
 @media (min-width: 65rem) {
   .k-seo-previews {
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
 }
 
@@ -225,12 +237,12 @@
   .k-seo-preview__content {
     background: var(--color-gray-900);
   }
-  
+
   .k-google-preview__url,
   .k-google-preview__description {
     color: #bdc1c6;
   }
-  
+
   .k-google-preview__title {
     color: #8ab4f8;
   }

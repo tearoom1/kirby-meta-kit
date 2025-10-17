@@ -7,26 +7,55 @@ return [
         }
     ],
     'computed' => [
-        'metaTitle' => function () {
+        'meta' => function () {
             $page = $this->model();
-            return $page->metaTitle()->isNotEmpty() 
-                ? $page->metaTitle()->value() 
-                : ($page->title()->value() . ' | ' . site()->title()->value());
-        },
-        'metaDescription' => function () {
-            $page = $this->model();
-            if ($page->metaDescription()->isNotEmpty()) {
-                return $page->metaDescription()->excerpt(160);
+            
+            try {
+                // Get SEO data from object field
+                $seoData = $page->seo()->toObject();
+                
+                // Build meta object
+                $title = $seoData && $seoData->metatitle()->isNotEmpty() 
+                    ? $seoData->metatitle()->value() 
+                    : ($page->title()->value() . ' | ' . site()->title()->value());
+                
+                $description = $seoData && $seoData->metadescription()->isNotEmpty()
+                    ? $seoData->metadescription()->value()
+                    : 'No description';
+                
+                $ogTitle = $seoData && $seoData->ogtitle()->isNotEmpty()
+                    ? $seoData->ogtitle()->value()
+                    : $title;
+                
+                $ogDescription = $seoData && $seoData->ogdescription()->isNotEmpty()
+                    ? $seoData->ogdescription()->value()
+                    : $description;
+                
+                $ogImage = null;
+                if ($seoData && $seoData->ogimage()->isNotEmpty()) {
+                    $image = $seoData->ogimage()->toFile();
+                    $ogImage = $image ? $image->url() : null;
+                }
+                
+                return [
+                    'url' => $page->url(),
+                    'title' => $title,
+                    'description' => $description,
+                    'ogTitle' => $ogTitle,
+                    'ogDescription' => $ogDescription,
+                    'ogImage' => $ogImage
+                ];
+            } catch (Exception $e) {
+                // Return fallback data if error
+                return [
+                    'url' => $page->url(),
+                    'title' => $page->title()->value() . ' | ' . site()->title()->value(),
+                    'description' => 'Error loading SEO data: ' . $e->getMessage(),
+                    'ogTitle' => $page->title()->value(),
+                    'ogDescription' => '',
+                    'ogImage' => null
+                ];
             }
-            return $page->text()->excerpt(160);
-        },
-        'ogImage' => function () {
-            $page = $this->model();
-            $image = $page->ogImage()->toFile() ?? site()->ogImage()->toFile();
-            return $image ? $image->url() : null;
-        },
-        'pageUrl' => function () {
-            return $this->model()->url();
         }
     ]
 ];

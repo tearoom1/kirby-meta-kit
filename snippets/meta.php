@@ -5,14 +5,19 @@
 $site = $site ?? site();
 $page = $page ?? page();
 
+// Get SEO data from object field
+$seoData = $page->seo()->toObject();
+
 // Get meta title
-$metaTitle = $page->metaTitle()->isNotEmpty() 
-    ? $page->metaTitle()->value() 
-    : ($page->title()->value() . ' | ' . $site->title()->value());
+if ($seoData && $seoData->metaTitle()->isNotEmpty()) {
+    $metaTitle = $seoData->metaTitle()->value();
+} else {
+    $metaTitle = $page->title()->value() . ' | ' . $site->title()->value();
+}
 
 // Get meta description
-if ($page->metaDescription()->isNotEmpty()) {
-    $metaDescription = $page->metaDescription()->excerpt(160);
+if ($seoData && $seoData->metaDescription()->isNotEmpty()) {
+    $metaDescription = $seoData->metaDescription()->excerpt(160);
 } else {
     // Try to generate with AI
     $generated = $page->generateSeoDescription();
@@ -26,9 +31,14 @@ if ($page->metaDescription()->isNotEmpty()) {
 }
 
 // Get canonical URL
-$canonical = $page->canonicalUrl()->isNotEmpty() 
-    ? $page->canonicalUrl()->value() 
-    : $page->url();
+if ($seoData && $seoData->canonicalUrl()->isNotEmpty()) {
+    $canonical = $seoData->canonicalUrl()->value();
+} else {
+    $canonical = $page->url();
+}
+
+// Check noIndex
+$noIndex = $seoData && $seoData->noIndex()->isTrue();
 ?>
 
 <!-- SEO Meta Tags -->
@@ -45,15 +55,11 @@ $canonical = $page->canonicalUrl()->isNotEmpty()
 <?php endif; ?>
 
 <!-- No index if needed -->
-<?php if ($page->noIndex()->isTrue()): ?>
+<?php if ($noIndex): ?>
     <meta name="robots" content="noindex, nofollow">
 <?php endif; ?>
 
 <!-- Additional meta tags -->
-<?php if ($page->metaKeywords()->isNotEmpty()): ?>
-    <meta name="keywords" content="<?= $page->metaKeywords()->html() ?>">
-<?php endif; ?>
-
-<?php if ($page->metaRobots()->isNotEmpty()): ?>
-    <meta name="robots" content="<?= $page->metaRobots()->html() ?>">
+<?php if ($seoData && $seoData->metaKeywords()->isNotEmpty()): ?>
+    <meta name="keywords" content="<?= $seoData->metaKeywords()->html() ?>">
 <?php endif; ?>
