@@ -41,10 +41,10 @@ Core plugin settings, API credentials, and feature toggles:
     'api.key' => 'sk-or-v1-YOUR-KEY',         // Your OpenRouter API key
     'api.model' => 'mistralai/mistral-7b-instruct',  // AI model to use
     'api.temperature' => 0.7,                  // Creativity: 0.1 (focused) to 1.0 (creative)
-    
+
     // SEO Settings
     'maxDescriptionLength' => 160,             // Max meta description length
-    
+
     // Feature Toggles
     'sitemap.enabled' => true,                 // Enable/disable sitemap generation
     'sitemap.exclude' => ['error', 'drafts'],  // Page IDs to exclude from sitemap
@@ -154,9 +154,9 @@ POST /api/seo-ai/generate
 
 ## Best Practices
 
-**Meta Descriptions:** <160 chars, unique per page, include keywords
-**OG Images:** 1200×630px, PNG/JPG, avoid text-heavy images
-**Auto-Generate:** Use panel button instead of auto-save for better control
+* **Meta Descriptions:** <160 chars, unique per page, include keywords
+* **OG Images:** 1200×630px, PNG/JPG, avoid text-heavy images
+* **Auto-Generate:** Use panel button instead of auto-save for better control
 
 ## Requirements
 
