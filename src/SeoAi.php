@@ -90,7 +90,7 @@ class SeoAi
             return null;
             
         } catch (\Exception $e) {
-            $this->kirby->log('SEO AI Error: ' . $e->getMessage());
+            kirbylog('SEO AI Error: ' . $e->getMessage());
             return null;
         }
     }

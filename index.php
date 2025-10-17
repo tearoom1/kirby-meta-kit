@@ -157,7 +157,7 @@ Kirby::plugin('tearoom1/seo-ai', [
                 }
             } catch (Exception $e) {
                 // Silently fail - don't break the save operation
-                kirby()->log('SEO-AI auto-generate error: ' . $e->getMessage());
+                kirbylog('SEO-AI auto-generate error: ' . $e->getMessage());
             }
         }
     ],

@@ -129,33 +129,165 @@ panel.plugin('tearoom1/seo-ai', {
         }
       },
       methods: {
+        extractTextFromValue(value, depth = 0) {
+          // Prevent infinite recursion
+          if (depth > 5) return '';
+          
+          // Handle null/undefined
+          if (value == null) return '';
+          
+          // Handle strings
+          if (typeof value === 'string') {
+            return value;
+          }
+          
+          // Handle arrays
+          if (Array.isArray(value)) {
+            return value.map(item => this.extractTextFromValue(item, depth + 1)).join(' ');
+          }
+          
+          // Handle objects
+          if (typeof value === 'object') {
+            let texts = [];
+            
+            // Common text properties in Kirby blocks
+            const textProps = ['text', 'content', 'heading', 'headline', 'subheadline', 'title', 'description', 'caption'];
+            
+            for (const prop of textProps) {
+              if (value[prop]) {
+                texts.push(this.extractTextFromValue(value[prop], depth + 1));
+              }
+            }
+            
+            // If no text props found, try all properties
+            if (texts.length === 0) {
+              for (const [key, val] of Object.entries(value)) {
+                // Skip internal Vue/Kirby properties
+                if (key.startsWith('_') || key.startsWith('$') || key === '__ob__' || key === 'id' || key === 'type') {
+                  continue;
+                }
+                texts.push(this.extractTextFromValue(val, depth + 1));
+              }
+            }
+            
+            return texts.filter(t => t && t.trim()).join(' ');
+          }
+          
+          return '';
+        },
+        
+        extractTextFromBlocks(blocks) {
+          if (!blocks) return '';
+          
+          try {
+            // If it's a JSON string, parse it
+            if (typeof blocks === 'string') {
+              try {
+                blocks = JSON.parse(blocks);
+              } catch {
+                // Not JSON, return as is
+                return blocks;
+              }
+            }
+            
+            return this.extractTextFromValue(blocks);
+          } catch (e) {
+            console.warn('Could not parse blocks:', e);
+            return '';
+          }
+        },
+        
+        extractAllText(values) {
+          let texts = [];
+          
+          // Common text field names to check
+          const textFields = ['text', 'content', 'body', 'description', 'headline', 'subheadline'];
+          
+          // Check standard text fields
+          for (const field of textFields) {
+            if (values[field]) {
+              const extracted = this.extractTextFromBlocks(values[field]);
+              if (extracted) {
+                console.log(`Extracted from ${field}:`, extracted.substring(0, 100));
+                texts.push(extracted);
+              }
+            }
+          }
+          
+          // Check for layout/blocks fields
+          for (const [key, value] of Object.entries(values)) {
+            if (key.includes('layout') || key.includes('blocks') || key.includes('builder')) {
+              console.log(`Found ${key} field:`, value);
+              const extracted = this.extractTextFromBlocks(value);
+              if (extracted) {
+                console.log(`Extracted from ${key}:`, extracted.substring(0, 100));
+                texts.push(extracted);
+              }
+            }
+          }
+          
+          // Join all texts and clean up
+          const result = texts
+            .filter(t => t && t.trim())
+            .join(' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          
+          console.log('Final extracted text:', result.substring(0, 200));
+          return result;
+        },
+        
         async generate() {
           this.loading = true;
           this.error = null;
           this.success = false;
 
           try {
-            // Get the source field value
-            const sourceValue = this.$store.getters['content/values']()[this.sourceField];
-
-            if (!sourceValue || sourceValue.trim() === '') {
-              throw new Error('No content available to generate description');
+            // Get the parent form/view to access field values
+            let parent = this.$parent;
+            while (parent && !parent.value) {
+              parent = parent.$parent;
             }
 
-            // Get current language
-            const language = this.$language || 'en';
+            if (!parent || !parent.value) {
+              throw new Error('Cannot access form values');
+            }
 
-            // Call the API
+            // Debug: Log all available field names
+            console.log('Available fields:', Object.keys(parent.value));
+            console.log('All values:', parent.value);
+
+            // Extract all text content from the page
+            const allText = this.extractAllText(parent.value);
+            
+            console.log('Extracted text length:', allText.length);
+            console.log('Extracted text preview:', allText.substring(0, 200));
+
+            if (!allText || allText.trim() === '') {
+              // Show user what fields are available
+              const availableFields = Object.keys(parent.value).join(', ');
+              throw new Error(`No content available to generate description. Available fields: ${availableFields}`);
+            }
+
+            // Get current language code
+            const language = this.$language?.code || 'en';
+
+            // Call the API with extracted text
             const response = await this.$api.post('seo-ai/generate', {
-              text: sourceValue,
+              text: allText,
               language: language
             });
 
             if (response.status === 'success' && response.description) {
-              // Update the target field
-              this.$store.dispatch('content/update', {
-                [this.targetField]: response.description
-              });
+              // Update the target field value
+              this.$emit('input', response.description);
+              
+              // Also update the parent form
+              if (parent.update) {
+                parent.update({
+                  [this.targetField]: response.description
+                });
+              }
 
               this.success = true;
 
