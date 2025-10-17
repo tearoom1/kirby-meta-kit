@@ -1,4 +1,4 @@
-# Kirby Meta Stuff
+# Kirby Meta Kit
 
 AI-powered SEO plugin for Kirby 4 with automatic meta descriptions, live previews, sitemap generation, and Schema.org support.
 
@@ -18,12 +18,12 @@ AI-powered SEO plugin for Kirby 4 with automatic meta descriptions, live preview
 ### Via Composer
 
 ```bash
-composer require tearoom1/kirby-seo-ai
+composer require tearoom1/kirby-meta-kit
 ```
 
 ### Manual
 
-1. Copy to `site/plugins/kirby-seo-ai`
+1. Copy to `site/plugins/meta-kit`
 2. Run `composer install` inside plugin directory
 3. Get free API key from [OpenRouter.ai](https://openrouter.ai/)
 
@@ -36,10 +36,10 @@ The plugin uses two configuration layers that work together:
 Core plugin settings, API credentials, and feature toggles:
 
 ```php
-'tearoom1.meta-stuff' => [
+'tearoom1.meta-kit' => [
     // AI Generation (Required for AI features)
     'api.key' => 'sk-or-v1-YOUR-KEY',         // Your OpenRouter API key
-    'api.model' => 'mistralai/mistral-7b-instruct',  // AI model to use
+    'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',  // AI model to use
     'api.temperature' => 0.7,                  // Creativity: 0.1 (focused) to 1.0 (creative)
 
     // SEO Settings
@@ -110,7 +110,7 @@ Page SEO field → Site default description → Auto-generated → Empty
 # site/blueprints/site.yml
 tabs:
   seo:
-    extends: seo-ai/site
+    extends: meta-kit/site
 ```
 
 **Page SEO:**
@@ -118,7 +118,7 @@ tabs:
 # site/blueprints/pages/default.yml
 tabs:
   seo:
-    extends: seo-ai/page
+    extends: meta-kit/page
 ```
 
 ### 3. Use Panel Features

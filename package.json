@@ -1,7 +1,7 @@
 {
-  "name": "@tearoom1/kirby-seo-ai",
+  "name": "@tearoom1/meta-kit",
   "version": "1.0.0",
-  "description": "AI-powered SEO plugin for Kirby CMS",
+  "description": "AI-powered SEO plugin for Kirby with meta descriptions, previews, and Schema.org",
   "scripts": {
     "dev": "npx -y kirbyup src/index.js --watch",
     "build": "npx -y kirbyup src/index.js"

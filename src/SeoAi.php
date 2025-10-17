@@ -26,7 +26,7 @@ class SeoAi
                 'sitemap.include' => 'all',
                 'sitemap.exclude' => ['error'],
             ],
-            $kirby->option('tearoom1.meta-stuff', [])
+            $kirby->option('tearoom1.meta-kit', [])
         );
 
         $this->httpClient = new Client([

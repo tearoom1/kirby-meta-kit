@@ -1,4 +1,4 @@
-label: Page SEO
+label: Meta & SEO
 columns:
 
   preview:
@@ -17,7 +17,7 @@ columns:
     icon: seo
     fields:
       aiGenerator:
-        type: seo-ai-generator
+        type: meta-kit-generator
         label: AI Description Generator
         help: Generate descriptions automatically using AI
         sourceField: text

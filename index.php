@@ -9,7 +9,7 @@ load([
     'TearoomOne\SeoAi' => 'src/SeoAi.php',
 ], __DIR__);
 
-Kirby::plugin('tearoom1/meta-stuff', [
+Kirby::plugin('tearoom1/meta-kit', [
     'options' => [
         'api.key' => null,
         'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
@@ -21,15 +21,15 @@ Kirby::plugin('tearoom1/meta-stuff', [
         'autoGenerate' => false,
     ],
     'blueprints' => [
-        'seo-ai/site' => __DIR__ . '/blueprints/site.yml',
-        'seo-ai/page' => __DIR__ . '/blueprints/page.yml',
-        'seo-ai/fields/og-image' => __DIR__ . '/blueprints/fields/og-image.php',
+        'meta-kit/site' => __DIR__ . '/blueprints/site.yml',
+        'meta-kit/page' => __DIR__ . '/blueprints/page.yml',
+        'meta-kit/fields/og-image' => __DIR__ . '/blueprints/fields/og-image.php',
     ],
     'sections' => [
         'seo-preview' => __DIR__ . '/sections/preview.php',
     ],
     'fields' => [
-        'seo-ai-generator' => [],
+        'meta-kit-generator' => [],
     ],
     'snippets' => [
         'seo/meta' => __DIR__ . '/snippets/meta.php',
@@ -39,7 +39,7 @@ Kirby::plugin('tearoom1/meta-stuff', [
     'api' => [
         'routes' => [
             [
-                'pattern' => 'seo-ai/generate',
+                'pattern' => 'meta-kit/generate',
                 'method' => 'POST',
                 'auth' => true,
                 'action' => function () {
@@ -100,7 +100,7 @@ Kirby::plugin('tearoom1/meta-stuff', [
             'pattern' => 'sitemap.xml',
             'action' => function () {
                 // Check if sitemap is enabled in config
-                if (option('tearoom1.meta-stuff.sitemap.enabled', true) === false) {
+                if (option('tearoom1.meta-kit.sitemap.enabled', true) === false) {
                     return new Response('Sitemap is disabled', 'text/plain', 404);
                 }
                 
@@ -165,7 +165,7 @@ Kirby::plugin('tearoom1/meta-stuff', [
     'hooks' => [
         'page.update:after' => function ($newPage, $oldPage) {
             // Auto-generate description if enabled and field is empty
-            $autoGenerate = option('tearoom1.meta-stuff.autoGenerate', false);
+            $autoGenerate = option('tearoom1.meta-kit.autoGenerate', false);
             
             if (!$autoGenerate || $newPage->intendedTemplate()->name() === 'error') {
                 return;

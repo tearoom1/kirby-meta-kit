@@ -136,12 +136,12 @@
   );
   __component__.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/kirby-seo-ai/src/sections/seo-preview.vue";
   const SeoPreview = __component__.exports;
-  panel.plugin("tearoom1/seo-ai", {
+  panel.plugin("tearoom1/meta-kit", {
     sections: {
       "seo-preview": SeoPreview
     },
     fields: {
-      "seo-ai-generator": {
+      "meta-kit-generator": {
         props: {
           label: String,
           help: String,
@@ -162,7 +162,7 @@
           };
         },
         template: `
-        <k-field v-bind="$props" class="k-seo-ai-generator-field">
+        <k-field v-bind="$props" class="k-meta-kit-generator-field">
           <k-button
             icon="ai"
             :text="buttonText"
@@ -170,16 +170,16 @@
             :disabled="loading"
             theme="positive"
           />
-          <div v-if="loading" class="k-seo-ai-generator__status">
+          <div v-if="loading" class="k-meta-kit-generator__status">
             <k-loader />
             <span>Generating description...</span>
           </div>
-          <div v-if="error" class="k-seo-ai-generator__error">
+          <div v-if="error" class="k-meta-kit-generator__error">
             {{ error }}
           </div>
-          <div v-if="generatedText" class="k-seo-ai-generator__result">
+          <div v-if="generatedText" class="k-meta-kit-generator__result">
             <strong>✓ Description generated and filled:</strong>
-            <div class="k-seo-ai-generator__text">{{ generatedText }}</div>
+            <div class="k-meta-kit-generator__text">{{ generatedText }}</div>
             <small>The description has been added to both Meta Description and OG Description fields below. Scroll down to review and save.</small>
           </div>
         </k-field>
@@ -321,7 +321,7 @@
               const language = ((_a = this.$language) == null ? void 0 : _a.code) || "en";
               console.log("Calling API with text:", allText.substring(0, 100));
               console.log("Language:", language);
-              const response = await this.$api.post("seo-ai/generate", {
+              const response = await this.$api.post("meta-kit/generate", {
                 text: allText,
                 language
               });
