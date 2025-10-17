@@ -13,7 +13,34 @@ class Sitemap
     public function __construct(Kirby $kirby)
     {
         $this->kirby = $kirby;
-        $this->options = $kirby->option('tearoom1.meta-kit', []);
+        
+        // Default options (lowest priority)
+        $defaults = [
+            'sitemap.include' => 'all',
+            'sitemap.exclude' => ['error'],
+        ];
+        
+        // Site settings from panel (middle priority)
+        $siteSettings = [];
+        $siteSitemap = $kirby->site()->sitemap()->toObject();
+        if ($siteSitemap) {
+            if ($siteSitemap->exclude()->isNotEmpty()) {
+                // Store page IDs for later checking
+                $siteSettings['sitemap.exclude.pages'] = $siteSitemap->exclude()->toPages();
+            }
+            if ($siteSitemap->priorityHome()->isNotEmpty()) {
+                $siteSettings['sitemap.priorityHome'] = $siteSitemap->priorityHome()->toFloat();
+            }
+            if ($siteSitemap->priorityDefault()->isNotEmpty()) {
+                $siteSettings['sitemap.priorityDefault'] = $siteSitemap->priorityDefault()->toFloat();
+            }
+        }
+        
+        // Config.php settings (highest priority)
+        $configSettings = $kirby->option('tearoom1.meta-kit', []);
+        
+        // Merge: defaults < site settings < config
+        $this->options = array_merge($defaults, $siteSettings, $configSettings);
     }
 
     public function generate(): array
@@ -76,10 +103,8 @@ class Sitemap
         }
 
         // Check site blueprint's sitemapExclude field (pages selector)
-        $siteSitemap = $this->kirby->site()->sitemap()->toObject();
-        if ($siteSitemap && $siteSitemap->exclude()->isNotEmpty()) {
-            $excludedPages = $siteSitemap->exclude()->toPages();
-            foreach ($excludedPages as $excludedPage) {
+        if (isset($this->options['sitemap.exclude.pages'])) {
+            foreach ($this->options['sitemap.exclude.pages'] as $excludedPage) {
                 if ($excludedPage->id() === $page->id()) {
                     return false;
                 }
@@ -111,21 +136,14 @@ class Sitemap
 
     protected function getPriority(Page $page): float
     {
-        // Use site settings if available
-        $site = $this->kirby->site();
-        $siteSitemap = $site->sitemap()->toObject();
-
-        // Homepage gets priority from site settings or 1.0
+        // Homepage gets priority from settings
         if ($page->isHomePage()) {
-            if ($siteSitemap && $siteSitemap->priorityHome()->isNotEmpty()) {
-                return $siteSitemap->priorityHome()->toFloat();
-            }
-            return 1.0;
+            return $this->options['sitemap.priorityHome'] ?? 1.0;
         }
 
-        // Other pages get default priority from site settings
-        if ($siteSitemap && $siteSitemap->priorityDefault()->isNotEmpty()) {
-            return $siteSitemap->priorityDefault()->toFloat();
+        // Other pages get default priority from settings
+        if (isset($this->options['sitemap.priorityDefault'])) {
+            return $this->options['sitemap.priorityDefault'];
         }
 
         // Fallback: Priority based on page depth

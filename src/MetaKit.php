@@ -17,17 +17,35 @@ class MetaKit
     public function __construct(Kirby $kirby)
     {
         $this->kirby = $kirby;
-        $this->options = array_merge(
-            [
-                'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
-                'api.model' => 'mistralai/mistral-7b-instruct',
-                'api.temperature' => 0.7,
-                'maxDescriptionLength' => 160,
-                'sitemap.include' => 'all',
-                'sitemap.exclude' => ['error'],
-            ],
-            $kirby->option('tearoom1.meta-kit', [])
-        );
+
+        // Default options (lowest priority)
+        $defaults = [
+            'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
+            'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
+            'api.temperature' => 0.7,
+            'maxDescriptionLength' => 160,
+        ];
+
+        // Site settings from panel (middle priority)
+        $siteSettings = [];
+        $openrouter = $kirby->site()->openrouter()->toObject();
+        if ($openrouter) {
+            if ($openrouter->apiKey()->isNotEmpty()) {
+                $siteSettings['api.key'] = $openrouter->apiKey()->value();
+            }
+            if ($openrouter->model()->isNotEmpty()) {
+                $siteSettings['api.model'] = $openrouter->model()->value();
+            }
+            if ($openrouter->temperature()->isNotEmpty()) {
+                $siteSettings['api.temperature'] = $openrouter->temperature()->toFloat();
+            }
+        }
+
+        // Config.php settings (highest priority)
+        $configSettings = $kirby->option('tearoom1.meta-kit', []);
+
+        // Merge: defaults < site settings < config
+        $this->options = array_merge($defaults, $siteSettings, $configSettings);
 
         $this->httpClient = new Client([
             'timeout' => 30,
