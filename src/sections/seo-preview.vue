@@ -49,7 +49,9 @@ export default {
   data() {
     return {
       meta: null,
-      updateTimeout: null
+      updateTimeout: null,
+      siteName: null,
+      separator: '|'
     }
   },
   async mounted() {
@@ -95,9 +97,9 @@ export default {
     updatePreviewFromData(seoData, pageTitle) {
       console.log('Updating preview from data:', seoData, pageTitle);
 
-      // Build meta object from passed data
-      const siteName = this.$store?.state?.system?.title || 'Site Name';
-      const separator = '|';
+      // Use stored site name and separator (extracted from initial load)
+      const siteName = this.siteName || this.$store?.state?.system?.title || 'Site Name';
+      const separator = this.separator || '|';
 
       const metaTitle = seoData.metatitle || pageTitle || 'Page Title';
       const fullTitle = metaTitle + ' ' + separator + ' ' + siteName;
@@ -150,13 +152,38 @@ export default {
         // Try different possible locations
         if (response.meta) {
           this.meta = response.meta;
+          // Extract and store site name from the title
+          this.extractSiteInfo();
         } else if (response.data && response.data.meta) {
           this.meta = response.data.meta;
+          this.extractSiteInfo();
         } else {
           console.warn('No meta found in response');
         }
       } catch (error) {
         console.error('Error loading section:', error);
+      }
+    },
+    extractSiteInfo() {
+      // Extract site name and separator from the loaded title
+      // Title format: "Page Title | Site Name"
+      if (this.meta && this.meta.title) {
+        const separators = ['|', '-', '–', '—', '•', '/'];
+        for (const sep of separators) {
+          if (this.meta.title.includes(` ${sep} `)) {
+            this.separator = sep;
+            const parts = this.meta.title.split(` ${sep} `);
+            if (parts.length > 1) {
+              this.siteName = parts[parts.length - 1].trim();
+              console.log('Extracted site name:', this.siteName, 'separator:', this.separator);
+            }
+            break;
+          }
+        }
+      }
+      // Fallback
+      if (!this.siteName) {
+        this.siteName = 'Site Name';
       }
     },
     truncate(text, length) {
