@@ -7,7 +7,7 @@
  */
 
 return [
-    'tearoom1.seo-ai' => [
+    'tearoom1.meta-stuff' => [
         
         // ============================================
         // API Settings (Required for AI features)

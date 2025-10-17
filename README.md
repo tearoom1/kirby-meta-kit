@@ -38,7 +38,7 @@ Add your OpenRouter API key to `site/config/config.php`:
 
 ```php
 return [
-    'tearoom1.seo-ai' => [
+    'tearoom1.meta-stuff' => [
         // Required: Your OpenRouter API key
         'api.key' => 'your-openrouter-api-key',
         
@@ -109,7 +109,7 @@ This helps search engines better understand your content and may enable rich res
 You can disable Schema.org JSON-LD generation if not needed:
 
 ```php
-'tearoom1.seo-ai' => [
+'tearoom1.meta-stuff' => [
     'schema.enabled' => false,
 ]
 ```
@@ -231,7 +231,7 @@ https://yourdomain.com/sitemap.xml
 You can disable sitemap generation if not needed:
 
 ```php
-'tearoom1.seo-ai' => [
+'tearoom1.meta-stuff' => [
     'sitemap.enabled' => false,
 ]
 ```
@@ -336,7 +336,7 @@ The plugin includes a hook to auto-generate descriptions when pages are saved (i
 
 ```php
 // Enable in config
-'tearoom1.seo-ai' => [
+'tearoom1.meta-stuff' => [
     'autoGenerate' => true,
 ]
 ```

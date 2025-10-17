@@ -6,7 +6,7 @@ $site = $site ?? site();
 $page = $page ?? page();
 
 // Check if schema is enabled in config
-if (option('tearoom1.seo-ai.schema.enabled', true) === false) {
+if (option('tearoom1.meta-stuff.schema.enabled', true) === false) {
     return;
 }
 $seoData = $page->seo()->toObject();

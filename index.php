@@ -9,11 +9,11 @@ load([
     'TearoomOne\SeoAi' => 'src/SeoAi.php',
 ], __DIR__);
 
-Kirby::plugin('tearoom1/seo-ai', [
+Kirby::plugin('tearoom1/meta-stuff', [
     'options' => [
         'api.key' => null,
         'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
-        'api.model' => 'mistralai/mistral-7b-instruct',
+        'api.model' => '',
         'api.temperature' => 0.7,
         'maxDescriptionLength' => 160,
         'sitemap.include' => 'all',
@@ -100,7 +100,7 @@ Kirby::plugin('tearoom1/seo-ai', [
             'pattern' => 'sitemap.xml',
             'action' => function () {
                 // Check if sitemap is enabled in config
-                if (option('tearoom1.seo-ai.sitemap.enabled', true) === false) {
+                if (option('tearoom1.meta-stuff.sitemap.enabled', true) === false) {
                     return new Response('Sitemap is disabled', 'text/plain', 404);
                 }
                 
@@ -165,23 +165,33 @@ Kirby::plugin('tearoom1/seo-ai', [
     'hooks' => [
         'page.update:after' => function ($newPage, $oldPage) {
             // Auto-generate description if enabled and field is empty
-            $autoGenerate = option('tearoom1.seo-ai.autoGenerate', false);
+            $autoGenerate = option('tearoom1.meta-stuff.autoGenerate', false);
             
             if (!$autoGenerate || $newPage->intendedTemplate()->name() === 'error') {
                 return;
             }
             
             try {
-                if ($newPage->metaDescription()->isEmpty()) {
-                    $content = $newPage->text()->toString();
-                    if (!empty($content)) {
-                        $seoAi = new SeoAi(kirby());
-                        $languageCode = kirby()->language()?->code() ?? 'en';
-                        $description = $seoAi->generateDescription($content, ['language' => $languageCode]);
+                // Check if SEO object exists and if metadescription is empty
+                $seoData = $newPage->seo()->toObject();
+                if (!$seoData || $seoData->metadescription()->isNotEmpty()) {
+                    return;
+                }
+                
+                $content = $newPage->text()->toString();
+                if (!empty($content)) {
+                    $seoAi = new SeoAi(kirby());
+                    $languageCode = kirby()->language()?->code() ?? 'en';
+                    $description = $seoAi->generateDescription($content, ['language' => $languageCode]);
+                    
+                    if ($description) {
+                        // Get existing SEO data and update metadescription
+                        $existingSeo = $newPage->seo()->yaml();
+                        $existingSeo['metadescription'] = $description;
                         
-                        if ($description) {
-                            $newPage->update(['metaDescription' => $description], kirby()->language()?->code());
-                        }
+                        $newPage->update([
+                            'seo' => $existingSeo
+                        ], kirby()->language()?->code());
                     }
                 }
             } catch (Exception $e) {
