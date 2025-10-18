@@ -49,6 +49,13 @@
     <div class="k-meta-kit-actions">
       <k-button-group>
         <k-button
+          icon="edit"
+          :disabled="selectedPages.length === 0"
+          @click="showSelectedPagesDialog"
+        >
+          Edit Selected ({{ selectedPages.length }})
+        </k-button>
+        <k-button
           icon="sparkling"
           :disabled="isGeneratingAll || selectedPages.length === 0"
           :progress="isGeneratingAll"
@@ -56,19 +63,11 @@
         >
           Generate Missing ({{ selectedPages.length || filteredPages.length }})
         </k-button>
-        <k-button
-          icon="edit"
-          :disabled="selectedPages.length === 0"
-          @click="showSelectedPagesDialog"
-        >
-          Edit Selected ({{ selectedPages.length }})
-        </k-button>
-        <k-button icon="download" @click="detectLegacyMetadata">Detect Legacy Data</k-button>
-        <k-button icon="refresh" @click="refreshPages">Refresh</k-button>
+        <k-button icon="download" @click="detectLegacyMetadata">Legacy Data</k-button>
+        <k-button icon="refresh" @click="refreshPages"></k-button>
       </k-button-group>
 
       <div class="k-meta-kit-controls">
-        <span class="k-meta-kit-count">{{ selectedPages.length }} of {{ filteredPages.length }} selected</span>
         <div class="k-meta-kit-search-wrapper">
           <k-search-input
             icon="search"
@@ -131,7 +130,10 @@
           </td>
           <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
           <td>
-            <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
+            <div class="k-meta-kit-table-page">
+              <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
+              <span class="k-meta-kit-table-page-id">{{ page.id }}</span>
+            </div>
           </td>
           <td>{{ page.template }}</td>
           <td class="k-meta-kit-table-center">
@@ -869,6 +871,7 @@ export default {
       const query = this.searchQuery.toLowerCase();
       return this.pagesData.filter(page => {
         return page.title.toLowerCase().includes(query) ||
+               page.id.toLowerCase().includes(query) ||
                page.template.toLowerCase().includes(query) ||
                (page.metaDescription && page.metaDescription.toLowerCase().includes(query));
       });
@@ -1204,7 +1207,7 @@ export default {
           if (pageInAllPages) {
             // Update the specific field with the new value
             this.$set(pageInAllPages, fieldName, value);
-            
+
             // Update the "has" flags
             if (fieldName === 'metaTitle') {
               this.$set(pageInAllPages, 'hasMetaTitle', value && value.length > 0);
@@ -1215,7 +1218,7 @@ export default {
             } else if (fieldName === 'ogImage') {
               this.$set(pageInAllPages, 'hasOgImage', value && value.length > 0);
             }
-            
+
             // Clear legacy data for this field if it exists
             if (pageInAllPages.legacy && pageInAllPages.legacy[fieldName]) {
               delete pageInAllPages.legacy[fieldName];
