@@ -119,7 +119,7 @@
               size="sm"
               @click="convertLegacyPage(page.id)"
             >
-              Convert
+              Apply Legacy
             </k-button>
           </div>
 
@@ -907,6 +907,7 @@ export default {
 }
 
 .k-meta-kit-legacy-field-reference {
+  display: none;
   margin: 1rem 0;
   border-top: 1px solid var(--color-border);
   padding-top: 0.75rem;

@@ -15,7 +15,7 @@ class MetaKitController
 
         foreach ($pages as $page) {
             $seoData = $page->seo()->toObject();
-            
+
             $result[] = [
                 'id' => $page->id(),
                 'title' => $page->title()->value(),
@@ -26,11 +26,11 @@ class MetaKitController
                 'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
                 'hasOgImage' => $seoData && $seoData->ogImage()->isNotEmpty(),
                 'noIndex' => $seoData && $seoData->noIndex()->toBool(),
-                'metaTitleLength' => $seoData && $seoData->metaTitle()->isNotEmpty() 
-                    ? mb_strlen($seoData->metaTitle()->value()) 
+                'metaTitleLength' => $seoData && $seoData->metaTitle()->isNotEmpty()
+                    ? mb_strlen($seoData->metaTitle()->value())
                     : 0,
-                'metaDescriptionLength' => $seoData && $seoData->metaDescription()->isNotEmpty() 
-                    ? mb_strlen($seoData->metaDescription()->value()) 
+                'metaDescriptionLength' => $seoData && $seoData->metaDescription()->isNotEmpty()
+                    ? mb_strlen($seoData->metaDescription()->value())
                     : 0,
             ];
         }
@@ -53,7 +53,7 @@ class MetaKitController
         try {
             $metaKit = new MetaKit($kirby);
             $languageCode = $kirby->language()?->code() ?? 'en';
-            
+
             // Get page content for generation
             $content = $page->text()->or($page->title())->value();
             $description = $metaKit->generateDescription($content, ['language' => $languageCode]);
@@ -95,7 +95,7 @@ class MetaKitController
 
         foreach ($pages as $page) {
             $seoData = $page->seo()->toObject();
-            
+
             // Skip if already has description
             if ($seoData && $seoData->metaDescription()->isNotEmpty()) {
                 $skipped++;
@@ -103,7 +103,7 @@ class MetaKitController
             }
 
             $result = self::generateDescription($page->id());
-            
+
             if ($result['status'] === 'success') {
                 $generated++;
             } else {
@@ -135,50 +135,26 @@ class MetaKitController
             // Meta Title variations
             if ($page->metatitle()->isNotEmpty()) {
                 $legacy['metaTitle'] = $page->metatitle()->value();
-                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty() 
-                    ? $seoData->metaTitle()->value() 
+                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty()
+                    ? $seoData->metaTitle()->value()
                     : null;
             }
-            if ($page->Metatitle()->isNotEmpty()) {
-                $legacy['metaTitle'] = $page->Metatitle()->value();
-                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty() 
-                    ? $seoData->metaTitle()->value() 
-                    : null;
-            }
-            if ($page->customtitle()->isNotEmpty()) {
-                $legacy['metaTitle'] = $page->customtitle()->value();
-                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty() 
-                    ? $seoData->metaTitle()->value() 
-                    : null;
-            }
-            if ($page->seotitle()->isNotEmpty()) {
-                $legacy['metaTitle'] = $page->seotitle()->value();
-                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty() 
-                    ? $seoData->metaTitle()->value() 
-                    : null;
-            }
-            
+
             // Meta Description variations
             if ($page->metadescription()->isNotEmpty()) {
                 $legacy['metaDescription'] = $page->metadescription()->value();
-                $current['metaDescription'] = $seoData && $seoData->metaDescription()->isNotEmpty() 
-                    ? $seoData->metaDescription()->value() 
+                $current['metaDescription'] = $seoData && $seoData->metaDescription()->isNotEmpty()
+                    ? $seoData->metaDescription()->value()
                     : null;
             }
-            if ($page->seodescription()->isNotEmpty()) {
-                $legacy['metaDescription'] = $page->seodescription()->value();
-                $current['metaDescription'] = $seoData && $seoData->metaDescription()->isNotEmpty() 
-                    ? $seoData->metaDescription()->value() 
-                    : null;
-            }
-            
+
             // OG Image
             if ($page->ogimage()->isNotEmpty()) {
                 $files = $page->ogimage()->toFiles();
                 if ($files->count() > 0) {
                     $legacy['ogImage'] = $files->first()->filename();
-                    $current['ogImage'] = $seoData && $seoData->ogImage()->isNotEmpty() 
-                        ? $seoData->ogImage()->toFiles()->first()?->filename() 
+                    $current['ogImage'] = $seoData && $seoData->ogImage()->isNotEmpty()
+                        ? $seoData->ogImage()->toFiles()->first()?->filename()
                         : null;
                 }
             }
@@ -231,7 +207,7 @@ class MetaKitController
                 $seoArray['metaTitle'] = $page->customtitle()->value();
                 $converted[] = 'metaTitle (from customtitle)';
             }
-            
+
             // Migrate legacy fields - Meta Description variations
             if ($page->metadescription()->isNotEmpty() && empty($seoArray['metaDescription'])) {
                 $seoArray['metaDescription'] = $page->metadescription()->value();
@@ -240,7 +216,7 @@ class MetaKitController
                 $seoArray['metaDescription'] = $page->seodescription()->value();
                 $converted[] = 'metaDescription (from seodescription)';
             }
-            
+
             // Migrate legacy fields - OG Image
             if ($page->ogimage()->isNotEmpty() && empty($seoArray['ogImage'])) {
                 $seoArray['ogImage'] = $page->ogimage()->toFiles();
@@ -285,10 +261,10 @@ class MetaKitController
         try {
             $seoData = $page->seo()->toObject();
             $seoArray = $seoData ? $seoData->toArray() : [];
-            
+
             // Update the specific field
             $seoArray[$fieldName] = $value;
-            
+
             $languageCode = $kirby->language()?->code();
             $page->update(['seo' => $seoArray], $languageCode);
 
