@@ -260,16 +260,7 @@
         }
       },
       async checkLegacyOnLoad() {
-        const dismissed = sessionStorage.getItem("metaKitLegacyDismissed");
-        if (dismissed) return;
-        try {
-          const response = await this.$api.get("meta-kit/detect-legacy");
-          if (response.status === "success" && response.found > 0) {
-            this.legacyDetection.show = true;
-            this.legacyDetection.found = response.found;
-          }
-        } catch (error) {
-        }
+        return;
       },
       dismissLegacyWarning() {
         this.legacyDetection.show = false;

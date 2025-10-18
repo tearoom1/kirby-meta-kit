@@ -862,6 +862,7 @@ export default {
       }
     },
     async checkLegacyOnLoad() {
+      return; // disabled for now
       const dismissed = sessionStorage.getItem('metaKitLegacyDismissed');
       if (dismissed) return;
 
