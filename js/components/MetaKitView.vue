@@ -1191,17 +1191,40 @@ export default {
           window.panel.notification.success(`${this.formatFieldName(fieldName)} updated successfully`);
           await this.refreshPages();
 
-          // Refresh the appropriate dialog
+          // Reset the choice to 'keep' to show current value
+          this.setFieldChoice(pageId, fieldName, 'keep');
+
+          // Clear any manual values
+          if (this.fieldChoices[pageId]) {
+            this.$set(this.fieldChoices[pageId], fieldName + '_manual', '');
+          }
+
+          // Update the field in-place without reloading the whole dialog
+          const pageInAllPages = this.allPagesData.find(p => p.id === pageId);
+          if (pageInAllPages) {
+            // Update the specific field with the new value
+            this.$set(pageInAllPages, fieldName, value);
+            
+            // Update the "has" flags
+            if (fieldName === 'metaTitle') {
+              this.$set(pageInAllPages, 'hasMetaTitle', value && value.length > 0);
+              this.$set(pageInAllPages, 'metaTitleLength', value ? value.length : 0);
+            } else if (fieldName === 'metaDescription') {
+              this.$set(pageInAllPages, 'hasMetaDescription', value && value.length > 0);
+              this.$set(pageInAllPages, 'metaDescriptionLength', value ? value.length : 0);
+            } else if (fieldName === 'ogImage') {
+              this.$set(pageInAllPages, 'hasOgImage', value && value.length > 0);
+            }
+            
+            // Clear legacy data for this field if it exists
+            if (pageInAllPages.legacy && pageInAllPages.legacy[fieldName]) {
+              delete pageInAllPages.legacy[fieldName];
+            }
+          }
+
+          // Refresh legacy dialog if needed
           if (this.legacyPages.find(p => p.id === pageId)) {
             await this.detectLegacyMetadata();
-          }
-          if (this.allPagesData.find(p => p.id === pageId)) {
-            // Reload only selected pages if we have a selection, otherwise load all
-            if (this.selectedPages.length > 0) {
-              await this.reloadSelectedPages();
-            } else {
-              await this.loadAllPages();
-            }
           }
         } else {
           window.panel.notification.error(response.message);

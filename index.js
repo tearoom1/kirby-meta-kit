@@ -475,15 +475,28 @@
           if (response.status === "success") {
             window.panel.notification.success(`${this.formatFieldName(fieldName)} updated successfully`);
             await this.refreshPages();
+            this.setFieldChoice(pageId, fieldName, "keep");
+            if (this.fieldChoices[pageId]) {
+              this.$set(this.fieldChoices[pageId], fieldName + "_manual", "");
+            }
+            const pageInAllPages = this.allPagesData.find((p) => p.id === pageId);
+            if (pageInAllPages) {
+              this.$set(pageInAllPages, fieldName, value);
+              if (fieldName === "metaTitle") {
+                this.$set(pageInAllPages, "hasMetaTitle", value && value.length > 0);
+                this.$set(pageInAllPages, "metaTitleLength", value ? value.length : 0);
+              } else if (fieldName === "metaDescription") {
+                this.$set(pageInAllPages, "hasMetaDescription", value && value.length > 0);
+                this.$set(pageInAllPages, "metaDescriptionLength", value ? value.length : 0);
+              } else if (fieldName === "ogImage") {
+                this.$set(pageInAllPages, "hasOgImage", value && value.length > 0);
+              }
+              if (pageInAllPages.legacy && pageInAllPages.legacy[fieldName]) {
+                delete pageInAllPages.legacy[fieldName];
+              }
+            }
             if (this.legacyPages.find((p) => p.id === pageId)) {
               await this.detectLegacyMetadata();
-            }
-            if (this.allPagesData.find((p) => p.id === pageId)) {
-              if (this.selectedPages.length > 0) {
-                await this.reloadSelectedPages();
-              } else {
-                await this.loadAllPages();
-              }
             }
           } else {
             window.panel.notification.error(response.message);
