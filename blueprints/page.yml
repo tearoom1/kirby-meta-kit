@@ -52,6 +52,7 @@ columns:
             width: 1/2
 
           separator1:
+            label:
             type: info
             text: Social Media Settings
             theme: positive
