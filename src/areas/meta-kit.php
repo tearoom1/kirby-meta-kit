@@ -4,7 +4,7 @@ use TearoomOne\MetaKitController;
 
 return [
     'label' => 'Meta Kit',
-    'icon' => 'seo',
+    'icon' => 'wand',
     'menu' => true,
     'link' => 'meta-kit',
     'views' => [
