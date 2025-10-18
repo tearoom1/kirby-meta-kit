@@ -100,7 +100,7 @@
     </div>
 
     <!-- Legacy Data Dialog -->
-    <k-dialog ref="legacyDialog" size="huge">
+    <k-dialog ref="legacyDialog" size="huge" cancelButton="" submitButton="">
       <k-headline>Legacy SEO Metadata</k-headline>
 
       <div v-if="isLoadingLegacy" class="k-meta-kit-loading">
@@ -235,10 +235,6 @@
             </div>
           </div>
         </div>
-
-        <k-button-group slot="footer">
-          <k-button icon="check" @click="$refs.legacyDialog.close()">Close</k-button>
-        </k-button-group>
       </div>
 
       <div v-else class="k-meta-kit-empty">
@@ -980,5 +976,12 @@ export default {
 
 .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-reference summary:hover {
   color: var(--color-text);
+}
+
+.k-button-group.k-dialog-buttons:has(>.k-button:nth-child(2)) {
+  grid-template-columns: 1fr;
+}
+.k-button.k-dialog-button-cancel {
+  display: none;
 }
 </style>

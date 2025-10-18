@@ -652,3 +652,9 @@ to {
 .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-reference summary:hover {
   color: var(--color-text);
 }
+.k-button-group.k-dialog-buttons:has(>.k-button:nth-child(2)) {
+  grid-template-columns: 1fr;
+}
+.k-button.k-dialog-button-cancel {
+  display: none;
+}

@@ -132,18 +132,47 @@ class MetaKitController
             $current = [];
 
             // Check for common legacy SEO field names
+            // Meta Title variations
             if ($page->metatitle()->isNotEmpty()) {
                 $legacy['metaTitle'] = $page->metatitle()->value();
                 $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty() 
                     ? $seoData->metaTitle()->value() 
                     : null;
             }
+            if ($page->Metatitle()->isNotEmpty()) {
+                $legacy['metaTitle'] = $page->Metatitle()->value();
+                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty() 
+                    ? $seoData->metaTitle()->value() 
+                    : null;
+            }
+            if ($page->customtitle()->isNotEmpty()) {
+                $legacy['metaTitle'] = $page->customtitle()->value();
+                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty() 
+                    ? $seoData->metaTitle()->value() 
+                    : null;
+            }
+            if ($page->seotitle()->isNotEmpty()) {
+                $legacy['metaTitle'] = $page->seotitle()->value();
+                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty() 
+                    ? $seoData->metaTitle()->value() 
+                    : null;
+            }
+            
+            // Meta Description variations
             if ($page->metadescription()->isNotEmpty()) {
                 $legacy['metaDescription'] = $page->metadescription()->value();
                 $current['metaDescription'] = $seoData && $seoData->metaDescription()->isNotEmpty() 
                     ? $seoData->metaDescription()->value() 
                     : null;
             }
+            if ($page->seodescription()->isNotEmpty()) {
+                $legacy['metaDescription'] = $page->seodescription()->value();
+                $current['metaDescription'] = $seoData && $seoData->metaDescription()->isNotEmpty() 
+                    ? $seoData->metaDescription()->value() 
+                    : null;
+            }
+            
+            // OG Image
             if ($page->ogimage()->isNotEmpty()) {
                 $files = $page->ogimage()->toFiles();
                 if ($files->count() > 0) {
@@ -152,12 +181,6 @@ class MetaKitController
                         ? $seoData->ogImage()->toFiles()->first()?->filename() 
                         : null;
                 }
-            }
-            if ($page->customtitle()->isNotEmpty()) {
-                $legacy['metaTitle'] = $page->customtitle()->value();
-                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty() 
-                    ? $seoData->metaTitle()->value() 
-                    : null;
             }
 
             if (!empty($legacy)) {
@@ -194,19 +217,31 @@ class MetaKitController
             $seoArray = $seoData ? $seoData->toArray() : [];
             $converted = [];
 
-            // Migrate legacy fields
+            // Migrate legacy fields - Meta Title variations
             if ($page->metatitle()->isNotEmpty() && empty($seoArray['metaTitle'])) {
                 $seoArray['metaTitle'] = $page->metatitle()->value();
-                $converted[] = 'metaTitle';
-            }
-            if ($page->metadescription()->isNotEmpty() && empty($seoArray['metaDescription'])) {
-                $seoArray['metaDescription'] = $page->metadescription()->value();
-                $converted[] = 'metaDescription';
-            }
-            if ($page->customtitle()->isNotEmpty() && empty($seoArray['metaTitle'])) {
+                $converted[] = 'metaTitle (from metatitle)';
+            } elseif ($page->Metatitle()->isNotEmpty() && empty($seoArray['metaTitle'])) {
+                $seoArray['metaTitle'] = $page->Metatitle()->value();
+                $converted[] = 'metaTitle (from Metatitle)';
+            } elseif ($page->seotitle()->isNotEmpty() && empty($seoArray['metaTitle'])) {
+                $seoArray['metaTitle'] = $page->seotitle()->value();
+                $converted[] = 'metaTitle (from seotitle)';
+            } elseif ($page->customtitle()->isNotEmpty() && empty($seoArray['metaTitle'])) {
                 $seoArray['metaTitle'] = $page->customtitle()->value();
                 $converted[] = 'metaTitle (from customtitle)';
             }
+            
+            // Migrate legacy fields - Meta Description variations
+            if ($page->metadescription()->isNotEmpty() && empty($seoArray['metaDescription'])) {
+                $seoArray['metaDescription'] = $page->metadescription()->value();
+                $converted[] = 'metaDescription (from metadescription)';
+            } elseif ($page->seodescription()->isNotEmpty() && empty($seoArray['metaDescription'])) {
+                $seoArray['metaDescription'] = $page->seodescription()->value();
+                $converted[] = 'metaDescription (from seodescription)';
+            }
+            
+            // Migrate legacy fields - OG Image
             if ($page->ogimage()->isNotEmpty() && empty($seoArray['ogImage'])) {
                 $seoArray['ogImage'] = $page->ogimage()->toFiles();
                 $converted[] = 'ogImage';
