@@ -48,6 +48,10 @@ Core plugin settings, API credentials, and feature toggles:
 
     // SEO Settings
     'maxDescriptionLength' => 160,             // Max meta description length
+    
+    // AI Prompts (optional - customize AI generation behavior)
+    'prompt.title' => "Write a compelling meta title (30-65 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling and clickable for search results. The title MUST be between 30 and 65 characters long. Write ONLY the title, nothing else.\n\nTitle:",
+    'prompt.description' => "Write a concise, engaging meta description (max 160 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling for search results. Write ONLY the description, nothing else.\n\nDescription:",
 
     // Feature Toggles
     'sitemap.enabled' => true,                 // Enable/disable sitemap generation
@@ -60,8 +64,15 @@ Core plugin settings, API credentials, and feature toggles:
 **Key Options Explained:**
 
 - **`api.temperature`** (0.1-1.0): Controls AI creativity. Lower values (0.3) = consistent, factual. Higher values (0.9) = varied, creative. Default 0.7 is balanced.
+- **`prompt.title`** / **`prompt.description`**: Customize the AI prompts. Use `{language}` for the language name and `{content}` for page content. Adjust tone, style, or specific requirements.
 - **`autoGenerate`**: When `true`, automatically generates descriptions when saving pages. Recommended: `false` (use panel button instead for control).
 - **`sitemap.exclude`**: Array of page IDs or regex patterns. Pages matching these won't appear in sitemap.
+
+**Example Custom Prompt:**
+
+```php
+'prompt.description' => "Create a professional meta description (max 160 chars) in {language} for:\n\n{content}\n\nUse a formal tone. Focus on benefits and value. Include a call-to-action. Write ONLY the description:\n\n",
+```
 
 ### 2. Site Settings (Panel)
 

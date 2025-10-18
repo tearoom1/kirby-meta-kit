@@ -24,6 +24,8 @@ class MetaKit
             'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
             'api.temperature' => 0.7,
             'maxDescriptionLength' => 160,
+            'prompt.title' => "Write a compelling meta title (30-65 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling and clickable for search results. The title MUST be between 30 and 65 characters long. Write ONLY the title, nothing else.\n\nTitle:",
+            'prompt.description' => "Write a concise, engaging meta description (max 160 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling for search results. Write ONLY the description, nothing else.\n\nDescription:",
         ];
 
         // Site settings from panel (middle priority)
@@ -74,13 +76,13 @@ class MetaKit
         // Limit content length to avoid token limits
         $contentPreview = mb_substr(strip_tags($content), 0, 1000);
 
-        $prompt = "Write a compelling meta title (30-65 characters) in {$languageName} for the following content:\n\n" .
-                 $contentPreview . "\n\n" .
-                 "Focus on the main topic and include relevant keywords. " .
-                 "Make it compelling and clickable for search results. " .
-                 "The title MUST be between 30 and 65 characters long. " .
-                 "Write ONLY the title, nothing else.\n\n" .
-                 "Title:";
+        // Get prompt template and replace placeholders
+        $promptTemplate = $this->options['prompt.title'];
+        $prompt = str_replace(
+            ['{language}', '{content}'],
+            [$languageName, $contentPreview],
+            $promptTemplate
+        );
 
         try {
             $response = $this->httpClient->post($this->options['api.endpoint'], [
@@ -146,12 +148,13 @@ class MetaKit
         // Limit content length to avoid token limits
         $contentPreview = mb_substr(strip_tags($content), 0, 1000);
 
-        $prompt = "Write a concise, engaging meta description (max 160 characters) in {$languageName} for the following content:\n\n" .
-                 $contentPreview . "\n\n" .
-                 "Focus on the main topic and include relevant keywords. " .
-                 "Make it compelling for search results. " .
-                 "Write ONLY the description, nothing else.\n\n" .
-                 "Description:";
+        // Get prompt template and replace placeholders
+        $promptTemplate = $this->options['prompt.description'];
+        $prompt = str_replace(
+            ['{language}', '{content}'],
+            [$languageName, $contentPreview],
+            $promptTemplate
+        );
 
         try {
             $response = $this->httpClient->post($this->options['api.endpoint'], [
