@@ -124,6 +124,16 @@ Kirby::plugin('tearoom1/meta-kit', [
                     $pageId = get('pageId');
                     return \TearoomOne\MetaKitController::getSinglePage($pageId);
                 }
+            ],
+            [
+                'pattern' => 'meta-kit/generate-field',
+                'method' => 'POST',
+                'auth' => true,
+                'action' => function () {
+                    $pageId = get('pageId');
+                    $fieldName = get('fieldName');
+                    return \TearoomOne\MetaKitController::generateField($pageId, $fieldName);
+                }
             ]
         ]
     ],

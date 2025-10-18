@@ -52,6 +52,79 @@ class MetaKit
         ]);
     }
 
+    public function generateTitle(string $content, array $context = []): ?string
+    {
+        $apiKey = $this->options['api.key'] ?? null;
+
+        if (empty($apiKey)) {
+            throw new Exception('OpenRouter API key is not configured');
+        }
+
+        // Get language from context
+        $language = $context['language'] ?? 'en';
+        $languageNames = [
+            'de' => 'German',
+            'en' => 'English',
+            'fr' => 'French',
+            'es' => 'Spanish',
+            'it' => 'Italian',
+        ];
+        $languageName = $languageNames[$language] ?? 'English';
+
+        // Limit content length to avoid token limits
+        $contentPreview = mb_substr(strip_tags($content), 0, 1000);
+
+        $prompt = "Write a compelling meta title (30-65 characters) in {$languageName} for the following content:\n\n" .
+                 $contentPreview . "\n\n" .
+                 "Focus on the main topic and include relevant keywords. " .
+                 "Make it compelling and clickable for search results. " .
+                 "The title MUST be between 30 and 65 characters long. " .
+                 "Write ONLY the title, nothing else.\n\n" .
+                 "Title:";
+
+        try {
+            $response = $this->httpClient->post($this->options['api.endpoint'], [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Content-Type' => 'application/json',
+                    'HTTP-Referer' => $this->kirby->url(),
+                ],
+                'json' => [
+                    'model' => $this->options['api.model'],
+                    'messages' => [
+                        ['role' => 'user', 'content' => $prompt]
+                    ],
+                    'max_tokens' => 50,
+                    'temperature' => $this->options['api.temperature'] ?? 0.7,
+                ]
+            ]);
+
+            $body = $response->getBody()->getContents();
+            $data = json_decode($body, true);
+
+            // Log the response for debugging
+            kirbylog('OpenRouter Response: ' . substr($body, 0, 500));
+
+            if (!isset($data['choices'][0]['message']['content'])) {
+                $errorMsg = $data['error']['message'] ?? 'Unknown API error';
+                kirbylog('OpenRouter API Error: ' . $errorMsg);
+                throw new Exception('OpenRouter API error: ' . $errorMsg);
+            }
+
+            $title = $data['choices'][0]['message']['content'];
+
+            if ($title) {
+                return $this->sanitizeTitle($title);
+            }
+
+            return null;
+
+        } catch (\Exception $e) {
+            kirbylog('Meta Kit Error: ' . $e->getMessage());
+            throw $e; // Re-throw to show error to user
+        }
+    }
+
     public function generateDescription(string $content, array $context = []): ?string
     {
         $apiKey = $this->options['api.key'] ?? null;
@@ -158,6 +231,34 @@ class MetaKit
         }
 
         return $description;
+    }
+
+    protected function sanitizeTitle(string $title): string
+    {
+        $title = strip_tags($title);
+        $title = preg_replace('/\s+/', ' ', $title);
+        $title = trim($title, " \t\n\r\0\x0B\"'`");
+
+        $minLength = 30;
+        $maxLength = 65;
+        $currentLength = mb_strlen($title);
+
+        // If title is too long, truncate at word boundary
+        if ($currentLength > $maxLength) {
+            $shortened = mb_substr($title, 0, $maxLength);
+            $lastSpace = mb_strrpos($shortened, ' ');
+
+            if ($lastSpace !== false && $lastSpace > $minLength) {
+                $title = mb_substr($shortened, 0, $lastSpace);
+            } else {
+                $title = $shortened;
+            }
+        }
+
+        // If title is too short, return as is and let the AI retry or user manually adjust
+        // We don't want to artificially pad titles
+
+        return $title;
     }
 
 }

@@ -922,9 +922,12 @@ export default {
       this.$set(this.generatingFields[pageId], fieldName, true);
 
       try {
-        const response = await this.$api.post('meta-kit/generate-description', {pageId});
-        if (response.status === 'success' && response.description) {
-          this.setManualValue(pageId, fieldName, response.description);
+        const response = await this.$api.post('meta-kit/generate-field', {
+          pageId,
+          fieldName
+        });
+        if (response.status === 'success' && response.content) {
+          this.setManualValue(pageId, fieldName, response.content);
           window.panel.notification.success('AI content generated successfully');
         } else {
           window.panel.notification.error(response.message || 'Failed to generate content');
@@ -936,10 +939,13 @@ export default {
       }
     },
     async applySingleField(pageId, fieldName) {
-      // Find page in either legacy or all pages
+      // Find page in either legacy, all pages, or current edit dialog
       let page = this.legacyPages.find(p => p.id === pageId);
       if (!page) {
         page = this.allPagesData.find(p => p.id === pageId);
+      }
+      if (!page && this.currentEditPage && this.currentEditPage.id === pageId) {
+        page = this.currentEditPage;
       }
       if (!page) return;
 
@@ -958,11 +964,16 @@ export default {
           value = page.legacy[fieldName];
         }
       } else if (choice === 'current' || choice === 'keep') {
-        // For all pages dialog, current values are in the page object directly
+        // Check if from legacy dialog (has fields property)
         if (page.fields) {
           value = page.current[fieldName];
-        } else {
-          // Already at current value, no change needed
+        } 
+        // Check if from single page or all pages dialog (values stored directly)
+        else if (page[fieldName]) {
+          value = page[fieldName];
+        } 
+        else {
+          // Already at current value or no value exists, no change needed
           window.panel.notification.success('Already using current value');
           return;
         }

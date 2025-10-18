@@ -379,6 +379,19 @@ class MetaKitController
             $legacy['metaDescription'] = $page->seodescription()->value();
         }
 
+        $ogImageData = null;
+        if ($seoData && $seoData->ogImage()->isNotEmpty()) {
+            $ogFiles = $seoData->ogImage()->toFiles();
+            if ($ogFiles->count() > 0) {
+                $ogFile = $ogFiles->first();
+                $ogImageData = [
+                    'filename' => $ogFile->filename(),
+                    'url' => $ogFile->url(),
+                    'uuid' => $ogFile->uuid()?->toString()
+                ];
+            }
+        }
+
         $result = [
             'id' => $page->id(),
             'title' => $page->title()->value(),
@@ -395,6 +408,7 @@ class MetaKitController
             'metaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty()
                 ? $seoData->metaDescription()->value()
                 : null,
+            'ogImage' => $ogImageData,
             'metaTitleLength' => $seoData && $seoData->metaTitle()->isNotEmpty()
                 ? mb_strlen($seoData->metaTitle()->value())
                 : 0,
@@ -408,5 +422,50 @@ class MetaKitController
             'status' => 'success',
             'data' => $result
         ];
+    }
+
+    public static function generateField(string $pageId, string $fieldName): array
+    {
+        $kirby = kirby();
+        $page = $kirby->page($pageId);
+
+        if (!$page) {
+            return [
+                'status' => 'error',
+                'message' => 'Page not found'
+            ];
+        }
+
+        try {
+            $metaKit = new MetaKit($kirby);
+            $languageCode = $kirby->language()?->code();
+
+            // Get page content for generation
+            $content = $page->text()->or($page->title())->value();
+
+            if ($fieldName === 'metaTitle') {
+                $result = $metaKit->generateTitle($content, ['language' => $languageCode]);
+            } else {
+                $result = $metaKit->generateDescription($content, ['language' => $languageCode]);
+            }
+
+            if ($result) {
+                return [
+                    'status' => 'success',
+                    'content' => $result
+                ];
+            }
+
+            return [
+                'status' => 'error',
+                'message' => 'Failed to generate content'
+            ];
+
+        } catch (\Exception $e) {
+            return [
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ];
+        }
     }
 }

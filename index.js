@@ -372,9 +372,12 @@
         }
         this.$set(this.generatingFields[pageId], fieldName, true);
         try {
-          const response = await this.$api.post("meta-kit/generate-description", { pageId });
-          if (response.status === "success" && response.description) {
-            this.setManualValue(pageId, fieldName, response.description);
+          const response = await this.$api.post("meta-kit/generate-field", {
+            pageId,
+            fieldName
+          });
+          if (response.status === "success" && response.content) {
+            this.setManualValue(pageId, fieldName, response.content);
             window.panel.notification.success("AI content generated successfully");
           } else {
             window.panel.notification.error(response.message || "Failed to generate content");
@@ -389,6 +392,9 @@
         let page = this.legacyPages.find((p) => p.id === pageId);
         if (!page) {
           page = this.allPagesData.find((p) => p.id === pageId);
+        }
+        if (!page && this.currentEditPage && this.currentEditPage.id === pageId) {
+          page = this.currentEditPage;
         }
         if (!page) return;
         const choice = this.getFieldChoice(pageId, fieldName);
@@ -406,6 +412,8 @@
         } else if (choice === "current" || choice === "keep") {
           if (page.fields) {
             value = page.current[fieldName];
+          } else if (page[fieldName]) {
+            value = page[fieldName];
           } else {
             window.panel.notification.success("Already using current value");
             return;
