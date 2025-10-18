@@ -700,3 +700,32 @@ to {
   padding-bottom: 0;
 }
 
+/* OG Image Display */
+.k-meta-kit-og-image-current {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--color-light);
+  border-radius: var(--rounded);
+}
+.k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-current {
+  background: var(--color-dark);
+}
+.k-meta-kit-og-image-current img {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: var(--rounded-sm);
+  background: var(--color-white);
+}
+.k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-current img {
+  background: var(--color-black);
+}
+.k-meta-kit-og-image-filename {
+  font-size: 0.875rem;
+  color: var(--color-text-dimmed);
+  font-family: var(--font-mono);
+}
+

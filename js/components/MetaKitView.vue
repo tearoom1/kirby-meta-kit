@@ -96,7 +96,7 @@
                 title="Edit Metadata"
               />
               <k-button
-                icon="magic"
+                icon="sparkling"
                 size="sm"
                 :disabled="page.hasMetaDescription"
                 @click="generateDescription(page.id)"
@@ -681,6 +681,31 @@
             </k-button>
           </div>
         </div>
+
+        <!-- OG Image -->
+        <div class="k-meta-kit-legacy-field">
+          <span class="k-meta-kit-legacy-field-label">OG Image:</span>
+          <div class="k-meta-kit-legacy-field-values">
+
+            <!-- Current Image Display -->
+            <div v-if="currentEditPage.ogImage" class="k-meta-kit-og-image-current">
+              <img :src="currentEditPage.ogImage.url" :alt="currentEditPage.ogImage.filename" />
+              <span class="k-meta-kit-og-image-filename">{{ currentEditPage.ogImage.filename }}</span>
+            </div>
+            <div v-else class="k-meta-kit-legacy-field-value-empty">
+              No OG image set
+            </div>
+
+            <!-- Edit Page Button -->
+            <k-button
+              icon="open"
+              size="sm"
+              @click="openPageSeoTab(currentEditPage)"
+            >
+              Edit in Page
+            </k-button>
+          </div>
+        </div>
       </div>
     </k-dialog>
   </k-panel-inside>
@@ -858,11 +883,11 @@ export default {
         this.$set(this.fieldChoices[pageId], fieldName, {});
       }
       this.$set(this.fieldChoices[pageId][fieldName], 'choice', choice);
-      
+
       // If switching to manual edit, prefill with current or legacy value if no manual value exists
       if (choice === 'manual') {
         const existingManualValue = this.getManualValue(pageId, fieldName);
-        
+
         // Only prefill if there's no existing manual value
         if (!existingManualValue) {
           // Find the page
@@ -873,10 +898,10 @@ export default {
           if (!page) {
             page = this.currentEditPage;
           }
-          
+
           if (page) {
             let prefillValue = '';
-            
+
             // Try current value first
             if (fieldName === 'metaTitle' && page.metaTitle) {
               prefillValue = page.metaTitle;
@@ -887,7 +912,7 @@ export default {
             else if (page.legacy && page.legacy[fieldName]) {
               prefillValue = page.legacy[fieldName];
             }
-            
+
             // Set the prefill value
             if (prefillValue) {
               this.setManualValue(pageId, fieldName, prefillValue);
@@ -967,11 +992,11 @@ export default {
         // Check if from legacy dialog (has fields property)
         if (page.fields) {
           value = page.current[fieldName];
-        } 
+        }
         // Check if from single page or all pages dialog (values stored directly)
         else if (page[fieldName]) {
           value = page[fieldName];
-        } 
+        }
         else {
           // Already at current value or no value exists, no change needed
           window.panel.notification.success('Already using current value');
@@ -979,7 +1004,7 @@ export default {
         }
       } else if (choice === 'manual' || choice === 'ai') {
         value = this.getManualValue(pageId, fieldName);
-        if (!value) {
+        if (false && !value) {
           window.panel.notification.error('Please enter a value');
           return;
         }
@@ -1057,15 +1082,15 @@ export default {
     },
     async applySingleFieldAndClose(pageId, fieldName) {
       await this.applySingleField(pageId, fieldName);
-      
+
       // Reset the choice to 'keep' which hides the apply button
       this.setFieldChoice(pageId, fieldName, 'keep');
-      
+
       // Clear any manual values
       if (this.fieldChoices[pageId]) {
         this.$set(this.fieldChoices[pageId], fieldName + '_manual', '');
       }
-      
+
       // Reload the current page data to show updated values
       if (this.currentEditPage && this.currentEditPage.id === pageId) {
         try {
@@ -1077,6 +1102,19 @@ export default {
           // Silent fail
         }
       }
+    },
+    openPageSeoTab(page) {
+      if (!page) return;
+
+      // Close the dialog
+      this.$refs.singlePageDialog.close();
+
+      // Navigate to the page with SEO tab
+      // Panel URL format: /panel/pages/{id}
+      const pageUrl = page.panelUrl;
+
+      // Open the page - Kirby will handle the tab navigation
+      window.panel.view.open(pageUrl);
     }
   }
 };
@@ -1614,6 +1652,39 @@ export default {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
+}
+
+/* OG Image Display */
+.k-meta-kit-og-image-current {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--color-light);
+  border-radius: var(--rounded);
+}
+
+.k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-current {
+  background: var(--color-dark);
+}
+
+.k-meta-kit-og-image-current img {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: var(--rounded-sm);
+  background: var(--color-white);
+}
+
+.k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-current img {
+  background: var(--color-black);
+}
+
+.k-meta-kit-og-image-filename {
+  font-size: 0.875rem;
+  color: var(--color-text-dimmed);
+  font-family: var(--font-mono);
 }
 
 </style>

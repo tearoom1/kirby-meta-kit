@@ -262,8 +262,35 @@ class MetaKitController
             $seoData = $page->seo()->toObject();
             $seoArray = $seoData ? $seoData->toArray() : [];
 
-            // Update the specific field
-            $seoArray[$fieldName] = $value;
+            // Handle ogImage specially - it needs to be an array of UUIDs
+            if ($fieldName === 'ogImage') {
+                if (empty($value)) {
+                    $seoArray[$fieldName] = [];
+                } else {
+                    // Value can be a UUID string or filename
+                    // Try to find the file
+                    $file = null;
+                    if (strpos($value, 'file://') === 0) {
+                        // Already a UUID
+                        $file = $kirby->file(str_replace('file://', '', $value));
+                    } else {
+                        // Try as filename from the page
+                        $file = $page->file($value);
+                    }
+                    
+                    if ($file) {
+                        $seoArray[$fieldName] = [$file->uuid()->toString()];
+                    } else {
+                        return [
+                            'status' => 'error',
+                            'message' => 'Image file not found'
+                        ];
+                    }
+                }
+            } else {
+                // Update the specific field normally
+                $seoArray[$fieldName] = $value;
+            }
 
             $languageCode = $kirby->language()?->code();
             $page->update(['seo' => $seoArray], $languageCode);
@@ -311,6 +338,19 @@ class MetaKitController
                 $legacy['metaDescription'] = $page->seodescription()->value();
             }
 
+            $ogImageData = null;
+            if ($seoData && $seoData->ogImage()->isNotEmpty()) {
+                $ogFiles = $seoData->ogImage()->toFiles();
+                if ($ogFiles->count() > 0) {
+                    $ogFile = $ogFiles->first();
+                    $ogImageData = [
+                        'filename' => $ogFile->filename(),
+                        'url' => $ogFile->url(),
+                        'uuid' => $ogFile->uuid()?->toString()
+                    ];
+                }
+            }
+
             $result[] = [
                 'id' => $page->id(),
                 'title' => $page->title()->value(),
@@ -327,6 +367,7 @@ class MetaKitController
                 'metaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty()
                     ? $seoData->metaDescription()->value()
                     : null,
+                'ogImage' => $ogImageData,
                 'metaTitleLength' => $seoData && $seoData->metaTitle()->isNotEmpty()
                     ? mb_strlen($seoData->metaTitle()->value())
                     : 0,
