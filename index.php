@@ -152,7 +152,7 @@ Kirby::plugin('tearoom1/meta-kit', [
         ]
     ],
     'pageMethods' => [
-        'generateSeoDescription' => function (string $content = null, string $languageCode = null) {
+        'generateSeoDescription' => function (?string $content = null, ?string $languageCode = null) {
             $metaKit = new MetaKit(kirby());
             $languageCode = $languageCode ?? kirby()->language()?->code() ?? 'en';
             $content = $content ?? $this->text()->toString();
