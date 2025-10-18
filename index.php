@@ -135,7 +135,8 @@ Kirby::plugin('tearoom1/meta-kit', [
                 'action' => function () {
                     $pageId = get('pageId');
                     $fieldName = get('fieldName');
-                    return \TearoomOne\MetaKitController::generateField($pageId, $fieldName);
+                    $language = get('language');
+                    return \TearoomOne\MetaKitController::generateField($pageId, $fieldName, $language);
                 }
             ]
         ]

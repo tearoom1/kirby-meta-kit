@@ -744,28 +744,27 @@
           },
           extractAllText(values) {
             let texts = [];
-            const textFields = ["text", "content", "body", "description", "headline", "subheadline"];
-            for (const field of textFields) {
-              if (values[field]) {
-                const extracted = this.extractTextFromBlocks(values[field]);
-                if (extracted) {
-                  texts.push(extracted);
-                }
-              }
+            const skipFields = ["title", "slug", "template", "ogimage"];
+            if (values.title && typeof values.title === "string") {
+              texts.push(values.title);
             }
             for (const [key, value] of Object.entries(values)) {
-              if (key.includes("layout") || key.includes("blocks") || key.includes("builder")) {
-                const extracted = this.extractTextFromBlocks(value);
-                if (extracted) {
-                  texts.push(extracted);
-                }
+              if (skipFields.includes(key)) {
+                continue;
+              }
+              if (!value || typeof value === "string" && !value.trim()) {
+                continue;
+              }
+              const extracted = this.extractTextFromBlocks(value);
+              if (extracted && extracted.trim().length > 0) {
+                texts.push(extracted);
               }
             }
             const result = texts.filter((t) => t && t.trim()).join(" ").replace(/\s+/g, " ").trim();
             return result;
           },
           async generate() {
-            var _a;
+            var _a, _b, _c, _d, _e, _f;
             this.loading = true;
             this.error = null;
             this.success = false;
@@ -782,7 +781,14 @@
                 const availableFields = Object.keys(parent.value).join(", ");
                 throw new Error(`No content available to generate description. Available fields: ${availableFields}`);
               }
-              const language = ((_a = this.$language) == null ? void 0 : _a.code) || "en";
+              let language = "en";
+              if ((_c = (_b = (_a = window.panel) == null ? void 0 : _a.view) == null ? void 0 : _b.props) == null ? void 0 : _c.language) {
+                language = window.panel.view.props.language;
+              } else if ((_e = (_d = window.panel) == null ? void 0 : _d.language) == null ? void 0 : _e.code) {
+                language = window.panel.language.code;
+              } else if ((_f = this.$language) == null ? void 0 : _f.code) {
+                language = this.$language.code;
+              }
               const response = await this.$api.post("meta-kit/generate", {
                 text: allText,
                 language

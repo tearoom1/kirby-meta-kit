@@ -134,15 +134,14 @@ class MetaKit
         }
 
         // Get language from context
-        $language = $context['language'] ?? 'en';
-        $languageNames = [
-            'de' => 'German',
-            'en' => 'English',
-            'fr' => 'French',
-            'es' => 'Spanish',
-            'it' => 'Italian',
-        ];
-        $languageName = $languageNames[$language] ?? 'English';
+        $languageCode = $context['language'] ?? 'en';
+        // get the language names from kirby
+        $languages = $this->kirby->languages();
+        $languageNames = [];
+        foreach ($languages as $language) {
+            $languageNames[$language->code()] = $language->name();
+        }
+        $languageName = $languageNames[$languageCode] ?? 'English';
 
         // Limit content length to avoid token limits
         $contentPreview = mb_substr(strip_tags($content), 0, 1000);

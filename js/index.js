@@ -176,26 +176,30 @@ panel.plugin('tearoom1/meta-kit', {
         extractAllText(values) {
           let texts = [];
 
-          // Common text field names to check
-          const textFields = ['text', 'content', 'body', 'description', 'headline', 'subheadline'];
+          // Skip system and SEO fields
+          const skipFields = ['title', 'slug', 'template', 'ogimage'];
 
-          // Check standard text fields
-          for (const field of textFields) {
-            if (values[field]) {
-              const extracted = this.extractTextFromBlocks(values[field]);
-              if (extracted) {
-                texts.push(extracted);
-              }
-            }
+          // Add page title if available
+          if (values.title && typeof values.title === 'string') {
+            texts.push(values.title);
           }
 
-          // Check for layout/blocks fields
+          // Extract from ALL fields, not just predefined ones
           for (const [key, value] of Object.entries(values)) {
-            if (key.includes('layout') || key.includes('blocks') || key.includes('builder')) {
-              const extracted = this.extractTextFromBlocks(value);
-              if (extracted) {
-                texts.push(extracted);
-              }
+            // Skip system fields
+            if (skipFields.includes(key)) {
+              continue;
+            }
+
+            // Skip empty values
+            if (!value || (typeof value === 'string' && !value.trim())) {
+              continue;
+            }
+
+            // Try to extract text from any field
+            const extracted = this.extractTextFromBlocks(value);
+            if (extracted && extracted.trim().length > 0) {
+              texts.push(extracted);
             }
           }
 
@@ -234,8 +238,18 @@ panel.plugin('tearoom1/meta-kit', {
               throw new Error(`No content available to generate description. Available fields: ${availableFields}`);
             }
 
-            // Get current language code
-            const language = this.$language?.code || 'en';
+            // Get current language code from multiple sources
+            // Priority: 1. Content language, 2. Panel language, 3. Default 'en'
+            let language = 'en';
+
+            // Try to get language from page context (from URL or content language)
+            if (window.panel?.view?.props?.language) {
+              language = window.panel.view.props.language;
+            } else if (window.panel?.language?.code) {
+              language = window.panel.language.code;
+            } else if (this.$language?.code) {
+              language = this.$language.code;
+            }
 
             // Call the API with extracted text
             const response = await this.$api.post('meta-kit/generate', {

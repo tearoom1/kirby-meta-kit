@@ -1161,7 +1161,7 @@ export default {
     },
     goToLanguage(langCode) {
       if (langCode === this.language) return;
-      
+
       // Force full page reload with new language
       const baseUrl = window.location.origin + window.location.pathname.split('?')[0];
       window.location.href = baseUrl + '?language=' + langCode;

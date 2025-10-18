@@ -7,12 +7,17 @@ use Kirby\Cms\Page;
 
 class MetaKitController
 {
+    /**
+     * Avoid short text, numbers and file strings
+     */
+    const int MIN_TEXT_LENGTH = 25;
+
     public static function getPages(): array
     {
         $kirby = kirby();
         $pages = $kirby->site()->index();
         $result = [];
-        
+
         // Get current language
         $language = $kirby->language();
         $languageCode = $language ? $language->code() : null;
@@ -46,16 +51,16 @@ class MetaKitController
             'pages' => $result
         ];
     }
-    
+
     private static function getLanguages(): array
     {
         $kirby = kirby();
         $languages = $kirby->languages();
-        
+
         if (!$languages || $languages->count() === 0) {
             return [];
         }
-        
+
         $result = [];
         foreach ($languages as $lang) {
             $result[] = [
@@ -64,7 +69,7 @@ class MetaKitController
                 'default' => $lang->isDefault()
             ];
         }
-        
+
         return $result;
     }
 
@@ -307,7 +312,7 @@ class MetaKitController
                         // Try as filename from the page
                         $file = $page->file($value);
                     }
-                    
+
                     if ($file) {
                         $seoArray[$fieldName] = [$file->uuid()->toString()];
                     } else {
@@ -320,12 +325,12 @@ class MetaKitController
             } else {
                 // Update the specific field normally
                 $seoArray[$fieldName] = $value;
-                
+
                 // Also update OG description when updating meta description
                 if ($fieldName === 'metaDescription') {
                     $seoArray['ogDescription'] = $value;
                 }
-                
+
                 // Also update OG title when updating meta title
                 if ($fieldName === 'metaTitle') {
                     $seoArray['ogTitle'] = $value;
@@ -505,7 +510,90 @@ class MetaKitController
         ];
     }
 
-    public static function generateField(string $pageId, string $fieldName): array
+    /**
+     * Extract all text content from a page
+     */
+    private static function extractPageContent($page): string
+    {
+        $texts = [];
+
+        // Add title
+        $texts[] = $page->title()->value();
+
+        // Extract from all fields
+        foreach ($page->content()->fields() as $key => $field) {
+            if (in_array($key, ['title', 'slug', 'template', 'seo', 'ogimage'])) {
+                continue;
+            }
+
+            $value = $page->content()->get($key);
+            if ($value->isEmpty()) {
+                continue;
+            }
+
+            if ($value->toFiles()->isNotEmpty()) {
+                continue;
+            }
+
+            // Get raw value
+            $rawValue = $value->value();
+
+            // Check if it's JSON (blocks, layout, structure)
+            if (is_string($rawValue) && (str_starts_with(trim($rawValue), '[') || str_starts_with(trim($rawValue), '{'))) {
+                $decoded = json_decode($rawValue, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    // Extract text from structured data
+                    $extracted = self::extractTextFromStructure($decoded);
+                    if (!empty($extracted)) {
+                        $texts[] = $extracted;
+                    }
+                    continue;
+                }
+            }
+
+            // Regular text field
+            $text = strip_tags($rawValue);
+            if (strlen(trim($text)) > self::MIN_TEXT_LENGTH) {
+                $texts[] = $text;
+            }
+
+        }
+        return implode("\n\n", array_filter($texts));
+    }
+
+    /**
+     * Recursively extract only text content from structured data
+     */
+    private static function extractTextFromStructure($data): string
+    {
+        if (!is_array($data)) {
+            return is_string($data) ? strip_tags($data) : '';
+        }
+
+        $texts = [];
+
+        foreach ($data as $key => $value) {
+            // Skip metadata keys
+            if (in_array($key, ['id', 'type', 'isHidden', 'attrs'])) {
+                continue;
+            }
+
+            if (is_array($value)) {
+                // Recursively extract from nested structures
+                $extracted = self::extractTextFromStructure($value);
+                if (!empty(trim($extracted))) {
+                    $texts[] = $extracted;
+                }
+            } elseif (is_string($value) && strlen(trim(strip_tags($value))) > self::MIN_TEXT_LENGTH) {
+                // Only include actual text content
+                $texts[] = strip_tags($value);
+            }
+        }
+
+        return implode(' ', $texts);
+    }
+
+    public static function generateField(string $pageId, string $fieldName, string $language = null): array
     {
         $kirby = kirby();
         $page = $kirby->page($pageId);
@@ -519,10 +607,22 @@ class MetaKitController
 
         try {
             $metaKit = new MetaKit($kirby);
-            $languageCode = $kirby->language()?->code();
 
-            // Get page content for generation
-            $content = $page->text()->or($page->title())->value();
+            // Use provided language or fall back to current language
+            $languageCode = $language ?: $kirby->language()?->code();
+
+            // Set the language context if provided
+            if ($language && $kirby->multilang()) {
+                $kirby->setCurrentLanguage($language);
+            }
+
+            // Extract all page content including structured fields
+            $content = self::extractPageContent($page);
+
+            // Fallback to title if no content found
+            if (empty(trim($content))) {
+                $content = $page->title()->value();
+            }
 
             if ($fieldName === 'metaTitle') {
                 $result = $metaKit->generateTitle($content, ['language' => $languageCode]);
