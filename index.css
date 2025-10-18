@@ -255,6 +255,14 @@
     padding: 1.5rem;
     color: var(--color-text);
 }
+
+  /* Language Switcher */
+.k-meta-kit-language-bar {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
 .k-meta-kit-warning {
     margin-bottom: 1.5rem;
 }

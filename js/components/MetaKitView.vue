@@ -1,5 +1,20 @@
 <template>
   <k-panel-inside class="k-meta-kit-view">
+    <!-- Language Switcher -->
+    <div v-if="languages && languages.length > 1" class="k-meta-kit-language-bar">
+      <k-button-group>
+        <k-button
+          v-for="lang in languages"
+          :key="lang.code"
+          :theme="lang.code === language ? 'positive' : ''"
+          size="xs"
+          @click="goToLanguage(lang.code)"
+        >
+          {{ lang.code.toUpperCase() }}
+        </k-button>
+      </k-button-group>
+    </div>
+
     <!-- Legacy Detection Warning -->
     <div v-if="legacyDetection.show && legacyDetection.found > 0" class="k-meta-kit-warning">
       <k-box theme="info">
@@ -741,7 +756,9 @@
 <script>
 export default {
   props: {
-    pages: Array
+    pages: Array,
+    language: String,
+    languages: Array
   },
   data() {
     return {
@@ -1141,6 +1158,13 @@ export default {
 
       // Open the page - Kirby will handle the tab navigation
       window.panel.view.open(pageUrl);
+    },
+    goToLanguage(langCode) {
+      if (langCode === this.language) return;
+      
+      // Force full page reload with new language
+      const baseUrl = window.location.origin + window.location.pathname.split('?')[0];
+      window.location.href = baseUrl + '?language=' + langCode;
     }
   }
 };
@@ -1152,6 +1176,15 @@ export default {
   .k-meta-kit-view {
     padding: 1.5rem;
     color: var(--color-text);
+  }
+
+  /* Language Switcher */
+
+  .k-meta-kit-language-bar {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
   }
 
   .k-meta-kit-warning {

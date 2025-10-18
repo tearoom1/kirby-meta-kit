@@ -12,6 +12,10 @@ class MetaKitController
         $kirby = kirby();
         $pages = $kirby->site()->index();
         $result = [];
+        
+        // Get current language
+        $language = $kirby->language();
+        $languageCode = $language ? $language->code() : null;
 
         foreach ($pages as $page) {
             $seoData = $page->seo()->toObject();
@@ -32,9 +36,35 @@ class MetaKitController
                 'metaDescriptionLength' => $seoData && $seoData->metaDescription()->isNotEmpty()
                     ? mb_strlen($seoData->metaDescription()->value())
                     : 0,
+                'language' => $languageCode,
             ];
         }
 
+        return [
+            'language' => $languageCode,
+            'languages' => self::getLanguages(),
+            'pages' => $result
+        ];
+    }
+    
+    private static function getLanguages(): array
+    {
+        $kirby = kirby();
+        $languages = $kirby->languages();
+        
+        if (!$languages || $languages->count() === 0) {
+            return [];
+        }
+        
+        $result = [];
+        foreach ($languages as $lang) {
+            $result[] = [
+                'code' => $lang->code(),
+                'name' => $lang->name(),
+                'default' => $lang->isDefault()
+            ];
+        }
+        
         return $result;
     }
 
@@ -290,6 +320,16 @@ class MetaKitController
             } else {
                 // Update the specific field normally
                 $seoArray[$fieldName] = $value;
+                
+                // Also update OG description when updating meta description
+                if ($fieldName === 'metaDescription') {
+                    $seoArray['ogDescription'] = $value;
+                }
+                
+                // Also update OG title when updating meta title
+                if ($fieldName === 'metaTitle') {
+                    $seoArray['ogTitle'] = $value;
+                }
             }
 
             $languageCode = $kirby->language()?->code();

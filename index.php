@@ -57,9 +57,12 @@ Kirby::plugin('tearoom1/meta-kit', [
                 'method' => 'GET',
                 'auth' => true,
                 'action' => function () {
+                    $data = \TearoomOne\MetaKitController::getPages();
                     return [
                         'status' => 'success',
-                        'data' => \TearoomOne\MetaKitController::getPages()
+                        'data' => $data['pages'],
+                        'language' => $data['language'],
+                        'languages' => $data['languages']
                     ];
                 }
             ],
