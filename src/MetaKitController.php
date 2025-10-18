@@ -353,6 +353,15 @@ class MetaKitController
     {
         $kirby = kirby();
         $pages = $kirby->site()->index();
+        
+        // Filter by specific page IDs if provided
+        $pageIds = get('pageIds');
+        if ($pageIds && is_array($pageIds)) {
+            $pages = $pages->filter(function ($page) use ($pageIds) {
+                return in_array($page->id(), $pageIds);
+            });
+        }
+        
         $result = [];
 
         foreach ($pages as $page) {
