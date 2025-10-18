@@ -100,7 +100,7 @@
     </div>
 
     <!-- Legacy Data Dialog -->
-    <k-dialog ref="legacyDialog" size="large">
+    <k-dialog ref="legacyDialog" size="huge">
       <k-headline>Legacy SEO Metadata</k-headline>
 
       <div v-if="isLoadingLegacy" class="k-meta-kit-loading">
@@ -122,23 +122,115 @@
               Convert
             </k-button>
           </div>
-          
+
           <div class="k-meta-kit-legacy-item-content">
             <div v-for="(value, key) in page.fields" :key="key" class="k-meta-kit-legacy-field">
               <span class="k-meta-kit-legacy-field-label">{{ formatFieldName(key) }}:</span>
               <div class="k-meta-kit-legacy-field-values">
-                <div class="k-meta-kit-legacy-field-old">
-                  <span class="k-meta-kit-legacy-badge">Legacy</span>
-                  <span class="k-meta-kit-legacy-field-value">{{ formatFieldValue(value) }}</span>
+
+                <!-- Choice Buttons -->
+                <div class="k-meta-kit-legacy-choices">
+                  <k-button
+                    size="xs"
+                    :theme="getFieldChoice(page.id, key) === 'legacy' ? 'positive' : ''"
+                    @click="setFieldChoice(page.id, key, 'legacy')"
+                  >
+                    Use Legacy
+                  </k-button>
+                  <k-button
+                    v-if="page.current && page.current[key]"
+                    size="xs"
+                    :theme="getFieldChoice(page.id, key) === 'current' ? 'positive' : ''"
+                    @click="setFieldChoice(page.id, key, 'current')"
+                  >
+                    Keep Current
+                  </k-button>
+                  <k-button
+                    size="xs"
+                    :theme="getFieldChoice(page.id, key) === 'manual' ? 'positive' : ''"
+                    @click="setFieldChoice(page.id, key, 'manual')"
+                  >
+                    Manual Edit
+                  </k-button>
+                  <k-button
+                    v-if="key !== 'ogImage'"
+                    size="xs"
+                    icon="sparkling"
+                    :theme="getFieldChoice(page.id, key) === 'ai' ? 'positive' : ''"
+                    :disabled="isGeneratingField(page.id, key)"
+                    @click="generateFieldAI(page.id, key)"
+                  >
+                    AI Generate
+                  </k-button>
                 </div>
-                <div v-if="page.current && page.current[key]" class="k-meta-kit-legacy-field-new">
-                  <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-warning">Will be overwritten</span>
-                  <span class="k-meta-kit-legacy-field-value-current">{{ formatFieldValue(page.current[key]) }}</span>
+
+                <!-- Preview based on choice -->
+                <div class="k-meta-kit-legacy-field-preview">
+                  <div v-if="getFieldChoice(page.id, key) === 'legacy'" class="k-meta-kit-legacy-field-option">
+                    <span class="k-meta-kit-legacy-badge">Legacy Value</span>
+                    <span class="k-meta-kit-legacy-field-value">{{ formatFieldValue(value) }}</span>
+                  </div>
+
+                  <div v-else-if="getFieldChoice(page.id, key) === 'current' && page.current && page.current[key]" class="k-meta-kit-legacy-field-option">
+                    <span class="k-meta-kit-legacy-badge">Current Value</span>
+                    <span class="k-meta-kit-legacy-field-value">{{ formatFieldValue(page.current[key]) }}</span>
+                  </div>
+
+                  <div v-else-if="getFieldChoice(page.id, key) === 'manual'" class="k-meta-kit-legacy-field-option">
+                    <span class="k-meta-kit-legacy-badge">Manual Entry</span>
+                    <k-input
+                      :value="getManualValue(page.id, key)"
+                      @input="setManualValue(page.id, key, $event)"
+                      :placeholder="`Enter ${formatFieldName(key)}`"
+                      type="textarea"
+                    />
+                  </div>
+
+                  <div v-else-if="getFieldChoice(page.id, key) === 'ai'" class="k-meta-kit-legacy-field-option">
+                    <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated</span>
+                    <span v-if="isGeneratingField(page.id, key)" class="k-meta-kit-legacy-field-generating">
+                      <k-icon class="k-meta-kit-spinner" type="loader"/>
+                      Generating...
+                    </span>
+                    <span v-else-if="getManualValue(page.id, key)" class="k-meta-kit-legacy-field-value">
+                      {{ getManualValue(page.id, key) }}
+                    </span>
+                    <span v-else class="k-meta-kit-legacy-field-value-empty">
+                      Click AI Generate to create content
+                    </span>
+                  </div>
+
+                  <div v-else class="k-meta-kit-legacy-field-option">
+                    <span class="k-meta-kit-legacy-badge-hint">Select an option above</span>
+                  </div>
                 </div>
-                <div v-else class="k-meta-kit-legacy-field-new">
-                  <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-new">New field</span>
-                  <span class="k-meta-kit-legacy-field-value-empty">No current value</span>
+
+                <!-- Original values for reference -->
+                <div class="k-meta-kit-legacy-field-reference">
+                  <details>
+                    <summary>View original values</summary>
+                    <div class="k-meta-kit-legacy-field-old">
+                      <span class="k-meta-kit-legacy-badge-small">Legacy</span>
+                      <span class="k-meta-kit-legacy-field-value-small">{{ formatFieldValue(value) }}</span>
+                    </div>
+                    <div v-if="page.current && page.current[key]" class="k-meta-kit-legacy-field-new">
+                      <span class="k-meta-kit-legacy-badge-small">Current</span>
+                      <span class="k-meta-kit-legacy-field-value-small">{{ formatFieldValue(page.current[key]) }}</span>
+                    </div>
+                  </details>
                 </div>
+
+                <!-- Apply button for single field -->
+                <k-button
+                  v-if="getFieldChoice(page.id, key)"
+                  icon="check"
+                  size="sm"
+                  theme="positive"
+                  @click="applySingleField(page.id, key)"
+                >
+                  Apply {{ formatFieldName(key) }}
+                </k-button>
+
               </div>
             </div>
           </div>
@@ -172,7 +264,9 @@ export default {
       legacyDetection: {
         show: false,
         found: 0
-      }
+      },
+      fieldChoices: {}, // { pageId: { fieldName: 'legacy|current|manual|ai', manualValue: '...' } }
+      generatingFields: {} // { pageId: { fieldName: true } }
     };
   },
   computed: {
@@ -302,7 +396,7 @@ export default {
     },
     formatFieldValue(value) {
       if (typeof value === 'string') {
-        return value.length > 100 ? value.substring(0, 100) + '...' : value;
+        return value;
       }
       if (Array.isArray(value)) {
         return `${value.length} image(s)`;
@@ -311,6 +405,98 @@ export default {
         return 'File';
       }
       return String(value);
+    },
+    getFieldChoice(pageId, fieldName) {
+      return this.fieldChoices[pageId]?.[fieldName]?.choice || null;
+    },
+    setFieldChoice(pageId, fieldName, choice) {
+      if (!this.fieldChoices[pageId]) {
+        this.$set(this.fieldChoices, pageId, {});
+      }
+      if (!this.fieldChoices[pageId][fieldName]) {
+        this.$set(this.fieldChoices[pageId], fieldName, {});
+      }
+      this.$set(this.fieldChoices[pageId][fieldName], 'choice', choice);
+    },
+    getManualValue(pageId, fieldName) {
+      return this.fieldChoices[pageId]?.[fieldName]?.manualValue || '';
+    },
+    setManualValue(pageId, fieldName, value) {
+      if (!this.fieldChoices[pageId]) {
+        this.$set(this.fieldChoices, pageId, {});
+      }
+      if (!this.fieldChoices[pageId][fieldName]) {
+        this.$set(this.fieldChoices[pageId], fieldName, {});
+      }
+      this.$set(this.fieldChoices[pageId][fieldName], 'manualValue', value);
+    },
+    isGeneratingField(pageId, fieldName) {
+      return this.generatingFields[pageId]?.[fieldName] || false;
+    },
+    async generateFieldAI(pageId, fieldName) {
+      // Set AI as the choice
+      this.setFieldChoice(pageId, fieldName, 'ai');
+
+      // Mark as generating
+      if (!this.generatingFields[pageId]) {
+        this.$set(this.generatingFields, pageId, {});
+      }
+      this.$set(this.generatingFields[pageId], fieldName, true);
+
+      try {
+        const response = await this.$api.post('meta-kit/generate-description', {pageId});
+        if (response.status === 'success' && response.description) {
+          this.setManualValue(pageId, fieldName, response.description);
+          window.panel.notification.success('AI content generated successfully');
+        } else {
+          window.panel.notification.error(response.message || 'Failed to generate content');
+        }
+      } catch (error) {
+        window.panel.notification.error('Failed to generate content');
+      } finally {
+        this.$set(this.generatingFields[pageId], fieldName, false);
+      }
+    },
+    async applySingleField(pageId, fieldName) {
+      const page = this.legacyPages.find(p => p.id === pageId);
+      if (!page) return;
+
+      const choice = this.getFieldChoice(pageId, fieldName);
+      if (!choice) {
+        window.panel.notification.error('Please select an option first');
+        return;
+      }
+
+      let value;
+      if (choice === 'legacy') {
+        value = page.fields[fieldName];
+      } else if (choice === 'current') {
+        value = page.current[fieldName];
+      } else if (choice === 'manual' || choice === 'ai') {
+        value = this.getManualValue(pageId, fieldName);
+        if (!value) {
+          window.panel.notification.error('Please enter a value');
+          return;
+        }
+      }
+
+      try {
+        const response = await this.$api.post('meta-kit/apply-single-field', {
+          pageId,
+          fieldName,
+          value
+        });
+
+        if (response.status === 'success') {
+          window.panel.notification.success(`${this.formatFieldName(fieldName)} updated successfully`);
+          await this.refreshPages();
+          await this.detectLegacyMetadata();
+        } else {
+          window.panel.notification.error(response.message);
+        }
+      } catch (error) {
+        window.panel.notification.error('Failed to update field');
+      }
     }
   }
 };
@@ -681,5 +867,118 @@ export default {
 
 .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-value-empty {
   color: var(--color-gray-500);
+}
+
+/* New interactive elements */
+.k-meta-kit-legacy-choices {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.k-meta-kit-legacy-field-preview {
+  padding: 1rem;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--rounded);
+  margin-bottom: 1rem;
+}
+
+.k-meta-kit-legacy-field-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.k-meta-kit-legacy-badge-ai {
+  background: var(--color-purple-100);
+  color: var(--color-purple-700);
+}
+
+.k-meta-kit-legacy-badge-hint {
+  color: var(--color-gray-500);
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.k-meta-kit-legacy-field-generating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-gray-600);
+  font-size: 0.875rem;
+}
+
+.k-meta-kit-legacy-field-reference {
+  margin: 1rem 0;
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.75rem;
+}
+
+.k-meta-kit-legacy-field-reference details {
+  cursor: pointer;
+}
+
+.k-meta-kit-legacy-field-reference summary {
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  user-select: none;
+  padding: 0.25rem 0;
+}
+
+.k-meta-kit-legacy-field-reference summary:hover {
+  color: var(--color-text);
+}
+
+.k-meta-kit-legacy-badge-small {
+  display: inline-block;
+  padding: 0.125rem 0.375rem;
+  background: var(--color-gray-200);
+  color: var(--color-gray-700);
+  border-radius: var(--rounded-xs);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.k-meta-kit-legacy-field-value-small {
+  color: var(--color-text);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  padding: 0.375rem;
+  background: var(--color-back);
+  border-radius: var(--rounded-xs);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Dark mode for new elements */
+.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge-ai {
+  background: var(--color-purple-900);
+  color: var(--color-purple-300);
+}
+
+.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-preview {
+  background: var(--color-black);
+}
+
+.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge-small {
+  background: var(--color-gray-800);
+  color: var(--color-gray-300);
+}
+
+.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-value-small {
+  background: var(--color-black);
+  color: var(--color-text);
+}
+
+.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-reference summary {
+  color: var(--color-gray-400);
+}
+
+.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-reference summary:hover {
+  color: var(--color-text);
 }
 </style>

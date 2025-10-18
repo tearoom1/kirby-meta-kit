@@ -234,4 +234,38 @@ class MetaKitController
             ];
         }
     }
+
+    public static function applySingleField(string $pageId, string $fieldName, $value): array
+    {
+        $kirby = kirby();
+        $page = $kirby->page($pageId);
+
+        if (!$page) {
+            return [
+                'status' => 'error',
+                'message' => 'Page not found'
+            ];
+        }
+
+        try {
+            $seoData = $page->seo()->toObject();
+            $seoArray = $seoData ? $seoData->toArray() : [];
+            
+            // Update the specific field
+            $seoArray[$fieldName] = $value;
+            
+            $languageCode = $kirby->language()?->code();
+            $page->update(['seo' => $seoArray], $languageCode);
+
+            return [
+                'status' => 'success',
+                'message' => 'Field updated successfully'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ];
+        }
+    }
 }

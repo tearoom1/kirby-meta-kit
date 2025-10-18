@@ -96,6 +96,17 @@ Kirby::plugin('tearoom1/meta-kit', [
                     $pageId = get('pageId');
                     return \TearoomOne\MetaKitController::convertLegacyMetadata($pageId);
                 }
+            ],
+            [
+                'pattern' => 'meta-kit/apply-single-field',
+                'method' => 'POST',
+                'auth' => true,
+                'action' => function () {
+                    $pageId = get('pageId');
+                    $fieldName = get('fieldName');
+                    $value = get('value');
+                    return \TearoomOne\MetaKitController::applySingleField($pageId, $fieldName, $value);
+                }
             ]
         ]
     ],
