@@ -122,10 +122,25 @@
               Convert
             </k-button>
           </div>
-          <div class="k-meta-kit-legacy-item-fields">
-            <span v-for="(value, key) in page.fields" :key="key" class="k-tag">
-              {{ key }}
-            </span>
+          
+          <div class="k-meta-kit-legacy-item-content">
+            <div v-for="(value, key) in page.fields" :key="key" class="k-meta-kit-legacy-field">
+              <span class="k-meta-kit-legacy-field-label">{{ formatFieldName(key) }}:</span>
+              <div class="k-meta-kit-legacy-field-values">
+                <div class="k-meta-kit-legacy-field-old">
+                  <span class="k-meta-kit-legacy-badge">Legacy</span>
+                  <span class="k-meta-kit-legacy-field-value">{{ formatFieldValue(value) }}</span>
+                </div>
+                <div v-if="page.current && page.current[key]" class="k-meta-kit-legacy-field-new">
+                  <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-warning">Will be overwritten</span>
+                  <span class="k-meta-kit-legacy-field-value-current">{{ formatFieldValue(page.current[key]) }}</span>
+                </div>
+                <div v-else class="k-meta-kit-legacy-field-new">
+                  <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-new">New field</span>
+                  <span class="k-meta-kit-legacy-field-value-empty">No current value</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -276,6 +291,26 @@ export default {
       } catch (error) {
         window.panel.notification.error('Failed to convert legacy data');
       }
+    },
+    formatFieldName(fieldName) {
+      const names = {
+        'metaTitle': 'Meta Title',
+        'metaDescription': 'Meta Description',
+        'ogImage': 'OG Image'
+      };
+      return names[fieldName] || fieldName;
+    },
+    formatFieldValue(value) {
+      if (typeof value === 'string') {
+        return value.length > 100 ? value.substring(0, 100) + '...' : value;
+      }
+      if (Array.isArray(value)) {
+        return `${value.length} image(s)`;
+      }
+      if (typeof value === 'object') {
+        return 'File';
+      }
+      return String(value);
     }
   }
 };
@@ -480,13 +515,96 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.k-meta-kit-legacy-item-fields {
+.k-meta-kit-legacy-item-content {
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.k-meta-kit-legacy-field {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 1rem;
+  align-items: start;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.k-meta-kit-legacy-field:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.k-meta-kit-legacy-field-label {
+  font-weight: 600;
+  color: var(--color-gray-600);
+  font-size: 0.875rem;
+  padding-top: 0.5rem;
+}
+
+.k-meta-kit-legacy-field-values {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.k-meta-kit-legacy-field-old,
+.k-meta-kit-legacy-field-new {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.k-meta-kit-legacy-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  background: var(--color-blue-100);
+  color: var(--color-blue-700);
+  border-radius: var(--rounded-xs);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  width: fit-content;
+}
+
+.k-meta-kit-legacy-badge-warning {
+  background: var(--color-orange-100);
+  color: var(--color-orange-700);
+}
+
+.k-meta-kit-legacy-badge-new {
+  background: var(--color-green-100);
+  color: var(--color-green-700);
+}
+
+.k-meta-kit-legacy-field-value,
+.k-meta-kit-legacy-field-value-current {
+  color: var(--color-text);
+  font-size: 0.875rem;
+  word-break: break-word;
+  line-height: 1.5;
+  padding: 0.5rem;
+  background: var(--color-background);
+  border-radius: var(--rounded-xs);
+  border: 1px solid var(--color-border);
+}
+
+.k-meta-kit-legacy-field-value-current {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.k-meta-kit-legacy-field-value-empty {
+  color: var(--color-gray-500);
+  font-size: 0.875rem;
+  font-style: italic;
+  padding: 0.5rem;
 }
 
 .k-tag {
@@ -534,5 +652,34 @@ export default {
 .k-panel[data-color-scheme="dark"] .k-tag {
   background: var(--color-back);
   color: var(--color-blue-300);
+}
+
+.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-label {
+  color: var(--color-gray-400);
+}
+
+.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-value,
+.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-value-current {
+  color: var(--color-text);
+  background: var(--color-black);
+}
+
+.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge {
+  background: var(--color-blue-900);
+  color: var(--color-blue-300);
+}
+
+.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge-warning {
+  background: var(--color-orange-900);
+  color: var(--color-orange-300);
+}
+
+.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge-new {
+  background: var(--color-green-900);
+  color: var(--color-green-300);
+}
+
+.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-value-empty {
+  color: var(--color-gray-500);
 }
 </style>

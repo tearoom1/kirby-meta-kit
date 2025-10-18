@@ -128,26 +128,44 @@ class MetaKitController
 
         foreach ($pages as $page) {
             $legacy = [];
+            $seoData = $page->seo()->toObject();
+            $current = [];
 
             // Check for common legacy SEO field names
             if ($page->metatitle()->isNotEmpty()) {
                 $legacy['metaTitle'] = $page->metatitle()->value();
+                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty() 
+                    ? $seoData->metaTitle()->value() 
+                    : null;
             }
             if ($page->metadescription()->isNotEmpty()) {
                 $legacy['metaDescription'] = $page->metadescription()->value();
+                $current['metaDescription'] = $seoData && $seoData->metaDescription()->isNotEmpty() 
+                    ? $seoData->metaDescription()->value() 
+                    : null;
             }
             if ($page->ogimage()->isNotEmpty()) {
-                $legacy['ogImage'] = $page->ogimage()->toFiles();
+                $files = $page->ogimage()->toFiles();
+                if ($files->count() > 0) {
+                    $legacy['ogImage'] = $files->first()->filename();
+                    $current['ogImage'] = $seoData && $seoData->ogImage()->isNotEmpty() 
+                        ? $seoData->ogImage()->toFiles()->first()?->filename() 
+                        : null;
+                }
             }
             if ($page->customtitle()->isNotEmpty()) {
                 $legacy['metaTitle'] = $page->customtitle()->value();
+                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty() 
+                    ? $seoData->metaTitle()->value() 
+                    : null;
             }
 
             if (!empty($legacy)) {
                 $found[] = [
                     'id' => $page->id(),
                     'title' => $page->title()->value(),
-                    'fields' => $legacy
+                    'fields' => $legacy,
+                    'current' => $current
                 ];
             }
         }

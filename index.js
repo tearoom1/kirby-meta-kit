@@ -281,6 +281,26 @@
         } catch (error) {
           window.panel.notification.error("Failed to convert legacy data");
         }
+      },
+      formatFieldName(fieldName) {
+        const names = {
+          "metaTitle": "Meta Title",
+          "metaDescription": "Meta Description",
+          "ogImage": "OG Image"
+        };
+        return names[fieldName] || fieldName;
+      },
+      formatFieldValue(value) {
+        if (typeof value === "string") {
+          return value.length > 100 ? value.substring(0, 100) + "..." : value;
+        }
+        if (Array.isArray(value)) {
+          return `${value.length} image(s)`;
+        }
+        if (typeof value === "object") {
+          return "File";
+        }
+        return String(value);
       }
     }
   };
@@ -293,8 +313,8 @@
     }), 0)])]), _c("k-dialog", { ref: "legacyDialog", attrs: { "size": "large" } }, [_c("k-headline", [_vm._v("Legacy SEO Metadata")]), _vm.isLoadingLegacy ? _c("div", { staticClass: "k-meta-kit-loading" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Scanning for legacy metadata...")])], 1) : _vm.legacyPages.length > 0 ? _c("div", { staticClass: "k-meta-kit-legacy-list" }, [_c("p", [_vm._v("Found " + _vm._s(_vm.legacyPages.length) + " pages with legacy SEO fields:")]), _vm._l(_vm.legacyPages, function(page) {
       return _c("div", { key: page.id, staticClass: "k-meta-kit-legacy-item" }, [_c("div", { staticClass: "k-meta-kit-legacy-item-header" }, [_c("strong", [_vm._v(_vm._s(page.title))]), _c("k-button", { attrs: { "icon": "download", "size": "sm" }, on: { "click": function($event) {
         return _vm.convertLegacyPage(page.id);
-      } } }, [_vm._v(" Convert ")])], 1), _c("div", { staticClass: "k-meta-kit-legacy-item-fields" }, _vm._l(page.fields, function(value, key) {
-        return _c("span", { key, staticClass: "k-tag" }, [_vm._v(" " + _vm._s(key) + " ")]);
+      } } }, [_vm._v(" Convert ")])], 1), _c("div", { staticClass: "k-meta-kit-legacy-item-content" }, _vm._l(page.fields, function(value, key) {
+        return _c("div", { key, staticClass: "k-meta-kit-legacy-field" }, [_c("span", { staticClass: "k-meta-kit-legacy-field-label" }, [_vm._v(_vm._s(_vm.formatFieldName(key)) + ":")]), _c("div", { staticClass: "k-meta-kit-legacy-field-values" }, [_c("div", { staticClass: "k-meta-kit-legacy-field-old" }, [_c("span", { staticClass: "k-meta-kit-legacy-badge" }, [_vm._v("Legacy")]), _c("span", { staticClass: "k-meta-kit-legacy-field-value" }, [_vm._v(_vm._s(_vm.formatFieldValue(value)))])]), page.current && page.current[key] ? _c("div", { staticClass: "k-meta-kit-legacy-field-new" }, [_c("span", { staticClass: "k-meta-kit-legacy-badge k-meta-kit-legacy-badge-warning" }, [_vm._v("Will be overwritten")]), _c("span", { staticClass: "k-meta-kit-legacy-field-value-current" }, [_vm._v(_vm._s(_vm.formatFieldValue(page.current[key])))])]) : _c("div", { staticClass: "k-meta-kit-legacy-field-new" }, [_c("span", { staticClass: "k-meta-kit-legacy-badge k-meta-kit-legacy-badge-new" }, [_vm._v("New field")]), _c("span", { staticClass: "k-meta-kit-legacy-field-value-empty" }, [_vm._v("No current value")])])])]);
       }), 0)]);
     }), _c("k-button-group", { attrs: { "slot": "footer" }, slot: "footer" }, [_c("k-button", { attrs: { "icon": "check" }, on: { "click": function($event) {
       return _vm.$refs.legacyDialog.close();
