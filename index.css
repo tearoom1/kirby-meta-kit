@@ -308,8 +308,17 @@
 .k-panel[data-color-scheme="dark"] .k-meta-kit-stats-card p {
     color: var(--color-white);
 }
+.k-meta-kit-stats-total {
+    font-size: 0.875rem;
+    color: var(--color-text-dimmed);
+    font-weight: 400;
+}
 .k-meta-kit-actions {
     margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
 }
 .k-meta-kit-table {
     background: var(--color-back);
@@ -324,24 +333,37 @@
 }
 .k-meta-kit-table th:first-child,
   .k-meta-kit-table td:first-child {
+    width: 40px;
+    text-align: center;
+}
+.k-meta-kit-table th:nth-child(2),
+  .k-meta-kit-table td:nth-child(2) {
     width: 50px;
     text-align: center;
 }
-.k-meta-kit-table th:nth-child(2) {
-    min-width: 200px;
-}
-.k-meta-kit-table th:nth-child(3) {
-    width: 120px;
+.k-meta-kit-table th:nth-child(3),
+  .k-meta-kit-table td:nth-child(3) {
+    min-width: 250px;
+    width: auto;
 }
 .k-meta-kit-table th:nth-child(4),
-  .k-meta-kit-table th:nth-child(5) {
+  .k-meta-kit-table td:nth-child(4) {
+    width: 120px;
+}
+.k-meta-kit-table th:nth-child(5),
+  .k-meta-kit-table th:nth-child(6),
+  .k-meta-kit-table td:nth-child(5),
+  .k-meta-kit-table td:nth-child(6) {
     width: 100px;
 }
-.k-meta-kit-table th:nth-child(6),
-  .k-meta-kit-table th:nth-child(7) {
+.k-meta-kit-table th:nth-child(7),
+  .k-meta-kit-table th:nth-child(8),
+  .k-meta-kit-table td:nth-child(7),
+  .k-meta-kit-table td:nth-child(8) {
     width: 80px;
 }
-.k-meta-kit-table th:nth-child(8) {
+.k-meta-kit-table th:nth-child(9),
+  .k-meta-kit-table td:nth-child(9) {
     width: 120px;
 }
 .k-meta-kit-table-actions {
@@ -735,5 +757,103 @@ to {
     font-size: 0.875rem;
     color: var(--color-text-dimmed);
     font-family: var(--font-mono);
+}
+
+  /* Controls & Search */
+.k-meta-kit-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.k-meta-kit-search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.k-meta-kit-search {
+    min-width: 250px;
+    border: 1px solid var(--color-border);
+}
+.k-meta-kit-search-clear {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-dimmed);
+    border-radius: var(--rounded-xs);
+    transition: all 0.2s;
+}
+.k-meta-kit-search-clear:hover {
+    color: var(--color-text);
+}
+.k-meta-kit-search-clear:active {
+    transform: translateY(-50%) scale(0.95);
+}
+.k-panel[data-color-scheme="dark"] .k-meta-kit-search-clear:hover {
+    background: var(--color-gray-800);
+}
+.k-meta-kit-count {
+    font-size: 0.875rem;
+    color: var(--color-text-dimmed);
+    white-space: nowrap;
+}
+.k-meta-kit-pagesize-select {
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    background: var(--color-back);
+    border: 1px solid var(--color-border);
+    border-radius: var(--rounded-sm);
+    font-size: 0.875rem;
+    color: var(--color-text);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 12px;
+}
+.k-meta-kit-pagesize-select:hover {
+    border-color: var(--color-focus);
+}
+.k-meta-kit-pagesize-select:focus {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+.k-panel[data-color-scheme="dark"] .k-meta-kit-pagesize-select {
+    background-color: var(--color-black);
+    border-color: var(--color-border);
+    color: var(--color-white);
+}
+
+  /* Pagination */
+.k-meta-kit-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+.k-meta-kit-pagination-info {
+    font-size: 0.875rem;
+    color: var(--color-text-dimmed);
+}
+
+  /* Checkbox */
+.k-meta-kit-table-checkbox {
+    width: 40px;
+    text-align: center;
+}
+.k-meta-kit-table-checkbox input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
 }
 }

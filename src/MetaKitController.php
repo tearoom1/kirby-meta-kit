@@ -2,9 +2,6 @@
 
 namespace TearoomOne;
 
-use Kirby\Cms\App as Kirby;
-use Kirby\Cms\Page;
-
 class MetaKitController
 {
     /**
@@ -591,6 +588,60 @@ class MetaKitController
         }
 
         return implode(' ', $texts);
+    }
+
+    function extractTextFromContent($content)
+    {
+        $texts = [];
+
+        foreach ($content->data() as $key => $field) {
+            // If it's a basic text-like field
+            if (in_array($field->type(), ['text', 'textarea', 'writer'])) {
+                $texts[] = $field->value();
+            }
+
+            // Structure fields → loop entries
+            if ($field->type() === 'structure') {
+                foreach ($field->toStructure() as $entry) {
+                    $texts = array_merge($texts, extractTextFromContent($entry));
+                }
+            }
+
+            // Layout fields → columns → blocks
+            if ($field->type() === 'layout') {
+                foreach ($field->toLayouts() as $layout) {
+                    foreach ($layout->columns() as $column) {
+                        foreach ($column->blocks() as $block) {
+                            $texts = array_merge($texts, extractTextFromBlock($block));
+                        }
+                    }
+                }
+            }
+
+            // Blocks field
+            if ($field->type() === 'blocks') {
+                foreach ($field->toBlocks() as $block) {
+                    $texts = array_merge($texts, extractTextFromBlock($block));
+                }
+            }
+        }
+
+        return $texts;
+    }
+
+    function extractTextFromBlock($block)
+    {
+        $texts = [];
+        foreach ($block->content()->data() as $key => $subfield) {
+            if (in_array($subfield->type(), ['text', 'textarea', 'writer'])) {
+                $texts[] = $subfield->value();
+            }
+            // Recursively handle nested structures/layouts/blocks inside a block
+            if (in_array($subfield->type(), ['structure', 'layout', 'blocks'])) {
+                $texts = array_merge($texts, extractTextFromContent($block->content()));
+            }
+        }
+        return $texts;
     }
 
     public static function generateField(string $pageId, string $fieldName, string $language = null): array

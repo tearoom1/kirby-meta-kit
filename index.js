@@ -174,11 +174,49 @@
         },
         fieldChoices: {},
         // { pageId: { fieldName: 'legacy|current|manual|ai', manualValue: '...' } }
-        generatingFields: {}
+        generatingFields: {},
         // { pageId: { fieldName: true } }
+        // Pagination & Selection
+        selectedPages: [],
+        currentPage: 1,
+        pageSize: 25,
+        pageSizeOptions: [
+          { value: 25, text: "25 per page" },
+          { value: 50, text: "50 per page" },
+          { value: 100, text: "100 per page" },
+          { value: 99999, text: "All" }
+        ],
+        searchQuery: ""
       };
     },
     computed: {
+      filteredPages() {
+        if (!this.searchQuery.trim()) {
+          return this.pagesData;
+        }
+        const query = this.searchQuery.toLowerCase();
+        return this.pagesData.filter((page) => {
+          return page.title.toLowerCase().includes(query) || page.template.toLowerCase().includes(query) || page.metaDescription && page.metaDescription.toLowerCase().includes(query);
+        });
+      },
+      paginatedPages() {
+        if (this.pageSize >= 99999) {
+          return this.filteredPages;
+        }
+        const start = (this.currentPage - 1) * this.pageSize;
+        const end = start + this.pageSize;
+        return this.filteredPages.slice(start, end);
+      },
+      totalPages() {
+        if (this.pageSize >= 99999) {
+          return 1;
+        }
+        return Math.ceil(this.filteredPages.length / this.pageSize);
+      },
+      isAllCurrentPageSelected() {
+        if (this.paginatedPages.length === 0) return false;
+        return this.paginatedPages.every((page) => this.selectedPages.includes(page.id));
+      },
       pagesWithDescription() {
         return this.pagesData.filter((p) => p.hasMetaDescription).length;
       },
@@ -187,6 +225,20 @@
       },
       pagesNoIndex() {
         return this.pagesData.filter((p) => p.noIndex).length;
+      },
+      filteredPagesWithDescription() {
+        return this.filteredPages.filter((p) => p.hasMetaDescription).length;
+      },
+      filteredPagesWithOgImage() {
+        return this.filteredPages.filter((p) => p.hasOgImage).length;
+      },
+      filteredPagesNoIndex() {
+        return this.filteredPages.filter((p) => p.noIndex).length;
+      }
+    },
+    watch: {
+      searchQuery() {
+        this.currentPage = 1;
       }
     },
     created() {
@@ -504,6 +556,61 @@
         if (langCode === this.language) return;
         const baseUrl = window.location.origin + window.location.pathname.split("?")[0];
         window.location.href = baseUrl + "?language=" + langCode;
+      },
+      // Pagination methods
+      changePageSize(newSize) {
+        this.pageSize = parseInt(newSize);
+        this.currentPage = 1;
+      },
+      nextPage() {
+        if (this.currentPage < this.totalPages) {
+          this.currentPage++;
+        }
+      },
+      previousPage() {
+        if (this.currentPage > 1) {
+          this.currentPage--;
+        }
+      },
+      // Selection methods
+      isPageSelected(pageId) {
+        return this.selectedPages.includes(pageId);
+      },
+      togglePageSelection(pageId) {
+        const index = this.selectedPages.indexOf(pageId);
+        if (index > -1) {
+          this.selectedPages.splice(index, 1);
+        } else {
+          this.selectedPages.push(pageId);
+        }
+      },
+      toggleSelectAllCurrentPage() {
+        const allSelected = this.isAllCurrentPageSelected;
+        this.paginatedPages.forEach((page) => {
+          const index = this.selectedPages.indexOf(page.id);
+          if (allSelected) {
+            if (index > -1) {
+              this.selectedPages.splice(index, 1);
+            }
+          } else {
+            if (index === -1) {
+              this.selectedPages.push(page.id);
+            }
+          }
+        });
+      },
+      async showSelectedPagesDialog() {
+        if (this.selectedPages.length === 0) return;
+        this.isLoadingAllPages = true;
+        try {
+          const selectedPagesData = this.pagesData.filter((p) => this.selectedPages.includes(p.id));
+          this.allPagesData = selectedPagesData;
+          this.$refs.allPagesDialog.open();
+        } catch (error) {
+          window.panel.notification.error("Failed to load selected pages");
+        } finally {
+          this.isLoadingAllPages = false;
+        }
       }
     }
   };
@@ -513,13 +620,23 @@
       return _c("k-button", { key: lang.code, attrs: { "theme": lang.code === _vm.language ? "positive" : "", "size": "xs" }, on: { "click": function($event) {
         return _vm.goToLanguage(lang.code);
       } } }, [_vm._v(" " + _vm._s(lang.code.toUpperCase()) + " ")]);
-    }), 1)], 1) : _vm._e(), _vm.legacyDetection.show && _vm.legacyDetection.found > 0 ? _c("div", { staticClass: "k-meta-kit-warning" }, [_c("k-box", { attrs: { "theme": "info" } }, [_c("k-icon", { attrs: { "type": "info" } }), _c("span", [_vm._v("Found " + _vm._s(_vm.legacyDetection.found) + " pages with legacy SEO metadata")]), _c("k-button", { attrs: { "icon": "download" }, on: { "click": _vm.showLegacyDialog } }, [_vm._v("View & Convert")]), _c("k-button", { attrs: { "icon": "cancel" }, on: { "click": _vm.dismissLegacyWarning } }, [_vm._v("Dismiss")])], 1)], 1) : _vm._e(), _c("div", { staticClass: "k-meta-kit-stats" }, [_c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("Total Pages")]), _c("p", [_vm._v(_vm._s(_vm.pages.length))])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With Description")]), _c("p", [_vm._v(_vm._s(_vm.pagesWithDescription))])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With OG Image")]), _c("p", [_vm._v(_vm._s(_vm.pagesWithOgImage))])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("NoIndex")]), _c("p", [_vm._v(_vm._s(_vm.pagesNoIndex))])])]), _c("div", { staticClass: "k-meta-kit-actions" }, [_c("k-button-group", [_c("k-button", { attrs: { "icon": "sparkling", "disabled": _vm.isGeneratingAll, "progress": _vm.isGeneratingAll }, on: { "click": _vm.generateAllDescriptions } }, [_vm._v(" Generate All Missing Descriptions ")]), _c("k-button", { attrs: { "icon": "refresh" }, on: { "click": _vm.refreshPages } }, [_vm._v("Refresh")]), _c("k-button", { attrs: { "icon": "edit" }, on: { "click": _vm.showAllPagesDialog } }, [_vm._v("Edit All Pages")]), _c("k-button", { attrs: { "icon": "download" }, on: { "click": _vm.detectLegacyMetadata } }, [_vm._v("Detect Legacy Data")])], 1)], 1), _c("div", { staticClass: "k-meta-kit-table" }, [_c("table", [_c("thead", [_c("tr", [_c("th", [_vm._v("#")]), _c("th", [_vm._v("Page")]), _c("th", [_vm._v("Template")]), _c("th", [_vm._v("Meta Title")]), _c("th", [_vm._v("Description")]), _c("th", [_vm._v("OG Image")]), _c("th", [_vm._v("NoIndex")]), _c("th", [_vm._v("Actions")])])]), _c("tbody", _vm._l(_vm.pagesData, function(page, index) {
-      return _c("tr", { key: page.id }, [_c("td", [_vm._v(_vm._s(index + 1))]), _c("td", [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))])]), _c("td", [_vm._v(_vm._s(page.template))]), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: _vm.getStatusClass(page.hasMetaTitle, page.metaTitleLength) }, [_vm._v(" " + _vm._s(page.hasMetaTitle ? page.metaTitleLength : "—") + " ")])]), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: _vm.getStatusClass(page.hasMetaDescription, page.metaDescriptionLength) }, [_vm._v(" " + _vm._s(page.hasMetaDescription ? page.metaDescriptionLength : "—") + " ")])]), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? _c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } }) : _c("span", [_vm._v("—")])], 1), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.noIndex ? _c("k-icon", { staticClass: "k-meta-kit-icon-warning", attrs: { "type": "check" } }) : _c("span", [_vm._v("—")])], 1), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("div", { staticClass: "k-meta-kit-table-actions" }, [_c("k-button", { attrs: { "icon": "edit", "size": "sm", "title": "Edit Metadata" }, on: { "click": function($event) {
+    }), 1)], 1) : _vm._e(), _vm.legacyDetection.show && _vm.legacyDetection.found > 0 ? _c("div", { staticClass: "k-meta-kit-warning" }, [_c("k-box", { attrs: { "theme": "info" } }, [_c("k-icon", { attrs: { "type": "info" } }), _c("span", [_vm._v("Found " + _vm._s(_vm.legacyDetection.found) + " pages with legacy SEO metadata")]), _c("k-button", { attrs: { "icon": "download" }, on: { "click": _vm.showLegacyDialog } }, [_vm._v("View & Convert")]), _c("k-button", { attrs: { "icon": "cancel" }, on: { "click": _vm.dismissLegacyWarning } }, [_vm._v("Dismiss")])], 1)], 1) : _vm._e(), _c("div", { staticClass: "k-meta-kit-stats" }, [_c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("Total Pages")]), _c("p", [_vm._v(_vm._s(_vm.filteredPages.length)), _vm.searchQuery ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.pagesData.length))]) : _vm._e()])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With Description")]), _c("p", [_vm._v(_vm._s(_vm.filteredPagesWithDescription)), _vm.searchQuery ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.pagesWithDescription))]) : _vm._e()])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With OG Image")]), _c("p", [_vm._v(_vm._s(_vm.filteredPagesWithOgImage)), _vm.searchQuery ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.pagesWithOgImage))]) : _vm._e()])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("NoIndex")]), _c("p", [_vm._v(_vm._s(_vm.filteredPagesNoIndex)), _vm.searchQuery ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.pagesNoIndex))]) : _vm._e()])])]), _c("div", { staticClass: "k-meta-kit-actions" }, [_c("k-button-group", [_c("k-button", { attrs: { "icon": "sparkling", "disabled": _vm.isGeneratingAll || _vm.selectedPages.length === 0, "progress": _vm.isGeneratingAll }, on: { "click": _vm.generateAllDescriptions } }, [_vm._v(" Generate Missing (" + _vm._s(_vm.selectedPages.length || _vm.filteredPages.length) + ") ")]), _c("k-button", { attrs: { "icon": "edit", "disabled": _vm.selectedPages.length === 0 }, on: { "click": _vm.showSelectedPagesDialog } }, [_vm._v(" Edit Selected (" + _vm._s(_vm.selectedPages.length) + ") ")]), _c("k-button", { attrs: { "icon": "download" }, on: { "click": _vm.detectLegacyMetadata } }, [_vm._v("Detect Legacy Data")]), _c("k-button", { attrs: { "icon": "refresh" }, on: { "click": _vm.refreshPages } }, [_vm._v("Refresh")])], 1), _c("div", { staticClass: "k-meta-kit-controls" }, [_c("span", { staticClass: "k-meta-kit-count" }, [_vm._v(_vm._s(_vm.selectedPages.length) + " of " + _vm._s(_vm.filteredPages.length) + " selected")]), _c("div", { staticClass: "k-meta-kit-search-wrapper" }, [_c("k-search-input", { staticClass: "k-meta-kit-search", attrs: { "icon": "search", "value": _vm.searchQuery, "placeholder": "Filter pages..." }, on: { "input": function($event) {
+      _vm.searchQuery = $event;
+    } } }), _vm.searchQuery ? _c("button", { staticClass: "k-meta-kit-search-clear", attrs: { "title": "Clear search" }, on: { "click": function($event) {
+      _vm.searchQuery = "";
+    } } }, [_c("k-icon", { attrs: { "type": "cancel" } })], 1) : _vm._e()], 1), _c("select", { staticClass: "k-meta-kit-pagesize-select", domProps: { "value": _vm.pageSize }, on: { "change": function($event) {
+      return _vm.changePageSize($event.target.value);
+    } } }, _vm._l(_vm.pageSizeOptions, function(option) {
+      return _c("option", { key: option.value, domProps: { "value": option.value } }, [_vm._v(" " + _vm._s(option.text) + " ")]);
+    }), 0)])], 1), _c("div", { staticClass: "k-meta-kit-table" }, [_c("table", [_c("thead", [_c("tr", [_c("th", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isAllCurrentPageSelected }, on: { "change": _vm.toggleSelectAllCurrentPage } })]), _c("th", [_vm._v("#")]), _c("th", [_vm._v("Page")]), _c("th", [_vm._v("Template")]), _c("th", [_vm._v("Meta Title")]), _c("th", [_vm._v("Description")]), _c("th", [_vm._v("OG Image")]), _c("th", [_vm._v("NoIndex")]), _c("th", [_vm._v("Actions")])])]), _c("tbody", _vm._l(_vm.paginatedPages, function(page, index) {
+      return _c("tr", { key: page.id }, [_c("td", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isPageSelected(page.id) }, on: { "change": function($event) {
+        return _vm.togglePageSelection(page.id);
+      } } })]), _c("td", [_vm._v(_vm._s((_vm.currentPage - 1) * _vm.pageSize + index + 1))]), _c("td", [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))])]), _c("td", [_vm._v(_vm._s(page.template))]), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: _vm.getStatusClass(page.hasMetaTitle, page.metaTitleLength) }, [_vm._v(" " + _vm._s(page.hasMetaTitle ? page.metaTitleLength : "—") + " ")])]), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: _vm.getStatusClass(page.hasMetaDescription, page.metaDescriptionLength) }, [_vm._v(" " + _vm._s(page.hasMetaDescription ? page.metaDescriptionLength : "—") + " ")])]), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? _c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } }) : _c("span", [_vm._v("—")])], 1), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.noIndex ? _c("k-icon", { staticClass: "k-meta-kit-icon-warning", attrs: { "type": "check" } }) : _c("span", [_vm._v("—")])], 1), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("div", { staticClass: "k-meta-kit-table-actions" }, [_c("k-button", { attrs: { "icon": "edit", "size": "sm", "title": "Edit Metadata" }, on: { "click": function($event) {
         return _vm.editSinglePageMetadata(page.id);
       } } }), _c("k-button", { attrs: { "icon": "sparkling", "size": "sm", "disabled": page.hasMetaDescription, "title": "Generate Description" }, on: { "click": function($event) {
         return _vm.generateDescription(page.id);
       } } })], 1)])]);
-    }), 0)])]), _c("k-dialog", { ref: "legacyDialog", attrs: { "size": "huge", "cancelButton": "", "submitButton": "" } }, [_c("k-headline", [_vm._v("Legacy SEO Metadata")]), _vm.isLoadingLegacy ? _c("div", { staticClass: "k-meta-kit-loading" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Scanning for legacy metadata...")])], 1) : _vm.legacyPages.length > 0 ? _c("div", { staticClass: "k-meta-kit-legacy-list" }, [_c("p", [_vm._v("Found " + _vm._s(_vm.legacyPages.length) + " pages with legacy SEO fields:")]), _vm._l(_vm.legacyPages, function(page) {
+    }), 0)])]), _vm.totalPages > 1 ? _c("div", { staticClass: "k-meta-kit-pagination" }, [_c("k-button", { attrs: { "icon": "angle-left", "disabled": _vm.currentPage === 1 }, on: { "click": _vm.previousPage } }), _c("span", { staticClass: "k-meta-kit-pagination-info" }, [_vm._v(" Page " + _vm._s(_vm.currentPage) + " of " + _vm._s(_vm.totalPages) + " "), _vm.searchQuery ? [_vm._v("(" + _vm._s(_vm.filteredPages.length) + " of " + _vm._s(_vm.pagesData.length) + ")")] : [_vm._v("(" + _vm._s(_vm.pagesData.length) + " total)")]], 2), _c("k-button", { attrs: { "icon": "angle-right", "disabled": _vm.currentPage === _vm.totalPages }, on: { "click": _vm.nextPage } })], 1) : _vm._e(), _c("k-dialog", { ref: "legacyDialog", attrs: { "size": "huge", "cancelButton": "", "submitButton": "" } }, [_c("k-headline", [_vm._v("Legacy SEO Metadata")]), _vm.isLoadingLegacy ? _c("div", { staticClass: "k-meta-kit-loading" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Scanning for legacy metadata...")])], 1) : _vm.legacyPages.length > 0 ? _c("div", { staticClass: "k-meta-kit-legacy-list" }, [_c("p", [_vm._v("Found " + _vm._s(_vm.legacyPages.length) + " pages with legacy SEO fields:")]), _vm._l(_vm.legacyPages, function(page) {
       return _c("div", { key: page.id, staticClass: "k-meta-kit-legacy-item" }, [_c("div", { staticClass: "k-meta-kit-legacy-item-header" }, [_c("strong", [_vm._v(_vm._s(page.title))]), _c("k-button", { attrs: { "icon": "download", "size": "sm" }, on: { "click": function($event) {
         return _vm.convertLegacyPage(page.id);
       } } }, [_vm._v(" Apply Legacy ")])], 1), _c("div", { staticClass: "k-meta-kit-legacy-item-content" }, _vm._l(page.fields, function(value, key) {

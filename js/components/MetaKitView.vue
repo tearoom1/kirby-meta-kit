@@ -29,37 +29,73 @@
     <div class="k-meta-kit-stats">
       <div class="k-meta-kit-stats-card">
         <h3>Total Pages</h3>
-        <p>{{ pages.length }}</p>
+        <p>{{ filteredPages.length }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{ pagesData.length }}</span></p>
       </div>
       <div class="k-meta-kit-stats-card">
         <h3>With Description</h3>
-        <p>{{ pagesWithDescription }}</p>
+        <p>{{ filteredPagesWithDescription }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{ pagesWithDescription }}</span></p>
       </div>
       <div class="k-meta-kit-stats-card">
         <h3>With OG Image</h3>
-        <p>{{ pagesWithOgImage }}</p>
+        <p>{{ filteredPagesWithOgImage }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{ pagesWithOgImage }}</span></p>
       </div>
       <div class="k-meta-kit-stats-card">
         <h3>NoIndex</h3>
-        <p>{{ pagesNoIndex }}</p>
+        <p>{{ filteredPagesNoIndex }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{ pagesNoIndex }}</span></p>
       </div>
     </div>
 
-    <!-- Actions -->
+    <!-- Actions & Filters -->
     <div class="k-meta-kit-actions">
       <k-button-group>
         <k-button
           icon="sparkling"
-          :disabled="isGeneratingAll"
+          :disabled="isGeneratingAll || selectedPages.length === 0"
           :progress="isGeneratingAll"
           @click="generateAllDescriptions"
         >
-          Generate All Missing Descriptions
+          Generate Missing ({{ selectedPages.length || filteredPages.length }})
         </k-button>
-        <k-button icon="refresh" @click="refreshPages">Refresh</k-button>
-        <k-button icon="edit" @click="showAllPagesDialog">Edit All Pages</k-button>
+        <k-button
+          icon="edit"
+          :disabled="selectedPages.length === 0"
+          @click="showSelectedPagesDialog"
+        >
+          Edit Selected ({{ selectedPages.length }})
+        </k-button>
         <k-button icon="download" @click="detectLegacyMetadata">Detect Legacy Data</k-button>
+        <k-button icon="refresh" @click="refreshPages">Refresh</k-button>
       </k-button-group>
+
+      <div class="k-meta-kit-controls">
+        <span class="k-meta-kit-count">{{ selectedPages.length }} of {{ filteredPages.length }} selected</span>
+        <div class="k-meta-kit-search-wrapper">
+          <k-search-input
+            icon="search"
+            :value="searchQuery"
+            @input="searchQuery = $event"
+            placeholder="Filter pages..."
+            class="k-meta-kit-search"
+          />
+          <button
+            v-if="searchQuery"
+            class="k-meta-kit-search-clear"
+            @click="searchQuery = ''"
+            title="Clear search"
+          >
+            <k-icon type="cancel" />
+          </button>
+        </div>
+        <select
+          class="k-meta-kit-pagesize-select"
+          :value="pageSize"
+          @change="changePageSize($event.target.value)"
+        >
+          <option v-for="option in pageSizeOptions" :key="option.value" :value="option.value">
+            {{ option.text }}
+          </option>
+        </select>
+      </div>
     </div>
 
     <!-- Pages Table -->
@@ -67,6 +103,13 @@
       <table>
         <thead>
         <tr>
+          <th class="k-meta-kit-table-checkbox">
+            <input
+              type="checkbox"
+              :checked="isAllCurrentPageSelected"
+              @change="toggleSelectAllCurrentPage"
+            />
+          </th>
           <th>#</th>
           <th>Page</th>
           <th>Template</th>
@@ -78,8 +121,15 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="(page, index) in pagesData" :key="page.id">
-          <td>{{ index + 1 }}</td>
+        <tr v-for="(page, index) in paginatedPages" :key="page.id">
+          <td class="k-meta-kit-table-checkbox">
+            <input
+              type="checkbox"
+              :checked="isPageSelected(page.id)"
+              @change="togglePageSelection(page.id)"
+            />
+          </td>
+          <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
           <td>
             <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
           </td>
@@ -122,6 +172,25 @@
         </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination -->
+    <div v-if="totalPages > 1" class="k-meta-kit-pagination">
+      <k-button
+        icon="angle-left"
+        :disabled="currentPage === 1"
+        @click="previousPage"
+      />
+      <span class="k-meta-kit-pagination-info">
+        Page {{ currentPage }} of {{ totalPages }}
+        <template v-if="searchQuery">({{ filteredPages.length }} of {{ pagesData.length }})</template>
+        <template v-else>({{ pagesData.length }} total)</template>
+      </span>
+      <k-button
+        icon="angle-right"
+        :disabled="currentPage === totalPages"
+        @click="nextPage"
+      />
     </div>
 
     <!-- Legacy Data Dialog -->
@@ -776,10 +845,52 @@ export default {
         found: 0
       },
       fieldChoices: {}, // { pageId: { fieldName: 'legacy|current|manual|ai', manualValue: '...' } }
-      generatingFields: {} // { pageId: { fieldName: true } }
+      generatingFields: {}, // { pageId: { fieldName: true } }
+
+      // Pagination & Selection
+      selectedPages: [],
+      currentPage: 1,
+      pageSize: 25,
+      pageSizeOptions: [
+        { value: 25, text: '25 per page' },
+        { value: 50, text: '50 per page' },
+        { value: 100, text: '100 per page' },
+        { value: 99999, text: 'All' }
+      ],
+      searchQuery: ''
     };
   },
   computed: {
+    filteredPages() {
+      if (!this.searchQuery.trim()) {
+        return this.pagesData;
+      }
+
+      const query = this.searchQuery.toLowerCase();
+      return this.pagesData.filter(page => {
+        return page.title.toLowerCase().includes(query) ||
+               page.template.toLowerCase().includes(query) ||
+               (page.metaDescription && page.metaDescription.toLowerCase().includes(query));
+      });
+    },
+    paginatedPages() {
+      if (this.pageSize >= 99999) {
+        return this.filteredPages;
+      }
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      return this.filteredPages.slice(start, end);
+    },
+    totalPages() {
+      if (this.pageSize >= 99999) {
+        return 1;
+      }
+      return Math.ceil(this.filteredPages.length / this.pageSize);
+    },
+    isAllCurrentPageSelected() {
+      if (this.paginatedPages.length === 0) return false;
+      return this.paginatedPages.every(page => this.selectedPages.includes(page.id));
+    },
     pagesWithDescription() {
       return this.pagesData.filter(p => p.hasMetaDescription).length;
     },
@@ -788,6 +899,21 @@ export default {
     },
     pagesNoIndex() {
       return this.pagesData.filter(p => p.noIndex).length;
+    },
+    filteredPagesWithDescription() {
+      return this.filteredPages.filter(p => p.hasMetaDescription).length;
+    },
+    filteredPagesWithOgImage() {
+      return this.filteredPages.filter(p => p.hasOgImage).length;
+    },
+    filteredPagesNoIndex() {
+      return this.filteredPages.filter(p => p.noIndex).length;
+    }
+  },
+  watch: {
+    searchQuery() {
+      // Reset to first page when search changes
+      this.currentPage = 1;
     }
   },
   created() {
@@ -1166,6 +1292,67 @@ export default {
       // Force full page reload with new language
       const baseUrl = window.location.origin + window.location.pathname.split('?')[0];
       window.location.href = baseUrl + '?language=' + langCode;
+    },
+
+    // Pagination methods
+    changePageSize(newSize) {
+      this.pageSize = parseInt(newSize);
+      this.currentPage = 1; // Reset to first page
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+
+    // Selection methods
+    isPageSelected(pageId) {
+      return this.selectedPages.includes(pageId);
+    },
+    togglePageSelection(pageId) {
+      const index = this.selectedPages.indexOf(pageId);
+      if (index > -1) {
+        this.selectedPages.splice(index, 1);
+      } else {
+        this.selectedPages.push(pageId);
+      }
+    },
+    toggleSelectAllCurrentPage() {
+      const allSelected = this.isAllCurrentPageSelected;
+      this.paginatedPages.forEach(page => {
+        const index = this.selectedPages.indexOf(page.id);
+        if (allSelected) {
+          // Deselect all on current page
+          if (index > -1) {
+            this.selectedPages.splice(index, 1);
+          }
+        } else {
+          // Select all on current page
+          if (index === -1) {
+            this.selectedPages.push(page.id);
+          }
+        }
+      });
+    },
+    async showSelectedPagesDialog() {
+      if (this.selectedPages.length === 0) return;
+
+      // Load full data for selected pages
+      this.isLoadingAllPages = true;
+      try {
+        const selectedPagesData = this.pagesData.filter(p => this.selectedPages.includes(p.id));
+        this.allPagesData = selectedPagesData;
+        this.$refs.allPagesDialog.open();
+      } catch (error) {
+        window.panel.notification.error('Failed to load selected pages');
+      } finally {
+        this.isLoadingAllPages = false;
+      }
     }
   }
 };
@@ -1242,8 +1429,18 @@ export default {
     color: var(--color-white);
   }
 
+  .k-meta-kit-stats-total {
+    font-size: 0.875rem;
+    color: var(--color-text-dimmed);
+    font-weight: 400;
+  }
+
   .k-meta-kit-actions {
     margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
   }
 
   .k-meta-kit-table {
@@ -1261,29 +1458,43 @@ export default {
 
   .k-meta-kit-table th:first-child,
   .k-meta-kit-table td:first-child {
+    width: 40px;
+    text-align: center;
+  }
+
+  .k-meta-kit-table th:nth-child(2),
+  .k-meta-kit-table td:nth-child(2) {
     width: 50px;
     text-align: center;
   }
 
-  .k-meta-kit-table th:nth-child(2) {
-    min-width: 200px;
-  }
-
-  .k-meta-kit-table th:nth-child(3) {
-    width: 120px;
+  .k-meta-kit-table th:nth-child(3),
+  .k-meta-kit-table td:nth-child(3) {
+    min-width: 250px;
+    width: auto;
   }
 
   .k-meta-kit-table th:nth-child(4),
-  .k-meta-kit-table th:nth-child(5) {
+  .k-meta-kit-table td:nth-child(4) {
+    width: 120px;
+  }
+
+  .k-meta-kit-table th:nth-child(5),
+  .k-meta-kit-table th:nth-child(6),
+  .k-meta-kit-table td:nth-child(5),
+  .k-meta-kit-table td:nth-child(6) {
     width: 100px;
   }
 
-  .k-meta-kit-table th:nth-child(6),
-  .k-meta-kit-table th:nth-child(7) {
+  .k-meta-kit-table th:nth-child(7),
+  .k-meta-kit-table th:nth-child(8),
+  .k-meta-kit-table td:nth-child(7),
+  .k-meta-kit-table td:nth-child(8) {
     width: 80px;
   }
 
-  .k-meta-kit-table th:nth-child(8) {
+  .k-meta-kit-table th:nth-child(9),
+  .k-meta-kit-table td:nth-child(9) {
     width: 120px;
   }
 
@@ -1754,6 +1965,120 @@ export default {
     font-size: 0.875rem;
     color: var(--color-text-dimmed);
     font-family: var(--font-mono);
+  }
+
+  /* Controls & Search */
+
+  .k-meta-kit-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .k-meta-kit-search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .k-meta-kit-search {
+    min-width: 250px;
+    border: 1px solid var(--color-border);
+  }
+
+  .k-meta-kit-search-clear {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-dimmed);
+    border-radius: var(--rounded-xs);
+    transition: all 0.2s;
+  }
+
+  .k-meta-kit-search-clear:hover {
+    color: var(--color-text);
+  }
+
+  .k-meta-kit-search-clear:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-search-clear:hover {
+    background: var(--color-gray-800);
+  }
+
+  .k-meta-kit-count {
+    font-size: 0.875rem;
+    color: var(--color-text-dimmed);
+    white-space: nowrap;
+  }
+
+  .k-meta-kit-pagesize-select {
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    background: var(--color-back);
+    border: 1px solid var(--color-border);
+    border-radius: var(--rounded-sm);
+    font-size: 0.875rem;
+    color: var(--color-text);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 12px;
+  }
+
+  .k-meta-kit-pagesize-select:hover {
+    border-color: var(--color-focus);
+  }
+
+  .k-meta-kit-pagesize-select:focus {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-pagesize-select {
+    background-color: var(--color-black);
+    border-color: var(--color-border);
+    color: var(--color-white);
+  }
+
+  /* Pagination */
+
+  .k-meta-kit-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .k-meta-kit-pagination-info {
+    font-size: 0.875rem;
+    color: var(--color-text-dimmed);
+  }
+
+  /* Checkbox */
+
+  .k-meta-kit-table-checkbox {
+    width: 40px;
+    text-align: center;
+  }
+
+  .k-meta-kit-table-checkbox input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
   }
 }
 </style>
