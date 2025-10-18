@@ -181,7 +181,8 @@
                     <span class="k-meta-kit-legacy-field-value">{{ formatFieldValue(value) }}</span>
                   </div>
 
-                  <div v-else-if="getFieldChoice(page.id, key) === 'current' && page.current && page.current[key]" class="k-meta-kit-legacy-field-option">
+                  <div v-else-if="getFieldChoice(page.id, key) === 'current' && page.current && page.current[key]"
+                       class="k-meta-kit-legacy-field-option">
                     <span class="k-meta-kit-legacy-badge">Current Value</span>
                     <span class="k-meta-kit-legacy-field-value">{{ formatFieldValue(page.current[key]) }}</span>
                   </div>
@@ -325,18 +326,22 @@
                     <span class="k-meta-kit-legacy-field-value">{{ page.legacy.metaTitle }}</span>
                   </div>
 
-                  <div v-else-if="getFieldChoice(page.id, 'metaTitle') === 'keep' || !getFieldChoice(page.id, 'metaTitle')" class="k-meta-kit-legacy-field-option">
+                  <div
+                    v-else-if="getFieldChoice(page.id, 'metaTitle') === 'keep' || !getFieldChoice(page.id, 'metaTitle')"
+                    class="k-meta-kit-legacy-field-option">
                     <span class="k-meta-kit-legacy-badge">Current Value</span>
                     <span v-if="page.hasMetaTitle" class="k-meta-kit-legacy-field-value">
                       {{ page.metaTitle || '—' }}
-                      <span class="k-meta-kit-field-length" :class="getStatusClass(page.hasMetaTitle, page.metaTitleLength)">
+                      <span class="k-meta-kit-field-length"
+                            :class="getStatusClass(page.hasMetaTitle, page.metaTitleLength)">
                         ({{ page.metaTitleLength }} chars)
                       </span>
                     </span>
                     <span v-else class="k-meta-kit-legacy-field-value-empty">No meta title set</span>
                   </div>
 
-                  <div v-else-if="getFieldChoice(page.id, 'metaTitle') === 'manual'" class="k-meta-kit-legacy-field-option">
+                  <div v-else-if="getFieldChoice(page.id, 'metaTitle') === 'manual'"
+                       class="k-meta-kit-legacy-field-option">
                     <span class="k-meta-kit-legacy-badge">Manual Entry</span>
                     <k-input
                       :value="getManualValue(page.id, 'metaTitle')"
@@ -416,23 +421,28 @@
 
                 <!-- Preview -->
                 <div class="k-meta-kit-legacy-field-preview">
-                  <div v-if="getFieldChoice(page.id, 'metaDescription') === 'legacy'" class="k-meta-kit-legacy-field-option">
+                  <div v-if="getFieldChoice(page.id, 'metaDescription') === 'legacy'"
+                       class="k-meta-kit-legacy-field-option">
                     <span class="k-meta-kit-legacy-badge">Legacy Value</span>
                     <span class="k-meta-kit-legacy-field-value">{{ page.legacy.metaDescription }}</span>
                   </div>
 
-                  <div v-else-if="getFieldChoice(page.id, 'metaDescription') === 'keep' || !getFieldChoice(page.id, 'metaDescription')" class="k-meta-kit-legacy-field-option">
+                  <div
+                    v-else-if="getFieldChoice(page.id, 'metaDescription') === 'keep' || !getFieldChoice(page.id, 'metaDescription')"
+                    class="k-meta-kit-legacy-field-option">
                     <span class="k-meta-kit-legacy-badge">Current Value</span>
                     <span v-if="page.hasMetaDescription" class="k-meta-kit-legacy-field-value">
                       {{ page.metaDescription || '—' }}
-                      <span class="k-meta-kit-field-length" :class="getStatusClass(page.hasMetaDescription, page.metaDescriptionLength)">
+                      <span class="k-meta-kit-field-length"
+                            :class="getStatusClass(page.hasMetaDescription, page.metaDescriptionLength)">
                         ({{ page.metaDescriptionLength }} chars)
                       </span>
                     </span>
                     <span v-else class="k-meta-kit-legacy-field-value-empty">No meta description set</span>
                   </div>
 
-                  <div v-else-if="getFieldChoice(page.id, 'metaDescription') === 'manual'" class="k-meta-kit-legacy-field-option">
+                  <div v-else-if="getFieldChoice(page.id, 'metaDescription') === 'manual'"
+                       class="k-meta-kit-legacy-field-option">
                     <span class="k-meta-kit-legacy-badge">Manual Entry</span>
                     <k-input
                       :value="getManualValue(page.id, 'metaDescription')"
@@ -442,9 +452,11 @@
                     />
                   </div>
 
-                  <div v-else-if="getFieldChoice(page.id, 'metaDescription') === 'ai'" class="k-meta-kit-legacy-field-option">
+                  <div v-else-if="getFieldChoice(page.id, 'metaDescription') === 'ai'"
+                       class="k-meta-kit-legacy-field-option">
                     <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated</span>
-                    <span v-if="isGeneratingField(page.id, 'metaDescription')" class="k-meta-kit-legacy-field-generating">
+                    <span v-if="isGeneratingField(page.id, 'metaDescription')"
+                          class="k-meta-kit-legacy-field-generating">
                       <k-icon class="k-meta-kit-spinner" type="loader"/>
                       Generating...
                     </span>
@@ -531,23 +543,28 @@
 
             <!-- Preview -->
             <div class="k-meta-kit-legacy-field-preview">
-              <div v-if="getFieldChoice(currentEditPage.id, 'metaTitle') === 'legacy'" class="k-meta-kit-legacy-field-option">
+              <div v-if="getFieldChoice(currentEditPage.id, 'metaTitle') === 'legacy'"
+                   class="k-meta-kit-legacy-field-option">
                 <span class="k-meta-kit-legacy-badge">Legacy Value</span>
                 <span class="k-meta-kit-legacy-field-value">{{ currentEditPage.legacy.metaTitle }}</span>
               </div>
 
-              <div v-else-if="getFieldChoice(currentEditPage.id, 'metaTitle') === 'keep' || !getFieldChoice(currentEditPage.id, 'metaTitle')" class="k-meta-kit-legacy-field-option">
+              <div
+                v-else-if="getFieldChoice(currentEditPage.id, 'metaTitle') === 'keep' || !getFieldChoice(currentEditPage.id, 'metaTitle')"
+                class="k-meta-kit-legacy-field-option">
                 <span class="k-meta-kit-legacy-badge">Current Value</span>
                 <span v-if="currentEditPage.hasMetaTitle" class="k-meta-kit-legacy-field-value">
                   {{ currentEditPage.metaTitle || '—' }}
-                  <span class="k-meta-kit-field-length" :class="getStatusClass(currentEditPage.hasMetaTitle, currentEditPage.metaTitleLength)">
+                  <span class="k-meta-kit-field-length"
+                        :class="getStatusClass(currentEditPage.hasMetaTitle, currentEditPage.metaTitleLength)">
                     ({{ currentEditPage.metaTitleLength }} chars)
                   </span>
                 </span>
                 <span v-else class="k-meta-kit-legacy-field-value-empty">No meta title set</span>
               </div>
 
-              <div v-else-if="getFieldChoice(currentEditPage.id, 'metaTitle') === 'manual'" class="k-meta-kit-legacy-field-option">
+              <div v-else-if="getFieldChoice(currentEditPage.id, 'metaTitle') === 'manual'"
+                   class="k-meta-kit-legacy-field-option">
                 <span class="k-meta-kit-legacy-badge">Manual Entry</span>
                 <k-input
                   :value="getManualValue(currentEditPage.id, 'metaTitle')"
@@ -557,9 +574,11 @@
                 />
               </div>
 
-              <div v-else-if="getFieldChoice(currentEditPage.id, 'metaTitle') === 'ai'" class="k-meta-kit-legacy-field-option">
+              <div v-else-if="getFieldChoice(currentEditPage.id, 'metaTitle') === 'ai'"
+                   class="k-meta-kit-legacy-field-option">
                 <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated</span>
-                <span v-if="isGeneratingField(currentEditPage.id, 'metaTitle')" class="k-meta-kit-legacy-field-generating">
+                <span v-if="isGeneratingField(currentEditPage.id, 'metaTitle')"
+                      class="k-meta-kit-legacy-field-generating">
                   <k-icon class="k-meta-kit-spinner" type="loader"/>
                   Generating...
                 </span>
@@ -627,23 +646,28 @@
 
             <!-- Preview -->
             <div class="k-meta-kit-legacy-field-preview">
-              <div v-if="getFieldChoice(currentEditPage.id, 'metaDescription') === 'legacy'" class="k-meta-kit-legacy-field-option">
+              <div v-if="getFieldChoice(currentEditPage.id, 'metaDescription') === 'legacy'"
+                   class="k-meta-kit-legacy-field-option">
                 <span class="k-meta-kit-legacy-badge">Legacy Value</span>
                 <span class="k-meta-kit-legacy-field-value">{{ currentEditPage.legacy.metaDescription }}</span>
               </div>
 
-              <div v-else-if="getFieldChoice(currentEditPage.id, 'metaDescription') === 'keep' || !getFieldChoice(currentEditPage.id, 'metaDescription')" class="k-meta-kit-legacy-field-option">
+              <div
+                v-else-if="getFieldChoice(currentEditPage.id, 'metaDescription') === 'keep' || !getFieldChoice(currentEditPage.id, 'metaDescription')"
+                class="k-meta-kit-legacy-field-option">
                 <span class="k-meta-kit-legacy-badge">Current Value</span>
                 <span v-if="currentEditPage.hasMetaDescription" class="k-meta-kit-legacy-field-value">
                   {{ currentEditPage.metaDescription || '—' }}
-                  <span class="k-meta-kit-field-length" :class="getStatusClass(currentEditPage.hasMetaDescription, currentEditPage.metaDescriptionLength)">
+                  <span class="k-meta-kit-field-length"
+                        :class="getStatusClass(currentEditPage.hasMetaDescription, currentEditPage.metaDescriptionLength)">
                     ({{ currentEditPage.metaDescriptionLength }} chars)
                   </span>
                 </span>
                 <span v-else class="k-meta-kit-legacy-field-value-empty">No meta description set</span>
               </div>
 
-              <div v-else-if="getFieldChoice(currentEditPage.id, 'metaDescription') === 'manual'" class="k-meta-kit-legacy-field-option">
+              <div v-else-if="getFieldChoice(currentEditPage.id, 'metaDescription') === 'manual'"
+                   class="k-meta-kit-legacy-field-option">
                 <span class="k-meta-kit-legacy-badge">Manual Entry</span>
                 <k-input
                   :value="getManualValue(currentEditPage.id, 'metaDescription')"
@@ -654,13 +678,16 @@
                 />
               </div>
 
-              <div v-else-if="getFieldChoice(currentEditPage.id, 'metaDescription') === 'ai'" class="k-meta-kit-legacy-field-option">
+              <div v-else-if="getFieldChoice(currentEditPage.id, 'metaDescription') === 'ai'"
+                   class="k-meta-kit-legacy-field-option">
                 <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated</span>
-                <span v-if="isGeneratingField(currentEditPage.id, 'metaDescription')" class="k-meta-kit-legacy-field-generating">
+                <span v-if="isGeneratingField(currentEditPage.id, 'metaDescription')"
+                      class="k-meta-kit-legacy-field-generating">
                   <k-icon class="k-meta-kit-spinner" type="loader"/>
                   Generating...
                 </span>
-                <span v-else-if="getManualValue(currentEditPage.id, 'metaDescription')" class="k-meta-kit-legacy-field-value">
+                <span v-else-if="getManualValue(currentEditPage.id, 'metaDescription')"
+                      class="k-meta-kit-legacy-field-value">
                   {{ getManualValue(currentEditPage.id, 'metaDescription') }}
                 </span>
                 <span v-else class="k-meta-kit-legacy-field-value-empty">
@@ -689,7 +716,7 @@
 
             <!-- Current Image Display -->
             <div v-if="currentEditPage.ogImage" class="k-meta-kit-og-image-current">
-              <img :src="currentEditPage.ogImage.url" :alt="currentEditPage.ogImage.filename" />
+              <img :src="currentEditPage.ogImage.url" :alt="currentEditPage.ogImage.filename"/>
               <span class="k-meta-kit-og-image-filename">{{ currentEditPage.ogImage.filename }}</span>
             </div>
             <div v-else class="k-meta-kit-legacy-field-value-empty">
@@ -996,8 +1023,7 @@ export default {
         // Check if from single page or all pages dialog (values stored directly)
         else if (page[fieldName]) {
           value = page[fieldName];
-        }
-        else {
+        } else {
           // Already at current value or no value exists, no change needed
           window.panel.notification.success('Already using current value');
           return;
@@ -1070,7 +1096,7 @@ export default {
       this.isLoadingSinglePage = true;
 
       try {
-        const response = await this.$api.get('meta-kit/single-page', { pageId });
+        const response = await this.$api.get('meta-kit/single-page', {pageId});
         if (response.status === 'success') {
           this.currentEditPage = response.data;
         }
@@ -1094,7 +1120,7 @@ export default {
       // Reload the current page data to show updated values
       if (this.currentEditPage && this.currentEditPage.id === pageId) {
         try {
-          const response = await this.$api.get('meta-kit/single-page', { pageId });
+          const response = await this.$api.get('meta-kit/single-page', {pageId});
           if (response.status === 'success') {
             this.currentEditPage = response.data;
           }
@@ -1120,571 +1146,580 @@ export default {
 };
 </script>
 <style>
-
-/* Meta Kit View */
 .k-meta-kit-view {
-  padding: 1.5rem;
-  color: var(--color-text);
-}
+  /* Meta Kit View */
 
-.k-meta-kit-warning {
-  margin-bottom: 1.5rem;
-}
-
-.k-meta-kit-warning .k-box {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-}
-
-.k-meta-kit-warning .k-box > span {
-  flex: 1;
-}
-
-.k-meta-kit-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.k-meta-kit-stats-card {
-  background: var(--color-back);
-  border: 1px solid var(--color-border);
-  border-radius: var(--rounded);
-  padding: 1.5rem;
-  text-align: center;
-}
-
-.k-meta-kit-stats-card h3 {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-gray-600);
-  margin: 0 0 0.5rem 0;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.k-meta-kit-stats-card p {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-text);
-  margin: 0;
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-stats-card h3 {
-  color: var(--color-gray-400);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-stats-card p {
-  color: var(--color-white);
-}
-
-.k-meta-kit-actions {
-  margin-bottom: 1.5rem;
-}
-
-.k-meta-kit-table {
-  background: var(--color-back);
-  border: 1px solid var(--color-border);
-  border-radius: var(--rounded);
-  overflow-x: auto;
-}
-
-.k-meta-kit-table table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 900px;
-}
-
-.k-meta-kit-table th:first-child,
-.k-meta-kit-table td:first-child {
-  width: 50px;
-  text-align: center;
-}
-
-.k-meta-kit-table th:nth-child(2) {
-  min-width: 200px;
-}
-
-.k-meta-kit-table th:nth-child(3) {
-  width: 120px;
-}
-
-.k-meta-kit-table th:nth-child(4),
-.k-meta-kit-table th:nth-child(5) {
-  width: 100px;
-}
-
-.k-meta-kit-table th:nth-child(6),
-.k-meta-kit-table th:nth-child(7) {
-  width: 80px;
-}
-
-.k-meta-kit-table th:nth-child(8) {
-  width: 120px;
-}
-
-.k-meta-kit-table-actions {
-  display: flex;
-  gap: 0.25rem;
-  justify-content: center;
-  align-items: center;
-}
-
-.k-meta-kit-table th {
-  background: var(--color-back);
-  padding: 0.75rem 1rem;
-  text-align: left;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-text);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.k-meta-kit-table td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--color-border);
-  font-size: 0.875rem;
-  color: var(--color-text);
-  background: var(--color-back);
-}
-
-.k-meta-kit-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.k-meta-kit-table tbody tr:hover td {
-  background: var(--color-back);
-}
-
-.k-meta-kit-table-center {
-  text-align: center;
-}
-
-.k-meta-kit-table .k-link {
-  color: var(--color-blue-600);
-  text-decoration: none;
-}
-
-.k-meta-kit-table .k-link:hover {
-  text-decoration: underline;
-}
-
-.k-meta-kit-status-success {
-  color: var(--color-green-600);
-  font-weight: 600;
-}
-
-.k-meta-kit-status-warning {
-  color: var(--color-orange-600);
-  font-weight: 600;
-}
-
-.k-meta-kit-icon-success {
-  color: var(--color-green-600);
-}
-
-.k-meta-kit-icon-warning {
-  color: var(--color-orange-600);
-}
-
-.k-meta-kit-loading,
-.k-meta-kit-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 3rem;
-  text-align: center;
-  color: var(--color-gray-600);
-}
-
-.k-meta-kit-spinner {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
+  .k-meta-kit-view {
+    padding: 1.5rem;
+    color: var(--color-text);
   }
-  to {
-    transform: rotate(360deg);
+
+  .k-meta-kit-warning {
+    margin-bottom: 1.5rem;
+  }
+
+  .k-meta-kit-warning .k-box {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .k-meta-kit-warning .k-box > span {
+    flex: 1;
+  }
+
+  .k-meta-kit-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .k-meta-kit-stats-card {
+    background: var(--color-back);
+    border: 1px solid var(--color-border);
+    border-radius: var(--rounded);
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .k-meta-kit-stats-card h3 {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-gray-600);
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .k-meta-kit-stats-card p {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-stats-card h3 {
+    color: var(--color-gray-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-stats-card p {
+    color: var(--color-white);
+  }
+
+  .k-meta-kit-actions {
+    margin-bottom: 1.5rem;
+  }
+
+  .k-meta-kit-table {
+    background: var(--color-back);
+    border: 1px solid var(--color-border);
+    border-radius: var(--rounded);
+    overflow-x: auto;
+  }
+
+  .k-meta-kit-table table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+  }
+
+  .k-meta-kit-table th:first-child,
+  .k-meta-kit-table td:first-child {
+    width: 50px;
+    text-align: center;
+  }
+
+  .k-meta-kit-table th:nth-child(2) {
+    min-width: 200px;
+  }
+
+  .k-meta-kit-table th:nth-child(3) {
+    width: 120px;
+  }
+
+  .k-meta-kit-table th:nth-child(4),
+  .k-meta-kit-table th:nth-child(5) {
+    width: 100px;
+  }
+
+  .k-meta-kit-table th:nth-child(6),
+  .k-meta-kit-table th:nth-child(7) {
+    width: 80px;
+  }
+
+  .k-meta-kit-table th:nth-child(8) {
+    width: 120px;
+  }
+
+  .k-meta-kit-table-actions {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .k-meta-kit-table th {
+    background: var(--color-back);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .k-meta-kit-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.875rem;
+    color: var(--color-text);
+    background: var(--color-back);
+  }
+
+  .k-meta-kit-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .k-meta-kit-table tbody tr:hover td {
+    background: var(--color-back);
+  }
+
+  .k-meta-kit-table-center {
+    text-align: center;
+  }
+
+  .k-meta-kit-table .k-link {
+    color: var(--color-blue-600);
+    text-decoration: none;
+  }
+
+  .k-meta-kit-table .k-link:hover {
+    text-decoration: underline;
+  }
+
+  .k-meta-kit-status-success {
+    color: var(--color-green-600);
+    font-weight: 600;
+  }
+
+  .k-meta-kit-status-warning {
+    color: var(--color-orange-600);
+    font-weight: 600;
+  }
+
+  .k-meta-kit-icon-success {
+    color: var(--color-green-600);
+  }
+
+  .k-meta-kit-icon-warning {
+    color: var(--color-orange-600);
+  }
+
+  .k-meta-kit-loading,
+  .k-meta-kit-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 3rem;
+    text-align: center;
+    color: var(--color-gray-600);
+  }
+
+  .k-meta-kit-spinner {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .k-meta-kit-legacy-list {
+    padding: 1rem;
+  }
+
+  .k-meta-kit-legacy-item {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: var(--color-back);
+    border-radius: var(--rounded);
+  }
+
+  .k-meta-kit-legacy-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .k-meta-kit-legacy-item-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .k-meta-kit-legacy-field {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1rem;
+    align-items: start;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .k-meta-kit-legacy-field:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .k-meta-kit-legacy-field-label {
+    font-weight: 600;
+    color: var(--color-gray-600);
+    font-size: 0.875rem;
+    padding-top: 0.5rem;
+  }
+
+  .k-meta-kit-legacy-field-values {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .k-meta-kit-legacy-field-old,
+  .k-meta-kit-legacy-field-new {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .k-meta-kit-legacy-badge {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    background: var(--color-blue-100);
+    color: var(--color-blue-700);
+    border-radius: var(--rounded-xs);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    width: fit-content;
+  }
+
+  .k-meta-kit-legacy-badge-warning {
+    background: var(--color-orange-100);
+    color: var(--color-orange-700);
+  }
+
+  .k-meta-kit-legacy-badge-new {
+    background: var(--color-green-100);
+    color: var(--color-green-700);
+  }
+
+  .k-meta-kit-legacy-field-value,
+  .k-meta-kit-legacy-field-value-current {
+    color: var(--color-text);
+    font-size: 0.875rem;
+    word-break: break-word;
+    line-height: 1.5;
+    padding: 0.5rem;
+    background: var(--color-background);
+    border-radius: var(--rounded-xs);
+    border: 1px solid var(--color-border);
+  }
+
+  .k-meta-kit-legacy-field-value-current {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  .k-meta-kit-legacy-field-value-empty {
+    color: var(--color-gray-500);
+    font-size: 0.875rem;
+    font-style: italic;
+    padding: 0.5rem;
+  }
+
+  .k-tag {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: var(--color-back);
+    color: var(--color-blue-700);
+    border-radius: var(--rounded-xs);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  /* Dark mode support */
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-stats-card {
+    background: var(--color-black);
+    border-color: var(--color-border);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-item {
+    background: var(--color-black);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-table {
+    background: var(--color-black);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-table th {
+    background: var(--color-back);
+    color: var(--color-text);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-table td {
+    background: var(--color-black);
+    color: var(--color-text);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-table tbody tr:hover td {
+    background: var(--color-back);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-table .k-link {
+    color: var(--color-blue-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-tag {
+    background: var(--color-back);
+    color: var(--color-blue-300);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-label {
+    color: var(--color-gray-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-value,
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-value-current {
+    color: var(--color-text);
+    background: var(--color-black);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge {
+    background: var(--color-blue-900);
+    color: var(--color-blue-300);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge-warning {
+    background: var(--color-orange-900);
+    color: var(--color-orange-300);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge-new {
+    background: var(--color-green-900);
+    color: var(--color-green-300);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-value-empty {
+    color: var(--color-gray-500);
+  }
+
+  /* New interactive elements */
+
+  .k-meta-kit-legacy-choices {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .k-meta-kit-legacy-field-preview {
+    padding: 1rem;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--rounded);
+    margin-bottom: 1rem;
+  }
+
+  .k-meta-kit-legacy-field-option {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .k-meta-kit-legacy-badge-ai {
+    background: var(--color-purple-100);
+    color: var(--color-purple-700);
+  }
+
+  .k-meta-kit-legacy-badge-hint {
+    color: var(--color-gray-500);
+    font-size: 0.875rem;
+    font-style: italic;
+  }
+
+  .k-meta-kit-legacy-field-generating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-gray-600);
+    font-size: 0.875rem;
+  }
+
+  .k-meta-kit-legacy-field-reference {
+    display: none;
+    margin: 1rem 0;
+    border-top: 1px solid var(--color-border);
+    padding-top: 0.75rem;
+  }
+
+  .k-meta-kit-legacy-field-reference details {
+    cursor: pointer;
+  }
+
+  .k-meta-kit-legacy-field-reference summary {
+    font-size: 0.875rem;
+    color: var(--color-gray-600);
+    user-select: none;
+    padding: 0.25rem 0;
+  }
+
+  .k-meta-kit-legacy-field-reference summary:hover {
+    color: var(--color-text);
+  }
+
+  .k-meta-kit-legacy-badge-small {
+    display: inline-block;
+    padding: 0.125rem 0.375rem;
+    background: var(--color-gray-200);
+    color: var(--color-gray-700);
+    border-radius: var(--rounded-xs);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  .k-meta-kit-legacy-field-value-small {
+    color: var(--color-text);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    padding: 0.375rem;
+    background: var(--color-back);
+    border-radius: var(--rounded-xs);
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  /* Dark mode for new elements */
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge-ai {
+    background: var(--color-purple-900);
+    color: var(--color-purple-300);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-preview {
+    background: var(--color-black);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge-small {
+    background: var(--color-gray-800);
+    color: var(--color-gray-300);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-value-small {
+    background: var(--color-black);
+    color: var(--color-text);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-reference summary {
+    color: var(--color-gray-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-reference summary:hover {
+    color: var(--color-text);
+  }
+
+  .k-button-group.k-dialog-buttons:has(>.k-button:nth-child(2)) {
+    grid-template-columns: 1fr;
+  }
+
+  .k-button.k-dialog-button-submit {
+    display: none;
+  }
+
+  .k-toolbar.k-textarea-toolbar {
+    display: none;
+  }
+
+  /* Field length indicator */
+
+  .k-meta-kit-field-length {
+    display: inline-block;
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .k-meta-kit-field-length.k-meta-kit-status-success {
+    color: var(--color-green-600);
+  }
+
+  .k-meta-kit-field-length.k-meta-kit-status-warning {
+    color: var(--color-orange-600);
+  }
+
+  /* Single page edit dialog */
+
+  .k-meta-kit-single-edit {
+    padding: 1rem;
+  }
+
+  .k-meta-kit-single-edit .k-meta-kit-legacy-field {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .k-meta-kit-single-edit .k-meta-kit-legacy-field:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  /* OG Image Display */
+
+  .k-meta-kit-og-image-current {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--color-light);
+    border-radius: var(--rounded);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-current {
+    background: var(--color-dark);
+  }
+
+  .k-meta-kit-og-image-current img {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: var(--rounded-sm);
+    background: var(--color-white);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-current img {
+    background: var(--color-black);
+  }
+
+  .k-meta-kit-og-image-filename {
+    font-size: 0.875rem;
+    color: var(--color-text-dimmed);
+    font-family: var(--font-mono);
   }
 }
-
-.k-meta-kit-legacy-list {
-  padding: 1rem;
-}
-
-.k-meta-kit-legacy-item {
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background: var(--color-back);
-  border-radius: var(--rounded);
-}
-
-.k-meta-kit-legacy-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.k-meta-kit-legacy-item-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.k-meta-kit-legacy-field {
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: 1rem;
-  align-items: start;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.k-meta-kit-legacy-field:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.k-meta-kit-legacy-field-label {
-  font-weight: 600;
-  color: var(--color-gray-600);
-  font-size: 0.875rem;
-  padding-top: 0.5rem;
-}
-
-.k-meta-kit-legacy-field-values {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.k-meta-kit-legacy-field-old,
-.k-meta-kit-legacy-field-new {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.k-meta-kit-legacy-badge {
-  display: inline-block;
-  padding: 0.125rem 0.5rem;
-  background: var(--color-blue-100);
-  color: var(--color-blue-700);
-  border-radius: var(--rounded-xs);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-  width: fit-content;
-}
-
-.k-meta-kit-legacy-badge-warning {
-  background: var(--color-orange-100);
-  color: var(--color-orange-700);
-}
-
-.k-meta-kit-legacy-badge-new {
-  background: var(--color-green-100);
-  color: var(--color-green-700);
-}
-
-.k-meta-kit-legacy-field-value,
-.k-meta-kit-legacy-field-value-current {
-  color: var(--color-text);
-  font-size: 0.875rem;
-  word-break: break-word;
-  line-height: 1.5;
-  padding: 0.5rem;
-  background: var(--color-background);
-  border-radius: var(--rounded-xs);
-  border: 1px solid var(--color-border);
-}
-
-.k-meta-kit-legacy-field-value-current {
-  text-decoration: line-through;
-  opacity: 0.7;
-}
-
-.k-meta-kit-legacy-field-value-empty {
-  color: var(--color-gray-500);
-  font-size: 0.875rem;
-  font-style: italic;
-  padding: 0.5rem;
-}
-
-.k-tag {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  background: var(--color-back);
-  color: var(--color-blue-700);
-  border-radius: var(--rounded-xs);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-/* Dark mode support */
-.k-panel[data-color-scheme="dark"] .k-meta-kit-stats-card {
-  background: var(--color-black);
-  border-color: var(--color-border);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-item {
-  background: var(--color-black);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-table {
-  background: var(--color-black);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-table th {
-  background: var(--color-back);
-  color: var(--color-text);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-table td {
-  background: var(--color-black);
-  color: var(--color-text);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-table tbody tr:hover td {
-  background: var(--color-back);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-table .k-link {
-  color: var(--color-blue-400);
-}
-
-.k-panel[data-color-scheme="dark"] .k-tag {
-  background: var(--color-back);
-  color: var(--color-blue-300);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-label {
-  color: var(--color-gray-400);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-value,
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-value-current {
-  color: var(--color-text);
-  background: var(--color-black);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge {
-  background: var(--color-blue-900);
-  color: var(--color-blue-300);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge-warning {
-  background: var(--color-orange-900);
-  color: var(--color-orange-300);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge-new {
-  background: var(--color-green-900);
-  color: var(--color-green-300);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-value-empty {
-  color: var(--color-gray-500);
-}
-
-/* New interactive elements */
-.k-meta-kit-legacy-choices {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
-
-.k-meta-kit-legacy-field-preview {
-  padding: 1rem;
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: var(--rounded);
-  margin-bottom: 1rem;
-}
-
-.k-meta-kit-legacy-field-option {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.k-meta-kit-legacy-badge-ai {
-  background: var(--color-purple-100);
-  color: var(--color-purple-700);
-}
-
-.k-meta-kit-legacy-badge-hint {
-  color: var(--color-gray-500);
-  font-size: 0.875rem;
-  font-style: italic;
-}
-
-.k-meta-kit-legacy-field-generating {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--color-gray-600);
-  font-size: 0.875rem;
-}
-
-.k-meta-kit-legacy-field-reference {
-  display: none;
-  margin: 1rem 0;
-  border-top: 1px solid var(--color-border);
-  padding-top: 0.75rem;
-}
-
-.k-meta-kit-legacy-field-reference details {
-  cursor: pointer;
-}
-
-.k-meta-kit-legacy-field-reference summary {
-  font-size: 0.875rem;
-  color: var(--color-gray-600);
-  user-select: none;
-  padding: 0.25rem 0;
-}
-
-.k-meta-kit-legacy-field-reference summary:hover {
-  color: var(--color-text);
-}
-
-.k-meta-kit-legacy-badge-small {
-  display: inline-block;
-  padding: 0.125rem 0.375rem;
-  background: var(--color-gray-200);
-  color: var(--color-gray-700);
-  border-radius: var(--rounded-xs);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  margin-bottom: 0.25rem;
-}
-
-.k-meta-kit-legacy-field-value-small {
-  color: var(--color-text);
-  font-size: 0.8125rem;
-  line-height: 1.4;
-  padding: 0.375rem;
-  background: var(--color-back);
-  border-radius: var(--rounded-xs);
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-/* Dark mode for new elements */
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge-ai {
-  background: var(--color-purple-900);
-  color: var(--color-purple-300);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-preview {
-  background: var(--color-black);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-badge-small {
-  background: var(--color-gray-800);
-  color: var(--color-gray-300);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-value-small {
-  background: var(--color-black);
-  color: var(--color-text);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-reference summary {
-  color: var(--color-gray-400);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-legacy-field-reference summary:hover {
-  color: var(--color-text);
-}
-
-.k-button-group.k-dialog-buttons:has(>.k-button:nth-child(2)) {
-  grid-template-columns: 1fr;
-}
-.k-button.k-dialog-button-submit {
-  display: none;
-}
-.k-toolbar.k-textarea-toolbar {
-  display: none;
-}
-
-/* Field length indicator */
-.k-meta-kit-field-length {
-  display: inline-block;
-  margin-left: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.k-meta-kit-field-length.k-meta-kit-status-success {
-  color: var(--color-green-600);
-}
-
-.k-meta-kit-field-length.k-meta-kit-status-warning {
-  color: var(--color-orange-600);
-}
-
-/* Single page edit dialog */
-.k-meta-kit-single-edit {
-  padding: 1rem;
-}
-
-.k-meta-kit-single-edit .k-meta-kit-legacy-field {
-  margin-bottom: 2rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.k-meta-kit-single-edit .k-meta-kit-legacy-field:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-/* OG Image Display */
-.k-meta-kit-og-image-current {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background: var(--color-light);
-  border-radius: var(--rounded);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-current {
-  background: var(--color-dark);
-}
-
-.k-meta-kit-og-image-current img {
-  max-width: 100%;
-  max-height: 200px;
-  object-fit: contain;
-  border-radius: var(--rounded-sm);
-  background: var(--color-white);
-}
-
-.k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-current img {
-  background: var(--color-black);
-}
-
-.k-meta-kit-og-image-filename {
-  font-size: 0.875rem;
-  color: var(--color-text-dimmed);
-  font-family: var(--font-mono);
-}
-
 </style>

@@ -2,6 +2,8 @@
 
 AI-powered SEO plugin for Kirby 4 with automatic meta descriptions, live previews, sitemap generation, and Schema.org support.
 
+[![Screenshot](screenshot.jpg)](https://github.com/tearoom1/kirby-content-watch)
+
 ## Features
 
 - 🤖 AI-powered meta descriptions via OpenRouter
