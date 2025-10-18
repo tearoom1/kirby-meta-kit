@@ -858,6 +858,43 @@ export default {
         this.$set(this.fieldChoices[pageId], fieldName, {});
       }
       this.$set(this.fieldChoices[pageId][fieldName], 'choice', choice);
+      
+      // If switching to manual edit, prefill with current or legacy value if no manual value exists
+      if (choice === 'manual') {
+        const existingManualValue = this.getManualValue(pageId, fieldName);
+        
+        // Only prefill if there's no existing manual value
+        if (!existingManualValue) {
+          // Find the page
+          let page = this.legacyPages.find(p => p.id === pageId);
+          if (!page) {
+            page = this.allPagesData.find(p => p.id === pageId);
+          }
+          if (!page) {
+            page = this.currentEditPage;
+          }
+          
+          if (page) {
+            let prefillValue = '';
+            
+            // Try current value first
+            if (fieldName === 'metaTitle' && page.metaTitle) {
+              prefillValue = page.metaTitle;
+            } else if (fieldName === 'metaDescription' && page.metaDescription) {
+              prefillValue = page.metaDescription;
+            }
+            // If no current value, try legacy value
+            else if (page.legacy && page.legacy[fieldName]) {
+              prefillValue = page.legacy[fieldName];
+            }
+            
+            // Set the prefill value
+            if (prefillValue) {
+              this.setManualValue(pageId, fieldName, prefillValue);
+            }
+          }
+        }
+      }
     },
     getManualValue(pageId, fieldName) {
       return this.fieldChoices[pageId]?.[fieldName]?.manualValue || '';
@@ -1009,6 +1046,15 @@ export default {
     },
     async applySingleFieldAndClose(pageId, fieldName) {
       await this.applySingleField(pageId, fieldName);
+      
+      // Reset the choice to 'keep' which hides the apply button
+      this.setFieldChoice(pageId, fieldName, 'keep');
+      
+      // Clear any manual values
+      if (this.fieldChoices[pageId]) {
+        this.$set(this.fieldChoices[pageId], fieldName + '_manual', '');
+      }
+      
       // Reload the current page data to show updated values
       if (this.currentEditPage && this.currentEditPage.id === pageId) {
         try {

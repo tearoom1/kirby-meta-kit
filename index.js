@@ -322,6 +322,31 @@
           this.$set(this.fieldChoices[pageId], fieldName, {});
         }
         this.$set(this.fieldChoices[pageId][fieldName], "choice", choice);
+        if (choice === "manual") {
+          const existingManualValue = this.getManualValue(pageId, fieldName);
+          if (!existingManualValue) {
+            let page = this.legacyPages.find((p) => p.id === pageId);
+            if (!page) {
+              page = this.allPagesData.find((p) => p.id === pageId);
+            }
+            if (!page) {
+              page = this.currentEditPage;
+            }
+            if (page) {
+              let prefillValue = "";
+              if (fieldName === "metaTitle" && page.metaTitle) {
+                prefillValue = page.metaTitle;
+              } else if (fieldName === "metaDescription" && page.metaDescription) {
+                prefillValue = page.metaDescription;
+              } else if (page.legacy && page.legacy[fieldName]) {
+                prefillValue = page.legacy[fieldName];
+              }
+              if (prefillValue) {
+                this.setManualValue(pageId, fieldName, prefillValue);
+              }
+            }
+          }
+        }
       },
       getManualValue(pageId, fieldName) {
         var _a, _b;
@@ -458,6 +483,10 @@
       },
       async applySingleFieldAndClose(pageId, fieldName) {
         await this.applySingleField(pageId, fieldName);
+        this.setFieldChoice(pageId, fieldName, "keep");
+        if (this.fieldChoices[pageId]) {
+          this.$set(this.fieldChoices[pageId], fieldName + "_manual", "");
+        }
         if (this.currentEditPage && this.currentEditPage.id === pageId) {
           try {
             const response = await this.$api.get("meta-kit/single-page", { pageId });
