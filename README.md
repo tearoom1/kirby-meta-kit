@@ -6,8 +6,10 @@ AI-powered SEO plugin for Kirby 4 with automatic meta descriptions, live preview
 
 ## Features
 
-- 🤖 AI-powered meta descriptions via OpenRouter
+- 🎛️ Dedicated Panel area for metadata management
+- 🤖 AI-powered meta titles & descriptions via OpenRouter
 - 👁️ Live panel previews (Google, Twitter, Facebook)
+- ⚡ Bulk operations & legacy field migration
 - 🗺️ Styled XML sitemap with multilanguage support
 - 🏗️ Schema.org JSON-LD structured data
 - 📱 OpenGraph & Twitter Cards (1200×630px)
@@ -136,17 +138,34 @@ tabs:
 
 ### 3. Use Panel Features
 
+#### Meta Kit Area
+
+The plugin adds a **Meta Kit** section to the Kirby Panel main menu with powerful metadata management tools:
+
+**Features:**
+- **Overview Dashboard:** Statistics showing metadata coverage across all pages
+- **Bulk Operations:** Generate or update metadata for multiple pages at once
+- **Legacy Migration:** Detect and convert old SEO fields to the new structure
+- **Single Page Editor:** Quick edit dialog for meta title, description, and OG image
+- **AI Generation:** Generate optimized meta titles (30-65 chars) and descriptions (max 160 chars)
+
+**Access:** Click **"Meta Kit"** (wand icon) in the Panel sidebar
+
+**Page Editor:**
 * **Live Preview:** See real-time Google/Twitter/Facebook appearance
-* **AI Generator:** Click "Generate with AI" button to create optimized descriptions
+* **AI Generator:** Click "Generate with AI" button for optimized content
+* **Manual Override:** Edit metadata directly in each page's SEO tab
 * **Languages:** Auto-detects language (de, en, fr, es, it)
 
 ## What's Included
 
+* **Panel Area:** Dedicated metadata management interface with dashboard and bulk operations
 * **Unified Snippet:** Single `meta-kit/seo` snippet for all SEO needs
 * **Meta Tags:** Title, description, keywords, canonical, noindex, hreflang
 * **Social Media:** OpenGraph & Twitter Cards with optimized images (1200×630px)
 * **Schema.org:** Organization, WebSite, WebPage, BreadcrumbList (JSON-LD)
 * **Sitemap:** `/sitemap.xml` with styled view, exclusions, priorities
+* **AI Generation:** Smart meta titles (30-65 chars) & descriptions (max 160 chars)
 * **Multilanguage:** Full support with hreflang tags and og:locale
 * **Configurable:** Toggle meta/opengraph/schema individually
 
