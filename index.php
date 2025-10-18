@@ -115,6 +115,15 @@ Kirby::plugin('tearoom1/meta-kit', [
                 'action' => function () {
                     return \TearoomOne\MetaKitController::getPagesWithContent();
                 }
+            ],
+            [
+                'pattern' => 'meta-kit/single-page',
+                'method' => 'GET',
+                'auth' => true,
+                'action' => function () {
+                    $pageId = get('pageId');
+                    return \TearoomOne\MetaKitController::getSinglePage($pageId);
+                }
             ]
         ]
     ],

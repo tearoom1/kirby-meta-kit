@@ -342,4 +342,71 @@ class MetaKitController
             'data' => $result
         ];
     }
+
+    public static function getSinglePage(string $pageId): array
+    {
+        $kirby = kirby();
+        $page = $kirby->page($pageId);
+
+        if (!$page) {
+            return [
+                'status' => 'error',
+                'message' => 'Page not found'
+            ];
+        }
+
+        $seoData = $page->seo()->toObject();
+        $legacy = [];
+
+        // Check for legacy fields
+        if ($page->metatitle()->isNotEmpty()) {
+            $legacy['metaTitle'] = $page->metatitle()->value();
+        }
+        if ($page->Metatitle()->isNotEmpty()) {
+            $legacy['metaTitle'] = $page->Metatitle()->value();
+        }
+        if ($page->customtitle()->isNotEmpty() && empty($legacy['metaTitle'])) {
+            $legacy['metaTitle'] = $page->customtitle()->value();
+        }
+        if ($page->seotitle()->isNotEmpty() && empty($legacy['metaTitle'])) {
+            $legacy['metaTitle'] = $page->seotitle()->value();
+        }
+
+        if ($page->metadescription()->isNotEmpty()) {
+            $legacy['metaDescription'] = $page->metadescription()->value();
+        }
+        if ($page->seodescription()->isNotEmpty() && empty($legacy['metaDescription'])) {
+            $legacy['metaDescription'] = $page->seodescription()->value();
+        }
+
+        $result = [
+            'id' => $page->id(),
+            'title' => $page->title()->value(),
+            'url' => $page->url(),
+            'panelUrl' => $page->panel()->url(),
+            'template' => $page->intendedTemplate()->name(),
+            'hasMetaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty(),
+            'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
+            'hasOgImage' => $seoData && $seoData->ogImage()->isNotEmpty(),
+            'noIndex' => $seoData && $seoData->noIndex()->toBool(),
+            'metaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty()
+                ? $seoData->metaTitle()->value()
+                : null,
+            'metaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty()
+                ? $seoData->metaDescription()->value()
+                : null,
+            'metaTitleLength' => $seoData && $seoData->metaTitle()->isNotEmpty()
+                ? mb_strlen($seoData->metaTitle()->value())
+                : 0,
+            'metaDescriptionLength' => $seoData && $seoData->metaDescription()->isNotEmpty()
+                ? mb_strlen($seoData->metaDescription()->value())
+                : 0,
+            'legacy' => !empty($legacy) ? $legacy : null,
+        ];
+
+        return [
+            'status' => 'success',
+            'data' => $result
+        ];
+    }
 }
