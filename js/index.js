@@ -1,8 +1,12 @@
 
 import './index.css';
 import SeoPreview from '../src/sections/seo-preview.vue';
+import MetaKitView from './components/MetaKitView.vue';
 
 panel.plugin('tearoom1/meta-kit', {
+  components: {
+    'meta-kit-view': MetaKitView
+  },
   sections: {
     'seo-preview': SeoPreview
   },

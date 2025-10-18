@@ -9,6 +9,7 @@ load([
     'TearoomOne\MetaKit' => 'src/MetaKit.php',
     'TearoomOne\Sitemap' => 'src/Sitemap.php',
     'TearoomOne\MetaHelper' => 'src/MetaHelper.php',
+    'TearoomOne\MetaKitController' => 'src/MetaKitController.php',
 ], __DIR__);
 
 Kirby::plugin('tearoom1/meta-kit', [
@@ -40,6 +41,9 @@ Kirby::plugin('tearoom1/meta-kit', [
         'seo/opengraph' => __DIR__ . '/snippets/opengraph.php',
         'seo/schema' => __DIR__ . '/snippets/schema.php',
     ],
+    'areas' => [
+        'meta-kit' => require __DIR__ . '/src/areas/meta-kit.php',
+    ],
     'api' => [
         'routes' => [
             [
@@ -47,6 +51,51 @@ Kirby::plugin('tearoom1/meta-kit', [
                 'method' => 'POST',
                 'auth' => true,
                 'action' => require __DIR__ . '/src/api/generate.php'
+            ],
+            [
+                'pattern' => 'meta-kit/pages',
+                'method' => 'GET',
+                'auth' => true,
+                'action' => function () {
+                    return [
+                        'status' => 'success',
+                        'data' => \TearoomOne\MetaKitController::getPages()
+                    ];
+                }
+            ],
+            [
+                'pattern' => 'meta-kit/generate-description',
+                'method' => 'POST',
+                'auth' => true,
+                'action' => function () {
+                    $pageId = get('pageId');
+                    return \TearoomOne\MetaKitController::generateDescription($pageId);
+                }
+            ],
+            [
+                'pattern' => 'meta-kit/generate-all',
+                'method' => 'POST',
+                'auth' => true,
+                'action' => function () {
+                    return \TearoomOne\MetaKitController::generateAllDescriptions();
+                }
+            ],
+            [
+                'pattern' => 'meta-kit/detect-legacy',
+                'method' => 'GET',
+                'auth' => true,
+                'action' => function () {
+                    return \TearoomOne\MetaKitController::detectLegacyMetadata();
+                }
+            ],
+            [
+                'pattern' => 'meta-kit/convert-legacy',
+                'method' => 'POST',
+                'auth' => true,
+                'action' => function () {
+                    $pageId = get('pageId');
+                    return \TearoomOne\MetaKitController::convertLegacyMetadata($pageId);
+                }
             ]
         ]
     ],

@@ -12,7 +12,7 @@
       options
     };
   }
-  const _sfc_main = {
+  const _sfc_main$1 = {
     props: {
       label: String,
       parent: String,
@@ -138,9 +138,167 @@
       }
     }
   };
-  var _sfc_render = function render() {
+  var _sfc_render$1 = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("section", { staticClass: "k-seo-preview-section" }, [_c("header", { staticClass: "k-section-header" }, [_c("h2", { staticClass: "k-headline" }, [_vm._v(_vm._s(_vm.label || "SEO Preview"))])]), _vm.meta ? _c("div", { staticClass: "k-seo-previews" }, [_c("div", { staticClass: "k-seo-preview k-seo-preview--google" }, [_c("h3", { staticClass: "k-seo-preview__title" }, [_vm._v("Google Search Preview")]), _c("div", { staticClass: "k-seo-preview__content" }, [_c("div", { staticClass: "k-google-preview" }, [_c("cite", { staticClass: "k-google-preview__url" }, [_vm._v(_vm._s(_vm.displayUrl(_vm.meta.url)))]), _c("h3", { staticClass: "k-google-preview__title" }, [_vm._v(_vm._s(_vm.meta.title || "Page Title"))]), _c("p", { staticClass: "k-google-preview__description" }, [_vm._v(_vm._s(_vm.meta.description || "No description available"))])])])]), _c("div", { staticClass: "k-seo-preview k-seo-preview--twitter" }, [_c("h3", { staticClass: "k-seo-preview__title" }, [_vm._v("Share / Card Preview")]), _c("div", { staticClass: "k-seo-preview__content" }, [_c("div", { staticClass: "k-twitter-preview" }, [_vm.meta.ogImage ? _c("div", { staticClass: "k-twitter-preview__image", style: { backgroundImage: "url(" + _vm.meta.ogImage + ")" } }) : _vm._e(), _c("div", { staticClass: "k-twitter-preview__body" }, [_c("cite", { staticClass: "k-twitter-preview__url" }, [_vm._v(_vm._s(_vm.displayUrl(_vm.meta.url)))]), _c("h4", { staticClass: "k-twitter-preview__title" }, [_vm._v(_vm._s(_vm.meta.ogTitle || _vm.meta.title || "Page Title"))]), _c("p", { staticClass: "k-twitter-preview__description" }, [_vm._v(_vm._s(_vm.truncate(_vm.meta.ogDescription || _vm.meta.description, 140) || "No description"))])])])])])]) : _c("div", { staticClass: "k-seo-preview-loading" }, [_vm._v(" Loading preview... ")])]);
+  };
+  var _sfc_staticRenderFns$1 = [];
+  _sfc_render$1._withStripped = true;
+  var __component__$1 = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$1,
+    _sfc_render$1,
+    _sfc_staticRenderFns$1
+  );
+  __component__$1.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/kirby-seo-ai/src/sections/seo-preview.vue";
+  const SeoPreview = __component__$1.exports;
+  const _sfc_main = {
+    props: {
+      pages: Array
+    },
+    data() {
+      return {
+        isLoadingPages: false,
+        isGeneratingAll: false,
+        isLoadingLegacy: false,
+        pagesData: this.pages || [],
+        legacyPages: [],
+        legacyDetection: {
+          show: false,
+          found: 0
+        }
+      };
+    },
+    computed: {
+      pagesWithDescription() {
+        return this.pagesData.filter((p) => p.hasMetaDescription).length;
+      },
+      pagesWithOgImage() {
+        return this.pagesData.filter((p) => p.hasOgImage).length;
+      },
+      pagesNoIndex() {
+        return this.pagesData.filter((p) => p.noIndex).length;
+      }
+    },
+    created() {
+      this.checkLegacyOnLoad();
+    },
+    methods: {
+      getStatusClass(hasField, length) {
+        if (!hasField) return "";
+        if (length < 50 || length > 160) {
+          return "k-meta-kit-status-warning";
+        }
+        return "k-meta-kit-status-success";
+      },
+      async refreshPages() {
+        this.isLoadingPages = true;
+        try {
+          const response = await this.$api.get("meta-kit/pages");
+          if (response.status === "success") {
+            this.pagesData = response.data;
+          }
+        } catch (error) {
+          window.panel.notification.error("Failed to refresh pages");
+        } finally {
+          this.isLoadingPages = false;
+        }
+      },
+      async generateDescription(pageId) {
+        try {
+          const response = await this.$api.post("meta-kit/generate-description", { pageId });
+          if (response.status === "success") {
+            window.panel.notification.success(response.message);
+            await this.refreshPages();
+          } else {
+            window.panel.notification.error(response.message);
+          }
+        } catch (error) {
+          window.panel.notification.error("Failed to generate description");
+        }
+      },
+      async generateAllDescriptions() {
+        if (!confirm("This will generate descriptions for all pages without one. Continue?")) {
+          return;
+        }
+        this.isGeneratingAll = true;
+        try {
+          const response = await this.$api.post("meta-kit/generate-all");
+          if (response.status === "success") {
+            window.panel.notification.success(response.message);
+            await this.refreshPages();
+          } else {
+            window.panel.notification.error(response.message);
+          }
+        } catch (error) {
+          window.panel.notification.error("Failed to generate descriptions");
+        } finally {
+          this.isGeneratingAll = false;
+        }
+      },
+      async detectLegacyMetadata() {
+        this.$refs.legacyDialog.open();
+        this.isLoadingLegacy = true;
+        try {
+          const response = await this.$api.get("meta-kit/detect-legacy");
+          if (response.status === "success") {
+            this.legacyPages = response.pages || [];
+          }
+        } catch (error) {
+          window.panel.notification.error("Failed to detect legacy metadata");
+        } finally {
+          this.isLoadingLegacy = false;
+        }
+      },
+      async checkLegacyOnLoad() {
+        const dismissed = sessionStorage.getItem("metaKitLegacyDismissed");
+        if (dismissed) return;
+        try {
+          const response = await this.$api.get("meta-kit/detect-legacy");
+          if (response.status === "success" && response.found > 0) {
+            this.legacyDetection.show = true;
+            this.legacyDetection.found = response.found;
+          }
+        } catch (error) {
+        }
+      },
+      dismissLegacyWarning() {
+        this.legacyDetection.show = false;
+        sessionStorage.setItem("metaKitLegacyDismissed", "true");
+      },
+      showLegacyDialog() {
+        this.detectLegacyMetadata();
+      },
+      async convertLegacyPage(pageId) {
+        try {
+          const response = await this.$api.post("meta-kit/convert-legacy", { pageId });
+          if (response.status === "success" || response.status === "info") {
+            window.panel.notification.success(response.message);
+            await this.detectLegacyMetadata();
+            await this.refreshPages();
+          } else {
+            window.panel.notification.error(response.message);
+          }
+        } catch (error) {
+          window.panel.notification.error("Failed to convert legacy data");
+        }
+      }
+    }
+  };
+  var _sfc_render = function render() {
+    var _vm = this, _c = _vm._self._c;
+    return _c("k-panel-inside", { staticClass: "k-meta-kit-view" }, [_vm.legacyDetection.show && _vm.legacyDetection.found > 0 ? _c("div", { staticClass: "k-meta-kit-warning" }, [_c("k-box", { attrs: { "theme": "info" } }, [_c("k-icon", { attrs: { "type": "info" } }), _c("span", [_vm._v("Found " + _vm._s(_vm.legacyDetection.found) + " pages with legacy SEO metadata")]), _c("k-button", { attrs: { "icon": "download" }, on: { "click": _vm.showLegacyDialog } }, [_vm._v("View & Convert")]), _c("k-button", { attrs: { "icon": "cancel" }, on: { "click": _vm.dismissLegacyWarning } }, [_vm._v("Dismiss")])], 1)], 1) : _vm._e(), _c("div", { staticClass: "k-meta-kit-stats" }, [_c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("Total Pages")]), _c("p", [_vm._v(_vm._s(_vm.pages.length))])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With Description")]), _c("p", [_vm._v(_vm._s(_vm.pagesWithDescription))])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With OG Image")]), _c("p", [_vm._v(_vm._s(_vm.pagesWithOgImage))])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("NoIndex")]), _c("p", [_vm._v(_vm._s(_vm.pagesNoIndex))])])]), _c("div", { staticClass: "k-meta-kit-actions" }, [_c("k-button-group", [_c("k-button", { attrs: { "icon": "magic", "disabled": _vm.isGeneratingAll, "progress": _vm.isGeneratingAll }, on: { "click": _vm.generateAllDescriptions } }, [_vm._v(" Generate All Missing Descriptions ")]), _c("k-button", { attrs: { "icon": "refresh" }, on: { "click": _vm.refreshPages } }, [_vm._v("Refresh")]), _c("k-button", { attrs: { "icon": "download" }, on: { "click": _vm.detectLegacyMetadata } }, [_vm._v("Detect Legacy Data")])], 1)], 1), _c("div", { staticClass: "k-meta-kit-table" }, [_c("table", [_c("thead", [_c("tr", [_c("th", [_vm._v("#")]), _c("th", [_vm._v("Page")]), _c("th", [_vm._v("Template")]), _c("th", [_vm._v("Meta Title")]), _c("th", [_vm._v("Description")]), _c("th", [_vm._v("OG Image")]), _c("th", [_vm._v("NoIndex")]), _c("th", [_vm._v("Actions")])])]), _c("tbody", _vm._l(_vm.pagesData, function(page, index) {
+      return _c("tr", { key: page.id }, [_c("td", [_vm._v(_vm._s(index + 1))]), _c("td", [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))])]), _c("td", [_vm._v(_vm._s(page.template))]), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: _vm.getStatusClass(page.hasMetaTitle, page.metaTitleLength) }, [_vm._v(" " + _vm._s(page.hasMetaTitle ? page.metaTitleLength : "—") + " ")])]), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: _vm.getStatusClass(page.hasMetaDescription, page.metaDescriptionLength) }, [_vm._v(" " + _vm._s(page.hasMetaDescription ? page.metaDescriptionLength : "—") + " ")])]), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? _c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } }) : _c("span", [_vm._v("—")])], 1), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.noIndex ? _c("k-icon", { staticClass: "k-meta-kit-icon-warning", attrs: { "type": "check" } }) : _c("span", [_vm._v("—")])], 1), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("k-button", { attrs: { "icon": "magic", "size": "sm", "disabled": page.hasMetaDescription }, on: { "click": function($event) {
+        return _vm.generateDescription(page.id);
+      } } })], 1)]);
+    }), 0)])]), _c("k-dialog", { ref: "legacyDialog", attrs: { "size": "large" } }, [_c("k-headline", [_vm._v("Legacy SEO Metadata")]), _vm.isLoadingLegacy ? _c("div", { staticClass: "k-meta-kit-loading" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Scanning for legacy metadata...")])], 1) : _vm.legacyPages.length > 0 ? _c("div", { staticClass: "k-meta-kit-legacy-list" }, [_c("p", [_vm._v("Found " + _vm._s(_vm.legacyPages.length) + " pages with legacy SEO fields:")]), _vm._l(_vm.legacyPages, function(page) {
+      return _c("div", { key: page.id, staticClass: "k-meta-kit-legacy-item" }, [_c("div", { staticClass: "k-meta-kit-legacy-item-header" }, [_c("strong", [_vm._v(_vm._s(page.title))]), _c("k-button", { attrs: { "icon": "download", "size": "sm" }, on: { "click": function($event) {
+        return _vm.convertLegacyPage(page.id);
+      } } }, [_vm._v(" Convert ")])], 1), _c("div", { staticClass: "k-meta-kit-legacy-item-fields" }, _vm._l(page.fields, function(value, key) {
+        return _c("span", { key, staticClass: "k-tag" }, [_vm._v(" " + _vm._s(key) + " ")]);
+      }), 0)]);
+    }), _c("k-button-group", { attrs: { "slot": "footer" }, slot: "footer" }, [_c("k-button", { attrs: { "icon": "check" }, on: { "click": function($event) {
+      return _vm.$refs.legacyDialog.close();
+    } } }, [_vm._v("Close")])], 1)], 2) : _c("div", { staticClass: "k-meta-kit-empty" }, [_c("k-icon", { attrs: { "type": "check" } }), _c("p", [_vm._v("No legacy SEO metadata found!")])], 1)], 1)], 1);
   };
   var _sfc_staticRenderFns = [];
   _sfc_render._withStripped = true;
@@ -149,9 +307,12 @@
     _sfc_render,
     _sfc_staticRenderFns
   );
-  __component__.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/kirby-seo-ai/src/sections/seo-preview.vue";
-  const SeoPreview = __component__.exports;
+  __component__.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/kirby-seo-ai/js/components/MetaKitView.vue";
+  const MetaKitView = __component__.exports;
   panel.plugin("tearoom1/meta-kit", {
+    components: {
+      "meta-kit-view": MetaKitView
+    },
     sections: {
       "seo-preview": SeoPreview
     },
