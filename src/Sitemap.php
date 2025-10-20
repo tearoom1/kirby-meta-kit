@@ -13,13 +13,13 @@ class Sitemap
     public function __construct(Kirby $kirby)
     {
         $this->kirby = $kirby;
-        
+
         // Default options (lowest priority)
         $defaults = [
             'sitemap.include' => 'all',
             'sitemap.exclude' => ['error'],
         ];
-        
+
         // Site settings from panel (middle priority)
         $siteSettings = [];
         $siteSitemap = $kirby->site()->sitemap()->toObject();
@@ -35,10 +35,10 @@ class Sitemap
                 $siteSettings['sitemap.priorityDefault'] = $siteSitemap->priorityDefault()->toFloat();
             }
         }
-        
+
         // Config.php settings (highest priority)
         $configSettings = $kirby->option('tearoom1.meta-kit', []);
-        
+
         // Merge: defaults < site settings < config
         $this->options = array_merge($defaults, $siteSettings, $configSettings);
     }
@@ -55,6 +55,7 @@ class Sitemap
             }
 
             // For multilanguage sites, add entry for each language
+            $timestamp = $page->modified() ?? time();
             if ($isMultilang) {
                 $defaultLanguage = $this->kirby->defaultLanguage();
 
@@ -70,7 +71,7 @@ class Sitemap
                 // Add URL for default language
                 $sitemap[] = [
                     'url' => $page->url($defaultLanguage->code()),
-                    'lastmod' => $page->modified('c'),
+                    'lastmod' =>  (date('c', $timestamp)),
                     'changefreq' => $this->getChangeFrequency($page),
                     'priority' => $this->getPriority($page),
                     'alternates' => $alternates
@@ -79,7 +80,7 @@ class Sitemap
                 // Single language site
                 $sitemap[] = [
                     'url' => $page->url(),
-                    'lastmod' => $page->modified('c'),
+                    'lastmod' =>  (date('c', $timestamp)),
                     'changefreq' => $this->getChangeFrequency($page),
                     'priority' => $this->getPriority($page)
                 ];
