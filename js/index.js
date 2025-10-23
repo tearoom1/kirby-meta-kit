@@ -261,18 +261,43 @@ panel.plugin('tearoom1/meta-kit', {
               // Show the generated text
               this.generatedText = response.description;
 
-              // Update the nested object fields directly
+              // Update the nested blocks field
               if (parent && parent.value) {
-                // Get current SEO object (Vue reactive)
-                if (!parent.value.seo) {
-                  this.$set(parent.value, 'seo', {});
+                // Ensure seo field exists as an array (Vue reactive array)
+                if (!parent.value.seo || !Array.isArray(parent.value.seo)) {
+                  this.$set(parent.value, 'seo', [{
+                    id: 'seo-metadata',
+                    type: 'seo',
+                    isHidden: false,
+                    content: {}
+                  }]);
+                }
+                
+                // Get or create the first block
+                if (parent.value.seo.length === 0) {
+                  parent.value.seo.push({
+                    id: 'seo-metadata',
+                    type: 'seo',
+                    isHidden: false,
+                    content: {}
+                  });
                 }
 
-                // Update descriptions directly on reactive object (lowercase field names!)
-                this.$set(parent.value.seo, 'metadescription', response.description);
-                this.$set(parent.value.seo, 'ogdescription', response.description);
+                // Get the first (and only) SEO block
+                const seoBlock = parent.value.seo[0];
+                
+                // Ensure content object exists
+                if (!seoBlock.content) {
+                  this.$set(seoBlock, 'content', {});
+                }
 
-                // Also trigger form update
+                // Update descriptions using Vue.set for reactivity (lowercase field names!)
+                this.$set(seoBlock.content, 'metadescription', response.description);
+                this.$set(seoBlock.content, 'ogdescription', response.description);
+                
+                console.log('Updated SEO block:', seoBlock.content);
+
+                // Trigger form update
                 if (parent.update) {
                   parent.update({
                     seo: parent.value.seo
@@ -287,7 +312,7 @@ panel.plugin('tearoom1/meta-kit', {
                     detail: {
                       field: 'metadescription',
                       value: response.description,
-                      seoData: parent.value.seo,
+                      seoData: seoBlock.content,
                       pageTitle: parent.value.title
                     }
                   });
