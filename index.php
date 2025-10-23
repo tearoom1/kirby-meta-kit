@@ -61,6 +61,14 @@ Kirby::plugin('tearoom1/meta-kit', [
                 'action' => require __DIR__ . '/src/api/generate.php'
             ],
             [
+                'pattern' => 'meta-kit/convert-all-to-blocks',
+                'method' => 'POST',
+                'auth' => true,
+                'action' => function () {
+                    return \TearoomOne\MetaKitController::convertAllToBlocks();
+                }
+            ],
+            [
                 'pattern' => 'meta-kit/pages',
                 'method' => 'GET',
                 'auth' => true,

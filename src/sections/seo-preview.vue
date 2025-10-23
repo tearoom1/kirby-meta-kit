@@ -51,7 +51,9 @@ export default {
       meta: null,
       siteName: null,
       separator: '|',
-      pollInterval: null
+      updateTimeout: null,
+      fieldObserver: null,
+      lastFieldValues: {}
     }
   },
   async mounted() {
@@ -60,26 +62,89 @@ export default {
     // Listen for custom SEO field updates from AI generator
     document.addEventListener('seo-field-updated', this.handleSeoFieldUpdate, true);
 
-    // Poll for changes every 3 seconds (preview is in different column, can't access form state directly)
-    this.pollInterval = setInterval(() => {
-      this.load();
-    }, 3000);
+    // Listen for input changes in the document
+    document.addEventListener('input', this.handleDOMInput, true);
+    document.addEventListener('change', this.handleDOMInput, true);
+    
+    // Set up MutationObserver to detect field resets (when discarding changes)
+    this.setupFieldObserver();
   },
   beforeDestroy() {
     // Clean up event listeners
     document.removeEventListener('seo-field-updated', this.handleSeoFieldUpdate, true);
-
-    // Clear interval
-    if (this.pollInterval) {
-      clearInterval(this.pollInterval);
+    document.removeEventListener('input', this.handleDOMInput, true);
+    document.removeEventListener('change', this.handleDOMInput, true);
+    
+    // Disconnect observer
+    if (this.fieldObserver) {
+      this.fieldObserver.disconnect();
     }
   },
   methods: {
+    setupFieldObserver() {
+      // Watch for when field values change programmatically (like when discarding)
+      const checkFieldValues = () => {
+        const currentValues = {
+          metatitle: document.querySelector('[name="metatitle"]')?.value || '',
+          metadescription: document.querySelector('[name="metadescription"]')?.value || '',
+          ogtitle: document.querySelector('[name="ogtitle"]')?.value || '',
+          ogdescription: document.querySelector('[name="ogdescription"]')?.value || ''
+        };
+        
+        const valuesChanged = Object.keys(currentValues).some(
+          key => this.lastFieldValues[key] !== currentValues[key]
+        );
+        
+        if (valuesChanged && Object.keys(this.lastFieldValues).length > 0) {
+          console.log('Field values changed programmatically (discard?), updating preview');
+          this.updatePreviewFromDOM();
+        }
+        
+        this.lastFieldValues = currentValues;
+      };
+      
+      // Check every 500ms for field changes
+      setInterval(checkFieldValues, 500);
+    },
+    handleDOMInput(event) {
+      const target = event.target;
+      const fieldName = target.name || target.getAttribute('name');
+      
+      // Check if this is an SEO field we care about
+      const seoFields = ['metatitle', 'metadescription', 'ogtitle', 'ogdescription'];
+      if (fieldName && seoFields.includes(fieldName.toLowerCase())) {
+        // Debounce updates
+        clearTimeout(this.updateTimeout);
+        this.updateTimeout = setTimeout(() => {
+          this.updatePreviewFromDOM();
+        }, 500);
+      }
+    },
     handleSeoFieldUpdate(event) {
       // AI generator triggered - use provided data directly (not saved yet)
       if (event.detail && event.detail.seoData) {
         this.updatePreviewFromData(event.detail.seoData, event.detail.pageTitle || 'Page Title');
       }
+    },
+    updatePreviewFromDOM() {
+      // Extract values directly from DOM inputs
+      const getFieldValue = (name) => {
+        const input = document.querySelector(`[name="${name}"], [name="${name.toLowerCase()}"]`);
+        return input ? input.value : '';
+      };
+      
+      const seoData = {
+        metatitle: getFieldValue('metatitle'),
+        metadescription: getFieldValue('metadescription'),
+        ogtitle: getFieldValue('ogtitle'),
+        ogdescription: getFieldValue('ogdescription')
+      };
+      
+      // Get page title (might be in a different field)
+      const pageTitle = getFieldValue('title') || document.querySelector('[name="title"]')?.value || 'Page Title';
+      
+      console.log('Updating preview from DOM:', seoData);
+      this.updatePreviewFromData(seoData, pageTitle);
     },
     updatePreviewFromData(seoData, pageTitle) {
       // Use stored site name and separator (extracted from initial load)
@@ -117,16 +182,20 @@ export default {
       try {
         const response = await this.$api.get(this.parent + '/sections/' + this.name);
 
-        // Try different possible locations
+        // Get meta from response
+        let newMeta = null;
         if (response.meta) {
-          this.meta = response.meta;
-          // Extract and store site name from the title
-          this.extractSiteInfo();
+          newMeta = response.meta;
         } else if (response.data && response.data.meta) {
-          this.meta = response.data.meta;
-          this.extractSiteInfo();
-        } else {
-          console.warn('No meta found in response');
+          newMeta = response.data.meta;
+        }
+
+        if (newMeta) {
+          this.meta = newMeta;
+          // Extract and store site name from the title on first load
+          if (!this.siteName) {
+            this.extractSiteInfo();
+          }
         }
       } catch (error) {
         console.error('Error loading section:', error);

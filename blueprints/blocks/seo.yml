@@ -12,7 +12,7 @@ fields:
     label: Meta Description
     type: textarea
     buttons: false
-    maxlength: 160
+    maxlength: 185
     counter: true
     help: Description for search engines (preferably max 160 characters)
 
@@ -50,7 +50,7 @@ fields:
     label: Social Media Description
     type: textarea
     buttons: false
-    maxlength: 160
+    maxlength: 185
     counter: true
     help: Description for social media. Uses the meta description if empty.
 

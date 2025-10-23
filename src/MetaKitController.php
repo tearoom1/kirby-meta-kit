@@ -61,7 +61,7 @@ class MetaKitController
         $languageCode = $language ? $language->code() : null;
 
         foreach ($pages as $page) {
-            $seoData = $page->seo()->toObject();
+            $seoData = self::getSeoData($page->seo());
 
             $result[] = [
                 'id' => $page->id(),
@@ -132,12 +132,19 @@ class MetaKitController
             $description = $metaKit->generateDescription($content, ['language' => $languageCode]);
 
             if ($description) {
-                // Update page
-                $seoData = $page->seo()->toObject();
-                $seoArray = $seoData ? $seoData->toArray() : [];
+                $seoData = self::getSeoData($page->seo());
+                $seoArray = self::seoDataToArray($seoData);
                 $seoArray['metaDescription'] = $description;
 
-                $page->update(['seo' => $seoArray], $languageCode);
+                $seoBlock = [
+                    [
+                        'content' => $seoArray,
+                        'id' => 'seo-metadata',
+                        'isHidden' => false,
+                        'type' => 'seo'
+                    ]
+                ];
+                $page->update(['seo' => $seoBlock], $languageCode);
 
                 return [
                     'status' => 'success',
@@ -158,6 +165,176 @@ class MetaKitController
         }
     }
 
+    public static function convertAllToBlocks(): array
+    {
+        $kirby = kirby();
+        $converted = 0;
+        $skipped = 0;
+        $errors = 0;
+
+        try {
+            $site = $kirby->site();
+            $updates = [];
+            $needsUpdate = false;
+
+            $seoField = $site->seo();
+            if ($seoField->isNotEmpty()) {
+                $rawValue = $seoField->value();
+                $isBlocks = is_string($rawValue) && str_starts_with(trim($rawValue), '[') && json_decode(trim($rawValue), true) !== null;
+                if (!$isBlocks) {
+                    $obj = $seoField->toObject();
+                    if ($obj) {
+                        $updates['seo'] = [
+                            [
+                                'content' => [
+                                    'appendSiteName' => $obj->appendsitename()->toBool(),
+                                    'titleSeparator' => $obj->titleseparator()->or('|')->value(),
+                                    'metaTitle' => $obj->metatitle()->value(),
+                                    'metaDescription' => $obj->metadescription()->value(),
+                                    'metaKeywords' => $obj->metakeywords()->value(),
+                                    'ogImage' => $obj->ogimage()->isNotEmpty() ? $obj->ogimage()->toFiles()->pluck('uuid')->toArray() : []
+                                ],
+                                'id' => 'seo-settings',
+                                'isHidden' => false,
+                                'type' => 'seo-settings'
+                            ]
+                        ];
+                        $needsUpdate = true;
+                    }
+                }
+            }
+
+            $openrouterField = $site->openrouter();
+            if ($openrouterField->isNotEmpty()) {
+                $rawValue = $openrouterField->value();
+                $isBlocks = is_string($rawValue) && str_starts_with(trim($rawValue), '[') && json_decode(trim($rawValue), true) !== null;
+                if (!$isBlocks) {
+                    $obj = $openrouterField->toObject();
+                    if ($obj) {
+                        $updates['openrouter'] = [
+                            [
+                                'content' => [
+                                    'apiKey' => $obj->apikey()->value(),
+                                    'model' => $obj->model()->or('meta-llama/llama-3.2-3b-instruct:free')->value(),
+                                    'temperature' => $obj->temperature()->or('0.7')->value()
+                                ],
+                                'id' => 'openrouter-settings',
+                                'isHidden' => false,
+                                'type' => 'openrouter'
+                            ]
+                        ];
+                        $needsUpdate = true;
+                    }
+                }
+            }
+
+            $sitemapField = $site->sitemap();
+            if ($sitemapField->isNotEmpty()) {
+                $rawValue = $sitemapField->value();
+                $isBlocks = is_string($rawValue) && str_starts_with(trim($rawValue), '[') && json_decode(trim($rawValue), true) !== null;
+                if (!$isBlocks) {
+                    $obj = $sitemapField->toObject();
+                    if ($obj) {
+                        $excludePages = [];
+                        if ($obj->exclude()->isNotEmpty()) {
+                            $excludePages = $obj->exclude()->toPages()->pluck('uuid')->toArray();
+                        }
+                        $updates['sitemap'] = [
+                            [
+                                'content' => [
+                                    'exclude' => $excludePages,
+                                    'priorityHome' => $obj->priorityhome()->or('1.0')->value(),
+                                    'priorityDefault' => $obj->prioritydefault()->or('0.8')->value()
+                                ],
+                                'id' => 'sitemap-settings',
+                                'isHidden' => false,
+                                'type' => 'sitemap'
+                            ]
+                        ];
+                        $needsUpdate = true;
+                    }
+                }
+            }
+
+            if ($needsUpdate) {
+                $kirby->impersonate('kirby');
+                $site->update($updates);
+                $converted++;
+            } else {
+                $skipped++;
+            }
+        } catch (\Exception $e) {
+            $errors++;
+        }
+
+        $pages = $kirby->site()->index();
+        foreach ($pages as $page) {
+            $seoField = $page->seo();
+            if ($seoField->isEmpty()) {
+                continue;
+            }
+            $rawValue = $seoField->value();
+            $isBlocks = false;
+            if (is_string($rawValue)) {
+                $trimmed = trim($rawValue);
+                if (str_starts_with($trimmed, '[')) {
+                    $decoded = json_decode($trimmed, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        $isBlocks = true;
+                    }
+                }
+            }
+            if ($isBlocks) {
+                $skipped++;
+                continue;
+            }
+            $obj = $seoField->toObject();
+            if (!$obj) {
+                $skipped++;
+                continue;
+            }
+            try {
+                $ogImageUuids = [];
+                if ($obj->ogimage()->isNotEmpty()) {
+                    $files = $obj->ogimage()->toFiles();
+                    if ($files->count() > 0) {
+                        $ogImageUuids = $files->pluck('uuid')->toArray();
+                    }
+                }
+                $seoBlock = [
+                    [
+                        'content' => [
+                            'metaTitle' => $obj->metatitle()->value(),
+                            'metaDescription' => $obj->metadescription()->value(),
+                            'metaKeywords' => $obj->metakeywords()->value(),
+                            'canonicalUrl' => $obj->canonicalurl()->value(),
+                            'noIndex' => $obj->noindex()->toBool(),
+                            'ogTitle' => $obj->ogtitle()->value(),
+                            'ogDescription' => $obj->ogdescription()->value(),
+                            'ogImage' => $ogImageUuids
+                        ],
+                        'id' => 'seo-metadata',
+                        'isHidden' => false,
+                        'type' => 'seo'
+                    ]
+                ];
+                $kirby->impersonate('kirby');
+                $page->update(['seo' => $seoBlock], $kirby->language()?->code());
+                $converted++;
+            } catch (\Exception $e) {
+                $errors++;
+            }
+        }
+
+        return [
+            'status' => 'success',
+            'message' => "Converted {$converted}, skipped {$skipped}, errors {$errors}",
+            'converted' => $converted,
+            'skipped' => $skipped,
+            'errors' => $errors
+        ];
+    }
+
     public static function generateAllDescriptions(): array
     {
         $kirby = kirby();
@@ -167,7 +344,7 @@ class MetaKitController
         $skipped = 0;
 
         foreach ($pages as $page) {
-            $seoData = $page->seo()->toObject();
+            $seoData = self::getSeoData($page->seo());
 
             // Skip if already has description
             if ($seoData && $seoData->metaDescription()->isNotEmpty()) {
@@ -201,7 +378,7 @@ class MetaKitController
 
         foreach ($pages as $page) {
             $legacy = [];
-            $seoData = $page->seo()->toObject();
+            $seoData = self::getSeoData($page->seo());
             $current = [];
 
             // Check for common legacy SEO field names
@@ -262,8 +439,8 @@ class MetaKitController
         }
 
         try {
-            $seoData = $page->seo()->toObject();
-            $seoArray = $seoData ? $seoData->toArray() : [];
+            $seoData = self::getSeoData($page->seo());
+            $seoArray = self::seoDataToArray($seoData);
             $converted = [];
 
             // Migrate legacy fields - Meta Title variations
@@ -298,7 +475,15 @@ class MetaKitController
 
             if (!empty($converted)) {
                 $languageCode = $kirby->language()?->code();
-                $page->update(['seo' => $seoArray], $languageCode);
+                $seoBlock = [
+                    [
+                        'content' => $seoArray,
+                        'id' => 'seo-metadata',
+                        'isHidden' => false,
+                        'type' => 'seo'
+                    ]
+                ];
+                $page->update(['seo' => $seoBlock], $languageCode);
 
                 return [
                     'status' => 'success',
@@ -332,8 +517,8 @@ class MetaKitController
         }
 
         try {
-            $seoData = $page->seo()->toObject();
-            $seoArray = $seoData ? $seoData->toArray() : [];
+            $seoData = self::getSeoData($page->seo());
+            $seoArray = self::seoDataToArray($seoData);
 
             // Handle ogImage specially - it needs to be an array of UUIDs
             if ($fieldName === 'ogImage') {
@@ -376,7 +561,15 @@ class MetaKitController
             }
 
             $languageCode = $kirby->language()?->code();
-            $page->update(['seo' => $seoArray], $languageCode);
+            $seoBlock = [
+                [
+                    'content' => $seoArray,
+                    'id' => 'seo-metadata',
+                    'isHidden' => false,
+                    'type' => 'seo'
+                ]
+            ];
+            $page->update(['seo' => $seoBlock], $languageCode);
 
             return [
                 'status' => 'success',
@@ -406,7 +599,7 @@ class MetaKitController
         $result = [];
 
         foreach ($pages as $page) {
-            $seoData = $page->seo()->toObject();
+            $seoData = self::getSeoData($page->seo());
             $legacy = [];
 
             // Check for legacy fields
@@ -488,7 +681,7 @@ class MetaKitController
             ];
         }
 
-        $seoData = $page->seo()->toObject();
+        $seoData = self::getSeoData($page->seo());
         $legacy = [];
 
         // Check for legacy fields
