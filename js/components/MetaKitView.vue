@@ -253,13 +253,6 @@
                     Current
                   </k-button>
                   <k-button
-                    size="xs"
-                    :theme="getFieldChoice(page.id, key) === 'manual' ? 'positive' : ''"
-                    @click="setFieldChoice(page.id, key, 'manual')"
-                  >
-                    Manual Edit
-                  </k-button>
-                  <k-button
                     v-if="key !== 'ogImage'"
                     size="xs"
                     icon="sparkling"
@@ -280,32 +273,28 @@
 
                   <div v-else-if="getFieldChoice(page.id, key) === 'current' && page.current && page.current[key]"
                        class="k-meta-kit-legacy-field-option">
-                    <span class="k-meta-kit-legacy-badge">Current Value</span>
-                    <span class="k-meta-kit-legacy-field-value">{{ formatFieldValue(page.current[key]) }}</span>
-                  </div>
-
-                  <div v-else-if="getFieldChoice(page.id, key) === 'manual'" class="k-meta-kit-legacy-field-option">
-                    <span class="k-meta-kit-legacy-badge">Manual Entry</span>
+                    <span class="k-meta-kit-legacy-badge">Current Value (editable)</span>
                     <k-input
-                      :value="getManualValue(page.id, key)"
+                      :value="getEditableValue(page.id, key, page.current[key])"
                       @input="setManualValue(page.id, key, $event)"
-                      :placeholder="`Enter ${formatFieldName(key)}`"
+                      :placeholder="formatFieldValue(page.current[key])"
                       type="textarea"
                     />
                   </div>
 
                   <div v-else-if="getFieldChoice(page.id, key) === 'ai'" class="k-meta-kit-legacy-field-option">
-                    <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated</span>
+                    <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated (editable)</span>
                     <span v-if="isGeneratingField(page.id, key)" class="k-meta-kit-legacy-field-generating">
                       <k-icon class="k-meta-kit-spinner" type="loader"/>
                       Generating...
                     </span>
-                    <span v-else-if="getManualValue(page.id, key)" class="k-meta-kit-legacy-field-value">
-                      {{ getManualValue(page.id, key) }}
-                    </span>
-                    <span v-else class="k-meta-kit-legacy-field-value-empty">
-                      Click AI Generate to create content
-                    </span>
+                    <k-input
+                      v-else
+                      :value="getManualValue(page.id, key)"
+                      @input="setManualValue(page.id, key, $event)"
+                      :placeholder="`AI generated ${formatFieldName(key)}`"
+                      type="textarea"
+                    />
                   </div>
 
                   <div v-else class="k-meta-kit-legacy-field-option">
@@ -330,7 +319,7 @@
 
                 <!-- Apply button for single field -->
                 <k-button
-                  v-if="getFieldChoice(page.id, key)"
+                  v-if="hasFieldChanged(page.id, key, page.current ? page.current[key] : null, value)"
                   icon="check"
                   size="sm"
                   theme="positive"
@@ -400,13 +389,6 @@
                   </k-button>
                   <k-button
                     size="xs"
-                    :theme="getFieldChoice(page.id, 'metaTitle') === 'manual' ? 'positive' : ''"
-                    @click="setFieldChoice(page.id, 'metaTitle', 'manual')"
-                  >
-                    Manual Edit
-                  </k-button>
-                  <k-button
-                    size="xs"
                     icon="sparkling"
                     :theme="getFieldChoice(page.id, 'metaTitle') === 'ai' ? 'positive' : ''"
                     :disabled="isGeneratingField(page.id, 'metaTitle')"
@@ -426,46 +408,38 @@
                   <div
                     v-else-if="getFieldChoice(page.id, 'metaTitle') === 'keep' || !getFieldChoice(page.id, 'metaTitle')"
                     class="k-meta-kit-legacy-field-option">
-                    <span class="k-meta-kit-legacy-badge">Current Value</span>
-                    <span v-if="page.hasMetaTitle" class="k-meta-kit-legacy-field-value">
-                      {{ page.metaTitle || '—' }}
-                      <span class="k-meta-kit-field-length"
-                            :class="getStatusClass(page.hasMetaTitle, page.metaTitleLength)">
-                        ({{ page.metaTitleLength }} chars)
-                      </span>
-                    </span>
-                    <span v-else class="k-meta-kit-legacy-field-value-empty">No meta title set</span>
-                  </div>
-
-                  <div v-else-if="getFieldChoice(page.id, 'metaTitle') === 'manual'"
-                       class="k-meta-kit-legacy-field-option">
-                    <span class="k-meta-kit-legacy-badge">Manual Entry</span>
+                    <span class="k-meta-kit-legacy-badge">Current Value (editable)</span>
                     <k-input
-                      :value="getManualValue(page.id, 'metaTitle')"
+                      :value="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
                       @input="setManualValue(page.id, 'metaTitle', $event)"
-                      placeholder="Enter Meta Title"
+                      :placeholder="page.metaTitle || 'No meta title set'"
                       type="text"
                     />
+                    <span v-if="page.hasMetaTitle" class="k-meta-kit-field-length"
+                          :class="getStatusClass(page.hasMetaTitle, page.metaTitleLength)">
+                      ({{ page.metaTitleLength }} chars)
+                    </span>
                   </div>
 
                   <div v-else-if="getFieldChoice(page.id, 'metaTitle') === 'ai'" class="k-meta-kit-legacy-field-option">
-                    <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated</span>
+                    <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated (editable)</span>
                     <span v-if="isGeneratingField(page.id, 'metaTitle')" class="k-meta-kit-legacy-field-generating">
                       <k-icon class="k-meta-kit-spinner" type="loader"/>
                       Generating...
                     </span>
-                    <span v-else-if="getManualValue(page.id, 'metaTitle')" class="k-meta-kit-legacy-field-value">
-                      {{ getManualValue(page.id, 'metaTitle') }}
-                    </span>
-                    <span v-else class="k-meta-kit-legacy-field-value-empty">
-                      Click AI Generate to create content
-                    </span>
+                    <k-input
+                      v-else
+                      :value="getManualValue(page.id, 'metaTitle')"
+                      @input="setManualValue(page.id, 'metaTitle', $event)"
+                      placeholder="AI generated Meta Title"
+                      type="text"
+                    />
                   </div>
                 </div>
 
                 <!-- Apply button -->
                 <k-button
-                  v-if="getFieldChoice(page.id, 'metaTitle') && getFieldChoice(page.id, 'metaTitle') !== 'keep'"
+                  v-if="hasFieldChanged(page.id, 'metaTitle', page.metaTitle, page.legacy ? page.legacy.metaTitle : null)"
                   icon="check"
                   size="sm"
                   theme="positive"
@@ -500,13 +474,6 @@
                   </k-button>
                   <k-button
                     size="xs"
-                    :theme="getFieldChoice(page.id, 'metaDescription') === 'manual' ? 'positive' : ''"
-                    @click="setFieldChoice(page.id, 'metaDescription', 'manual')"
-                  >
-                    Manual Edit
-                  </k-button>
-                  <k-button
-                    size="xs"
                     icon="sparkling"
                     :theme="getFieldChoice(page.id, 'metaDescription') === 'ai' ? 'positive' : ''"
                     :disabled="isGeneratingField(page.id, 'metaDescription')"
@@ -527,48 +494,40 @@
                   <div
                     v-else-if="getFieldChoice(page.id, 'metaDescription') === 'keep' || !getFieldChoice(page.id, 'metaDescription')"
                     class="k-meta-kit-legacy-field-option">
-                    <span class="k-meta-kit-legacy-badge">Current Value</span>
-                    <span v-if="page.hasMetaDescription" class="k-meta-kit-legacy-field-value">
-                      {{ page.metaDescription || '—' }}
-                      <span class="k-meta-kit-field-length"
-                            :class="getStatusClass(page.hasMetaDescription, page.metaDescriptionLength)">
-                        ({{ page.metaDescriptionLength }} chars)
-                      </span>
-                    </span>
-                    <span v-else class="k-meta-kit-legacy-field-value-empty">No meta description set</span>
-                  </div>
-
-                  <div v-else-if="getFieldChoice(page.id, 'metaDescription') === 'manual'"
-                       class="k-meta-kit-legacy-field-option">
-                    <span class="k-meta-kit-legacy-badge">Manual Entry</span>
+                    <span class="k-meta-kit-legacy-badge">Current Value (editable)</span>
                     <k-input
-                      :value="getManualValue(page.id, 'metaDescription')"
+                      :value="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
                       @input="setManualValue(page.id, 'metaDescription', $event)"
-                      placeholder="Enter Meta Description"
+                      :placeholder="page.metaDescription || 'No meta description set'"
                       type="textarea"
                     />
+                    <span v-if="page.hasMetaDescription" class="k-meta-kit-field-length"
+                          :class="getStatusClass(page.hasMetaDescription, page.metaDescriptionLength)">
+                      ({{ page.metaDescriptionLength }} chars)
+                    </span>
                   </div>
 
                   <div v-else-if="getFieldChoice(page.id, 'metaDescription') === 'ai'"
                        class="k-meta-kit-legacy-field-option">
-                    <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated</span>
+                    <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated (editable)</span>
                     <span v-if="isGeneratingField(page.id, 'metaDescription')"
                           class="k-meta-kit-legacy-field-generating">
                       <k-icon class="k-meta-kit-spinner" type="loader"/>
                       Generating...
                     </span>
-                    <span v-else-if="getManualValue(page.id, 'metaDescription')" class="k-meta-kit-legacy-field-value">
-                      {{ getManualValue(page.id, 'metaDescription') }}
-                    </span>
-                    <span v-else class="k-meta-kit-legacy-field-value-empty">
-                      Click AI Generate to create content
-                    </span>
+                    <k-input
+                      v-else
+                      :value="getManualValue(page.id, 'metaDescription')"
+                      @input="setManualValue(page.id, 'metaDescription', $event)"
+                      placeholder="AI generated Meta Description"
+                      type="textarea"
+                    />
                   </div>
                 </div>
 
                 <!-- Apply button -->
                 <k-button
-                  v-if="getFieldChoice(page.id, 'metaDescription') && getFieldChoice(page.id, 'metaDescription') !== 'keep'"
+                  v-if="hasFieldChanged(page.id, 'metaDescription', page.metaDescription, page.legacy ? page.legacy.metaDescription : null)"
                   icon="check"
                   size="sm"
                   theme="positive"
@@ -622,13 +581,6 @@
               </k-button>
               <k-button
                 size="xs"
-                :theme="getFieldChoice(currentEditPage.id, 'metaTitle') === 'manual' ? 'positive' : ''"
-                @click="setFieldChoice(currentEditPage.id, 'metaTitle', 'manual')"
-              >
-                Manual Edit
-              </k-button>
-              <k-button
-                size="xs"
                 icon="sparkling"
                 :theme="getFieldChoice(currentEditPage.id, 'metaTitle') === 'ai' ? 'positive' : ''"
                 :disabled="isGeneratingField(currentEditPage.id, 'metaTitle')"
@@ -649,48 +601,40 @@
               <div
                 v-else-if="getFieldChoice(currentEditPage.id, 'metaTitle') === 'keep' || !getFieldChoice(currentEditPage.id, 'metaTitle')"
                 class="k-meta-kit-legacy-field-option">
-                <span class="k-meta-kit-legacy-badge">Current Value</span>
-                <span v-if="currentEditPage.hasMetaTitle" class="k-meta-kit-legacy-field-value">
-                  {{ currentEditPage.metaTitle || '—' }}
-                  <span class="k-meta-kit-field-length"
-                        :class="getStatusClass(currentEditPage.hasMetaTitle, currentEditPage.metaTitleLength)">
-                    ({{ currentEditPage.metaTitleLength }} chars)
-                  </span>
-                </span>
-                <span v-else class="k-meta-kit-legacy-field-value-empty">No meta title set</span>
-              </div>
-
-              <div v-else-if="getFieldChoice(currentEditPage.id, 'metaTitle') === 'manual'"
-                   class="k-meta-kit-legacy-field-option">
-                <span class="k-meta-kit-legacy-badge">Manual Entry</span>
+                <span class="k-meta-kit-legacy-badge">Current Value (editable)</span>
                 <k-input
-                  :value="getManualValue(currentEditPage.id, 'metaTitle')"
+                  :value="getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)"
                   @input="setManualValue(currentEditPage.id, 'metaTitle', $event)"
-                  placeholder="Enter Meta Title"
+                  :placeholder="currentEditPage.metaTitle || 'No meta title set'"
                   type="text"
                 />
+                <span v-if="currentEditPage.hasMetaTitle" class="k-meta-kit-field-length"
+                      :class="getStatusClass(currentEditPage.hasMetaTitle, currentEditPage.metaTitleLength)">
+                  ({{ currentEditPage.metaTitleLength }} chars)
+                </span>
               </div>
 
               <div v-else-if="getFieldChoice(currentEditPage.id, 'metaTitle') === 'ai'"
                    class="k-meta-kit-legacy-field-option">
-                <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated</span>
+                <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated (editable)</span>
                 <span v-if="isGeneratingField(currentEditPage.id, 'metaTitle')"
                       class="k-meta-kit-legacy-field-generating">
                   <k-icon class="k-meta-kit-spinner" type="loader"/>
                   Generating...
                 </span>
-                <span v-else-if="getManualValue(currentEditPage.id, 'metaTitle')" class="k-meta-kit-legacy-field-value">
-                  {{ getManualValue(currentEditPage.id, 'metaTitle') }}
-                </span>
-                <span v-else class="k-meta-kit-legacy-field-value-empty">
-                  Click AI Generate to create content
-                </span>
+                <k-input
+                  v-else
+                  :value="getManualValue(currentEditPage.id, 'metaTitle')"
+                  @input="setManualValue(currentEditPage.id, 'metaTitle', $event)"
+                  placeholder="AI generated Meta Title"
+                  type="text"
+                />
               </div>
             </div>
 
             <!-- Apply button -->
             <k-button
-              v-if="getFieldChoice(currentEditPage.id, 'metaTitle') && getFieldChoice(currentEditPage.id, 'metaTitle') !== 'keep'"
+              v-if="hasFieldChanged(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle, currentEditPage.legacy ? currentEditPage.legacy.metaTitle : null)"
               icon="check"
               size="sm"
               theme="positive"
@@ -725,13 +669,6 @@
               </k-button>
               <k-button
                 size="xs"
-                :theme="getFieldChoice(currentEditPage.id, 'metaDescription') === 'manual' ? 'positive' : ''"
-                @click="setFieldChoice(currentEditPage.id, 'metaDescription', 'manual')"
-              >
-                Manual Edit
-              </k-button>
-              <k-button
-                size="xs"
                 icon="sparkling"
                 :theme="getFieldChoice(currentEditPage.id, 'metaDescription') === 'ai' ? 'positive' : ''"
                 :disabled="isGeneratingField(currentEditPage.id, 'metaDescription')"
@@ -752,50 +689,42 @@
               <div
                 v-else-if="getFieldChoice(currentEditPage.id, 'metaDescription') === 'keep' || !getFieldChoice(currentEditPage.id, 'metaDescription')"
                 class="k-meta-kit-legacy-field-option">
-                <span class="k-meta-kit-legacy-badge">Current Value</span>
-                <span v-if="currentEditPage.hasMetaDescription" class="k-meta-kit-legacy-field-value">
-                  {{ currentEditPage.metaDescription || '—' }}
-                  <span class="k-meta-kit-field-length"
-                        :class="getStatusClass(currentEditPage.hasMetaDescription, currentEditPage.metaDescriptionLength)">
-                    ({{ currentEditPage.metaDescriptionLength }} chars)
-                  </span>
-                </span>
-                <span v-else class="k-meta-kit-legacy-field-value-empty">No meta description set</span>
-              </div>
-
-              <div v-else-if="getFieldChoice(currentEditPage.id, 'metaDescription') === 'manual'"
-                   class="k-meta-kit-legacy-field-option">
-                <span class="k-meta-kit-legacy-badge">Manual Entry</span>
+                <span class="k-meta-kit-legacy-badge">Current Value (editable)</span>
                 <k-input
-                  :value="getManualValue(currentEditPage.id, 'metaDescription')"
+                  :value="getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription)"
                   @input="setManualValue(currentEditPage.id, 'metaDescription', $event)"
-                  placeholder="Enter Meta Description"
+                  :placeholder="currentEditPage.metaDescription || 'No meta description set'"
                   type="textarea"
                   buttons="false"
                 />
+                <span v-if="currentEditPage.hasMetaDescription" class="k-meta-kit-field-length"
+                      :class="getStatusClass(currentEditPage.hasMetaDescription, currentEditPage.metaDescriptionLength)">
+                  ({{ currentEditPage.metaDescriptionLength }} chars)
+                </span>
               </div>
 
               <div v-else-if="getFieldChoice(currentEditPage.id, 'metaDescription') === 'ai'"
                    class="k-meta-kit-legacy-field-option">
-                <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated</span>
+                <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated (editable)</span>
                 <span v-if="isGeneratingField(currentEditPage.id, 'metaDescription')"
                       class="k-meta-kit-legacy-field-generating">
                   <k-icon class="k-meta-kit-spinner" type="loader"/>
                   Generating...
                 </span>
-                <span v-else-if="getManualValue(currentEditPage.id, 'metaDescription')"
-                      class="k-meta-kit-legacy-field-value">
-                  {{ getManualValue(currentEditPage.id, 'metaDescription') }}
-                </span>
-                <span v-else class="k-meta-kit-legacy-field-value-empty">
-                  Click AI Generate to create content
-                </span>
+                <k-input
+                  v-else
+                  :value="getManualValue(currentEditPage.id, 'metaDescription')"
+                  @input="setManualValue(currentEditPage.id, 'metaDescription', $event)"
+                  placeholder="AI generated Meta Description"
+                  type="textarea"
+                  buttons="false"
+                />
               </div>
             </div>
 
             <!-- Apply button -->
             <k-button
-              v-if="getFieldChoice(currentEditPage.id, 'metaDescription') && getFieldChoice(currentEditPage.id, 'metaDescription') !== 'keep'"
+              v-if="hasFieldChanged(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription, currentEditPage.legacy ? currentEditPage.legacy.metaDescription : null)"
               icon="check"
               size="sm"
               theme="positive"
@@ -995,6 +924,12 @@ export default {
         const response = await this.$api.get('meta-kit/detect-legacy');
         if (response.status === 'success') {
           this.legacyPages = response.pages || [];
+          // Pre-select 'legacy' for all fields in legacy pages
+          this.legacyPages.forEach(page => {
+            Object.keys(page.fields).forEach(fieldName => {
+              this.setFieldChoice(page.id, fieldName, 'legacy');
+            });
+          });
         }
       } catch (error) {
         window.panel.notification.error('Failed to detect legacy metadata');
@@ -1141,6 +1076,33 @@ export default {
       }
       this.$set(this.fieldChoices[pageId][fieldName], 'manualValue', value);
     },
+    getEditableValue(pageId, fieldName, currentValue) {
+      const manualValue = this.getManualValue(pageId, fieldName);
+      return manualValue || currentValue || '';
+    },
+    hasFieldChanged(pageId, fieldName, currentValue, legacyValue) {
+      const choice = this.getFieldChoice(pageId, fieldName);
+      
+      // No choice selected, no change
+      if (!choice) return false;
+      
+      // Legacy choice always counts as a change
+      if (choice === 'legacy') return true;
+      
+      // For keep/current/ai, check if manual value exists and differs from current
+      const manualValue = this.getManualValue(pageId, fieldName);
+      if (choice === 'keep' || choice === 'current') {
+        // Only changed if there's a manual value that differs from current
+        return manualValue && manualValue !== currentValue;
+      }
+      
+      // AI choice - changed if there's generated content
+      if (choice === 'ai') {
+        return !!manualValue;
+      }
+      
+      return false;
+    },
     isGeneratingField(pageId, fieldName) {
       return this.generatingFields[pageId]?.[fieldName] || false;
     },
@@ -1196,24 +1158,22 @@ export default {
         } else if (page.legacy && page.legacy[fieldName]) {
           value = page.legacy[fieldName];
         }
-      } else if (choice === 'current' || choice === 'keep') {
-        // Check if from legacy dialog (has fields property)
-        if (page.fields) {
-          value = page.current[fieldName];
-        }
-        // Check if from single page or all pages dialog (values stored directly)
-        else if (page[fieldName]) {
-          value = page[fieldName];
+      } else if (choice === 'current' || choice === 'keep' || choice === 'ai') {
+        // For editable fields (current/keep/ai), check if there's an edited value
+        const manualValue = this.getManualValue(pageId, fieldName);
+        if (manualValue) {
+          // Use the edited/AI generated value
+          value = manualValue;
         } else {
-          // Already at current value or no value exists, no change needed
-          window.panel.notification.success('Already using current value');
-          return;
-        }
-      } else if (choice === 'manual' || choice === 'ai') {
-        value = this.getManualValue(pageId, fieldName);
-        if (false && !value) {
-          window.panel.notification.error('Please enter a value');
-          return;
+          // No manual value - use existing current value
+          if (page.fields && page.current) {
+            value = page.current[fieldName];
+          } else if (page[fieldName]) {
+            value = page[fieldName];
+          } else {
+            window.panel.notification.success('No changes to apply');
+            return;
+          }
         }
       }
 
@@ -1228,13 +1188,13 @@ export default {
           window.panel.notification.success(`${this.formatFieldName(fieldName)} updated successfully`);
           await this.refreshPages();
 
+          // Clear the manual value completely
+          if (this.fieldChoices[pageId] && this.fieldChoices[pageId][fieldName]) {
+            this.$set(this.fieldChoices[pageId][fieldName], 'manualValue', '');
+          }
+
           // Reset the choice to 'keep' to show current value
           this.setFieldChoice(pageId, fieldName, 'keep');
-
-          // Clear any manual values
-          if (this.fieldChoices[pageId]) {
-            this.$set(this.fieldChoices[pageId], fieldName + '_manual', '');
-          }
 
           // Update the field in-place without reloading the whole dialog
           const pageInAllPages = this.allPagesData.find(p => p.id === pageId);
@@ -1258,11 +1218,11 @@ export default {
               delete pageInAllPages.legacy[fieldName];
             }
           }
+          
+          // Force Vue to re-evaluate the button state
+          this.$forceUpdate();
 
-          // Refresh legacy dialog if needed
-          if (this.legacyPages.find(p => p.id === pageId)) {
-            await this.detectLegacyMetadata();
-          }
+          // Don't reload the legacy dialog - just update in place
         } else {
           window.panel.notification.error(response.message);
         }
@@ -1280,6 +1240,11 @@ export default {
         const response = await this.$api.get('meta-kit/pages-with-content');
         if (response.status === 'success') {
           this.allPagesData = response.data;
+          // Pre-select 'keep' (current) for all fields
+          this.allPagesData.forEach(page => {
+            this.setFieldChoice(page.id, 'metaTitle', 'keep');
+            this.setFieldChoice(page.id, 'metaDescription', 'keep');
+          });
         }
       } catch (error) {
         window.panel.notification.error('Failed to load pages');
@@ -1308,6 +1273,9 @@ export default {
         const response = await this.$api.get('meta-kit/single-page', {pageId});
         if (response.status === 'success') {
           this.currentEditPage = response.data;
+          // Pre-select 'keep' (current) for all fields
+          this.setFieldChoice(pageId, 'metaTitle', 'keep');
+          this.setFieldChoice(pageId, 'metaDescription', 'keep');
         }
       } catch (error) {
         window.panel.notification.error('Failed to load page');
@@ -1318,20 +1286,15 @@ export default {
     async applySingleFieldAndClose(pageId, fieldName) {
       await this.applySingleField(pageId, fieldName);
 
-      // Reset the choice to 'keep' which hides the apply button
-      this.setFieldChoice(pageId, fieldName, 'keep');
-
-      // Clear any manual values
-      if (this.fieldChoices[pageId]) {
-        this.$set(this.fieldChoices[pageId], fieldName + '_manual', '');
-      }
-
       // Reload the current page data to show updated values
       if (this.currentEditPage && this.currentEditPage.id === pageId) {
         try {
           const response = await this.$api.get('meta-kit/single-page', {pageId});
           if (response.status === 'success') {
             this.currentEditPage = response.data;
+            // Re-apply the 'keep' choice for the updated page
+            this.setFieldChoice(pageId, 'metaTitle', 'keep');
+            this.setFieldChoice(pageId, 'metaDescription', 'keep');
           }
         } catch (error) {
           // Silent fail
@@ -1422,6 +1385,11 @@ export default {
         if (response.status === 'success') {
           // Filter to only selected pages
           this.allPagesData = response.data.filter(p => this.selectedPages.includes(p.id));
+          // Pre-select 'keep' (current) for all fields
+          this.allPagesData.forEach(page => {
+            this.setFieldChoice(page.id, 'metaTitle', 'keep');
+            this.setFieldChoice(page.id, 'metaDescription', 'keep');
+          });
         }
       } catch (error) {
         window.panel.notification.error('Failed to load selected pages');
