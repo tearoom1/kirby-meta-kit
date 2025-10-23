@@ -490,7 +490,7 @@ class MetaKitController
                 $seoArray['metaTitle'] = $page->metatitle()->value();
                 $converted[] = 'metaTitle (from metatitle)';
             } elseif ($page->meta_title()->isNotEmpty() && empty($seoArray['metaTitle'])) {
-                $seoArray['metaTitle'] = $page->content()->get('Meta-title')->value();
+                $seoArray['metaTitle'] = $page->meta_title()->value();
                 $converted[] = 'metaTitle (from Meta-title)';
             }
 
