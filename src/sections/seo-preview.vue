@@ -59,7 +59,7 @@ export default {
 
     // Listen for custom SEO field updates from AI generator
     document.addEventListener('seo-field-updated', this.handleSeoFieldUpdate, true);
-    
+
     // Poll for changes every 3 seconds (preview is in different column, can't access form state directly)
     this.pollInterval = setInterval(() => {
       this.load();
@@ -68,7 +68,7 @@ export default {
   beforeDestroy() {
     // Clean up event listeners
     document.removeEventListener('seo-field-updated', this.handleSeoFieldUpdate, true);
-    
+
     // Clear interval
     if (this.pollInterval) {
       clearInterval(this.pollInterval);
@@ -76,10 +76,9 @@ export default {
   },
   methods: {
     handleSeoFieldUpdate(event) {
-      // AI generator triggered - reload from API
+      // AI generator triggered - use provided data directly (not saved yet)
       if (event.detail && event.detail.seoData) {
-        // Reload from API to get fresh data
-        this.load();
+        this.updatePreviewFromData(event.detail.seoData, event.detail.pageTitle || 'Page Title');
       }
     },
     updatePreviewFromData(seoData, pageTitle) {
@@ -89,18 +88,18 @@ export default {
 
       // Get page meta title from SEO data or use page title
       const pageMetaTitle = seoData.metatitle || pageTitle || 'Page Title';
-      
+
       // Build full title (page title + separator + site name)
       const fullTitle = pageMetaTitle + ' ' + separator + ' ' + siteName;
 
       // Preserve existing ogImage if we're just updating text fields
       const currentOgImage = this.meta?.ogImage || null;
-      
+
       // Get descriptions - handle empty strings as fallback
-      const metaDesc = seoData.metadescription && seoData.metadescription.trim() 
-        ? seoData.metadescription 
+      const metaDesc = seoData.metadescription && seoData.metadescription.trim()
+        ? seoData.metadescription
         : 'No description available';
-      
+
       const ogDesc = (seoData.ogdescription && seoData.ogdescription.trim())
         ? seoData.ogdescription
         : metaDesc;
