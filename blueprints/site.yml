@@ -5,7 +5,7 @@ columns:
     label: SEO
     icon: seo
     fields:
-      seo:
+      metaKitSeo:
         label: SEO Settings
         type: blocks
         fieldsets:
@@ -18,13 +18,13 @@ columns:
               appendSiteName: true
               titleSeparator: '|'
 
-  ai:
+  openrouter:
     width: 1/2
     type: fields
     label: AI Settings
     icon: ai
     fields:
-      openrouter:
+      metaKitOpenrouter:
         label: OpenRouter Settings
         type: blocks
         fieldsets:
@@ -43,7 +43,7 @@ columns:
     label: Sitemap
     icon: sitemap
     fields:
-      sitemap:
+      metaKitSitemap:
         label: Sitemap Settings
         type: blocks
         fieldsets:
@@ -62,7 +62,7 @@ columns:
     label: Social Media
     icon: share
     fields:
-      socialSites:
+      metaKitSocialSites:
         label: Social Media Profiles
         type: structure
         fields:

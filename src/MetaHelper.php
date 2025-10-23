@@ -29,7 +29,7 @@ class MetaHelper
     public static function buildTitle(Page $page, Site $site, $seoData = null): string
     {
         // Get site SEO settings
-        $siteSeo = self::getSeoData($site->seo());
+        $siteSeo = self::getSeoData($site->metaKitSeo());
 
         // Get site settings
         $separator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
@@ -63,7 +63,7 @@ class MetaHelper
 
     public static function getSeparator(Site $site): string
     {
-        $siteSeo = self::getSeoData($site->seo());
+        $siteSeo = self::getSeoData($site->metaKitSeo());
         return $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
             ? $siteSeo->titleSeparator()->value()
             : '|';
@@ -71,7 +71,7 @@ class MetaHelper
 
     public static function shouldAppendSiteName(Site $site): bool
     {
-        $siteSeo = self::getSeoData($site->seo());
+        $siteSeo = self::getSeoData($site->metaKitSeo());
         return $siteSeo && $siteSeo->appendSiteName()->isNotEmpty()
             ? $siteSeo->appendSiteName()->toBool()
             : true;
@@ -79,7 +79,7 @@ class MetaHelper
 
     public static function getSiteMetaTitle(Site $site): string
     {
-        $siteSeo = self::getSeoData($site->seo());
+        $siteSeo = self::getSeoData($site->metaKitSeo());
         if ($siteSeo && $siteSeo->metaTitle()->isNotEmpty()) {
             return $siteSeo->metaTitle()->value();
         }
@@ -94,7 +94,7 @@ class MetaHelper
         }
 
         // Get site SEO settings
-        $siteSeo = self::getSeoData($site->seo());
+        $siteSeo = self::getSeoData($site->metaKitSeo());
 
         // Fall back to site default description
         if ($siteSeo && $siteSeo->metaDescription()->isNotEmpty()) {
@@ -123,7 +123,7 @@ class MetaHelper
         }
 
         // Get site SEO settings
-        $siteSeo = self::getSeoData($site->seo());
+        $siteSeo = self::getSeoData($site->metaKitSeo());
 
         // Fall back to site OG description
         if ($siteSeo && $siteSeo->ogDescription()->isNotEmpty()) {

@@ -17,13 +17,13 @@ class MetaKitController
         if (!$field || $field->isEmpty()) {
             return null;
         }
-        
+
         // Try blocks format first
         $blocks = $field->toBlocks();
         if ($blocks && $blocks->count() > 0) {
             return $blocks->first()->content();
         }
-        
+
         // Fallback to object format (legacy)
         return $field->toObject();
     }
@@ -36,17 +36,17 @@ class MetaKitController
         if (!$seoData) {
             return [];
         }
-        
+
         // If it's already an array, return it
         if (is_array($seoData)) {
             return $seoData;
         }
-        
+
         // Convert object to array
         if (method_exists($seoData, 'toArray')) {
             return $seoData->toArray();
         }
-        
+
         return [];
     }
 
@@ -420,11 +420,21 @@ class MetaKitController
                 $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty()
                     ? $seoData->metaTitle()->value()
                     : null;
+            } elseif ($page->meta_title()->isNotEmpty()) {
+                $legacy['metaTitle'] = $page->meta_title()->value();
+                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty()
+                    ? $seoData->metaTitle()->value()
+                    : null;
             }
 
             // Meta Description variations
             if ($page->metadescription()->isNotEmpty()) {
                 $legacy['metaDescription'] = $page->metadescription()->value();
+                $current['metaDescription'] = $seoData && $seoData->metaDescription()->isNotEmpty()
+                    ? $seoData->metaDescription()->value()
+                    : null;
+            } elseif ($page->meta_description()->isNotEmpty()) {
+                $legacy['metaDescription'] = $page->meta_description()->value();
                 $current['metaDescription'] = $seoData && $seoData->metaDescription()->isNotEmpty()
                     ? $seoData->metaDescription()->value()
                     : null;
@@ -479,24 +489,18 @@ class MetaKitController
             if ($page->metatitle()->isNotEmpty() && empty($seoArray['metaTitle'])) {
                 $seoArray['metaTitle'] = $page->metatitle()->value();
                 $converted[] = 'metaTitle (from metatitle)';
-            } elseif ($page->Metatitle()->isNotEmpty() && empty($seoArray['metaTitle'])) {
-                $seoArray['metaTitle'] = $page->Metatitle()->value();
-                $converted[] = 'metaTitle (from Metatitle)';
-            } elseif ($page->seotitle()->isNotEmpty() && empty($seoArray['metaTitle'])) {
-                $seoArray['metaTitle'] = $page->seotitle()->value();
-                $converted[] = 'metaTitle (from seotitle)';
-            } elseif ($page->customtitle()->isNotEmpty() && empty($seoArray['metaTitle'])) {
-                $seoArray['metaTitle'] = $page->customtitle()->value();
-                $converted[] = 'metaTitle (from customtitle)';
+            } elseif ($page->meta_title()->isNotEmpty() && empty($seoArray['metaTitle'])) {
+                $seoArray['metaTitle'] = $page->content()->get('Meta-title')->value();
+                $converted[] = 'metaTitle (from Meta-title)';
             }
 
             // Migrate legacy fields - Meta Description variations
             if ($page->metadescription()->isNotEmpty() && empty($seoArray['metaDescription'])) {
                 $seoArray['metaDescription'] = $page->metadescription()->value();
                 $converted[] = 'metaDescription (from metadescription)';
-            } elseif ($page->seodescription()->isNotEmpty() && empty($seoArray['metaDescription'])) {
-                $seoArray['metaDescription'] = $page->seodescription()->value();
-                $converted[] = 'metaDescription (from seodescription)';
+            } elseif ($page->meta_description()->isNotEmpty() && empty($seoArray['metaDescription'])) {
+                $seoArray['metaDescription'] = $page->meta_description()->value();
+                $converted[] = 'metaDescription (from Meta-description)';
             }
 
             // Migrate legacy fields - OG Image
@@ -619,7 +623,7 @@ class MetaKitController
     {
         $kirby = kirby();
         $pages = $kirby->site()->index();
-        
+
         // Filter by specific page IDs if provided
         $pageIds = get('pageIds');
         if ($pageIds && is_array($pageIds)) {
@@ -627,7 +631,7 @@ class MetaKitController
                 return in_array($page->id(), $pageIds);
             });
         }
-        
+
         $result = [];
 
         foreach ($pages as $page) {

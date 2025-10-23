@@ -12,7 +12,7 @@
       options
     };
   }
-  const _sfc_main$1 = {
+  const _sfc_main$2 = {
     props: {
       label: String,
       parent: String,
@@ -169,20 +169,20 @@
       }
     }
   };
-  var _sfc_render$1 = function render() {
+  var _sfc_render$2 = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("section", { staticClass: "k-seo-preview-section" }, [_c("header", { staticClass: "k-section-header" }, [_c("h2", { staticClass: "k-headline" }, [_vm._v(_vm._s(_vm.label || "SEO Preview"))])]), _vm.meta ? _c("div", { staticClass: "k-seo-previews" }, [_c("div", { staticClass: "k-seo-preview k-seo-preview--google" }, [_c("h3", { staticClass: "k-seo-preview__title" }, [_vm._v("Google Search Preview")]), _c("div", { staticClass: "k-seo-preview__content" }, [_c("div", { staticClass: "k-google-preview" }, [_c("cite", { staticClass: "k-google-preview__url" }, [_vm._v(_vm._s(_vm.displayUrl(_vm.meta.url)))]), _c("h3", { staticClass: "k-google-preview__title" }, [_vm._v(_vm._s(_vm.meta.title || "Page Title"))]), _c("p", { staticClass: "k-google-preview__description" }, [_vm._v(_vm._s(_vm.meta.description || "No description available"))])])])]), _c("div", { staticClass: "k-seo-preview k-seo-preview--twitter" }, [_c("h3", { staticClass: "k-seo-preview__title" }, [_vm._v("Share / Card Preview")]), _c("div", { staticClass: "k-seo-preview__content" }, [_c("div", { staticClass: "k-twitter-preview" }, [_vm.meta.ogImage ? _c("div", { staticClass: "k-twitter-preview__image", style: { backgroundImage: "url(" + _vm.meta.ogImage + ")" } }) : _vm._e(), _c("div", { staticClass: "k-twitter-preview__body" }, [_c("cite", { staticClass: "k-twitter-preview__url" }, [_vm._v(_vm._s(_vm.displayUrl(_vm.meta.url)))]), _c("h4", { staticClass: "k-twitter-preview__title" }, [_vm._v(_vm._s(_vm.meta.ogTitle || _vm.meta.title || "Page Title"))]), _c("p", { staticClass: "k-twitter-preview__description" }, [_vm._v(_vm._s(_vm.truncate(_vm.meta.ogDescription || _vm.meta.description, 140) || "No description"))])])])])])]) : _c("div", { staticClass: "k-seo-preview-loading" }, [_vm._v(" Loading preview... ")])]);
   };
-  var _sfc_staticRenderFns$1 = [];
-  _sfc_render$1._withStripped = true;
-  var __component__$1 = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$1,
-    _sfc_render$1,
-    _sfc_staticRenderFns$1
+  var _sfc_staticRenderFns$2 = [];
+  _sfc_render$2._withStripped = true;
+  var __component__$2 = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$2,
+    _sfc_render$2,
+    _sfc_staticRenderFns$2
   );
-  __component__$1.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/kirby-seo-ai/src/sections/seo-preview.vue";
-  const SeoPreview = __component__$1.exports;
-  const _sfc_main = {
+  __component__$2.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/kirby-seo-ai/src/sections/seo-preview.vue";
+  const SeoPreview = __component__$2.exports;
+  const _sfc_main$1 = {
     props: {
       pages: Array,
       language: String,
@@ -742,7 +742,7 @@
       }
     }
   };
-  var _sfc_render = function render() {
+  var _sfc_render$1 = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("k-panel-inside", { staticClass: "k-meta-kit-view" }, [_vm.languages && _vm.languages.length > 1 ? _c("div", { staticClass: "k-meta-kit-language-bar" }, [_c("k-button-group", _vm._l(_vm.languages, function(lang) {
       return _c("k-button", { key: lang.code, attrs: { "theme": lang.code === _vm.language ? "positive" : "", "size": "xs" }, on: { "click": function($event) {
@@ -836,6 +836,142 @@
       return _vm.openPageSeoTab(_vm.currentEditPage);
     } } }, [_vm._v(" Edit in Page ")])], 1)])]) : _vm._e()], 1)], 1);
   };
+  var _sfc_staticRenderFns$1 = [];
+  _sfc_render$1._withStripped = true;
+  var __component__$1 = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$1,
+    _sfc_render$1,
+    _sfc_staticRenderFns$1
+  );
+  __component__$1.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/kirby-seo-ai/js/components/MetaKitView.vue";
+  const MetaKitView = __component__$1.exports;
+  const _sfc_main = {
+    props: {
+      fieldName: String,
+      fieldLabel: String,
+      fieldType: {
+        type: String,
+        default: "text"
+      },
+      legacyValue: [String, Object],
+      currentValue: [String, Object],
+      pageId: String,
+      showLegacy: {
+        type: Boolean,
+        default: false
+      },
+      showCurrent: {
+        type: Boolean,
+        default: true
+      },
+      showAI: {
+        type: Boolean,
+        default: true
+      }
+    },
+    data() {
+      return {
+        choice: "keep",
+        manualValue: "",
+        isGenerating: false
+      };
+    },
+    computed: {
+      editableValue() {
+        return this.manualValue || this.currentValue || "";
+      },
+      fieldLength() {
+        if (this.editableValue && typeof this.editableValue === "string") {
+          return this.editableValue.length;
+        }
+        return 0;
+      },
+      lengthClass() {
+        if (this.fieldLength < 50 || this.fieldLength > 160) {
+          return "k-meta-kit-status-warning";
+        }
+        return "k-meta-kit-status-success";
+      },
+      hasChanged() {
+        if (!this.choice) return false;
+        if (this.choice === "legacy") return true;
+        if (this.choice === "keep" || this.choice === "current") {
+          return this.manualValue && this.manualValue !== this.currentValue;
+        }
+        if (this.choice === "ai") {
+          return !!this.manualValue;
+        }
+        return false;
+      }
+    },
+    watch: {
+      currentValue: {
+        immediate: true,
+        handler(newVal) {
+          if (!this.manualValue) {
+            this.choice = this.showLegacy && this.legacyValue ? "legacy" : "keep";
+          }
+        }
+      }
+    },
+    methods: {
+      setChoice(newChoice) {
+        this.choice = newChoice;
+        this.$emit("choice-changed", { choice: newChoice });
+      },
+      updateValue(value) {
+        this.manualValue = value;
+      },
+      formatValue(value) {
+        if (typeof value === "string") return value;
+        if (Array.isArray(value)) return `${value.length} image(s)`;
+        if (typeof value === "object") return "File";
+        return String(value);
+      },
+      async generateAI() {
+        this.setChoice("ai");
+        this.isGenerating = true;
+        try {
+          const result = await this.$emit("generate-ai", { fieldName: this.fieldName, pageId: this.pageId });
+        } catch (error) {
+        } finally {
+          this.isGenerating = false;
+        }
+      },
+      apply() {
+        let value;
+        if (this.choice === "legacy") {
+          value = this.legacyValue;
+        } else {
+          value = this.manualValue || this.currentValue;
+        }
+        this.$emit("apply", {
+          fieldName: this.fieldName,
+          value,
+          choice: this.choice
+        });
+        this.manualValue = "";
+        this.choice = "keep";
+      },
+      // Method to be called by parent to set generated AI content
+      setGeneratedContent(content) {
+        this.manualValue = content;
+      },
+      // Method to reset the field
+      reset() {
+        this.manualValue = "";
+        this.choice = this.showLegacy && this.legacyValue ? "legacy" : "keep";
+      }
+    }
+  };
+  var _sfc_render = function render() {
+    var _vm = this, _c = _vm._self._c;
+    return _c("div", { staticClass: "k-meta-kit-legacy-field" }, [_c("span", { staticClass: "k-meta-kit-legacy-field-label" }, [_vm._v(_vm._s(_vm.fieldLabel) + ":")]), _c("div", { staticClass: "k-meta-kit-legacy-field-values" }, [_c("div", { staticClass: "k-meta-kit-legacy-choices" }, [_vm.showLegacy ? _c("k-button", { attrs: { "size": "xs", "theme": _vm.choice === "legacy" ? "positive" : "" }, on: { "click": function($event) {
+      return _vm.setChoice("legacy");
+    } } }, [_vm._v(" Legacy ")]) : _vm._e(), _vm.showCurrent ? _c("k-button", { attrs: { "size": "xs", "theme": _vm.choice === "current" || _vm.choice === "keep" ? "positive" : "" }, on: { "click": function($event) {
+      return _vm.setChoice("keep");
+    } } }, [_vm._v(" Current ")]) : _vm._e(), _vm.showAI && _vm.fieldType !== "image" ? _c("k-button", { attrs: { "size": "xs", "icon": "sparkling", "theme": _vm.choice === "ai" ? "positive" : "", "disabled": _vm.isGenerating }, on: { "click": _vm.generateAI } }, [_vm._v(" AI Generate ")]) : _vm._e()], 1), _c("div", { staticClass: "k-meta-kit-legacy-field-preview" }, [_vm.choice === "legacy" ? _c("div", { staticClass: "k-meta-kit-legacy-field-option" }, [_c("span", { staticClass: "k-meta-kit-legacy-badge" }, [_vm._v("Legacy Value")]), _c("span", { staticClass: "k-meta-kit-legacy-field-value" }, [_vm._v(_vm._s(_vm.formatValue(_vm.legacyValue)))])]) : _vm.choice === "current" || _vm.choice === "keep" ? _c("div", { staticClass: "k-meta-kit-legacy-field-option" }, [_c("span", { staticClass: "k-meta-kit-legacy-badge" }, [_vm._v("Current Value (editable)")]), _c("k-input", { attrs: { "value": _vm.editableValue, "placeholder": _vm.currentValue || "No value set", "type": _vm.fieldType === "textarea" ? "textarea" : "text", "buttons": false }, on: { "input": _vm.updateValue } }), _vm.currentValue && _vm.fieldLength ? _c("span", { staticClass: "k-meta-kit-field-length", class: _vm.lengthClass }, [_vm._v(" (" + _vm._s(_vm.fieldLength) + " chars) ")]) : _vm._e()], 1) : _vm.choice === "ai" ? _c("div", { staticClass: "k-meta-kit-legacy-field-option" }, [_c("span", { staticClass: "k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai" }, [_vm._v("AI Generated (editable)")]), _vm.isGenerating ? _c("span", { staticClass: "k-meta-kit-legacy-field-generating" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _vm._v(" Generating... ")], 1) : _c("k-input", { attrs: { "value": _vm.editableValue, "placeholder": `AI generated ${_vm.fieldLabel}`, "type": _vm.fieldType === "textarea" ? "textarea" : "text", "buttons": false }, on: { "input": _vm.updateValue } })], 1) : _vm._e()]), _vm.hasChanged ? _c("k-button", { attrs: { "icon": "check", "size": "sm", "theme": "positive" }, on: { "click": _vm.apply } }, [_vm._v(" Apply " + _vm._s(_vm.fieldLabel) + " ")]) : _vm._e()], 1)]);
+  };
   var _sfc_staticRenderFns = [];
   _sfc_render._withStripped = true;
   var __component__ = /* @__PURE__ */ normalizeComponent(
@@ -843,11 +979,12 @@
     _sfc_render,
     _sfc_staticRenderFns
   );
-  __component__.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/kirby-seo-ai/js/components/MetaKitView.vue";
-  const MetaKitView = __component__.exports;
+  __component__.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/kirby-seo-ai/js/components/FieldEditor.vue";
+  const FieldEditor = __component__.exports;
   panel.plugin("tearoom1/meta-kit", {
     components: {
-      "meta-kit-view": MetaKitView
+      "meta-kit-view": MetaKitView,
+      "field-editor": FieldEditor
     },
     sections: {
       "seo-preview": SeoPreview

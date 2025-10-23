@@ -22,7 +22,7 @@ class Sitemap
 
         // Site settings from panel (middle priority)
         $siteSettings = [];
-        $siteSitemap = $kirby->site()->sitemap()->toObject();
+        $siteSitemap = \TearoomOne\MetaHelper::getSeoData($kirby->site()->metaKitSitemap());
         if ($siteSitemap) {
             if ($siteSitemap->exclude()->isNotEmpty()) {
                 // Store page IDs for later checking

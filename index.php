@@ -195,27 +195,48 @@ Kirby::plugin('tearoom1/meta-kit', [
             $updates = [];
 
             // Check if objects need initialization
-            if ($site->seo()->isEmpty()) {
-                $updates['seo'] = [
-                    'appendSiteName' => 'true',
-                    'titleSeparator' => '|',
-                ];
+            if ($site->metaKitSeo()->isEmpty()) {
+                $updates['metaKitSeo'] = [[
+                    'content' => [
+                        'appendSiteName' => true,
+                        'titleSeparator' => '|',
+                        'metaTitle' => '',
+                        'metaDescription' => '',
+                        'metaKeywords' => '',
+                        'ogImage' => []
+                    ],
+                    'id' => 'site-seo-settings',
+                    'isHidden' => false,
+                    'type' => 'seo-settings'
+                ]];
                 $needsUpdate = true;
             }
 
-            if ($site->openrouter()->isEmpty()) {
-                $updates['openrouter'] = [
-                    'model' => 'meta-llama/llama-3.2-3b-instruct:free',
-                    'temperature' => '0.7',
-                ];
+            if ($site->metaKitOpenrouter()->isEmpty()) {
+                $updates['metaKitOpenrouter'] = [[
+                    'content' => [
+                        'apiKey' => '',
+                        'model' => 'meta-llama/llama-3.2-3b-instruct:free',
+                        'temperature' => 0.7
+                    ],
+                    'id' => 'openrouter-settings',
+                    'isHidden' => false,
+                    'type' => 'openrouter'
+                ]];
                 $needsUpdate = true;
             }
 
-            if ($site->sitemap()->isEmpty()) {
-                $updates['sitemap'] = [
-                    'priorityHome' => '1.0',
-                    'priorityDefault' => '0.8',
-                ];
+            if ($site->metaKitSitemap()->isEmpty()) {
+                $updates['metaKitSitemap'] = [[
+                    'content' => [
+                        'exclude' => [],
+                        'priorityHome' => 1.0,
+                        'priorityDefault' => 0.8
+                    ],
+                    'id' => 'sitemap-settings',
+                    'isHidden' => false,
+                    'type' => 'sitemap'
+                ]];
                 $needsUpdate = true;
             }
 

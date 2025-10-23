@@ -30,7 +30,7 @@ class MetaKit
 
         // Site settings from panel (middle priority)
         $siteSettings = [];
-        $openrouter = $kirby->site()->openrouter()->toObject();
+        $openrouter = \TearoomOne\MetaHelper::getSeoData($kirby->site()->metaKitOpenrouter());
         if ($openrouter) {
             if ($openrouter->apiKey()->isNotEmpty()) {
                 $siteSettings['api.key'] = $openrouter->apiKey()->value();
