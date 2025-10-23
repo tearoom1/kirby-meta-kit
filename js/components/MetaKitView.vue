@@ -221,13 +221,6 @@
         <div v-for="page in legacyPages" :key="page.id" class="k-meta-kit-legacy-item">
           <div class="k-meta-kit-legacy-item-header">
             <strong>{{ page.title }}</strong>
-            <k-button
-              icon="download"
-              size="sm"
-              @click="convertLegacyPage(page.id)"
-            >
-              Apply Legacy
-            </k-button>
           </div>
 
           <div class="k-meta-kit-legacy-item-content">
@@ -247,8 +240,8 @@
                   <k-button
                     v-if="page.current && page.current[key]"
                     size="xs"
-                    :theme="getFieldChoice(page.id, key) === 'current' ? 'positive' : ''"
-                    @click="setFieldChoice(page.id, key, 'current')"
+                    :theme="(getFieldChoice(page.id, key) === 'current' || getFieldChoice(page.id, key) === 'keep') ? 'positive' : ''"
+                    @click="setFieldChoice(page.id, key, 'keep')"
                   >
                     Current
                   </k-button>
@@ -271,7 +264,7 @@
                     <span class="k-meta-kit-legacy-field-value">{{ formatFieldValue(value) }}</span>
                   </div>
 
-                  <div v-else-if="getFieldChoice(page.id, key) === 'current' && page.current && page.current[key]"
+                  <div v-else-if="(getFieldChoice(page.id, key) === 'current' || getFieldChoice(page.id, key) === 'keep') && page.current && page.current[key]"
                        class="k-meta-kit-legacy-field-option">
                     <span class="k-meta-kit-legacy-badge">Current Value (editable)</span>
                     <k-input
@@ -1158,6 +1151,12 @@ export default {
         } else if (page.legacy && page.legacy[fieldName]) {
           value = page.legacy[fieldName];
         }
+        
+        // Ensure we got a value
+        if (!value) {
+          window.panel.notification.error('Legacy value not found');
+          return;
+        }
       } else if (choice === 'current' || choice === 'keep' || choice === 'ai') {
         // For editable fields (current/keep/ai), check if there's an edited value
         const manualValue = this.getManualValue(pageId, fieldName);
@@ -1217,6 +1216,19 @@ export default {
             if (pageInAllPages.legacy && pageInAllPages.legacy[fieldName]) {
               delete pageInAllPages.legacy[fieldName];
             }
+          }
+
+          // Also update legacy pages data if this is from the legacy dialog
+          const pageInLegacy = this.legacyPages.find(p => p.id === pageId);
+          if (pageInLegacy) {
+            // Update the current value to match what was just applied
+            if (!pageInLegacy.current) {
+              this.$set(pageInLegacy, 'current', {});
+            }
+            this.$set(pageInLegacy.current, fieldName, value);
+            
+            // Don't remove the field - just let the choice switch to 'keep'
+            // and the button will disappear since hasFieldChanged will be false
           }
           
           // Force Vue to re-evaluate the button state
