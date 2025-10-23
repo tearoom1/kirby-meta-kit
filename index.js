@@ -929,11 +929,29 @@
               if (response.status === "success" && response.description) {
                 this.generatedText = response.description;
                 if (parent && parent.value) {
-                  if (!parent.value.seo) {
-                    this.$set(parent.value, "seo", {});
+                  if (!parent.value.seo || !Array.isArray(parent.value.seo)) {
+                    this.$set(parent.value, "seo", [{
+                      id: "seo-metadata",
+                      type: "seo",
+                      isHidden: false,
+                      content: {}
+                    }]);
                   }
-                  this.$set(parent.value.seo, "metadescription", response.description);
-                  this.$set(parent.value.seo, "ogdescription", response.description);
+                  if (parent.value.seo.length === 0) {
+                    parent.value.seo.push({
+                      id: "seo-metadata",
+                      type: "seo",
+                      isHidden: false,
+                      content: {}
+                    });
+                  }
+                  const seoBlock = parent.value.seo[0];
+                  if (!seoBlock.content) {
+                    this.$set(seoBlock, "content", {});
+                  }
+                  this.$set(seoBlock.content, "metadescription", response.description);
+                  this.$set(seoBlock.content, "ogdescription", response.description);
+                  console.log("Updated SEO block:", seoBlock.content);
                   if (parent.update) {
                     parent.update({
                       seo: parent.value.seo
@@ -945,7 +963,7 @@
                       detail: {
                         field: "metadescription",
                         value: response.description,
-                        seoData: parent.value.seo,
+                        seoData: seoBlock.content,
                         pageTitle: parent.value.title
                       }
                     });
