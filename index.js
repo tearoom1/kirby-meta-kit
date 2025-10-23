@@ -329,12 +329,14 @@
           this.isGeneratingAll = false;
         }
       },
-      async reloadLegacyData() {
-        this.isLoadingLegacy = true;
+      async reloadLegacyData(showLoading = true) {
+        if (showLoading) {
+          this.isLoadingLegacy = true;
+        }
         try {
           const response = await this.$api.get("meta-kit/detect-legacy");
           if (response.status === "success") {
-            this.legacyPages = response.pages || [];
+            this.$set(this, "legacyPages", response.pages || []);
             this.legacyPages.forEach((page) => {
               Object.keys(page.fields).forEach((fieldName) => {
                 this.setFieldChoice(page.id, fieldName, "legacy");
@@ -344,7 +346,9 @@
         } catch (error) {
           window.panel.notification.error("Failed to detect legacy metadata");
         } finally {
-          this.isLoadingLegacy = false;
+          if (showLoading) {
+            this.isLoadingLegacy = false;
+          }
         }
       },
       async detectLegacyMetadata() {
@@ -352,7 +356,6 @@
         await this.reloadLegacyData();
       },
       async migrateAllToBlocks() {
-        var _a;
         if (!confirm("This will migrate all legacy SEO fields (metatitle, metadescription, etc.) into the seo field for all pages. Continue?")) {
           return;
         }
@@ -362,10 +365,9 @@
           if (response.status === "success") {
             window.panel.notification.success(response.message || "Migration completed");
             await this.refreshPages();
-            if ((_a = this.$refs.legacyDialog) == null ? void 0 : _a.isOpen) {
-              this.fieldChoices = {};
-              await this.reloadLegacyData();
-            }
+            this.fieldChoices = {};
+            await this.reloadLegacyData(false);
+            this.$forceUpdate();
           } else {
             window.panel.notification.error(response.message || "Migration failed");
           }

@@ -910,12 +910,16 @@ export default {
         this.isGeneratingAll = false;
       }
     },
-    async reloadLegacyData() {
-      this.isLoadingLegacy = true;
+    async reloadLegacyData(showLoading = true) {
+      if (showLoading) {
+        this.isLoadingLegacy = true;
+      }
       try {
         const response = await this.$api.get('meta-kit/detect-legacy');
         if (response.status === 'success') {
-          this.legacyPages = response.pages || [];
+          // Use $set to ensure Vue reactivity picks up the change
+          this.$set(this, 'legacyPages', response.pages || []);
+          
           // Pre-select 'legacy' for all fields in legacy pages
           this.legacyPages.forEach(page => {
             Object.keys(page.fields).forEach(fieldName => {
@@ -926,7 +930,9 @@ export default {
       } catch (error) {
         window.panel.notification.error('Failed to detect legacy metadata');
       } finally {
-        this.isLoadingLegacy = false;
+        if (showLoading) {
+          this.isLoadingLegacy = false;
+        }
       }
     },
     async detectLegacyMetadata() {
@@ -947,13 +953,14 @@ export default {
           await this.refreshPages();
           
           // Refresh the legacy dialog to show updated current values
-          if (this.$refs.legacyDialog?.isOpen) {
-            // Clear field choices so they reset to default (legacy selected)
-            this.fieldChoices = {};
-            
-            // Reload legacy data without reopening the dialog
-            await this.reloadLegacyData();
-          }
+          // Clear field choices so they reset to default (legacy selected)
+          this.fieldChoices = {};
+          
+          // Reload legacy data without showing loading spinner (keeps dialog content visible)
+          await this.reloadLegacyData(false);
+          
+          // Force Vue to re-render the dialog
+          this.$forceUpdate();
         } else {
           window.panel.notification.error(response.message || 'Migration failed');
         }
