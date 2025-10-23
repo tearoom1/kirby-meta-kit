@@ -205,7 +205,18 @@
       </div>
 
       <div v-else-if="legacyPages.length > 0" class="k-meta-kit-legacy-list">
-        <p>Found {{ legacyPages.length }} pages with legacy SEO fields:</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <p style="margin: 0;">Found {{ legacyPages.length }} pages with legacy SEO fields:</p>
+          <k-button
+            icon="download"
+            :disabled="isMigratingAll"
+            :progress="isMigratingAll"
+            @click="migrateAllToBlocks"
+            theme="positive"
+          >
+            Migrate All
+          </k-button>
+        </div>
 
         <div v-for="page in legacyPages" :key="page.id" class="k-meta-kit-legacy-item">
           <div class="k-meta-kit-legacy-item-header">
@@ -838,6 +849,7 @@ export default {
       isLoadingLegacy: false,
       isLoadingAllPages: false,
       isLoadingSinglePage: false,
+      isMigratingAll: false,
       pagesData: this.pages || [],
       allPagesData: [],
       legacyPages: [],
@@ -988,6 +1000,28 @@ export default {
         window.panel.notification.error('Failed to detect legacy metadata');
       } finally {
         this.isLoadingLegacy = false;
+      }
+    },
+    async migrateAllToBlocks() {
+      if (!confirm('This will migrate legacy SEO object fields to the new blocks format for the site and all pages. Continue?')) {
+        return;
+      }
+      this.isMigratingAll = true;
+      try {
+        const response = await this.$api.post('meta-kit/convert-all-to-blocks');
+        if (response.status === 'success') {
+          window.panel.notification.success(response.message || 'Migration completed');
+          await this.refreshPages();
+          if (this.$refs.legacyDialog?.isOpen) {
+            await this.detectLegacyMetadata();
+          }
+        } else {
+          window.panel.notification.error(response.message || 'Migration failed');
+        }
+      } catch (error) {
+        window.panel.notification.error('Migration failed');
+      } finally {
+        this.isMigratingAll = false;
       }
     },
     async checkLegacyOnLoad() {
