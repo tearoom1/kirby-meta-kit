@@ -43,10 +43,9 @@ return [
 
                 // Fallback to site default OG image
                 if (!$ogImage) {
-                    $siteSeo = site()->seo()->toObject();
+                    $siteSeo = \TearoomOne\MetaHelper::getSeoData(site()->seo());
                     if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
                         $siteImage = $siteSeo->ogImage()->toFile();
-                        // Resize to OG dimensions (1200x630)
                         $ogImage = $siteImage ? $siteImage->crop(1200, 630)->url() : null;
                     }
                 }

@@ -52,7 +52,7 @@ export default {
       siteName: null,
       separator: '|',
       updateTimeout: null,
-      fieldObserver: null,
+      fieldCheckInterval: null,
       lastFieldValues: {}
     }
   },
@@ -75,9 +75,9 @@ export default {
     document.removeEventListener('input', this.handleDOMInput, true);
     document.removeEventListener('change', this.handleDOMInput, true);
     
-    // Disconnect observer
-    if (this.fieldObserver) {
-      this.fieldObserver.disconnect();
+    // Clear field check interval
+    if (this.fieldCheckInterval) {
+      clearInterval(this.fieldCheckInterval);
     }
   },
   methods: {
@@ -96,7 +96,6 @@ export default {
         );
         
         if (valuesChanged && Object.keys(this.lastFieldValues).length > 0) {
-          console.log('Field values changed programmatically (discard?), updating preview');
           this.updatePreviewFromDOM();
         }
         
@@ -104,7 +103,9 @@ export default {
       };
       
       // Check every 500ms for field changes
-      setInterval(checkFieldValues, 500);
+      this.fieldCheckInterval = setInterval(checkFieldValues, 500);
+      // Initialize current values
+      checkFieldValues();
     },
     handleDOMInput(event) {
       const target = event.target;
@@ -141,9 +142,8 @@ export default {
       };
       
       // Get page title (might be in a different field)
-      const pageTitle = getFieldValue('title') || document.querySelector('[name="title"]')?.value || 'Page Title';
+      const pageTitle = getFieldValue('title') || 'Page Title';
       
-      console.log('Updating preview from DOM:', seoData);
       this.updatePreviewFromData(seoData, pageTitle);
     },
     updatePreviewFromData(seoData, pageTitle) {
@@ -198,7 +198,7 @@ export default {
           }
         }
       } catch (error) {
-        console.error('Error loading section:', error);
+        // Silently fail - preview will show loading state
       }
     },
     extractSiteInfo() {
