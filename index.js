@@ -789,9 +789,9 @@
             {{ error }}
           </div>
           <div v-if="generatedText" class="k-meta-kit-generator__result">
-            <strong>✓ Description generated and filled:</strong>
-            <div class="k-meta-kit-generator__text">{{ generatedText }}</div>
-            <small>The description has been added to both Meta Description and OG Description fields below. Scroll down to review and save.</small>
+            <strong>✓ Description generated and filled</strong>
+<!--            <div class="k-meta-kit-generator__text">{{ generatedText }}</div>-->
+<!--            <small>The description has been added to both Meta Description and OG Description fields below. Scroll down to review and save.</small>-->
           </div>
         </k-field>
       `,
@@ -951,7 +951,6 @@
                   }
                   this.$set(seoBlock.content, "metadescription", response.description);
                   this.$set(seoBlock.content, "ogdescription", response.description);
-                  console.log("Updated SEO block:", seoBlock.content);
                   if (parent.update) {
                     parent.update({
                       seo: parent.value.seo

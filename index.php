@@ -3,6 +3,10 @@
 use TearoomOne\MetaKit;
 use Kirby\Http\Response;
 
+if (!option('tearoom1.meta-kit.enabled', true)) {
+    return;
+}
+
 @include_once __DIR__ . '/vendor/autoload.php';
 
 load([
@@ -181,7 +185,7 @@ Kirby::plugin('tearoom1/meta-kit', [
             $site = site();
             $needsUpdate = false;
             $updates = [];
-            
+
             // Check if objects need initialization
             if ($site->seo()->isEmpty()) {
                 $updates['seo'] = [
@@ -190,7 +194,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                 ];
                 $needsUpdate = true;
             }
-            
+
             if ($site->openrouter()->isEmpty()) {
                 $updates['openrouter'] = [
                     'model' => 'meta-llama/llama-3.2-3b-instruct:free',
@@ -198,7 +202,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                 ];
                 $needsUpdate = true;
             }
-            
+
             if ($site->sitemap()->isEmpty()) {
                 $updates['sitemap'] = [
                     'priorityHome' => '1.0',
@@ -206,7 +210,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                 ];
                 $needsUpdate = true;
             }
-            
+
             // Only update if needed and not already being updated
             if ($needsUpdate && !defined('KIRBY_META_KIT_INITIALIZING')) {
                 define('KIRBY_META_KIT_INITIALIZING', true);

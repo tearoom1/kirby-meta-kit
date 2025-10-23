@@ -27,7 +27,7 @@ columns:
           aiGenerator:
             label: AI Description Generator
             type: meta-kit-generator
-            help: Generate descriptions automatically using AI
+#            help: Generate descriptions automatically using AI
             sourceField: text
             targetField: metaDescription
 
