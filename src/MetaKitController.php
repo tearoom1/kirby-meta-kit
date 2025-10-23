@@ -9,6 +9,47 @@ class MetaKitController
      */
     const int MIN_TEXT_LENGTH = 25;
 
+    /**
+     * Get SEO data from blocks or object field
+     */
+    private static function getSeoData($field)
+    {
+        if (!$field || $field->isEmpty()) {
+            return null;
+        }
+        
+        // Try blocks format first
+        $blocks = $field->toBlocks();
+        if ($blocks && $blocks->count() > 0) {
+            return $blocks->first()->content();
+        }
+        
+        // Fallback to object format (legacy)
+        return $field->toObject();
+    }
+
+    /**
+     * Convert SEO data to array for saving
+     */
+    private static function seoDataToArray($seoData)
+    {
+        if (!$seoData) {
+            return [];
+        }
+        
+        // If it's already an array, return it
+        if (is_array($seoData)) {
+            return $seoData;
+        }
+        
+        // Convert object to array
+        if (method_exists($seoData, 'toArray')) {
+            return $seoData->toArray();
+        }
+        
+        return [];
+    }
+
     public static function getPages(): array
     {
         $kirby = kirby();

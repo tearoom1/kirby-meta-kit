@@ -7,67 +7,54 @@ columns:
     fields:
       seo:
         label: SEO Settings
-        type: object
+        type: blocks
+        fieldsets:
+          - seo-settings
+        max: 1
         empty: false
         default:
-          appendSiteName: true
-          titleSeparator: '|'
-        fields:
-          appendSiteName:
-            label: Append Site Name to Titles
-            type: toggle
-            text:
-              - 'No'
-              - 'Yes'
-            default: true
-            width: 1/2
-            help: Automatically add site name to all page titles (e.g., "Page Title | Site Name")
-
-          titleSeparator:
-            label: Title Separator
-            type: select
-            options:
-              - { value: '|', text: '| (pipe)' }
-              - { value: '-', text: '- (dash)' }
-              - { value: '–', text: '– (en dash)' }
-              - { value: '—', text: '— (em dash)' }
-              - { value: '•', text: '• (bullet)' }
-              - { value: '/', text: '/ (slash)' }
-            default: '|'
-            width: 1/2
-            help: Separator between page title and site name
-            when:
+          - type: seo-settings
+            content:
               appendSiteName: true
+              titleSeparator: '|'
 
-          metaTitle:
-            label: Overwrite Site Name
-            type: text
-            placeholder: "{{ site.title }}"
-            help: >
-              Overwrite the site name.
-              Will be used if to be appended on pages.
-            when:
-              appendSiteName: true
+  ai:
+    width: 1/2
+    type: fields
+    label: AI Settings
+    icon: ai
+    fields:
+      openrouter:
+        label: OpenRouter Settings
+        type: blocks
+        fieldsets:
+          - openrouter
+        max: 1
+        empty: false
+        default:
+          - type: openrouter
+            content:
+              model: 'meta-llama/llama-3.2-3b-instruct:free'
+              temperature: 0.7
 
-          metaDescription:
-            label: Default Meta Description
-            type: textarea
-            buttons: false
-            help: Default description for all pages. Max 160 characters.
-
-          metaKeywords:
-            label: Default Keywords
-            type: tags
-            help: Comma-separated list of default keywords for all pages.
-
-          ogImage:
-            label: Default Social Media Image
-            type: files
-            max: 1
-            layout: cards
-            size: small
-            query: page.images
-            help: Default image for social media sharing (1200×630px recommended)
+  sitemap:
+    width: 1/2
+    type: fields
+    label: Sitemap
+    icon: sitemap
+    fields:
+      sitemap:
+        label: Sitemap Settings
+        type: blocks
+        fieldsets:
+          - sitemap
+        max: 1
+        empty: false
+        default:
+          - type: sitemap
+            content:
+              priorityHome: 1.0
+              priorityDefault: 0.8
 
   social:
     width: 1/2
@@ -94,94 +81,3 @@ columns:
           url:
             label: Profile URL
             type: url
-
-  ai:
-    width: 1/2
-    type: fields
-    label: AI Settings
-    icon: ai
-    fields:
-      openrouter:
-        label: OpenRouter Settings
-        type: object
-        empty: false
-        default:
-          model: 'meta-llama/llama-3.2-3b-instruct:free'
-          temperature: 0.7
-        fields:
-          apiKey:
-            label: OpenRouter API Key
-            type: text
-            help: Your OpenRouter API key for AI-generated descriptions
-            width: 1/2
-          model:
-            label: AI Model
-            type: select
-            options:
-              - { value: 'meta-llama/llama-3.2-3b-instruct:free', text: 'Llama 3.2 3B (Free)' }
-              - { value: 'meta-llama/llama-3.1-8b-instruct:free', text: 'Llama 3.1 8B (Free)' }
-              - { value: 'google/gemma-2-9b-it:free', text: 'Gemma 2 9B (Free)' }
-              - { value: 'mistralai/mistral-7b-instruct:free', text: 'Mistral 7B (Free)' }
-              - { value: 'microsoft/phi-3-medium-128k-instruct:free', text: 'Phi-3 Medium (Free)' }
-              - { value: 'qwen/qwen-2.5-7b-instruct:free', text: 'Qwen 2.5 7B (Free)' }
-              - { value: 'deepseek/deepseek-chat:free', text: 'DeepSeek Chat (Free)' }
-              - { value: 'google/gemini-2.0-flash-exp:free', text: 'Gemini 2.0 Flash (Free)' }
-              - { value: 'openai/gpt-5', text: 'GPT-5 (Paid)' }
-              - { value: 'openai/gpt-5-mini', text: 'GPT-5 Mini (Paid)' }
-              - { value: 'openai/gpt-4o-mini', text: 'GPT-4o Mini (Paid)' }
-              - { value: 'openai/gpt-4o', text: 'GPT-4o (Paid)' }
-              - { value: 'anthropic/claude-sonnet-4.5', text: 'Claude Sonnet 4.5 (Paid)' }
-              - { value: 'anthropic/claude-haiku-4.5', text: 'Claude Haiku 4.5 (Paid)' }
-              - { value: 'anthropic/claude-3.5-sonnet', text: 'Claude 3.5 Sonnet (Paid)' }
-              - { value: 'google/gemini-pro-1.5', text: 'Gemini 1.5 Pro (Paid)' }
-              - { value: 'google/gemini-flash-1.5', text: 'Gemini 1.5 Flash (Paid)' }
-              - { value: 'mistralai/mistral-large', text: 'Mistral Large (Paid)' }
-              - { value: 'meta-llama/llama-3.3-70b-instruct', text: 'Llama 3.3 70B (Paid)' }
-              - { value: 'deepseek/deepseek-chat', text: 'DeepSeek Chat V3 (Paid)' }
-            default: 'meta-llama/llama-3.2-3b-instruct:free'
-            width: 1/2
-          temperature:
-            label: Creativity Level
-            type: range
-            min: 0.1
-            max: 1.0
-            step: 0.1
-            default: 0.7
-            width: 1/2
-            help: Higher values make output more random, lower values more focused
-
-  sitemap:
-    width: 1/2
-    type: fields
-    label: Sitemap
-    icon: sitemap
-    fields:
-      sitemap:
-        label: Sitemap Settings
-        type: object
-        empty: false
-        default:
-          priorityHome: 1.0
-          priorityDefault: 0.8
-        fields:
-          exclude:
-            label: Exclude from Sitemap
-            type: pages
-            multiple: true
-            help: Pages to exclude from the sitemap
-          priorityHome:
-            label: Homepage Priority
-            type: range
-            min: 0.1
-            max: 1.0
-            step: 0.1
-            default: 1.0
-            width: 1/2
-          priorityDefault:
-            label: Default Page Priority
-            type: range
-            min: 0.1
-            max: 1.0
-            step: 0.1
-            default: 0.8
-            width: 1/2

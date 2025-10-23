@@ -27,6 +27,10 @@ Kirby::plugin('tearoom1/meta-kit', [
         'meta-kit/site' => __DIR__ . '/blueprints/site.yml',
         'meta-kit/page' => __DIR__ . '/blueprints/page.yml',
         'meta-kit/fields/og-image' => __DIR__ . '/blueprints/fields/og-image.php',
+        'blocks/seo' => __DIR__ . '/blueprints/blocks/seo.yml',
+        'blocks/seo-settings' => __DIR__ . '/blueprints/blocks/seo-settings.yml',
+        'blocks/openrouter' => __DIR__ . '/blueprints/blocks/openrouter.yml',
+        'blocks/sitemap' => __DIR__ . '/blueprints/blocks/sitemap.yml',
     ],
     'sections' => [
         'seo-preview' => __DIR__ . '/sections/preview.php',

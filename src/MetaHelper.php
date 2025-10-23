@@ -7,10 +7,29 @@ use Kirby\Cms\Site;
 
 class MetaHelper
 {
+    /**
+     * Get SEO data from blocks or object field
+     */
+    private static function getSeoData($field)
+    {
+        if (!$field || $field->isEmpty()) {
+            return null;
+        }
+        
+        // Try blocks format first
+        $blocks = $field->toBlocks();
+        if ($blocks && $blocks->count() > 0) {
+            return $blocks->first()->content();
+        }
+        
+        // Fallback to object format (legacy)
+        return $field->toObject();
+    }
+
     public static function buildTitle(Page $page, Site $site, $seoData = null): string
     {
-        // Get site SEO settings object
-        $siteSeo = $site->seo()->toObject();
+        // Get site SEO settings
+        $siteSeo = self::getSeoData($site->seo());
         
         // Get site settings
         $separator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty() 
@@ -44,7 +63,7 @@ class MetaHelper
 
     public static function getSeparator(Site $site): string
     {
-        $siteSeo = $site->seo()->toObject();
+        $siteSeo = self::getSeoData($site->seo());
         return $siteSeo && $siteSeo->titleSeparator()->isNotEmpty() 
             ? $siteSeo->titleSeparator()->value() 
             : '|';
@@ -52,7 +71,7 @@ class MetaHelper
 
     public static function shouldAppendSiteName(Site $site): bool
     {
-        $siteSeo = $site->seo()->toObject();
+        $siteSeo = self::getSeoData($site->seo());
         return $siteSeo && $siteSeo->appendSiteName()->isNotEmpty() 
             ? $siteSeo->appendSiteName()->toBool() 
             : true;
@@ -60,7 +79,7 @@ class MetaHelper
 
     public static function getSiteMetaTitle(Site $site): string
     {
-        $siteSeo = $site->seo()->toObject();
+        $siteSeo = self::getSeoData($site->seo());
         if ($siteSeo && $siteSeo->metaTitle()->isNotEmpty()) {
             return $siteSeo->metaTitle()->value();
         }
@@ -74,8 +93,8 @@ class MetaHelper
             return $seoData->metaDescription()->excerpt($maxLength);
         }
 
-        // Get site SEO settings object
-        $siteSeo = $site->seo()->toObject();
+        // Get site SEO settings
+        $siteSeo = self::getSeoData($site->seo());
         
         // Fall back to site default description
         if ($siteSeo && $siteSeo->metaDescription()->isNotEmpty()) {
@@ -103,8 +122,8 @@ class MetaHelper
             return $metaDescription;
         }
 
-        // Get site SEO settings object
-        $siteSeo = $site->seo()->toObject();
+        // Get site SEO settings
+        $siteSeo = self::getSeoData($site->seo());
         
         // Fall back to site OG description
         if ($siteSeo && $siteSeo->ogDescription()->isNotEmpty()) {
