@@ -206,13 +206,14 @@ class MetaKit
         $description = trim($description, " \t\n\r\0\x0B\"'`");
 
         $maxLength = $this->options['maxDescriptionLength'];
+        $flexibleLength = $maxLength + 20; // Allow up to 20 extra chars
 
-        if (mb_strlen($description) > $maxLength) {
-            // Try to truncate at sentence boundary
-            $shortened = mb_substr($description, 0, $maxLength - 3);
+        if (mb_strlen($description) > $flexibleLength) {
+            // Only truncate if significantly over limit
+            $shortened = mb_substr($description, 0, $maxLength);
 
-            // Look for last sentence ending (. ! ?)
-            if (preg_match('/^(.+[.!?])\s+/u', $shortened, $matches)) {
+            // Look for last sentence ending (. ! ?) within reasonable range
+            if (preg_match('/^(.+[.!?])(?:\s|$)/u', $shortened, $matches)) {
                 $description = $matches[1];
             } else {
                 // No sentence boundary, look for last word boundary
@@ -224,10 +225,9 @@ class MetaKit
 
                     // Clean up trailing punctuation if incomplete
                     $description = rtrim($description, ',-:;');
-                    $description .= '...';
                 } else {
-                    // Fallback: hard cut
-                    $description = $shortened . '...';
+                    // Fallback: hard cut at word boundary
+                    $description = $shortened;
                 }
             }
         }

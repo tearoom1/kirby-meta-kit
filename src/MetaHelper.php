@@ -10,18 +10,18 @@ class MetaHelper
     /**
      * Get SEO data from blocks or object field
      */
-    private static function getSeoData($field)
+    public static function getSeoData($field)
     {
         if (!$field || $field->isEmpty()) {
             return null;
         }
-        
+
         // Try blocks format first
         $blocks = $field->toBlocks();
         if ($blocks && $blocks->count() > 0) {
             return $blocks->first()->content();
         }
-        
+
         // Fallback to object format (legacy)
         return $field->toObject();
     }
@@ -30,13 +30,13 @@ class MetaHelper
     {
         // Get site SEO settings
         $siteSeo = self::getSeoData($site->seo());
-        
+
         // Get site settings
-        $separator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty() 
-            ? $siteSeo->titleSeparator()->value() 
+        $separator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
+            ? $siteSeo->titleSeparator()->value()
             : '|';
-        $appendSiteName = $siteSeo && $siteSeo->appendSiteName()->isNotEmpty() 
-            ? $siteSeo->appendSiteName()->toBool() 
+        $appendSiteName = $siteSeo && $siteSeo->appendSiteName()->isNotEmpty()
+            ? $siteSeo->appendSiteName()->toBool()
             : true;
 
         // Get page title
@@ -64,16 +64,16 @@ class MetaHelper
     public static function getSeparator(Site $site): string
     {
         $siteSeo = self::getSeoData($site->seo());
-        return $siteSeo && $siteSeo->titleSeparator()->isNotEmpty() 
-            ? $siteSeo->titleSeparator()->value() 
+        return $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
+            ? $siteSeo->titleSeparator()->value()
             : '|';
     }
 
     public static function shouldAppendSiteName(Site $site): bool
     {
         $siteSeo = self::getSeoData($site->seo());
-        return $siteSeo && $siteSeo->appendSiteName()->isNotEmpty() 
-            ? $siteSeo->appendSiteName()->toBool() 
+        return $siteSeo && $siteSeo->appendSiteName()->isNotEmpty()
+            ? $siteSeo->appendSiteName()->toBool()
             : true;
     }
 
@@ -89,13 +89,13 @@ class MetaHelper
     public static function buildDescription(Page $page, Site $site, $seoData = null, int $maxLength = 160): string
     {
         // Check page SEO data first
-        if ($seoData && method_exists($seoData, 'metaDescription') && $seoData->metaDescription()->isNotEmpty()) {
+        if ($seoData && $seoData->metaDescription()->isNotEmpty()) {
             return $seoData->metaDescription()->excerpt($maxLength);
         }
 
         // Get site SEO settings
         $siteSeo = self::getSeoData($site->seo());
-        
+
         // Fall back to site default description
         if ($siteSeo && $siteSeo->metaDescription()->isNotEmpty()) {
             return $siteSeo->metaDescription()->excerpt($maxLength);
@@ -124,7 +124,7 @@ class MetaHelper
 
         // Get site SEO settings
         $siteSeo = self::getSeoData($site->seo());
-        
+
         // Fall back to site OG description
         if ($siteSeo && $siteSeo->ogDescription()->isNotEmpty()) {
             return $siteSeo->ogDescription()->excerpt($maxLength);

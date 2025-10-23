@@ -17,8 +17,8 @@ return [
                     $page = $page->clone(['content' => $changesVersion->content()->toArray()]);
                 }
 
-                // Get SEO data from object field
-                $seoData = $page->seo()->toObject();
+                // Get SEO data from blocks or object field
+                $seoData = \TearoomOne\MetaHelper::getSeoData($page->seo());
 
                 // Build title and descriptions using helper
                 $title = \TearoomOne\MetaHelper::buildTitle($page, site(), $seoData);

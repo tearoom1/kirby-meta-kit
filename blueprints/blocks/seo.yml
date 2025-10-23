@@ -6,8 +6,7 @@ fields:
   metaTitle:
     label: Meta Title
     type: text
-    placeholder: "{{ page.title }} | {{ site.title }}"
-    help: Title for search engines
+    help: Title for search engines. See also the site settings.
 
   metaDescription:
     label: Meta Description
@@ -15,7 +14,7 @@ fields:
     buttons: false
     maxlength: 160
     counter: true
-    help: Description for search engines (max 160 characters)
+    help: Description for search engines (preferably max 160 characters)
 
   metaKeywords:
     label: Keywords
@@ -45,7 +44,7 @@ fields:
     label: Social Media Title
     type: text
     placeholder: "{{ page.title }}"
-    help: Title for social media shares
+    help: Title for social media shares. Uses the meta title if empty.
 
   ogDescription:
     label: Social Media Description
@@ -53,7 +52,7 @@ fields:
     buttons: false
     maxlength: 160
     counter: true
-    help: Description for social media
+    help: Description for social media. Uses the meta description if empty.
 
   ogImage:
     label: Social Media Image
