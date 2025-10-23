@@ -910,8 +910,7 @@ export default {
         this.isGeneratingAll = false;
       }
     },
-    async detectLegacyMetadata() {
-      this.$refs.legacyDialog.open();
+    async reloadLegacyData() {
       this.isLoadingLegacy = true;
       try {
         const response = await this.$api.get('meta-kit/detect-legacy');
@@ -930,8 +929,12 @@ export default {
         this.isLoadingLegacy = false;
       }
     },
+    async detectLegacyMetadata() {
+      this.$refs.legacyDialog.open();
+      await this.reloadLegacyData();
+    },
     async migrateAllToBlocks() {
-      if (!confirm('This will migrate legacy SEO object fields to the new blocks format for the site and all pages. Continue?')) {
+      if (!confirm('This will migrate all legacy SEO fields (metatitle, metadescription, etc.) into the seo field for all pages. Continue?')) {
         return;
       }
       this.isMigratingAll = true;
@@ -939,9 +942,17 @@ export default {
         const response = await this.$api.post('meta-kit/convert-all-to-blocks');
         if (response.status === 'success') {
           window.panel.notification.success(response.message || 'Migration completed');
+          
+          // Refresh the main pages list
           await this.refreshPages();
+          
+          // Refresh the legacy dialog to show updated current values
           if (this.$refs.legacyDialog?.isOpen) {
-            await this.detectLegacyMetadata();
+            // Clear field choices so they reset to default (legacy selected)
+            this.fieldChoices = {};
+            
+            // Reload legacy data without reopening the dialog
+            await this.reloadLegacyData();
           }
         } else {
           window.panel.notification.error(response.message || 'Migration failed');

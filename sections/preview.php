@@ -52,10 +52,10 @@ return [
 
                 return [
                     'url' => $page->url(),
-                    'title' => $title,
-                    'description' => $description,
-                    'ogTitle' => $ogTitle,
-                    'ogDescription' => $ogDescription,
+                    'title' => html_entity_decode($title, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                    'description' => html_entity_decode($description, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                    'ogTitle' => html_entity_decode($ogTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                    'ogDescription' => html_entity_decode($ogDescription, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                     'ogImage' => $ogImage
                 ];
             } catch (Exception $e) {

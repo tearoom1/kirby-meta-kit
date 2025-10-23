@@ -165,6 +165,38 @@ class MetaKitController
         }
     }
 
+    public static function convertAllLegacyFields(): array
+    {
+        $kirby = kirby();
+        $pages = $kirby->site()->index();
+        $converted = 0;
+        $skipped = 0;
+        $errors = 0;
+
+        foreach ($pages as $page) {
+            try {
+                $result = self::convertLegacyMetadata($page->id());
+                if ($result['status'] === 'success') {
+                    $converted++;
+                } elseif ($result['status'] === 'info') {
+                    $skipped++;
+                } else {
+                    $errors++;
+                }
+            } catch (\Exception $e) {
+                $errors++;
+            }
+        }
+
+        return [
+            'status' => 'success',
+            'message' => "Migrated {$converted} pages, skipped {$skipped}, errors {$errors}",
+            'converted' => $converted,
+            'skipped' => $skipped,
+            'errors' => $errors
+        ];
+    }
+
     public static function convertAllToBlocks(): array
     {
         $kirby = kirby();

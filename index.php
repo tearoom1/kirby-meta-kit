@@ -65,7 +65,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                 'method' => 'POST',
                 'auth' => true,
                 'action' => function () {
-                    return \TearoomOne\MetaKitController::convertAllToBlocks();
+                    return \TearoomOne\MetaKitController::convertAllLegacyFields();
                 }
             ],
             [

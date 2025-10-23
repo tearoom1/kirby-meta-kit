@@ -329,8 +329,7 @@
           this.isGeneratingAll = false;
         }
       },
-      async detectLegacyMetadata() {
-        this.$refs.legacyDialog.open();
+      async reloadLegacyData() {
         this.isLoadingLegacy = true;
         try {
           const response = await this.$api.get("meta-kit/detect-legacy");
@@ -348,9 +347,13 @@
           this.isLoadingLegacy = false;
         }
       },
+      async detectLegacyMetadata() {
+        this.$refs.legacyDialog.open();
+        await this.reloadLegacyData();
+      },
       async migrateAllToBlocks() {
         var _a;
-        if (!confirm("This will migrate legacy SEO object fields to the new blocks format for the site and all pages. Continue?")) {
+        if (!confirm("This will migrate all legacy SEO fields (metatitle, metadescription, etc.) into the seo field for all pages. Continue?")) {
           return;
         }
         this.isMigratingAll = true;
@@ -360,7 +363,8 @@
             window.panel.notification.success(response.message || "Migration completed");
             await this.refreshPages();
             if ((_a = this.$refs.legacyDialog) == null ? void 0 : _a.isOpen) {
-              await this.detectLegacyMetadata();
+              this.fieldChoices = {};
+              await this.reloadLegacyData();
             }
           } else {
             window.panel.notification.error(response.message || "Migration failed");
