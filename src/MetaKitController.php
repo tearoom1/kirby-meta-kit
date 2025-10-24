@@ -141,7 +141,7 @@ class MetaKitController
                         'content' => $seoArray,
                         'id' => 'seo-metadata',
                         'isHidden' => false,
-                        'type' => 'seo'
+                        'type' => 'mk-page-seo'
                     ]
                 ];
                 $page->update(['metaKitSeo' => $seoBlock], $languageCode);
@@ -516,7 +516,7 @@ class MetaKitController
                         'content' => $seoArray,
                         'id' => 'seo-metadata',
                         'isHidden' => false,
-                        'type' => 'seo'
+                        'type' => 'mk-page-seo'
                     ]
                 ];
                 $page->update(['metaKitSeo' => $seoBlock], $languageCode);
