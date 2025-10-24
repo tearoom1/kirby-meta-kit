@@ -18,7 +18,7 @@ return [
                 }
 
                 // Get SEO data from blocks or object field
-                $seoData = \TearoomOne\MetaHelper::getSeoData($page->seo());
+                $seoData = \TearoomOne\MetaHelper::getSeoData($page->metaKitSeo());
 
                 // Build title and descriptions using helper
                 $title = \TearoomOne\MetaHelper::buildTitle($page, site(), $seoData);
@@ -43,7 +43,7 @@ return [
 
                 // Fallback to site default OG image
                 if (!$ogImage) {
-                    $siteSeo = \TearoomOne\MetaHelper::getSeoData(site()->seo());
+                    $siteSeo = \TearoomOne\MetaHelper::getSeoData(site()->metaKitSeo());
                     if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
                         $siteImage = $siteSeo->ogImage()->toFile();
                         $ogImage = $siteImage ? $siteImage->crop(1200, 630)->url() : null;

@@ -26,14 +26,14 @@ $site = $kirby->site();
 try {
     $updates = [];
     $needsUpdate = false;
-    
+
     // Check and convert SEO field
-    $seoField = $site->seo();
+    $seoField = $site->metaKitSeo();
     if ($seoField->isNotEmpty()) {
         // Check if it's already in blocks format
         $rawValue = $seoField->value();
         $isBlocks = is_string($rawValue) && str_starts_with(trim($rawValue), '[');
-        
+
         if (!$isBlocks) {
             // Convert from object to blocks
             $obj = $seoField->toObject();
@@ -57,13 +57,13 @@ try {
             }
         }
     }
-    
+
     // Check and convert OpenRouter field
     $openrouterField = $site->openrouter();
     if ($openrouterField->isNotEmpty()) {
         $rawValue = $openrouterField->value();
         $isBlocks = is_string($rawValue) && str_starts_with(trim($rawValue), '[');
-        
+
         if (!$isBlocks) {
             $obj = $openrouterField->toObject();
             if ($obj) {
@@ -83,13 +83,13 @@ try {
             }
         }
     }
-    
+
     // Check and convert Sitemap field
     $sitemapField = $site->sitemap();
     if ($sitemapField->isNotEmpty()) {
         $rawValue = $sitemapField->value();
         $isBlocks = is_string($rawValue) && str_starts_with(trim($rawValue), '[');
-        
+
         if (!$isBlocks) {
             $obj = $sitemapField->toObject();
             if ($obj) {
@@ -97,7 +97,7 @@ try {
                 if ($obj->exclude()->isNotEmpty()) {
                     $excludePages = $obj->exclude()->toPages()->pluck('uuid')->toArray();
                 }
-                
+
                 $updates['sitemap'] = [
                     [
                         'content' => [
@@ -114,7 +114,7 @@ try {
             }
         }
     }
-    
+
     if ($needsUpdate) {
         $kirby->impersonate('kirby');
         $site->update($updates);
@@ -134,16 +134,16 @@ echo "\nConverting pages...\n";
 $pages = $kirby->site()->index();
 
 foreach ($pages as $page) {
-    $seoField = $page->seo();
-    
+    $seoField = $page->metaKitSeo();
+
     if ($seoField->isEmpty()) {
         continue;
     }
-    
+
     // Check if already in blocks format by checking the raw value
     $rawValue = $seoField->value();
     $isBlocks = false;
-    
+
     if (is_string($rawValue)) {
         $trimmed = trim($rawValue);
         // Blocks format starts with [ (JSON array)
@@ -155,19 +155,19 @@ foreach ($pages as $page) {
             }
         }
     }
-    
+
     if ($isBlocks) {
         $skipped++;
         continue;
     }
-    
+
     // Convert from object to blocks
     $obj = $seoField->toObject();
     if (!$obj) {
         $skipped++;
         continue;
     }
-    
+
     try {
         $ogImageUuids = [];
         if ($obj->ogimage()->isNotEmpty()) {
@@ -176,7 +176,7 @@ foreach ($pages as $page) {
                 $ogImageUuids = $files->pluck('uuid')->toArray();
             }
         }
-        
+
         $seoBlock = [
             [
                 'content' => [
@@ -194,10 +194,10 @@ foreach ($pages as $page) {
                 'type' => 'seo'
             ]
         ];
-        
+
         $kirby->impersonate('kirby');
         $page->update(['seo' => $seoBlock], $kirby->language()?->code());
-        
+
         echo "✓ {$page->id()}\n";
         $converted++;
     } catch (Exception $e) {

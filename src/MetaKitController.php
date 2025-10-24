@@ -61,7 +61,7 @@ class MetaKitController
         $languageCode = $language ? $language->code() : null;
 
         foreach ($pages as $page) {
-            $seoData = self::getSeoData($page->seo());
+            $seoData = self::getSeoData($page->metaKitSeo());
 
             $result[] = [
                 'id' => $page->id(),
@@ -132,7 +132,7 @@ class MetaKitController
             $description = $metaKit->generateDescription($content, ['language' => $languageCode]);
 
             if ($description) {
-                $seoData = self::getSeoData($page->seo());
+                $seoData = self::getSeoData($page->metaKitSeo());
                 $seoArray = self::seoDataToArray($seoData);
                 $seoArray['metaDescription'] = $description;
 
@@ -144,7 +144,7 @@ class MetaKitController
                         'type' => 'seo'
                     ]
                 ];
-                $page->update(['seo' => $seoBlock], $languageCode);
+                $page->update(['metaKitSeo' => $seoBlock], $languageCode);
 
                 return [
                     'status' => 'success',
@@ -209,14 +209,14 @@ class MetaKitController
             $updates = [];
             $needsUpdate = false;
 
-            $seoField = $site->seo();
+            $seoField = $site->metaKitSeo();
             if ($seoField->isNotEmpty()) {
                 $rawValue = $seoField->value();
                 $isBlocks = is_string($rawValue) && str_starts_with(trim($rawValue), '[') && json_decode(trim($rawValue), true) !== null;
                 if (!$isBlocks) {
                     $obj = $seoField->toObject();
                     if ($obj) {
-                        $updates['seo'] = [
+                        $updates['metaKitSeo'] = [
                             [
                                 'content' => [
                                     'appendSiteName' => $obj->appendsitename()->toBool(),
@@ -301,7 +301,7 @@ class MetaKitController
 
         $pages = $kirby->site()->index();
         foreach ($pages as $page) {
-            $seoField = $page->seo();
+            $seoField = $page->metaKitSeo();
             if ($seoField->isEmpty()) {
                 continue;
             }
@@ -351,7 +351,7 @@ class MetaKitController
                     ]
                 ];
                 $kirby->impersonate('kirby');
-                $page->update(['seo' => $seoBlock], $kirby->language()?->code());
+                $page->update(['metaKitSeo' => $seoBlock], $kirby->language()?->code());
                 $converted++;
             } catch (\Exception $e) {
                 $errors++;
@@ -376,7 +376,7 @@ class MetaKitController
         $skipped = 0;
 
         foreach ($pages as $page) {
-            $seoData = self::getSeoData($page->seo());
+            $seoData = self::getSeoData($page->metaKitSeo());
 
             // Skip if already has description
             if ($seoData && $seoData->metaDescription()->isNotEmpty()) {
@@ -410,7 +410,7 @@ class MetaKitController
 
         foreach ($pages as $page) {
             $legacy = [];
-            $seoData = self::getSeoData($page->seo());
+            $seoData = self::getSeoData($page->metaKitSeo());
             $current = [];
 
             // Check for common legacy SEO field names
@@ -481,7 +481,7 @@ class MetaKitController
         }
 
         try {
-            $seoData = self::getSeoData($page->seo());
+            $seoData = self::getSeoData($page->metaKitSeo());
             $seoArray = self::seoDataToArray($seoData);
             $converted = [];
 
@@ -519,7 +519,7 @@ class MetaKitController
                         'type' => 'seo'
                     ]
                 ];
-                $page->update(['seo' => $seoBlock], $languageCode);
+                $page->update(['metaKitSeo' => $seoBlock], $languageCode);
 
                 return [
                     'status' => 'success',
@@ -553,7 +553,7 @@ class MetaKitController
         }
 
         try {
-            $seoData = self::getSeoData($page->seo());
+            $seoData = self::getSeoData($page->metaKitSeo());
             $seoArray = self::seoDataToArray($seoData);
 
             // Handle ogImage specially - it needs to be an array of UUIDs
@@ -605,7 +605,7 @@ class MetaKitController
                     'type' => 'seo'
                 ]
             ];
-            $page->update(['seo' => $seoBlock], $languageCode);
+            $page->update(['metaKitSeo' => $seoBlock], $languageCode);
 
             return [
                 'status' => 'success',

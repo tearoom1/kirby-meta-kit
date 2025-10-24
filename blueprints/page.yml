@@ -1,18 +1,18 @@
-label: Meta & SEO
+label: SEO
+icon: search
 columns:
 
-  seodata:
+  seoData:
     width: 2/3
     sticky: true
     type: fields
     fields:
 
-
-      seo:
+      metaKitSeo:
         label: Metadata
         type: blocks
         fieldsets:
-          - seo
+          - mk-page-seo
         max: 1
         empty: false
 

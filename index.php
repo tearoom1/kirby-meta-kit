@@ -31,10 +31,10 @@ Kirby::plugin('tearoom1/meta-kit', [
         'meta-kit/site' => __DIR__ . '/blueprints/site.yml',
         'meta-kit/page' => __DIR__ . '/blueprints/page.yml',
         'meta-kit/fields/og-image' => __DIR__ . '/blueprints/fields/og-image.php',
-        'blocks/seo' => __DIR__ . '/blueprints/blocks/seo.yml',
-        'blocks/seo-settings' => __DIR__ . '/blueprints/blocks/seo-settings.yml',
-        'blocks/openrouter' => __DIR__ . '/blueprints/blocks/openrouter.yml',
-        'blocks/sitemap' => __DIR__ . '/blueprints/blocks/sitemap.yml',
+        'blocks/mk-page-seo' => __DIR__ . '/blueprints/blocks/mk-page-seo.yml',
+        'blocks/mk-site-seo' => __DIR__ . '/blueprints/blocks/mk-site-seo.yml',
+        'blocks/mk-openrouter' => __DIR__ . '/blueprints/blocks/mk-openrouter.yml',
+        'blocks/mk-sitemap' => __DIR__ . '/blueprints/blocks/mk-sitemap.yml',
     ],
     'sections' => [
         'seo-preview' => __DIR__ . '/sections/preview.php',
@@ -44,10 +44,6 @@ Kirby::plugin('tearoom1/meta-kit', [
     ],
     'snippets' => [
         'meta-kit/seo' => __DIR__ . '/snippets/seo.php',
-        // Legacy snippets (deprecated, use meta-kit/seo instead)
-        'seo/meta' => __DIR__ . '/snippets/meta.php',
-        'seo/opengraph' => __DIR__ . '/snippets/opengraph.php',
-        'seo/schema' => __DIR__ . '/snippets/schema.php',
     ],
     'areas' => [
         'meta-kit' => require __DIR__ . '/src/areas/meta-kit.php',
@@ -207,7 +203,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                     ],
                     'id' => 'site-seo-settings',
                     'isHidden' => false,
-                    'type' => 'seo-settings'
+                    'type' => 'mk-site-seo'
                 ]];
                 $needsUpdate = true;
             }
@@ -221,7 +217,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                     ],
                     'id' => 'openrouter-settings',
                     'isHidden' => false,
-                    'type' => 'openrouter'
+                    'type' => 'mk-openrouter'
                 ]];
                 $needsUpdate = true;
             }
@@ -235,7 +231,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                     ],
                     'id' => 'sitemap-settings',
                     'isHidden' => false,
-                    'type' => 'sitemap'
+                    'type' => 'mk-sitemap'
                 ]];
                 $needsUpdate = true;
             }
@@ -261,7 +257,7 @@ Kirby::plugin('tearoom1/meta-kit', [
 
             try {
                 // Check if SEO object exists and if metadescription is empty
-                $seoData = $newPage->seo()->toObject();
+                $seoData = $newPage->metaKitSeo()->toObject();
                 if (!$seoData || $seoData->metadescription()->isNotEmpty()) {
                     return;
                 }
@@ -274,7 +270,7 @@ Kirby::plugin('tearoom1/meta-kit', [
 
                     if ($description) {
                         // Get existing SEO data and update metadescription
-                        $existingSeo = $newPage->seo()->yaml();
+                        $existingSeo = $newPage->metaKitSeo()->yaml();
                         $existingSeo['metadescription'] = $description;
 
                         $newPage->update([

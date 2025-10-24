@@ -266,27 +266,27 @@ panel.plugin('tearoom1/meta-kit', {
               // Update the nested blocks field
               if (parent && parent.value) {
                 // Ensure seo field exists as an array (Vue reactive array)
-                if (!parent.value.seo || !Array.isArray(parent.value.seo)) {
+                if (!parent.value.metakitseo || !Array.isArray(parent.value.metakitseo)) {
                   this.$set(parent.value, 'seo', [{
                     id: 'seo-metadata',
-                    type: 'seo',
+                    type: 'mk-page-seo',
                     isHidden: false,
                     content: {}
                   }]);
                 }
 
                 // Get or create the first block
-                if (parent.value.seo.length === 0) {
-                  parent.value.seo.push({
+                if (parent.value.metakitseo.length === 0) {
+                  parent.value.metakitseo.push({
                     id: 'seo-metadata',
-                    type: 'seo',
+                    type: 'mk-page-seo',
                     isHidden: false,
                     content: {}
                   });
                 }
 
                 // Get the first (and only) SEO block
-                const seoBlock = parent.value.seo[0];
+                const seoBlock = parent.value.metakitseo[0];
 
                 // Ensure content object exists
                 if (!seoBlock.content) {
@@ -300,7 +300,7 @@ panel.plugin('tearoom1/meta-kit', {
                 // Trigger form update
                 if (parent.update) {
                   parent.update({
-                    seo: parent.value.seo
+                    seo: parent.value.metakitseo
                   });
                 }
 

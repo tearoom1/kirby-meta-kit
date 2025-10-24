@@ -98,7 +98,7 @@ class Sitemap
         }
 
         // Check page's noIndex field
-        $seoData = $page->seo()->toObject();
+        $seoData = $page->metaKitSeo()->toObject();
         if ($seoData && $seoData->noIndex()->toBool() === true) {
             return false;
         }

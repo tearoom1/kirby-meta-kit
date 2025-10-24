@@ -180,7 +180,7 @@
     _sfc_render$2,
     _sfc_staticRenderFns$2
   );
-  __component__$2.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/kirby-seo-ai/src/sections/seo-preview.vue";
+  __component__$2.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/src/sections/seo-preview.vue";
   const SeoPreview = __component__$2.exports;
   const _sfc_main$1 = {
     props: {
@@ -843,7 +843,7 @@
     _sfc_render$1,
     _sfc_staticRenderFns$1
   );
-  __component__$1.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/kirby-seo-ai/js/components/MetaKitView.vue";
+  __component__$1.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/MetaKitView.vue";
   const MetaKitView = __component__$1.exports;
   const _sfc_main = {
     props: {
@@ -979,7 +979,7 @@
     _sfc_render,
     _sfc_staticRenderFns
   );
-  __component__.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/kirby-seo-ai/js/components/FieldEditor.vue";
+  __component__.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/FieldEditor.vue";
   const FieldEditor = __component__.exports;
   panel.plugin("tearoom1/meta-kit", {
     components: {
@@ -1167,23 +1167,23 @@
               if (response.status === "success" && response.description) {
                 this.generatedText = response.description;
                 if (parent && parent.value) {
-                  if (!parent.value.seo || !Array.isArray(parent.value.seo)) {
+                  if (!parent.value.metakitseo || !Array.isArray(parent.value.metakitseo)) {
                     this.$set(parent.value, "seo", [{
                       id: "seo-metadata",
-                      type: "seo",
+                      type: "mk-page-seo",
                       isHidden: false,
                       content: {}
                     }]);
                   }
-                  if (parent.value.seo.length === 0) {
-                    parent.value.seo.push({
+                  if (parent.value.metakitseo.length === 0) {
+                    parent.value.metakitseo.push({
                       id: "seo-metadata",
-                      type: "seo",
+                      type: "mk-page-seo",
                       isHidden: false,
                       content: {}
                     });
                   }
-                  const seoBlock = parent.value.seo[0];
+                  const seoBlock = parent.value.metakitseo[0];
                   if (!seoBlock.content) {
                     this.$set(seoBlock, "content", {});
                   }
@@ -1191,7 +1191,7 @@
                   this.$set(seoBlock.content, "ogdescription", response.description);
                   if (parent.update) {
                     parent.update({
-                      seo: parent.value.seo
+                      seo: parent.value.metakitseo
                     });
                   }
                   setTimeout(() => {
