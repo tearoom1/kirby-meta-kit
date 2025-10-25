@@ -21,16 +21,26 @@ fields:
     help: Comma-separated keywords
     width: 1/2
 
+  metaAuthor:
+    label: Author
+    type: text
+    help: Author of the page
+    width: 1/2
+
   canonicalUrl:
     label: Canonical URL
     type: url
     help: Custom canonical URL
     width: 1/2
 
-  noIndex:
-    label: Hide from search engines
-    type: toggle
-    text: [yes, no]
+  robots:
+    label: Set a robots directive
+    type: select
+    options:
+      - { value: 'index, follow', text: 'Index, Follow' }
+      - { value: 'noindex, follow', text: 'No Index, Follow' }
+      - { value: 'index, nofollow', text: 'Index, No Follow' }
+      - { value: 'noindex, nofollow', text: 'No Index, No Follow' }
     width: 1/2
 
   separator1:

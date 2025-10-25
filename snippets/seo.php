@@ -29,7 +29,7 @@ if ($seoData && $seoData->canonicalUrl()->isNotEmpty()) {
 }
 
 // Check noIndex
-$noIndex = $seoData && $seoData->noIndex()->isTrue();
+$robots = $seoData && $seoData->robots();
 
 // Get OG title (use custom OG title or fall back to meta title)
 if ($seoData && $seoData->ogTitle()->isNotEmpty()) {
@@ -74,13 +74,16 @@ if ($seoData && $seoData->ogImage()->isNotEmpty()) {
 <?php endif; ?>
 
 <!-- No index if needed -->
-<?php if ($noIndex): ?>
-    <meta name="robots" content="noindex, nofollow">
+<?php if ($robots !== 'index, follow'): ?>
+    <meta name="robots" content="<?= $robots ?>">
 <?php endif; ?>
 
 <!-- Additional meta tags -->
 <?php if ($seoData && $seoData->metaKeywords()->isNotEmpty()): ?>
     <meta name="keywords" content="<?= $seoData->metaKeywords()->html() ?>">
+<?php endif; ?>
+<?php if ($seoData && $seoData->metaAuthor()->isNotEmpty()): ?>
+    <meta name="author" content="<?= $seoData->metaAuthor()->html() ?>">
 <?php endif; ?>
 
 <?php endif; ?>
