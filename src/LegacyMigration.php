@@ -148,6 +148,15 @@ class LegacyMigration
 
             $languageCode = $kirby->language()?->code();
 
+            // Check if translation file exists for this language
+            $content = $page->content($languageCode);
+            if (!$content->exists()) {
+                return [
+                    'status' => 'info',
+                    'message' => 'Translation file does not exist for language: ' . $languageCode
+                ];
+            }
+
             // List of all legacy SEO fields to remove
             $legacyFields = [
                 'metatemplate', 'usetitletemplate', 'metadescription', 'ogtemplate',
@@ -167,7 +176,7 @@ class LegacyMigration
                 'robots_noimageindex', 'robots_nosnippet', 'metatitle', 'meta_title'
             ];
 
-            // Build update array - start with metaKitSeo if we have conversions
+            // Build update array - only update metaKitSeo if it already exists AND we have conversions
             $updateData = [];
             if (!empty($converted)) {
                 $seoBlock = [
@@ -182,7 +191,6 @@ class LegacyMigration
             }
 
             // Check which legacy fields actually exist and mark them for removal
-            $content = $page->content($languageCode);
             $contentFields = $content->fields();
             $fieldsToDelete = [];
 

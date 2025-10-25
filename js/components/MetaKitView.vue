@@ -196,7 +196,7 @@
     </div>
 
     <!-- Legacy Data Dialog -->
-    <k-dialog ref="legacyDialog" size="huge" cancelButton="" submitButton="">
+    <k-dialog ref="legacyDialog" size="huge" cancelButton="Close" submitButton="">
       <k-headline>Legacy SEO Metadata</k-headline>
 
       <div v-if="isLoadingLegacy" class="k-meta-kit-loading">
@@ -919,7 +919,7 @@ export default {
         if (response.status === 'success') {
           // Use $set to ensure Vue reactivity picks up the change
           this.$set(this, 'legacyPages', response.pages || []);
-          
+
           // Pre-select 'legacy' for all fields in legacy pages
           this.legacyPages.forEach(page => {
             Object.keys(page.fields).forEach(fieldName => {
@@ -948,17 +948,17 @@ export default {
         const response = await this.$api.post('meta-kit/convert-all-to-blocks');
         if (response.status === 'success') {
           window.panel.notification.success(response.message || 'Migration completed');
-          
+
           // Refresh the main pages list
           await this.refreshPages();
-          
+
           // Refresh the legacy dialog to show updated current values
           // Clear field choices so they reset to default (legacy selected)
           this.fieldChoices = {};
-          
+
           // Reload legacy data without showing loading spinner (keeps dialog content visible)
           await this.reloadLegacyData(false);
-          
+
           // Force Vue to re-render the dialog
           this.$forceUpdate();
         } else {
@@ -1093,25 +1093,25 @@ export default {
     },
     hasFieldChanged(pageId, fieldName, currentValue, legacyValue) {
       const choice = this.getFieldChoice(pageId, fieldName);
-      
+
       // No choice selected, no change
       if (!choice) return false;
-      
+
       // Legacy choice always counts as a change
       if (choice === 'legacy') return true;
-      
+
       // For keep/current/ai, check if manual value exists and differs from current
       const manualValue = this.getManualValue(pageId, fieldName);
       if (choice === 'keep' || choice === 'current') {
         // Only changed if there's a manual value that differs from current
         return manualValue && manualValue !== currentValue;
       }
-      
+
       // AI choice - changed if there's generated content
       if (choice === 'ai') {
         return !!manualValue;
       }
-      
+
       return false;
     },
     isGeneratingField(pageId, fieldName) {
@@ -1169,7 +1169,7 @@ export default {
         } else if (page.legacy && page.legacy[fieldName]) {
           value = page.legacy[fieldName];
         }
-        
+
         // Ensure we got a value
         if (!value) {
           window.panel.notification.error('Legacy value not found');
@@ -1244,11 +1244,11 @@ export default {
               this.$set(pageInLegacy, 'current', {});
             }
             this.$set(pageInLegacy.current, fieldName, value);
-            
+
             // Don't remove the field - just let the choice switch to 'keep'
             // and the button will disappear since hasFieldChanged will be false
           }
-          
+
           // Force Vue to re-evaluate the button state
           this.$forceUpdate();
 
