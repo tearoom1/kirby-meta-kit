@@ -159,11 +159,12 @@ class LegacyMigration
 
             // List of all legacy SEO fields to remove
             $legacyFields = [
-                'metatemplate', 'usetitletemplate', 'metadescription', 'ogtemplate',
+                'metatemplate', 'usetitletemplate', 'ogtemplate',
                 'useogtemplate', 'ogdescription', 'ogimage', 'cropogimage',
                 'robotsindex', 'robotsfollow', 'robotsarchive', 'robotsimageindex',
                 'robotssnippet', 'metainherit', 'twittercardtype', 'twitterauthor',
-                'seo_title', 'seo_description', 'meta_title', 'meta_description',
+                'seo_title', 'seo_description',
+                'metatitle', 'meta_title', 'metadescription', 'meta_description',
                 'meta_canonical_url', 'meta_author', 'meta_image', 'meta_phone_number',
                 'og_title', 'og_description', 'og_image', 'og_site_name', 'og_url',
                 'og_audio', 'og_video', 'og_determiner', 'og_type',
@@ -173,7 +174,7 @@ class LegacyMigration
                 'twitter_title', 'twitter_description', 'twitter_image',
                 'twitter_card_type', 'twitter_site', 'twitter_creator',
                 'robots_noindex', 'robots_nofollow', 'robots_noarchive',
-                'robots_noimageindex', 'robots_nosnippet', 'metatitle', 'meta_title'
+                'robots_noimageindex', 'robots_nosnippet'
             ];
 
             // Build update array - only update metaKitSeo if it already exists AND we have conversions
