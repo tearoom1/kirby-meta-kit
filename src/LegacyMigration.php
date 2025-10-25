@@ -146,8 +146,30 @@ class LegacyMigration
                 $converted[] = 'ogImage';
             }
 
+            $languageCode = $kirby->language()?->code();
+
+            // List of all legacy SEO fields to remove
+            $legacyFields = [
+                'metatemplate', 'usetitletemplate', 'metadescription', 'ogtemplate',
+                'useogtemplate', 'ogdescription', 'ogimage', 'cropogimage',
+                'robotsindex', 'robotsfollow', 'robotsarchive', 'robotsimageindex',
+                'robotssnippet', 'metainherit', 'twittercardtype', 'twitterauthor',
+                'seo_title', 'seo_description', 'meta_title', 'meta_description',
+                'meta_canonical_url', 'meta_author', 'meta_image', 'meta_phone_number',
+                'og_title', 'og_description', 'og_image', 'og_site_name', 'og_url',
+                'og_audio', 'og_video', 'og_determiner', 'og_type',
+                'og_type_article_published_time', 'og_type_article_modified_time',
+                'og_type_article_expiration_time', 'og_type_article_author',
+                'og_type_article_section', 'og_type_article_tag',
+                'twitter_title', 'twitter_description', 'twitter_image',
+                'twitter_card_type', 'twitter_site', 'twitter_creator',
+                'robots_noindex', 'robots_nofollow', 'robots_noarchive',
+                'robots_noimageindex', 'robots_nosnippet', 'metatitle', 'meta_title'
+            ];
+
+            // Build update array - start with metaKitSeo if we have conversions
+            $updateData = [];
             if (!empty($converted)) {
-                $languageCode = $kirby->language()?->code();
                 $seoBlock = [
                     [
                         'content' => $seoArray,
@@ -156,19 +178,50 @@ class LegacyMigration
                         'type' => 'mk-page-seo'
                     ]
                 ];
-                $page->update(['metaKitSeo' => $seoBlock], $languageCode);
-
-                return [
-                    'status' => 'success',
-                    'message' => 'Converted: ' . implode(', ', $converted),
-                    'converted' => $converted
-                ];
-            } else {
-                return [
-                    'status' => 'info',
-                    'message' => 'No legacy fields found or already converted'
-                ];
+                $updateData['metaKitSeo'] = $seoBlock;
             }
+
+            // Check which legacy fields actually exist and mark them for removal
+            $content = $page->content($languageCode);
+            $contentFields = $content->fields();
+            $fieldsToDelete = [];
+
+            foreach ($legacyFields as $field) {
+                // Check if field exists in content
+                if (array_key_exists($field, $contentFields)) {
+                    $fieldsToDelete[] = $field;
+                }
+            }
+
+            // Flip keys and values and set new values to null
+            if (!empty($fieldsToDelete)) {
+                $deleteData = array_map(fn ($value) => null, array_flip($fieldsToDelete));
+                $updateData = array_merge($updateData, $deleteData);
+            }
+
+            // Only update if we have something to do
+            if (!empty($updateData)) {
+                $page->update($updateData, $languageCode);
+
+                if (!empty($converted)) {
+                    return [
+                        'status' => 'success',
+                        'message' => 'Converted: ' . implode(', ', $converted) . ' and removed legacy fields',
+                        'converted' => $converted
+                    ];
+                } else {
+                    return [
+                        'status' => 'success',
+                        'message' => 'Removed legacy fields',
+                        'converted' => []
+                    ];
+                }
+            }
+
+            return [
+                'status' => 'info',
+                'message' => 'No legacy fields found or already converted'
+            ];
         } catch (\Exception $e) {
             return [
                 'status' => 'error',
