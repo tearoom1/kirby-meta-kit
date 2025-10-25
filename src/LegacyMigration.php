@@ -144,6 +144,12 @@ class LegacyMigration
             if ($page->ogimage()->isNotEmpty() && empty($seoArray['ogImage'])) {
                 $seoArray['ogImage'] = $page->ogimage()->toFiles();
                 $converted[] = 'ogImage';
+            } elseif ($page->og_image()->isNotEmpty() && empty($seoArray['ogImage'])) {
+                $seoArray['ogImage'] = $page->og_image()->toFiles();
+                $converted[] = 'ogImage';
+            } elseif ($page->meta_image()->isNotEmpty() && empty($seoArray['ogImage'])) {
+                $seoArray['ogImage'] = $page->meta_image()->toFiles();
+                $converted[] = 'ogImage';
             }
 
             $languageCode = $kirby->language()?->code();

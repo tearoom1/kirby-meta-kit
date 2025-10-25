@@ -56,5 +56,5 @@ fields:
     max: 1
     layout: cards
     size: small
-    query: page.images
+    query: site.images
     help: Default image for social media sharing (1200×630px recommended)
