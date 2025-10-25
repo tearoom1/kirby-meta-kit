@@ -60,25 +60,25 @@ if ($seoData && $seoData->ogImage()->isNotEmpty()) {
 ?>
 
 <?php if ($enableMeta): ?>
-<!-- SEO Meta Tags -->
-<title><?= esc($metaTitle) ?></title>
-<meta name="description" content="<?= esc($metaDescription) ?>">
-<link rel="canonical" href="<?= esc($canonical) ?>">
+    <!-- SEO Meta Tags -->
+    <title><?= esc($metaTitle) ?></title>
+    <meta name="description" content="<?= esc($metaDescription) ?>">
+    <link rel="canonical" href="<?= esc($canonical) ?>">
 
-<!-- Alternate language versions -->
+    <!-- Alternate language versions -->
 <?php if (kirby()->multilang()): ?>
-    <?php foreach (kirby()->languages() as $language): ?>
-        <link rel="alternate" hreflang="<?= $language->code() ?>" href="<?= $page->url($language->code()) ?>">
-    <?php endforeach; ?>
+<?php foreach (kirby()->languages() as $language): ?>
+    <link rel="alternate" hreflang="<?= $language->code() ?>" href="<?= $page->url($language->code()) ?>">
+<?php endforeach; ?>
     <link rel="alternate" hreflang="x-default" href="<?= $page->url(kirby()->defaultLanguage()->code()) ?>">
 <?php endif; ?>
 
-<!-- No index if needed -->
-<?php if ($robots !== 'index, follow'): ?>
+    <!-- No index if needed -->
+<?php if ($robots !== 'index, follow' && strlen($robots) > 1): ?>
     <meta name="robots" content="<?= $robots ?>">
 <?php endif; ?>
 
-<!-- Additional meta tags -->
+    <!-- Additional meta tags -->
 <?php if ($seoData && $seoData->metaKeywords()->isNotEmpty()): ?>
     <meta name="keywords" content="<?= $seoData->metaKeywords()->html() ?>">
 <?php endif; ?>
@@ -89,35 +89,35 @@ if ($seoData && $seoData->ogImage()->isNotEmpty()) {
 <?php endif; ?>
 
 <?php if ($enableOpengraph): ?>
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="<?= $page->url() ?>">
-<meta property="og:title" content="<?= esc($ogTitle) ?>">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= $page->url() ?>">
+    <meta property="og:title" content="<?= esc($ogTitle) ?>">
 <?php if (!empty($ogDescription)): ?>
-<meta property="og:description" content="<?= esc($ogDescription) ?>">
+    <meta property="og:description" content="<?= esc($ogDescription) ?>">
 <?php endif; ?>
 <?php if ($ogImage): ?>
-<meta property="og:image" content="<?= $ogImage->url() ?>">
-<meta property="og:image:width" content="<?= $ogImage->width() ?>">
-<meta property="og:image:height" content="<?= $ogImage->height() ?>">
+    <meta property="og:image" content="<?= $ogImage->url() ?>">
+    <meta property="og:image:width" content="<?= $ogImage->width() ?>">
+    <meta property="og:image:height" content="<?= $ogImage->height() ?>">
 <?php endif; ?>
 <?php if (kirby()->multilang()): ?>
-<meta property="og:locale" content="<?= str_replace('-', '_', kirby()->language()->code()) ?>">
-    <?php foreach (kirby()->languages() as $language): ?>
-        <?php if ($language->code() !== kirby()->language()->code()): ?>
-<meta property="og:locale:alternate" content="<?= str_replace('-', '_', $language->code()) ?>">
-        <?php endif; ?>
-    <?php endforeach; ?>
+    <meta property="og:locale" content="<?= str_replace('-', '_', kirby()->language()->code()) ?>">
+<?php foreach (kirby()->languages() as $language): ?>
+<?php if ($language->code() !== kirby()->language()->code()): ?>
+    <meta property="og:locale:alternate" content="<?= str_replace('-', '_', $language->code()) ?>">
+<?php endif; ?>
+<?php endforeach; ?>
 <?php endif; ?>
 
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="<?= esc($ogTitle) ?>">
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= esc($ogTitle) ?>">
 <?php if (!empty($ogDescription)): ?>
-<meta name="twitter:description" content="<?= esc($ogDescription) ?>">
+    <meta name="twitter:description" content="<?= esc($ogDescription) ?>">
 <?php endif; ?>
 <?php if ($ogImage): ?>
-<meta name="twitter:image" content="<?= $ogImage->url() ?>">
+    <meta name="twitter:image" content="<?= $ogImage->url() ?>">
 <?php endif; ?>
 
 <?php endif; ?>
