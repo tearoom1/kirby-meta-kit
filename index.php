@@ -14,6 +14,7 @@ load([
     'TearoomOne\Sitemap' => 'src/Sitemap.php',
     'TearoomOne\MetaHelper' => 'src/MetaHelper.php',
     'TearoomOne\MetaKitController' => 'src/MetaKitController.php',
+    'TearoomOne\LegacyMigration' => 'src/LegacyMigration.php',
 ], __DIR__);
 
 Kirby::plugin('tearoom1/meta-kit', [
@@ -61,7 +62,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                 'method' => 'POST',
                 'auth' => true,
                 'action' => function () {
-                    return \TearoomOne\MetaKitController::convertAllLegacyFields();
+                    return \TearoomOne\LegacyMigration::convertAllLegacyFields();
                 }
             ],
             [
@@ -100,7 +101,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                 'method' => 'GET',
                 'auth' => true,
                 'action' => function () {
-                    return \TearoomOne\MetaKitController::detectLegacyMetadata();
+                    return \TearoomOne\LegacyMigration::detectLegacyMetadata();
                 }
             ],
             [
@@ -109,7 +110,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                 'auth' => true,
                 'action' => function () {
                     $pageId = get('pageId');
-                    return \TearoomOne\MetaKitController::convertLegacyMetadata($pageId);
+                    return \TearoomOne\LegacyMigration::convertLegacyMetadata($pageId);
                 }
             ],
             [
