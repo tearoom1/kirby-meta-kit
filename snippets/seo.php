@@ -11,7 +11,7 @@ $enableOpengraph = option('tearoom1.meta-kit.opengraph.enabled', true);
 $enableSchema = option('tearoom1.meta-kit.schema.enabled', true);
 
 // Get SEO data from object field
-$seoData = $page->metaKitSeo()->toObject();
+$seoData = $page->metaKitSeo()->toBlocks()->first()->content();
 
 // ==============================================================
 // Build Common Data
@@ -49,7 +49,7 @@ if ($seoData && $seoData->ogImage()->isNotEmpty()) {
         $ogImage = $ogImageFile->crop(1200, 630);
     }
 } else {
-    $siteSeo = $site->metaKitSeo()->toObject();
+    $siteSeo = $site->metaKitSeo()->toBlocks()->first()->content();
     if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
         $ogImageFile = $siteSeo->ogImage()->toFile();
         if ($ogImageFile) {
@@ -236,20 +236,20 @@ if (!$page->isHomePage() && $page->parents()->count() > 0) {
 
 <!-- Schema.org JSON-LD -->
 <script type="application/ld+json">
-<?= json_encode($organizationSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+  <?= json_encode($organizationSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
 </script>
 
 <script type="application/ld+json">
-<?= json_encode($websiteSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+  <?= json_encode($websiteSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
 </script>
 
 <script type="application/ld+json">
-<?= json_encode($webPageSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+  <?= json_encode($webPageSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
 </script>
 
 <?php if (isset($breadcrumbSchema)): ?>
 <script type="application/ld+json">
-<?= json_encode($breadcrumbSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+  <?= json_encode($breadcrumbSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
 </script>
 <?php endif; ?>
 
