@@ -108,6 +108,8 @@ class MetaKitController
             ];
         }
 
+        $result = array_reverse($result);
+
         return $result;
     }
 
