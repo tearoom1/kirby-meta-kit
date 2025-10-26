@@ -12,6 +12,31 @@ columns:
         fieldsets:
           - mk-site-seo
         max: 1
+  social:
+    width: 1/1
+    type: fields
+    label: Social Media
+    icon: share
+    fields:
+      metaKitSocialSites:
+        label: Social Media Profiles
+        type: structure
+        fields:
+          platform:
+            label: Platform
+            type: select
+            options:
+              - { value: 'facebook', text: 'Facebook' }
+              - { value: 'twitter', text: 'X (Twitter)' }
+              - { value: 'instagram', text: 'Instagram' }
+              - { value: 'linkedin', text: 'LinkedIn' }
+              - { value: 'youtube', text: 'YouTube' }
+              - { value: 'tiktok', text: 'TikTok' }
+              - { value: 'pinterest', text: 'Pinterest' }
+              - { value: 'github', text: 'GitHub' }
+          url:
+            label: Profile URL
+            type: url
 
   openrouter:
     width: 1/2
@@ -51,28 +76,3 @@ columns:
               priorityHome: 1.0
               priorityDefault: 0.8
 
-  social:
-    width: 1/2
-    type: fields
-    label: Social Media
-    icon: share
-    fields:
-      metaKitSocialSites:
-        label: Social Media Profiles
-        type: structure
-        fields:
-          platform:
-            label: Platform
-            type: select
-            options:
-              - { value: 'facebook', text: 'Facebook' }
-              - { value: 'twitter', text: 'X (Twitter)' }
-              - { value: 'instagram', text: 'Instagram' }
-              - { value: 'linkedin', text: 'LinkedIn' }
-              - { value: 'youtube', text: 'YouTube' }
-              - { value: 'tiktok', text: 'TikTok' }
-              - { value: 'pinterest', text: 'Pinterest' }
-              - { value: 'github', text: 'GitHub' }
-          url:
-            label: Profile URL
-            type: url
