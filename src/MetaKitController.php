@@ -469,7 +469,7 @@ class MetaKitController
         $result = [];
 
         foreach ($pages as $page) {
-            $seoData = self::getSeoData($page->seo());
+            $seoData = self::getSeoData($page->metaKitSeo());
             $legacy = [];
 
             // Check for legacy fields
@@ -551,7 +551,7 @@ class MetaKitController
             ];
         }
 
-        $seoData = self::getSeoData($page->seo());
+        $seoData = self::getSeoData($page->metaKitSeo());
         $legacy = [];
 
         // Check for legacy fields
