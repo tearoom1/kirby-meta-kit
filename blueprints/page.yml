@@ -15,6 +15,7 @@ columns:
           - mk-page-seo
         max: 1
         empty: false
+        pretty: true
 
   preview:
     width: 1/3

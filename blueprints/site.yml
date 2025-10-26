@@ -12,6 +12,7 @@ columns:
         fieldsets:
           - mk-site-seo
         max: 1
+        pretty: true
   social:
     width: 1/1
     type: fields
@@ -51,11 +52,7 @@ columns:
           - mk-openrouter
         max: 1
         empty: false
-        default:
-          - type: openrouter
-            content:
-              model: 'meta-llama/llama-3.2-3b-instruct:free'
-              temperature: 0.7
+        pretty: true
 
   sitemap:
     width: 1/2
@@ -70,9 +67,5 @@ columns:
           - mk-sitemap
         max: 1
         empty: false
-        default:
-          - type: sitemap
-            content:
-              priorityHome: 1.0
-              priorityDefault: 0.8
+        pretty: true
 
