@@ -290,7 +290,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                         $existingSeo['metadescription'] = $description;
 
                         $newPage->update([
-                            'seo' => $existingSeo
+                            'metaKitSeo' => $existingSeo
                         ], kirby()->language()?->code());
                     }
                 }
