@@ -48,7 +48,7 @@ Core plugin settings, API credentials, and feature toggles:
 
     // SEO Settings
     'maxDescriptionLength' => 160,             // Max meta description length
-    
+
     // AI Prompts (optional - customize AI generation behavior)
     'prompt.title' => "Write a compelling meta title (30-65 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling and clickable for search results. The title MUST be between 30 and 65 characters long. Write ONLY the title, nothing else.\n\nTitle:",
     'prompt.description' => "Write a concise, engaging meta description (max 160 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling for search results. Write ONLY the description, nothing else.\n\nDescription:",
