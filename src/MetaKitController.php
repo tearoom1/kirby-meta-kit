@@ -86,7 +86,8 @@ class MetaKitController
         return [
             'language' => $languageCode,
             'languages' => self::getLanguages(),
-            'pages' => $result
+            'pages' => $result,
+            'legacyMigration' => option('tearoom1.meta-kit.legacyMigration', false)
         ];
     }
 

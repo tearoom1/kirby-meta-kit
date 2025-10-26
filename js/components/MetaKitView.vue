@@ -16,7 +16,7 @@
     </div>
 
     <!-- Legacy Detection Warning -->
-    <div v-if="legacyDetection.show && legacyDetection.found > 0" class="k-meta-kit-warning">
+    <div v-if="legacyMigration && legacyDetection.show && legacyDetection.found > 0" class="k-meta-kit-warning">
       <k-box theme="info">
         <k-icon type="info"/>
         <span>Found {{ legacyDetection.found }} pages with legacy SEO metadata</span>
@@ -63,7 +63,7 @@
         >
           Generate Missing ({{ selectedPages.length || filteredPages.length }})
         </k-button>
-        <k-button icon="download" @click="detectLegacyMetadata">Legacy Data</k-button>
+        <k-button v-if="legacyMigration" icon="download" @click="detectLegacyMetadata">Legacy Data</k-button>
         <k-button icon="refresh" @click="refreshPages"></k-button>
       </k-button-group>
 
@@ -762,7 +762,11 @@ export default {
   props: {
     pages: Array,
     language: String,
-    languages: Array
+    languages: Array,
+    legacyMigration: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {

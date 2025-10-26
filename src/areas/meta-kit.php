@@ -27,7 +27,8 @@ return [
                     'props' => [
                         'pages' => $data['pages'],
                         'language' => $data['language'],
-                        'languages' => $data['languages']
+                        'languages' => $data['languages'],
+                        'legacyMigration' => $data['legacyMigration']
                     ]
                 ];
             }

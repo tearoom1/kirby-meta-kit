@@ -9,13 +9,19 @@ if (!option('tearoom1.meta-kit.enabled', true)) {
 
 @include_once __DIR__ . '/vendor/autoload.php';
 
-load([
+$classes = [
     'TearoomOne\MetaKit' => 'src/MetaKit.php',
     'TearoomOne\Sitemap' => 'src/Sitemap.php',
     'TearoomOne\MetaHelper' => 'src/MetaHelper.php',
     'TearoomOne\MetaKitController' => 'src/MetaKitController.php',
-    'TearoomOne\LegacyMigration' => 'src/LegacyMigration.php',
-], __DIR__);
+];
+
+// Only load LegacyMigration if enabled
+if (option('tearoom1.meta-kit.legacyMigration', false)) {
+    $classes['TearoomOne\LegacyMigration'] = 'src/LegacyMigration.php';
+}
+
+load($classes, __DIR__);
 
 Kirby::plugin('tearoom1/meta-kit', [
     'options' => [
@@ -27,6 +33,7 @@ Kirby::plugin('tearoom1/meta-kit', [
         'sitemap.include' => 'all',
         'sitemap.exclude' => ['error'],
         'autoGenerate' => false,
+        'legacyMigration' => false,
     ],
     'blueprints' => [
         'meta-kit/site' => __DIR__ . '/blueprints/site.yml',
@@ -50,109 +57,117 @@ Kirby::plugin('tearoom1/meta-kit', [
         'meta-kit' => require __DIR__ . '/src/areas/meta-kit.php',
     ],
     'api' => [
-        'routes' => [
-            [
-                'pattern' => 'meta-kit/generate',
-                'method' => 'POST',
-                'auth' => true,
-                'action' => require __DIR__ . '/src/api/generate.php'
-            ],
-            [
-                'pattern' => 'meta-kit/convert-all-to-blocks',
-                'method' => 'POST',
-                'auth' => true,
-                'action' => function () {
-                    return \TearoomOne\LegacyMigration::convertAllLegacyFields();
-                }
-            ],
-            [
-                'pattern' => 'meta-kit/pages',
-                'method' => 'GET',
-                'auth' => true,
-                'action' => function () {
-                    $data = \TearoomOne\MetaKitController::getPages();
-                    return [
-                        'status' => 'success',
-                        'data' => $data['pages'],
-                        'language' => $data['language'],
-                        'languages' => $data['languages']
-                    ];
-                }
-            ],
-            [
-                'pattern' => 'meta-kit/generate-description',
-                'method' => 'POST',
-                'auth' => true,
-                'action' => function () {
-                    $pageId = get('pageId');
-                    return \TearoomOne\MetaKitController::generateDescription($pageId);
-                }
-            ],
-            [
-                'pattern' => 'meta-kit/generate-all',
-                'method' => 'POST',
-                'auth' => true,
-                'action' => function () {
-                    return \TearoomOne\MetaKitController::generateAllDescriptions();
-                }
-            ],
-            [
-                'pattern' => 'meta-kit/detect-legacy',
-                'method' => 'GET',
-                'auth' => true,
-                'action' => function () {
-                    return \TearoomOne\LegacyMigration::detectLegacyMetadata();
-                }
-            ],
-            [
-                'pattern' => 'meta-kit/convert-legacy',
-                'method' => 'POST',
-                'auth' => true,
-                'action' => function () {
-                    $pageId = get('pageId');
-                    return \TearoomOne\LegacyMigration::convertLegacyMetadata($pageId);
-                }
-            ],
-            [
-                'pattern' => 'meta-kit/apply-single-field',
-                'method' => 'POST',
-                'auth' => true,
-                'action' => function () {
-                    $pageId = get('pageId');
-                    $fieldName = get('fieldName');
-                    $value = get('value');
-                    return \TearoomOne\MetaKitController::applySingleField($pageId, $fieldName, $value);
-                }
-            ],
-            [
-                'pattern' => 'meta-kit/pages-with-content',
-                'method' => 'GET',
-                'auth' => true,
-                'action' => function () {
-                    return \TearoomOne\MetaKitController::getPagesWithContent();
-                }
-            ],
-            [
-                'pattern' => 'meta-kit/single-page',
-                'method' => 'GET',
-                'auth' => true,
-                'action' => function () {
-                    $pageId = get('pageId');
-                    return \TearoomOne\MetaKitController::getSinglePage($pageId);
-                }
-            ],
-            [
-                'pattern' => 'meta-kit/generate-field',
-                'method' => 'POST',
-                'auth' => true,
-                'action' => function () {
-                    $pageId = get('pageId');
-                    $fieldName = get('fieldName');
-                    $language = get('language');
-                    return \TearoomOne\MetaKitController::generateField($pageId, $fieldName, $language);
-                }
-            ]
-        ]
+        'routes' => function() {
+            $routes = [
+                [
+                    'pattern' => 'meta-kit/generate',
+                    'method' => 'POST',
+                    'auth' => true,
+                    'action' => require __DIR__ . '/src/api/generate.php'
+                ],
+                [
+                    'pattern' => 'meta-kit/pages',
+                    'method' => 'GET',
+                    'auth' => true,
+                    'action' => function () {
+                        $data = \TearoomOne\MetaKitController::getPages();
+                        return [
+                            'status' => 'success',
+                            'data' => $data['pages'],
+                            'language' => $data['language'],
+                            'languages' => $data['languages']
+                        ];
+                    }
+                ],
+                [
+                    'pattern' => 'meta-kit/generate-description',
+                    'method' => 'POST',
+                    'auth' => true,
+                    'action' => function () {
+                        $pageId = get('pageId');
+                        return \TearoomOne\MetaKitController::generateDescription($pageId);
+                    }
+                ],
+                [
+                    'pattern' => 'meta-kit/generate-all',
+                    'method' => 'POST',
+                    'auth' => true,
+                    'action' => function () {
+                        return \TearoomOne\MetaKitController::generateAllDescriptions();
+                    }
+                ],
+                [
+                    'pattern' => 'meta-kit/apply-single-field',
+                    'method' => 'POST',
+                    'auth' => true,
+                    'action' => function () {
+                        $pageId = get('pageId');
+                        $fieldName = get('fieldName');
+                        $value = get('value');
+                        return \TearoomOne\MetaKitController::applySingleField($pageId, $fieldName, $value);
+                    }
+                ],
+                [
+                    'pattern' => 'meta-kit/pages-with-content',
+                    'method' => 'GET',
+                    'auth' => true,
+                    'action' => function () {
+                        return \TearoomOne\MetaKitController::getPagesWithContent();
+                    }
+                ],
+                [
+                    'pattern' => 'meta-kit/single-page',
+                    'method' => 'GET',
+                    'auth' => true,
+                    'action' => function () {
+                        $pageId = get('pageId');
+                        return \TearoomOne\MetaKitController::getSinglePage($pageId);
+                    }
+                ],
+                [
+                    'pattern' => 'meta-kit/generate-field',
+                    'method' => 'POST',
+                    'auth' => true,
+                    'action' => function () {
+                        $pageId = get('pageId');
+                        $fieldName = get('fieldName');
+                        $language = get('language');
+                        return \TearoomOne\MetaKitController::generateField($pageId, $fieldName, $language);
+                    }
+                ]
+            ];
+
+            // Add legacy migration routes only if enabled
+            if (option('tearoom1.meta-kit.legacyMigration', false)) {
+                $routes[] = [
+                    'pattern' => 'meta-kit/convert-all-to-blocks',
+                    'method' => 'POST',
+                    'auth' => true,
+                    'action' => function () {
+                        return \TearoomOne\LegacyMigration::convertAllLegacyFields();
+                    }
+                ];
+                $routes[] = [
+                    'pattern' => 'meta-kit/detect-legacy',
+                    'method' => 'GET',
+                    'auth' => true,
+                    'action' => function () {
+                        return \TearoomOne\LegacyMigration::detectLegacyMetadata();
+                    }
+                ];
+                $routes[] = [
+                    'pattern' => 'meta-kit/convert-legacy',
+                    'method' => 'POST',
+                    'auth' => true,
+                    'action' => function () {
+                        $pageId = get('pageId');
+                        return \TearoomOne\LegacyMigration::convertLegacyMetadata($pageId);
+                    }
+                ];
+            }
+
+            return $routes;
+        }
     ],
     'routes' => [
         [
