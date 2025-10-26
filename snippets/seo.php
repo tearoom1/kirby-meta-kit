@@ -12,6 +12,7 @@ $enableSchema = option('tearoom1.meta-kit.schema.enabled', true);
 
 // Get SEO data from object field
 $seoData = $page->metaKitSeo()->toBlocks()->first()->content();
+$siteSeo = $site->metaKitSeo()->toBlocks()->first()->content();
 
 // ==============================================================
 // Build Common Data
@@ -29,7 +30,9 @@ if ($seoData && $seoData->canonicalUrl()->isNotEmpty()) {
 }
 
 // Check noIndex
-$robots = $seoData && $seoData->robots();
+$robots = $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots() : $siteSeo->robots() ;
+$keywords = $seoData && $seoData->metaKeywords()->isNotEmpty() ? $seoData->metaKeywords() : $siteSeo->metaKeywords() ;
+$author = $seoData && $seoData->metaAuthor()->isNotEmpty() ? $seoData->metaAuthor() : $siteSeo->metaAuthor() ;
 
 // Get OG title (use custom OG title or fall back to meta title)
 if ($seoData && $seoData->ogTitle()->isNotEmpty()) {
@@ -49,7 +52,6 @@ if ($seoData && $seoData->ogImage()->isNotEmpty()) {
         $ogImage = $ogImageFile->crop(1200, 630);
     }
 } else {
-    $siteSeo = $site->metaKitSeo()->toBlocks()->first()->content();
     if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
         $ogImageFile = $siteSeo->ogImage()->toFile();
         if ($ogImageFile) {
@@ -79,11 +81,11 @@ if ($seoData && $seoData->ogImage()->isNotEmpty()) {
 <?php endif; ?>
 
     <!-- Additional meta tags -->
-<?php if ($seoData && $seoData->metaKeywords()->isNotEmpty()): ?>
-    <meta name="keywords" content="<?= $seoData->metaKeywords()->html() ?>">
+<?php if ($keywords): ?>
+    <meta name="keywords" content="<?= $keywords->html() ?>">
 <?php endif; ?>
-<?php if ($seoData && $seoData->metaAuthor()->isNotEmpty()): ?>
-    <meta name="author" content="<?= $seoData->metaAuthor()->html() ?>">
+<?php if ($author): ?>
+    <meta name="author" content="<?= $author ?>">
 <?php endif; ?>
 
 <?php endif; ?>

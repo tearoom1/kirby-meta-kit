@@ -35,7 +35,6 @@ fields:
     placeholder: "{{ site.title }}"
     help: >
       Overwrite the site name.
-      Will be used if to be appended on pages.
     when:
       appendSiteName: true
 
@@ -49,12 +48,32 @@ fields:
     label: Default Keywords
     type: tags
     help: Comma-separated list of default keywords for all pages.
+    width: 1/2
+
+  metaAuthor:
+    label: Default Author
+    type: text
+    help: The default author name
+    width: 1/2
+
+  robots:
+    label: Set a robots directive
+    type: select
+    options:
+      - { value: 'index, follow', text: 'Index, Follow' }
+      - { value: 'noindex, follow', text: 'No Index, Follow' }
+      - { value: 'index, nofollow', text: 'Index, No Follow' }
+      - { value: 'noindex, nofollow', text: 'No Index, No Follow' }
+    width: 1/2
 
   ogImage:
     label: Default Social Media Image
     type: files
     max: 1
     layout: cards
-    size: small
+    image:
+      ratio: 120/63
+      cover: true
+    size: medium
     query: site.images
     help: Default image for social media sharing (1200×630px recommended)
