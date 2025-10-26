@@ -3,7 +3,7 @@
   "description": "AI-powered SEO plugin for Kirby with meta descriptions, previews, and Schema.org",
   "type": "kirby-plugin",
     "license": "MIT",
-    "homepage": "https://github.com/tearoom1/kirby-ftp-backup",
+    "homepage": "https://github.com/tearoom1/kirby-meta-kit",
     "version": "1.0.0",
     "keywords": [
         "kirby",
