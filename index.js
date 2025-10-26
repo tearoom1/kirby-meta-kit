@@ -24,6 +24,7 @@
         siteName: null,
         separator: "|",
         siteOgImage: null,
+        siteOgImageDetermined: false,
         updateTimeout: null,
         fieldCheckInterval: null,
         lastFieldValues: {},
@@ -37,6 +38,11 @@
       document.addEventListener("change", this.handleDOMInput, true);
       this.setupFieldObserver();
       this.setupFilesObserver();
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.determineSiteDefaultImage();
+        }, 1e3);
+      });
     },
     beforeDestroy() {
       document.removeEventListener("seo-field-updated", this.handleSeoFieldUpdate, true);
@@ -76,7 +82,7 @@
           const valuesChanged = Object.keys(currentValues).some(
             (key) => this.lastFieldValues[key] !== currentValues[key]
           );
-          if (valuesChanged && Object.keys(this.lastFieldValues).length > 0) {
+          if (valuesChanged && Object.keys(this.lastFieldValues).length > 0 && this.siteOgImageDetermined) {
             this.updatePreviewFromDOM();
           }
           this.lastFieldValues = currentValues;
@@ -190,22 +196,24 @@
           }
           if (newMeta) {
             this.meta = newMeta;
-            if (!this.siteOgImage && newMeta.ogImage) {
-              setTimeout(() => {
-                var _a;
-                const ogImageField = document.querySelector(".k-field-name-ogimage");
-                const hasPageImage = ogImageField && ((_a = ogImageField.querySelector("img")) == null ? void 0 : _a.srcset);
-                if (!hasPageImage) {
-                  this.siteOgImage = newMeta.ogImage;
-                }
-              }, 1500);
-            }
             if (!this.siteName) {
               this.extractSiteInfo();
             }
           }
         } catch (error) {
         }
+      },
+      determineSiteDefaultImage() {
+        var _a;
+        const ogImageField = document.querySelector(".k-field-name-ogimage");
+        const pageImage = ogImageField == null ? void 0 : ogImageField.querySelector("img");
+        const hasPageImage = pageImage && pageImage.srcset;
+        if (!hasPageImage && ((_a = this.meta) == null ? void 0 : _a.ogImage)) {
+          this.siteOgImage = this.meta.ogImage;
+        } else if (hasPageImage) {
+          this.siteOgImage = null;
+        }
+        this.siteOgImageDetermined = true;
       },
       extractSiteInfo() {
         var _a, _b, _c;

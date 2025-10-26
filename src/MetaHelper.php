@@ -40,7 +40,7 @@ class MetaHelper
             : true;
 
         // Get page title
-        if ($seoData && method_exists($seoData, 'metaTitle') && $seoData->metaTitle()->isNotEmpty()) {
+        if ($seoData && $seoData->metaTitle()->isNotEmpty()) {
             $title = $seoData->metaTitle()->value();
         } else {
             $title = $page->title()->value();

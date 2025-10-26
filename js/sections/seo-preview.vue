@@ -52,6 +52,7 @@ export default {
       siteName: null,
       separator: '|',
       siteOgImage: null,
+      siteOgImageDetermined: false,
       updateTimeout: null,
       fieldCheckInterval: null,
       lastFieldValues: {},
@@ -73,6 +74,14 @@ export default {
 
     // Set up MutationObserver for file field changes
     this.setupFilesObserver();
+    
+    // After a short delay, check if there's a page-specific image
+    // If not, store the loaded image as the site default
+    this.$nextTick(() => {
+      setTimeout(() => {
+        this.determineSiteDefaultImage();
+      }, 1000);
+    });
   },
   beforeDestroy() {
     // Clean up event listeners
@@ -122,7 +131,7 @@ export default {
           key => this.lastFieldValues[key] !== currentValues[key]
         );
 
-        if (valuesChanged && Object.keys(this.lastFieldValues).length > 0) {
+        if (valuesChanged && Object.keys(this.lastFieldValues).length > 0 && this.siteOgImageDetermined) {
           this.updatePreviewFromDOM();
         }
 
@@ -281,18 +290,7 @@ export default {
 
         if (newMeta) {
           this.meta = newMeta;
-          // Store the site's default OG image only if the page field is empty
-          if (!this.siteOgImage && newMeta.ogImage) {
-            // Check if there's a page-specific image in the field
-            setTimeout(() => {
-              const ogImageField = document.querySelector('.k-field-name-ogimage');
-              const hasPageImage = ogImageField && ogImageField.querySelector('img')?.srcset;
-              // If no page image in field, the loaded image must be the site default
-              if (!hasPageImage) {
-                this.siteOgImage = newMeta.ogImage;
-              }
-            }, 1500); // Wait for DOM to be fully ready
-          }
+          
           // Extract and store site name from the title on first load
           if (!this.siteName) {
             this.extractSiteInfo();
@@ -301,6 +299,24 @@ export default {
       } catch (error) {
         // Silently fail - preview will show loading state
       }
+    },
+    determineSiteDefaultImage() {
+      // Check if there's a page-specific image in the field
+      const ogImageField = document.querySelector('.k-field-name-ogimage');
+      const pageImage = ogImageField?.querySelector('img');
+      const hasPageImage = pageImage && pageImage.srcset;
+      
+      if (!hasPageImage && this.meta?.ogImage) {
+        // No page-specific image, so the loaded image is the site default
+        this.siteOgImage = this.meta.ogImage;
+      } else if (hasPageImage) {
+        // There is a page image, we need to fetch site default separately
+        // For now, set to null (no fallback available)
+        this.siteOgImage = null;
+      }
+      
+      // Mark as determined so polling can start updating
+      this.siteOgImageDetermined = true;
     },
     extractSiteInfo() {
       // Extract site name and separator from the loaded title
