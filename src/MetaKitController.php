@@ -207,7 +207,7 @@ class MetaKitController
                 }
             }
 
-            $openrouterField = $site->openrouter();
+            $openrouterField = $site->metaKitOpenrouter();
             if ($openrouterField->isNotEmpty()) {
                 $rawValue = $openrouterField->value();
                 $isBlocks = is_string($rawValue) && str_starts_with(trim($rawValue), '[') && json_decode(trim($rawValue), true) !== null;
@@ -231,7 +231,7 @@ class MetaKitController
                 }
             }
 
-            $sitemapField = $site->sitemap();
+            $sitemapField = $site->metaKitSitemap();
             if ($sitemapField->isNotEmpty()) {
                 $rawValue = $sitemapField->value();
                 $isBlocks = is_string($rawValue) && str_starts_with(trim($rawValue), '[') && json_decode(trim($rawValue), true) !== null;
