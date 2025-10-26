@@ -1,13 +1,11 @@
 
 import './index.css';
-import SeoPreview from '../src/sections/seo-preview.vue';
+import SeoPreview from './sections/seo-preview.vue';
 import MetaKitView from './components/MetaKitView.vue';
-import FieldEditor from './components/FieldEditor.vue';
 
 panel.plugin('tearoom1/meta-kit', {
   components: {
-    'meta-kit-view': MetaKitView,
-    'field-editor': FieldEditor
+    'meta-kit-view': MetaKitView
   },
   sections: {
     'seo-preview': SeoPreview

@@ -24,16 +24,16 @@ return [
                 $title = \TearoomOne\MetaHelper::buildTitle($page, site(), $seoData);
                 $description = \TearoomOne\MetaHelper::buildDescription($page, site(), $seoData);
                 
-                $ogTitle = $seoData && $seoData->ogtitle()->isNotEmpty()
-                    ? $seoData->ogtitle()->value()
+                $ogTitle = $seoData && $seoData->ogTitle()->isNotEmpty()
+                    ? $seoData->ogTitle()->value()
                     : $title;
 
                 $ogDescription = \TearoomOne\MetaHelper::buildOgDescription($page, site(), $seoData, $description);
 
                 $ogImage = null;
-                if ($seoData && $seoData->ogimage()->isNotEmpty()) {
+                if ($seoData && $seoData->ogImage()->isNotEmpty()) {
                     // Get the first file from the files field
-                    $files = $seoData->ogimage()->toFiles();
+                    $files = $seoData->ogImage()->toFiles();
                     if ($files && $files->count() > 0) {
                         $image = $files->first();
                         // Resize to OG dimensions (1200x630)
@@ -45,8 +45,11 @@ return [
                 if (!$ogImage) {
                     $siteSeo = \TearoomOne\MetaHelper::getSeoData(site()->metaKitSeo());
                     if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
-                        $siteImage = $siteSeo->ogImage()->toFile();
-                        $ogImage = $siteImage ? $siteImage->crop(1200, 630)->url() : null;
+                        $siteFiles = $siteSeo->ogImage()->toFiles();
+                        if ($siteFiles && $siteFiles->count() > 0) {
+                            $siteImage = $siteFiles->first();
+                            $ogImage = $siteImage ? $siteImage->crop(1200, 630)->url() : null;
+                        }
                     }
                 }
 
