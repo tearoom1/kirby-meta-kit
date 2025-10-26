@@ -40,7 +40,7 @@
         <p>{{ filteredPagesWithOgImage }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{ pagesWithOgImage }}</span></p>
       </div>
       <div class="k-meta-kit-stats-card">
-        <h3>NoIndex</h3>
+        <h3>No Index</h3>
         <p>{{ filteredPagesNoIndex }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{ pagesNoIndex }}</span></p>
       </div>
     </div>
@@ -115,7 +115,7 @@
           <th>Meta Title</th>
           <th>Description</th>
           <th>OG Image</th>
-          <th>NoIndex</th>
+          <th>Robots</th>
           <th>Actions</th>
         </tr>
         </thead>
@@ -151,7 +151,7 @@
             <span v-else>—</span>
           </td>
           <td class="k-meta-kit-table-center">
-            <k-icon v-if="page.noIndex" type="check" class="k-meta-kit-icon-warning"/>
+            <span v-if="page.robots && page.robots.includes('noindex')" class="k-meta-kit-robots-noindex">noindex</span>
             <span v-else>—</span>
           </td>
           <td class="k-meta-kit-table-center">
@@ -839,7 +839,7 @@ export default {
       return this.pagesData.filter(p => p.hasOgImage).length;
     },
     pagesNoIndex() {
-      return this.pagesData.filter(p => p.noIndex).length;
+      return this.pagesData.filter(p => p.robots && p.robots.includes('noindex')).length;
     },
     filteredPagesWithDescription() {
       return this.filteredPages.filter(p => p.hasMetaDescription).length;
@@ -848,7 +848,7 @@ export default {
       return this.filteredPages.filter(p => p.hasOgImage).length;
     },
     filteredPagesNoIndex() {
-      return this.filteredPages.filter(p => p.noIndex).length;
+      return this.filteredPages.filter(p => p.robots && p.robots.includes('noindex')).length;
     }
   },
   watch: {

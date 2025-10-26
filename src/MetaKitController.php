@@ -72,7 +72,7 @@ class MetaKitController
                 'hasMetaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty(),
                 'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
                 'hasOgImage' => $seoData && $seoData->ogImage()->isNotEmpty(),
-                'noIndex' => $seoData && $seoData->noIndex()->toBool(),
+                'robots' => $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots()->value() : 'index, follow',
                 'metaTitleLength' => $seoData && $seoData->metaTitle()->isNotEmpty()
                     ? mb_strlen($seoData->metaTitle()->value())
                     : 0,
@@ -311,7 +311,7 @@ class MetaKitController
                             'metaDescription' => $obj->metadescription()->value(),
                             'metaKeywords' => $obj->metakeywords()->value(),
                             'canonicalUrl' => $obj->canonicalurl()->value(),
-                            'noIndex' => $obj->noindex()->toBool(),
+                            'robots' => $obj->robots()->value(),
                             'ogTitle' => $obj->ogtitle()->value(),
                             'ogDescription' => $obj->ogdescription()->value(),
                             'ogImage' => $ogImageUuids
@@ -515,7 +515,7 @@ class MetaKitController
                 'hasMetaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty(),
                 'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
                 'hasOgImage' => $seoData && $seoData->ogImage()->isNotEmpty(),
-                'noIndex' => $seoData && $seoData->noIndex()->toBool(),
+                'robots' => $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots()->value() : 'index, follow',
                 'metaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty()
                     ? $seoData->metaTitle()->value()
                     : null,
@@ -597,7 +597,7 @@ class MetaKitController
             'hasMetaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty(),
             'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
             'hasOgImage' => $seoData && $seoData->ogImage()->isNotEmpty(),
-            'noIndex' => $seoData && $seoData->noIndex()->toBool(),
+            'robots' => $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots()->value() : 'index, follow',
             'metaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty()
                 ? $seoData->metaTitle()->value()
                 : null,

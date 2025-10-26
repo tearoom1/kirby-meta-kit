@@ -29,7 +29,7 @@ if ($seoData && $seoData->canonicalUrl()->isNotEmpty()) {
     $canonical = $page->url();
 }
 
-// Check noIndex
+// Get robots directive
 $robots = $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots() : $siteSeo->robots() ;
 $keywords = $seoData && $seoData->metaKeywords()->isNotEmpty() ? $seoData->metaKeywords() : $siteSeo->metaKeywords() ;
 $author = $seoData && $seoData->metaAuthor()->isNotEmpty() ? $seoData->metaAuthor() : $siteSeo->metaAuthor() ;

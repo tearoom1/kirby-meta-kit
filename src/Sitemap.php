@@ -97,10 +97,13 @@ class Sitemap
             return false;
         }
 
-        // Check page's noIndex field
+        // Check page's robots directive
         $seoData = $page->metaKitSeo()->toObject();
-        if ($seoData && $seoData->noIndex()->toBool() === true) {
-            return false;
+        if ($seoData && $seoData->robots()->isNotEmpty()) {
+            $robots = $seoData->robots()->value();
+            if (str_contains($robots, 'noindex')) {
+                return false;
+            }
         }
 
         // Check site blueprint's sitemapExclude field (pages selector)
