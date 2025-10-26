@@ -143,9 +143,9 @@ if ($site->ogImage()->isNotEmpty()) {
 }
 
 // Add social profiles if available
-if ($site->socialSites()->isNotEmpty()) {
+if ($site->metaKitSocialSites()->isNotEmpty()) {
     $socialProfiles = [];
-    foreach ($site->socialSites()->toStructure() as $social) {
+    foreach ($site->metaKitSocialSites()->toStructure() as $social) {
         if ($social->url()->isNotEmpty()) {
             $socialProfiles[] = $social->url()->value();
         }
