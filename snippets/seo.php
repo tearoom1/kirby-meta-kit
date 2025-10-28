@@ -11,8 +11,8 @@ $enableOpengraph = option('tearoom1.meta-kit.opengraph.enabled', true);
 $enableSchema = option('tearoom1.meta-kit.schema.enabled', true);
 
 // Get SEO data from object field
-$seoData = $page->metaKitSeo()->toBlocks()->first()->content();
-$siteSeo = $site->metaKitSeo()->toBlocks()->first()->content();
+$seoData = $page->metaKitSeo()->toBlocks()->first()?->content();
+$siteSeo = $site->metaKitSeo()->toBlocks()->first()?->content();
 
 // ==============================================================
 // Build Common Data
