@@ -2,8 +2,6 @@
 
 namespace TearoomOne;
 
-use Kirby\Cms\Page;
-
 class LegacyMigration
 {
 
@@ -163,8 +161,23 @@ class LegacyMigration
                 ];
             }
 
+            // Build update array - only update metaKitSeo if it already exists AND we have conversions
+            $updateData = [];
+            if (count($converted) > 0) {
+                $seoBlock = [
+                    [
+                        'content' => $seoArray,
+                        'id' => 'seo-metadata',
+                        'isHidden' => false,
+                        'type' => 'mk-page-seo'
+                    ]
+                ];
+                $updateData['metaKitSeo'] = $seoBlock;
+            }
+
+
             // List of all legacy SEO fields to remove
-            $legacyFields = [
+            $fieldsToDelete = [
                 'metatemplate', 'usetitletemplate', 'ogtemplate',
                 'useogtemplate', 'ogdescription', 'ogimage', 'cropogimage',
                 'robotsindex', 'robotsfollow', 'robotsarchive', 'robotsimageindex',
@@ -183,39 +196,26 @@ class LegacyMigration
                 'robots_noimageindex', 'robots_nosnippet'
             ];
 
-            // Build update array - only update metaKitSeo if it already exists AND we have conversions
-            $updateData = [];
-            if (!empty($converted)) {
-                $seoBlock = [
-                    [
-                        'content' => $seoArray,
-                        'id' => 'seo-metadata',
-                        'isHidden' => false,
-                        'type' => 'mk-page-seo'
-                    ]
-                ];
-                $updateData['metaKitSeo'] = $seoBlock;
-            }
 
-            // Check which legacy fields actually exist and mark them for removal
             $contentFields = $content->fields();
-            $fieldsToDelete = [];
+            $originalContentKeys = array_keys($contentFields);
+            $contentFieldKeys = array_map('mb_strtolower', $originalContentKeys);
 
-            foreach ($legacyFields as $field) {
-                // Check if field exists in content
-                if (array_key_exists($field, $contentFields)) {
-                    $fieldsToDelete[] = $field;
+            // Flip keys and values and set new values to null
+            // update page only if there are any fields to be deleted
+            // create a mapping: lowercase => original field name
+            $lowercaseToOriginal = array_combine($contentFieldKeys, $originalContentKeys);
+
+            // build data array with original field names as keys and null as values
+            foreach ($fieldsToDelete as $lowercaseField) {
+                if (isset($lowercaseToOriginal[$lowercaseField])) {
+                    $originalField = $lowercaseToOriginal[$lowercaseField];
+                    $updateData[$originalField] = null;
                 }
             }
 
-            // Flip keys and values and set new values to null
-            if (!empty($fieldsToDelete)) {
-                $deleteData = array_map(fn ($value) => null, array_flip($fieldsToDelete));
-                $updateData = array_merge($updateData, $deleteData);
-            }
-
             // Only update if we have something to do
-            if (!empty($updateData)) {
+            if (count($updateData) > 0) {
                 $page->update($updateData, $languageCode);
 
                 if (!empty($converted)) {
