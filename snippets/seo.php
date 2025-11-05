@@ -30,9 +30,9 @@ if ($seoData && $seoData->canonicalUrl()->isNotEmpty()) {
 }
 
 // Get robots directive
-$robots = $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots() : $siteSeo->robots() ;
-$keywords = $seoData && $seoData->metaKeywords()->isNotEmpty() ? $seoData->metaKeywords() : $siteSeo->metaKeywords() ;
-$author = $seoData && $seoData->metaAuthor()->isNotEmpty() ? $seoData->metaAuthor() : $siteSeo->metaAuthor() ;
+$robots = $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots() : $siteSeo?->robots() ;
+$keywords = $seoData && $seoData->metaKeywords()->isNotEmpty() ? $seoData->metaKeywords() : $siteSeo?->metaKeywords() ;
+$author = $seoData && $seoData->metaAuthor()->isNotEmpty() ? $seoData->metaAuthor() : $siteSeo?->metaAuthor() ;
 
 // Get OG title (use custom OG title or fall back to meta title)
 if ($seoData && $seoData->ogTitle()->isNotEmpty()) {
@@ -76,7 +76,7 @@ if ($seoData && $seoData->ogImage()->isNotEmpty()) {
 <?php endif; ?>
 
     <!-- No index if needed -->
-<?php if ($robots !== 'index, follow' && strlen($robots) > 1): ?>
+<?php if ($robots !== null && $robots !== 'index, follow' && strlen($robots) > 1): ?>
     <meta name="robots" content="<?= $robots ?>">
 <?php endif; ?>
 
