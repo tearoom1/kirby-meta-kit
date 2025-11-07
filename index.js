@@ -393,13 +393,20 @@
         try {
           const response = await this.$api.post("meta-kit/generate-description", { pageId });
           if (response.status === "success") {
-            window.panel.notification.success(response.message);
+            window.panel.notification.success(response.message || "Description generated");
             await this.refreshPages();
           } else {
-            window.panel.notification.error(response.message);
+            window.panel.notification.error(response.message || "Failed to generate description");
           }
         } catch (error) {
-          window.panel.notification.error("Failed to generate description");
+          let errorMessage = "Failed to generate description";
+          if (error.message) {
+            errorMessage += `: ${error.message}`;
+          } else if (error.error) {
+            errorMessage += `: ${error.error}`;
+          }
+          window.panel.notification.error(errorMessage);
+          console.error("Generation error:", error);
         }
       },
       async generateAllDescriptions() {
@@ -407,16 +414,38 @@
           return;
         }
         this.isGeneratingAll = true;
+        const loadingNotification = window.panel.notification.open({
+          message: "Generating descriptions with AI...",
+          type: "info",
+          timeout: 0
+          // Don't auto-close
+        });
         try {
           const response = await this.$api.post("meta-kit/generate-all");
+          if (loadingNotification && loadingNotification.close) {
+            loadingNotification.close();
+          }
           if (response.status === "success") {
-            window.panel.notification.success(response.message);
+            const details = `Generated: ${response.generated || 0}, Skipped: ${response.skipped || 0}, Failed: ${response.failed || 0}`;
+            window.panel.notification.success(`${response.message || "Generation completed!"} ${details}`);
             await this.refreshPages();
           } else {
-            window.panel.notification.error(response.message);
+            window.panel.notification.error(response.message || "Generation failed");
           }
         } catch (error) {
-          window.panel.notification.error("Failed to generate descriptions");
+          if (loadingNotification && loadingNotification.close) {
+            loadingNotification.close();
+          }
+          let errorMessage = "Failed to generate descriptions";
+          if (error.message) {
+            errorMessage += `: ${error.message}`;
+          } else if (error.error) {
+            errorMessage += `: ${error.error}`;
+          } else if (typeof error === "string") {
+            errorMessage += `: ${error}`;
+          }
+          window.panel.notification.error(errorMessage);
+          console.error("Generation error details:", error);
         } finally {
           this.isGeneratingAll = false;
         }
@@ -452,19 +481,43 @@
           return;
         }
         this.isMigratingAll = true;
+        const loadingNotification = window.panel.notification.open({
+          message: "Migrating legacy fields to blocks...",
+          type: "info",
+          timeout: 0
+          // Don't auto-close
+        });
         try {
           const response = await this.$api.post("meta-kit/convert-all-to-blocks");
+          if (loadingNotification && loadingNotification.close) {
+            loadingNotification.close();
+          }
           if (response.status === "success") {
-            window.panel.notification.success(response.message || "Migration completed");
+            const details = `Converted: ${response.converted || 0}, Skipped: ${response.skipped || 0}, Errors: ${response.errors || 0}`;
+            window.panel.notification.success(`Migration completed! ${details}`);
             await this.refreshPages();
             this.fieldChoices = {};
             await this.reloadLegacyData(false);
             this.$forceUpdate();
           } else {
-            window.panel.notification.error(response.message || "Migration failed");
+            const errorMessage = response.message || "Migration failed";
+            const errorDetails = response.errors ? ` (${response.errors} errors)` : "";
+            window.panel.notification.error(errorMessage + errorDetails);
           }
         } catch (error) {
-          window.panel.notification.error("Migration failed");
+          if (loadingNotification && loadingNotification.close) {
+            loadingNotification.close();
+          }
+          let errorMessage = "Migration failed";
+          if (error.message) {
+            errorMessage += `: ${error.message}`;
+          } else if (error.error) {
+            errorMessage += `: ${error.error}`;
+          } else if (typeof error === "string") {
+            errorMessage += `: ${error}`;
+          }
+          window.panel.notification.error(errorMessage);
+          console.error("Migration error details:", error);
         } finally {
           this.isMigratingAll = false;
         }
@@ -686,10 +739,17 @@
             }
             this.$forceUpdate();
           } else {
-            window.panel.notification.error(response.message);
+            window.panel.notification.error(response.message || "Failed to update field");
           }
         } catch (error) {
-          window.panel.notification.error("Failed to update field");
+          let errorMessage = "Failed to update field";
+          if (error.message) {
+            errorMessage += `: ${error.message}`;
+          } else if (error.error) {
+            errorMessage += `: ${error.error}`;
+          }
+          window.panel.notification.error(errorMessage);
+          console.error("Field update error:", error);
         }
       },
       async showAllPagesDialog() {
