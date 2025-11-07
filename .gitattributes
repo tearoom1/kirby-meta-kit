@@ -15,6 +15,7 @@ composer.lock export-ignore
 
 # Documentation
 CHANGELOG.md export-ignore
+.docs/ export-ignore
 
 # Source files (if you use build process)
 /js/ export-ignore
