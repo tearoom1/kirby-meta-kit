@@ -3,10 +3,15 @@ icon: ai
 preview: fields
 wysiwyg: true
 fields:
+  infoAi:
+    type: info
+    label: AI Integration
+    text: AI features will be automatically disabled if the API key and model is not configured either here or in the config.
+    theme: info
   apiKey:
     label: OpenRouter API Key
     type: text
-    help: Your OpenRouter API key for AI-generated descriptions
+    help: Your OpenRouter API key for AI-generated descriptions. Leave empty to disable AI features.
     width: 1/2
 
   model:

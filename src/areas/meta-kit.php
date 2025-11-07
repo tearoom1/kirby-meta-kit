@@ -28,7 +28,8 @@ return [
                         'pages' => $data['pages'],
                         'language' => $data['language'],
                         'languages' => $data['languages'],
-                        'legacyMigration' => $data['legacyMigration']
+                        'legacyMigration' => $data['legacyMigration'],
+                        'aiEnabled' => $data['aiEnabled']
                     ]
                 ];
             }

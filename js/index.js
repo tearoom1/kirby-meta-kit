@@ -28,30 +28,48 @@ panel.plugin('tearoom1/meta-kit', {
         return {
           loading: false,
           error: null,
-          generatedText: null
+          generatedText: null,
+          aiEnabled: true
         };
+      },
+      async created() {
+        // Check if AI is enabled
+        try {
+          const response = await this.$api.get('meta-kit/pages');
+          this.aiEnabled = response.aiEnabled ?? true;
+        } catch (error) {
+          console.warn('Could not check AI status:', error);
+          this.aiEnabled = false;
+        }
       },
       template: `
         <k-field v-bind="$props" class="k-meta-kit-generator-field">
-          <k-button
-            icon="ai"
-            :text="buttonText"
-            @click="generate"
-            :disabled="loading"
-            theme="positive"
-          />
-          <div v-if="loading" class="k-meta-kit-generator__status">
-            <k-loader />
-            <span>Generating description...</span>
+          <div v-if="!aiEnabled" class="k-meta-kit-generator__disabled">
+            <k-box theme="info">
+              <k-text>AI generation is disabled.</k-text>
+            </k-box>
           </div>
-          <div v-if="error" class="k-meta-kit-generator__error">
-            {{ error }}
-          </div>
-          <div v-if="generatedText" class="k-meta-kit-generator__result">
-            <strong>✓ Description generated and filled</strong>
+          <template v-else>
+            <k-button
+              icon="ai"
+              :text="buttonText"
+              @click="generate"
+              :disabled="loading"
+              theme="positive"
+            />
+            <div v-if="loading" class="k-meta-kit-generator__status">
+              <k-loader />
+              <span>Generating description...</span>
+            </div>
+            <div v-if="error" class="k-meta-kit-generator__error">
+              {{ error }}
+            </div>
+            <div v-if="generatedText" class="k-meta-kit-generator__result">
+              <strong>✓ Description generated and filled</strong>
 <!--            <div class="k-meta-kit-generator__text">{{ generatedText }}</div>-->
 <!--            <small>The description has been added to both Meta Description and OG Description fields below. Scroll down to review and save.</small>-->
-          </div>
+            </div>
+          </template>
         </k-field>
       `,
       computed: {

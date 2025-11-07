@@ -25,6 +25,7 @@ load($classes, __DIR__);
 
 Kirby::plugin('tearoom1/meta-kit', [
     'options' => [
+        'ai.enabled' => true,
         'api.key' => null,
         'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
         'api.model' => '',
@@ -60,12 +61,6 @@ Kirby::plugin('tearoom1/meta-kit', [
         'routes' => function() {
             $routes = [
                 [
-                    'pattern' => 'meta-kit/generate',
-                    'method' => 'POST',
-                    'auth' => true,
-                    'action' => require __DIR__ . '/src/api/generate.php'
-                ],
-                [
                     'pattern' => 'meta-kit/pages',
                     'method' => 'GET',
                     'auth' => true,
@@ -75,25 +70,9 @@ Kirby::plugin('tearoom1/meta-kit', [
                             'status' => 'success',
                             'data' => $data['pages'],
                             'language' => $data['language'],
-                            'languages' => $data['languages']
+                            'languages' => $data['languages'],
+                            'aiEnabled' => $data['aiEnabled']
                         ];
-                    }
-                ],
-                [
-                    'pattern' => 'meta-kit/generate-description',
-                    'method' => 'POST',
-                    'auth' => true,
-                    'action' => function () {
-                        $pageId = get('pageId');
-                        return \TearoomOne\MetaKitController::generateDescription($pageId);
-                    }
-                ],
-                [
-                    'pattern' => 'meta-kit/generate-all',
-                    'method' => 'POST',
-                    'auth' => true,
-                    'action' => function () {
-                        return \TearoomOne\MetaKitController::generateAllDescriptions();
                     }
                 ],
                 [
@@ -123,8 +102,35 @@ Kirby::plugin('tearoom1/meta-kit', [
                         $pageId = get('pageId');
                         return \TearoomOne\MetaKitController::getSinglePage($pageId);
                     }
-                ],
-                [
+                ]
+            ];
+
+            // Add AI-related routes only if AI is enabled
+            if (\TearoomOne\MetaKit::isAiEnabled()) {
+                $routes[] = [
+                    'pattern' => 'meta-kit/generate',
+                    'method' => 'POST',
+                    'auth' => true,
+                    'action' => require __DIR__ . '/src/api/generate.php'
+                ];
+                $routes[] = [
+                    'pattern' => 'meta-kit/generate-description',
+                    'method' => 'POST',
+                    'auth' => true,
+                    'action' => function () {
+                        $pageId = get('pageId');
+                        return \TearoomOne\MetaKitController::generateDescription($pageId);
+                    }
+                ];
+                $routes[] = [
+                    'pattern' => 'meta-kit/generate-all',
+                    'method' => 'POST',
+                    'auth' => true,
+                    'action' => function () {
+                        return \TearoomOne\MetaKitController::generateAllDescriptions();
+                    }
+                ];
+                $routes[] = [
                     'pattern' => 'meta-kit/generate-field',
                     'method' => 'POST',
                     'auth' => true,
@@ -134,8 +140,8 @@ Kirby::plugin('tearoom1/meta-kit', [
                         $language = get('language');
                         return \TearoomOne\MetaKitController::generateField($pageId, $fieldName, $language);
                     }
-                ]
-            ];
+                ];
+            }
 
             // Add legacy migration routes only if enabled
             if (option('tearoom1.meta-kit.legacyMigration', false)) {
@@ -181,6 +187,10 @@ Kirby::plugin('tearoom1/meta-kit', [
     ],
     'pageMethods' => [
         'generateSeoDescription' => function (?string $content = null, ?string $languageCode = null) {
+            if (!\TearoomOne\MetaKit::isAiEnabled()) {
+                return null;
+            }
+            
             $metaKit = new MetaKit(kirby());
             $languageCode = $languageCode ?? kirby()->language()?->code() ?? 'en';
             $content = $content ?? $this->text()->toString();
@@ -194,6 +204,10 @@ Kirby::plugin('tearoom1/meta-kit', [
     ],
     'fieldMethods' => [
         'toSeoDescription' => function ($field) {
+            if (!\TearoomOne\MetaKit::isAiEnabled()) {
+                return null;
+            }
+            
             $metaKit = new MetaKit(kirby());
             $languageCode = kirby()->language()?->code() ?? 'en';
             return $metaKit->generateDescription($field->value(), ['language' => $languageCode]);
@@ -267,7 +281,7 @@ Kirby::plugin('tearoom1/meta-kit', [
             // Auto-generate description if enabled and field is empty
             $autoGenerate = option('tearoom1.meta-kit.autoGenerate', false);
 
-            if (!$autoGenerate || $newPage->intendedTemplate()->name() === 'error') {
+            if (!$autoGenerate || !\TearoomOne\MetaKit::isAiEnabled() || $newPage->intendedTemplate()->name() === 'error') {
                 return;
             }
 

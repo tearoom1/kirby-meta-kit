@@ -56,6 +56,7 @@
           Edit Selected ({{ selectedPages.length }})
         </k-button>
         <k-button
+          v-if="aiEnabled"
           icon="sparkling"
           :disabled="isGeneratingAll || selectedPages.length === 0"
           :progress="isGeneratingAll"
@@ -163,6 +164,7 @@
                 title="Edit Metadata"
               />
               <k-button
+                v-if="aiEnabled"
                 icon="sparkling"
                 size="sm"
                 :disabled="page.hasMetaDescription"
@@ -246,7 +248,7 @@
                     Current
                   </k-button>
                   <k-button
-                    v-if="key !== 'ogImage'"
+                    v-if="aiEnabled && key !== 'ogImage'"
                     size="xs"
                     icon="sparkling"
                     :theme="getFieldChoice(page.id, key) === 'ai' ? 'positive' : ''"
@@ -381,6 +383,7 @@
                     Current
                   </k-button>
                   <k-button
+                    v-if="aiEnabled"
                     size="xs"
                     icon="sparkling"
                     :theme="getFieldChoice(page.id, 'metaTitle') === 'ai' ? 'positive' : ''"
@@ -466,6 +469,7 @@
                     Current
                   </k-button>
                   <k-button
+                    v-if="aiEnabled"
                     size="xs"
                     icon="sparkling"
                     :theme="getFieldChoice(page.id, 'metaDescription') === 'ai' ? 'positive' : ''"
@@ -573,6 +577,7 @@
                 Current
               </k-button>
               <k-button
+                v-if="aiEnabled"
                 size="xs"
                 icon="sparkling"
                 :theme="getFieldChoice(currentEditPage.id, 'metaTitle') === 'ai' ? 'positive' : ''"
@@ -661,6 +666,7 @@
                 Current
               </k-button>
               <k-button
+                v-if="aiEnabled"
                 size="xs"
                 icon="sparkling"
                 :theme="getFieldChoice(currentEditPage.id, 'metaDescription') === 'ai' ? 'positive' : ''"
@@ -766,6 +772,10 @@ export default {
     legacyMigration: {
       type: Boolean,
       default: false
+    },
+    aiEnabled: {
+      type: Boolean,
+      default: true
     }
   },
   data() {

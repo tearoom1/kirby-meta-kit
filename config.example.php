@@ -10,14 +10,24 @@ return [
     'tearoom1.meta-kit' => [
 
         // ============================================
+        // AI Integration Settings
+        // ============================================
+
+        // Enable/disable AI features (will hide AI buttons in panel)
+        // AI is automatically disabled if api.key or api.model is empty
+        'ai.enabled' => true,
+
+        // ============================================
         // API Settings (Required for AI features)
         // ============================================
 
         // Your OpenRouter API key (get one at https://openrouter.ai/)
+        // Leave empty to disable AI features
         'api.key' => env('OPENROUTER_API_KEY', 'your-api-key-here'),
 
         // AI model to use for description generation
         // Options: mistralai/mistral-7b-instruct, openai/gpt-3.5-turbo, etc.
+        // Leave empty to disable AI features
         'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
 
         // API endpoint (usually no need to change)

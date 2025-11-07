@@ -14,6 +14,34 @@ class MetaKit
     protected $options;
     protected $httpClient;
 
+    /**
+     * Check if AI integration is enabled
+     */
+    public static function isAiEnabled(): bool
+    {
+        $kirby = kirby();
+        
+        // Check explicit disable in config
+        if (!option('tearoom1.meta-kit.ai.enabled', true)) {
+            return false;
+        }
+        
+        // Check if model is configured (either in config or site settings)
+        $configModel = option('tearoom1.meta-kit.api.model');
+        $configKey = option('tearoom1.meta-kit.api.key');
+        
+        // Get site settings
+        $openrouter = \TearoomOne\MetaHelper::getSeoData($kirby->site()->metaKitOpenrouter());
+        $siteModel = $openrouter ? $openrouter->model()->value() : null;
+        $siteKey = $openrouter ? $openrouter->apiKey()->value() : null;
+        
+        // AI is disabled if both model and key are empty
+        $hasModel = !empty($configModel) || !empty($siteModel);
+        $hasKey = !empty($configKey) || !empty($siteKey);
+        
+        return $hasModel && $hasKey;
+    }
+
     public function __construct(Kirby $kirby)
     {
         $this->kirby = $kirby;

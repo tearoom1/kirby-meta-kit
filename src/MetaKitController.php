@@ -87,7 +87,8 @@ class MetaKitController
             'language' => $languageCode,
             'languages' => self::getLanguages(),
             'pages' => $result,
-            'legacyMigration' => option('tearoom1.meta-kit.legacyMigration', false)
+            'legacyMigration' => option('tearoom1.meta-kit.legacyMigration', false),
+            'aiEnabled' => \TearoomOne\MetaKit::isAiEnabled()
         ];
     }
 

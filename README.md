@@ -41,9 +41,12 @@ Core plugin settings, API credentials, and feature toggles:
 
 ```php
 'tearoom1.meta-kit' => [
+    // AI Integration
+    'ai.enabled' => true,                      // Enable/disable AI features (auto-disabled if no key/model)
+    
     // AI Generation (Required for AI features)
-    'api.key' => 'sk-or-v1-YOUR-KEY',         // Your OpenRouter API key
-    'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',  // AI model to use
+    'api.key' => 'sk-or-v1-YOUR-KEY',         // Your OpenRouter API key (leave empty to disable AI)
+    'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',  // AI model (leave empty to disable AI)
     'api.temperature' => 0.7,                  // Creativity: 0.1 (focused) to 1.0 (creative)
 
     // SEO Settings
@@ -63,10 +66,38 @@ Core plugin settings, API credentials, and feature toggles:
 
 **Key Options Explained:**
 
+- **`ai.enabled`**: Explicitly enable/disable AI features. When `false`, AI buttons are hidden from the panel and all AI-related routes are disabled.
+- **Auto-Disable**: AI features are automatically disabled if both `api.key` and `api.model` are empty, even if `ai.enabled` is `true`.
 - **`api.temperature`** (0.1-1.0): Controls AI creativity. Lower values (0.3) = consistent, factual. Higher values (0.9) = varied, creative. Default 0.7 is balanced.
 - **`prompt.title`** / **`prompt.description`**: Customize the AI prompts. Use `{language}` for the language name and `{content}` for page content. Adjust tone, style, or specific requirements.
 - **`autoGenerate`**: When `true`, automatically generates descriptions when saving pages. Recommended: `false` (use panel button instead for control).
 - **`sitemap.exclude`**: Array of page IDs or regex patterns. Pages matching these won't appear in sitemap.
+
+**Disabling AI Features:**
+
+To completely disable AI integration:
+
+```php
+'tearoom1.meta-kit' => [
+    'ai.enabled' => false,  // Explicitly disable
+]
+```
+
+Or simply leave API credentials empty:
+
+```php
+'tearoom1.meta-kit' => [
+    'api.key' => '',     // Empty key auto-disables AI
+    'api.model' => '',   // Empty model auto-disables AI
+]
+```
+
+When AI is disabled:
+- AI generation buttons are hidden in the panel
+- `meta-kit-generator` field shows an info message instead of the generate button
+- AI-related API routes are not registered
+- Page methods (`generateSeoDescription()`) return `null`
+- The plugin still provides manual SEO field management and sitemap generation
 
 **Example Custom Prompt:**
 
