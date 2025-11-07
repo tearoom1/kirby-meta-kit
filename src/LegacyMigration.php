@@ -138,16 +138,27 @@ class LegacyMigration
                 $converted[] = 'metaDescription (from Meta-description)';
             }
 
-            // Migrate legacy fields - OG Image
+            // Migrate legacy fields - OG Image (needs to be array of UUID strings)
             if ($page->ogimage()->isNotEmpty() && empty($seoArray['ogImage'])) {
-                $seoArray['ogImage'] = $page->ogimage()->toFiles();
-                $converted[] = 'ogImage';
+                $files = $page->ogimage()->toFiles();
+                if ($files && $files->count() > 0) {
+                    $seoArray = self::convertUUIDObjectsToStrings($files, $seoArray);
+                    $converted[] = 'ogImage (from ogimage)';
+                }
             } elseif ($page->og_image()->isNotEmpty() && empty($seoArray['ogImage'])) {
-                $seoArray['ogImage'] = $page->og_image()->toFiles();
-                $converted[] = 'ogImage';
+                $files = $page->og_image()->toFiles();
+                if ($files && $files->count() > 0) {
+                    // Convert UUID objects to strings
+                    $seoArray = self::convertUUIDObjectsToStrings($files, $seoArray);
+                    $converted[] = 'ogImage (from og_image)';
+                }
             } elseif ($page->meta_image()->isNotEmpty() && empty($seoArray['ogImage'])) {
-                $seoArray['ogImage'] = $page->meta_image()->toFiles();
-                $converted[] = 'ogImage';
+                $files = $page->meta_image()->toFiles();
+                if ($files && $files->count() > 0) {
+                    // Convert UUID objects to strings
+                    $seoArray = self::convertUUIDObjectsToStrings($files, $seoArray);
+                    $converted[] = 'ogImage (from meta_image)';
+                }
             }
 
             $languageCode = $kirby->language()?->code();
@@ -197,21 +208,8 @@ class LegacyMigration
             ];
 
 
-            $contentFields = $content->fields();
-            $originalContentKeys = array_keys($contentFields);
-            $contentFieldKeys = array_map('mb_strtolower', $originalContentKeys);
-
-            // Flip keys and values and set new values to null
-            // update page only if there are any fields to be deleted
-            // create a mapping: lowercase => original field name
-            $lowercaseToOriginal = array_combine($contentFieldKeys, $originalContentKeys);
-
-            // build data array with original field names as keys and null as values
-            foreach ($fieldsToDelete as $lowercaseField) {
-                if (isset($lowercaseToOriginal[$lowercaseField])) {
-                    $originalField = $lowercaseToOriginal[$lowercaseField];
-                    $updateData[$originalField] = null;
-                }
+            foreach ($fieldsToDelete as $fieldToDelete) {
+                $updateData[$fieldToDelete] = null;
             }
 
             // Only update if we have something to do
@@ -243,5 +241,23 @@ class LegacyMigration
                 'message' => $e->getMessage()
             ];
         }
+    }
+
+    /**
+     * @param $files
+     * @param mixed $seoArray
+     * @return mixed
+     */
+    public static function convertUUIDObjectsToStrings($files, mixed $seoArray): mixed
+    {
+        // Convert UUID objects to strings
+        $uuids = [];
+        foreach ($files as $file) {
+            if ($uuid = $file->uuid()) {
+                $uuids[] = $uuid->toString();
+            }
+        }
+        $seoArray['ogImage'] = $uuids;
+        return $seoArray;
     }
 }
