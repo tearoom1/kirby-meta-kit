@@ -105,7 +105,7 @@ class MetaHelper
         return $page->text()->excerpt($maxLength);
     }
 
-    public static function buildOgDescription(Page $page, Site $site, $seoData = null, string $metaDescription = null, int $maxLength = 160): string
+    public static function buildOgDescription(Page $page, Site $site, $seoData = null, ?string $metaDescription = null, int $maxLength = 160): string
     {
         // Check OG-specific description first
         if ($seoData && method_exists($seoData, 'ogDescription') && $seoData->ogDescription()->isNotEmpty()) {

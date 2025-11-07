@@ -209,7 +209,10 @@ class LegacyMigration
 
 
             foreach ($fieldsToDelete as $fieldToDelete) {
-                $updateData[$fieldToDelete] = null;
+                // check if field exists in content
+                if ($content->has($fieldToDelete)) {
+                    $updateData[$fieldToDelete] = null;
+                }
             }
 
             // Only update if we have something to do
