@@ -54,7 +54,7 @@ class MetaHelper
         }
 
         // Append site name if enabled and not already included
-        if ($appendSiteName && !str_contains($title, $siteMetaTitle)) {
+        if ($appendSiteName && $siteMetaTitle && !str_contains($title, $siteMetaTitle)) {
             $title = $title . ' ' . $separator . ' ' . $siteMetaTitle;
         }
 
