@@ -101,16 +101,24 @@ class MetaKitController
             return [];
         }
 
-        $result = [];
+        // Build ordered list: default first, then remaining in configured order
+        $ordered = [];
+        if ($default = $languages->default()) {
+            $ordered[] = $default;
+            $languages = $languages->not($default);
+        }
         foreach ($languages as $lang) {
+            $ordered[] = $lang;
+        }
+
+        $result = [];
+        foreach ($ordered as $lang) {
             $result[] = [
                 'code' => $lang->code(),
                 'name' => $lang->name(),
                 'default' => $lang->isDefault()
             ];
         }
-
-        $result = array_reverse($result);
 
         return $result;
     }
