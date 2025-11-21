@@ -145,32 +145,7 @@ Kirby::plugin('tearoom1/meta-kit', [
 
             // Add legacy migration routes only if enabled
             if (option('tearoom1.meta-kit.legacyMigration', false)) {
-                $routes[] = [
-                    'pattern' => 'meta-kit/convert-all-to-blocks',
-                    'method' => 'POST',
-                    'auth' => true,
-                    'action' => function () {
-                        return \TearoomOne\LegacyMigration::convertAllLegacyFields();
-                    }
-                ];
-                $routes[] = [
-                    'pattern' => 'meta-kit/detect-legacy',
-                    'method' => 'GET',
-                    'auth' => true,
-                    'action' => function () {
-                        return \TearoomOne\LegacyMigration::detectLegacyMetadata();
-                    }
-                ];
-                $routes[] = [
-                    'pattern' => 'meta-kit/convert-legacy',
-                    'method' => 'POST',
-                    'auth' => true,
-                    'action' => function () {
-                        $pageId = get('pageId');
-                        return \TearoomOne\LegacyMigration::convertLegacyMetadata($pageId);
-                    }
-                ];
-                // New: summary across all languages (default first)
+                // Summary across all languages (default first)
                 $routes[] = [
                     'pattern' => 'meta-kit/legacy-summary',
                     'method' => 'GET',
@@ -179,7 +154,7 @@ Kirby::plugin('tearoom1/meta-kit', [
                         return \TearoomOne\LegacyMigration::detectLegacySummaryAllLanguages();
                     }
                 ];
-                // New: convert for all languages (default first)
+                // Convert for all languages (default first)
                 $routes[] = [
                     'pattern' => 'meta-kit/convert-legacy-all-languages',
                     'method' => 'POST',

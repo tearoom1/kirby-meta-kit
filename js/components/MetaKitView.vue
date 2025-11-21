@@ -766,7 +766,6 @@ export default {
     }
   },
   created() {
-    this.checkLegacyOnLoad();
   },
   methods: {
     getStatusClass(hasField, length) {
@@ -860,31 +859,7 @@ export default {
         this.isGeneratingAll = false;
       }
     },
-    async reloadLegacyData(showLoading = true) {
-      if (showLoading) {
-        this.isLoadingLegacy = true;
-      }
-      try {
-        const response = await this.$api.get('meta-kit/detect-legacy');
-        if (response.status === 'success') {
-          // Use $set to ensure Vue reactivity picks up the change
-          this.$set(this, 'legacyPages', response.pages || []);
-
-          // Pre-select 'legacy' for all fields in legacy pages
-          this.legacyPages.forEach(page => {
-            Object.keys(page.fields).forEach(fieldName => {
-              this.setFieldChoice(page.id, fieldName, 'legacy');
-            });
-          });
-        }
-      } catch (error) {
-        window.panel.notification.error('Failed to detect legacy metadata');
-      } finally {
-        if (showLoading) {
-          this.isLoadingLegacy = false;
-        }
-      }
-    },
+    
     async loadLegacySummary() {
       this.isLoadingLegacy = true;
       try {
@@ -933,104 +908,13 @@ export default {
         this.isMigratingAll = false;
       }
     },
-    async migrateAllToBlocks() {
-      if (!confirm('This will migrate all legacy SEO fields (metatitle, metadescription, etc.) into the seo field for all pages. Continue?')) {
-        return;
-      }
-
-      this.isMigratingAll = true;
-
-      // Show loading notification
-      const loadingNotification = window.panel.notification.open({
-        message: 'Migrating legacy fields to blocks...',
-        type: 'info',
-        timeout: 0 // Don't auto-close
-      });
-
-      try {
-        const response = await this.$api.post('meta-kit/convert-all-to-blocks');
-
-        // Close loading notification
-        if (loadingNotification && loadingNotification.close) {
-          loadingNotification.close();
-        }
-
-        if (response.status === 'success') {
-          const details = `Converted: ${response.converted || 0}, Skipped: ${response.skipped || 0}, Errors: ${response.errors || 0}`;
-          window.panel.notification.success(`Migration completed! ${details}`);
-
-          // Refresh the main pages list
-          await this.refreshPages();
-
-          // Refresh the legacy dialog to show updated current values
-          // Clear field choices so they reset to default (legacy selected)
-          this.fieldChoices = {};
-
-          // Reload legacy data without showing loading spinner (keeps dialog content visible)
-          await this.reloadLegacyData(false);
-
-          // Force Vue to re-render the dialog
-          this.$forceUpdate();
-        } else {
-          const errorMessage = response.message || 'Migration failed';
-          const errorDetails = response.errors ? ` (${response.errors} errors)` : '';
-          window.panel.notification.error(errorMessage + errorDetails);
-        }
-      } catch (error) {
-        // Close loading notification
-        if (loadingNotification && loadingNotification.close) {
-          loadingNotification.close();
-        }
-
-        // Extract detailed error message
-        let errorMessage = 'Migration failed';
-        if (error.message) {
-          errorMessage += `: ${error.message}`;
-        } else if (error.error) {
-          errorMessage += `: ${error.error}`;
-        } else if (typeof error === 'string') {
-          errorMessage += `: ${error}`;
-        }
-
-        window.panel.notification.error(errorMessage);
-        console.error('Migration error details:', error);
-      } finally {
-        this.isMigratingAll = false;
-      }
-    },
-    async checkLegacyOnLoad() {
-      return; // disabled for now
-      const dismissed = sessionStorage.getItem('metaKitLegacyDismissed');
-      if (dismissed) return;
-
-      try {
-        const response = await this.$api.get('meta-kit/detect-legacy');
-        if (response.status === 'success' && response.found > 0) {
-          this.legacyDetection.show = true;
-          this.legacyDetection.found = response.found;
-        }
-      } catch (error) {
-        // Silent fail
-      }
-    },
+    
+    
     dismissLegacyWarning() {
       this.legacyDetection.show = false;
       sessionStorage.setItem('metaKitLegacyDismissed', 'true');
     },
-    async convertLegacyPage(pageId) {
-      try {
-        const response = await this.$api.post("meta-kit/convert-legacy", { pageId });
-        if (response.status === "success" || response.status === "info") {
-          window.panel.notification.success(response.message);
-          await this.loadLegacySummary();
-          await this.refreshPages();
-        } else {
-          window.panel.notification.error(response.message);
-        }
-      } catch (error) {
-        window.panel.notification.error("Failed to convert legacy data");
-      }
-    },
+    
     formatFieldName(fieldName) {
       const names = {
         'metaTitle': 'Meta Title',
