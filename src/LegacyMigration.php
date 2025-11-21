@@ -13,6 +13,20 @@ class LegacyMigration
         $skipped = 0;
         $errors = 0;
 
+        // Convert Site first
+        try {
+            $siteResult = self::convertLegacyMetadata('site');
+            if ($siteResult['status'] === 'success') {
+                $converted++;
+            } elseif ($siteResult['status'] === 'info') {
+                $skipped++;
+            } else {
+                $errors++;
+            }
+        } catch (\Exception $e) {
+            $errors++;
+        }
+
         foreach ($pages as $page) {
             try {
                 $result = self::convertLegacyMetadata($page->id());
@@ -37,11 +51,153 @@ class LegacyMigration
         ];
     }
 
+    /**
+     * Detect legacy metadata across all languages and return a summary
+     * Order: default language first, then remaining languages
+     */
+    public static function detectLegacySummaryAllLanguages(): array
+    {
+        $kirby     = kirby();
+        $languages = $kirby->languages();
+
+        if ($languages->count() === 0) {
+            $result = self::detectLegacyMetadata();
+            return [
+                'status' => 'success',
+                'total'  => $result['found'] ?? 0,
+                'byLanguage' => []
+            ];
+        }
+
+        // Build default-first order
+        $ordered = [];
+        if ($default = $languages->default()) {
+            $ordered[] = $default;
+            $languages = $languages->not($default);
+        }
+        foreach ($languages as $lang) {
+            $ordered[] = $lang;
+        }
+
+        $summary = [];
+        $total   = 0;
+
+        $current = $kirby->language()?->code();
+        foreach ($ordered as $lang) {
+            $kirby->setCurrentLanguage($lang->code());
+            $res = self::detectLegacyMetadata();
+            $count = $res['found'] ?? 0;
+            $summary[] = [
+                'code'  => $lang->code(),
+                'name'  => $lang->name(),
+                'count' => $count,
+            ];
+            $total += $count;
+        }
+        // Restore previous language
+        if (!empty($current)) {
+            $kirby->setCurrentLanguage($current);
+        }
+
+        return [
+            'status' => 'success',
+            'total'  => $total,
+            'byLanguage' => $summary
+        ];
+    }
+
+    /**
+     * Convert legacy metadata for all languages (default first)
+     */
+    public static function convertAllLanguages(): array
+    {
+        $kirby     = kirby();
+        $languages = $kirby->languages();
+
+        // Single-language sites: reuse existing converter
+        if ($languages->count() === 0) {
+            return self::convertAllLegacyFields();
+        }
+
+        // Build default-first order
+        $ordered = [];
+        if ($default = $languages->default()) {
+            $ordered[] = $default;
+            $languages = $languages->not($default);
+        }
+        foreach ($languages as $lang) {
+            $ordered[] = $lang;
+        }
+
+        $converted = 0; $skipped = 0; $errors = 0;
+        $current = $kirby->language()?->code();
+
+        foreach ($ordered as $lang) {
+            try {
+                $kirby->setCurrentLanguage($lang->code());
+                $res = self::convertAllLegacyFields();
+                $converted += $res['converted'] ?? 0;
+                $skipped   += $res['skipped'] ?? 0;
+                $errors    += $res['errors'] ?? 0;
+            } catch (\Exception $e) {
+                $errors++;
+            }
+        }
+
+        // Restore previous language
+        if (!empty($current)) {
+            $kirby->setCurrentLanguage($current);
+        }
+
+        return [
+            'status'    => 'success',
+            'message'   => "Migrated {$converted} items, skipped {$skipped}, errors {$errors} across all languages",
+            'converted' => $converted,
+            'skipped'   => $skipped,
+            'errors'    => $errors,
+        ];
+    }
+
     public static function detectLegacyMetadata(): array
     {
         $kirby = kirby();
         $pages = $kirby->site()->index();
         $found = [];
+
+        // Check Site
+        $site = $kirby->site();
+        $siteLegacy = [];
+        $siteCurrent = [];
+        $siteSeo = MetaKitController::getSeoData($site->metaKitSeo());
+        if ($site->metatitle()->isNotEmpty()) {
+            $siteLegacy['metaTitle'] = $site->metatitle()->value();
+            $siteCurrent['metaTitle'] = $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
+                ? $siteSeo->metaTitle()->value()
+                : null;
+        }
+        if ($site->metadescription()->isNotEmpty()) {
+            $siteLegacy['metaDescription'] = $site->metadescription()->value();
+            $siteCurrent['metaDescription'] = $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
+                ? $siteSeo->metaDescription()->value()
+                : null;
+        }
+        if ($site->ogimage()->isNotEmpty()) {
+            $files = $site->ogimage()->toFiles();
+            if ($files->count() > 0) {
+                $siteLegacy['ogImage'] = $files->first()->filename();
+                $siteCurrent['ogImage'] = $siteSeo && $siteSeo->ogImage()->isNotEmpty()
+                    ? $siteSeo->ogImage()->toFiles()->first()?->filename()
+                    : null;
+            }
+        }
+        if (!empty($siteLegacy)) {
+            $found[] = [
+                'id' => 'site',
+                'title' => $site->title()->value(),
+                'fields' => $siteLegacy,
+                'current' => $siteCurrent
+            ];
+        }
 
         foreach ($pages as $page) {
             $legacy = [];
@@ -106,7 +262,8 @@ class LegacyMigration
     public static function convertLegacyMetadata(string $pageId): array
     {
         $kirby = kirby();
-        $page = $kirby->page($pageId);
+        $isSite = ($pageId === 'site');
+        $page = $isSite ? $kirby->site() : $kirby->page($pageId);
 
         if (!$page) {
             return [
@@ -163,9 +320,9 @@ class LegacyMigration
 
             $languageCode = $kirby->language()?->code();
 
-            // Check if translation file exists for this language
+            // Check if translation file exists for this language (skip for site)
             $content = $page->content($languageCode);
-            if (!$content->exists()) {
+            if ($isSite === false && !$content->exists()) {
                 return [
                     'status' => 'info',
                     'message' => 'Translation file does not exist for language: ' . $languageCode
@@ -178,9 +335,9 @@ class LegacyMigration
                 $seoBlock = [
                     [
                         'content' => $seoArray,
-                        'id' => 'seo-metadata',
+                        'id' => $isSite ? 'site-seo-settings' : 'seo-metadata',
                         'isHidden' => false,
-                        'type' => 'mk-page-seo'
+                        'type' => $isSite ? 'mk-site-seo' : 'mk-page-seo'
                     ]
                 ];
                 $updateData['metaKitSeo'] = $seoBlock;
@@ -209,9 +366,16 @@ class LegacyMigration
 
 
             foreach ($fieldsToDelete as $fieldToDelete) {
-                // check if field exists in content
-                if ($content->has($fieldToDelete)) {
-                    $updateData[$fieldToDelete] = null;
+                // check if field exists in content (for site, use current language content file)
+                if ($isSite === true) {
+                    $siteContent = $languageCode ? $page->content($languageCode) : $page->content();
+                    if ($siteContent->has($fieldToDelete)) {
+                        $updateData[$fieldToDelete] = null;
+                    }
+                } else {
+                    if ($content->has($fieldToDelete)) {
+                        $updateData[$fieldToDelete] = null;
+                    }
                 }
             }
 

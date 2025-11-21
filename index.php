@@ -170,6 +170,24 @@ Kirby::plugin('tearoom1/meta-kit', [
                         return \TearoomOne\LegacyMigration::convertLegacyMetadata($pageId);
                     }
                 ];
+                // New: summary across all languages (default first)
+                $routes[] = [
+                    'pattern' => 'meta-kit/legacy-summary',
+                    'method' => 'GET',
+                    'auth' => true,
+                    'action' => function () {
+                        return \TearoomOne\LegacyMigration::detectLegacySummaryAllLanguages();
+                    }
+                ];
+                // New: convert for all languages (default first)
+                $routes[] = [
+                    'pattern' => 'meta-kit/convert-legacy-all-languages',
+                    'method' => 'POST',
+                    'auth' => true,
+                    'action' => function () {
+                        return \TearoomOne\LegacyMigration::convertAllLanguages();
+                    }
+                ];
             }
 
             return $routes;

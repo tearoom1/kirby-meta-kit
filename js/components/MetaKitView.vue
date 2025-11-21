@@ -13,6 +13,7 @@
           {{ lang.code.toUpperCase() }}
         </k-button>
       </k-button-group>
+      <k-button v-if="legacyMigration" icon="download" size="xs" @click="showLegacyDialog">Legacy Migration</k-button>
     </div>
 
     <!-- Legacy Detection Warning -->
@@ -62,9 +63,9 @@
           :progress="isGeneratingAll"
           @click="generateAllDescriptions"
         >
-          Generate Missing ({{ selectedPages.length || filteredPages.length }})
+          Generate Missing ({{ selectedPages.length }})
         </k-button>
-        <k-button v-if="legacyMigration" icon="download" @click="detectLegacyMetadata">Legacy Data</k-button>
+        <!-- Legacy button moved to language bar -->
         <k-button icon="refresh" @click="refreshPages"></k-button>
       </k-button-group>
 
@@ -197,141 +198,37 @@
       />
     </div>
 
-    <!-- Legacy Data Dialog -->
-    <k-dialog ref="legacyDialog" size="huge" cancelButton="Close" submitButton="">
-      <k-headline>Legacy SEO Metadata</k-headline>
+    <!-- Legacy Migration Dialog (Summary) -->
+    <k-dialog ref="legacyDialog" size="medium" cancelButton="Close" submitButton="">
+      <k-headline>Legacy SEO Migration</k-headline>
 
       <div v-if="isLoadingLegacy" class="k-meta-kit-loading">
         <k-icon class="k-meta-kit-spinner" type="loader"/>
-        <span>Scanning for legacy metadata...</span>
+        <span>Scanning all languages for legacy metadata...</span>
       </div>
-
-      <div v-else-if="legacyPages.length > 0" class="k-meta-kit-legacy-list">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <p style="margin: 0;">Found {{ legacyPages.length }} pages with legacy SEO fields:</p>
+      <div v-else>
+        <div class="k-meta-kit-legacy-list">
+          <p>Summary of legacy fields by language:</p>
+          <ul>
+            <li v-for="item in legacySummary.byLanguage" :key="item.code">
+              <strong>{{ item.code.toUpperCase() }}</strong>: {{ item.count }} item(s)
+            </li>
+          </ul>
+          <p><strong>Total:</strong> {{ legacySummary.total }} item(s) across all languages</p>
+          <k-box theme="negative">
+            <k-icon type="alert"/>
+            <span>Warning: Legacy metadata will be migrated to the new meta kit fields. The old fields will be removed.</span>
+          </k-box>
           <k-button
             icon="download"
-            :disabled="isMigratingAll"
+            :disabled="isMigratingAll || legacySummary.total === 0"
             :progress="isMigratingAll"
-            @click="migrateAllToBlocks"
+            @click="migrateAllLanguages"
             theme="positive"
           >
-            Migrate All
+            Migrate All Languages
           </k-button>
         </div>
-
-        <div v-for="page in legacyPages" :key="page.id" class="k-meta-kit-legacy-item">
-          <div class="k-meta-kit-legacy-item-header">
-            <strong>{{ page.title }}</strong>
-          </div>
-
-          <div class="k-meta-kit-legacy-item-content">
-            <div v-for="(value, key) in page.fields" :key="key" class="k-meta-kit-legacy-field">
-              <span class="k-meta-kit-legacy-field-label">{{ formatFieldName(key) }}:</span>
-              <div class="k-meta-kit-legacy-field-values">
-
-                <!-- Choice Buttons -->
-                <div class="k-meta-kit-legacy-choices">
-                  <k-button
-                    size="xs"
-                    :theme="getFieldChoice(page.id, key) === 'legacy' ? 'positive' : ''"
-                    @click="setFieldChoice(page.id, key, 'legacy')"
-                  >
-                    Legacy
-                  </k-button>
-                  <k-button
-                    v-if="page.current && page.current[key]"
-                    size="xs"
-                    :theme="(getFieldChoice(page.id, key) === 'current' || getFieldChoice(page.id, key) === 'keep') ? 'positive' : ''"
-                    @click="setFieldChoice(page.id, key, 'keep')"
-                  >
-                    Current
-                  </k-button>
-                  <k-button
-                    v-if="aiEnabled && key !== 'ogImage'"
-                    size="xs"
-                    icon="sparkling"
-                    :theme="getFieldChoice(page.id, key) === 'ai' ? 'positive' : ''"
-                    :disabled="isGeneratingField(page.id, key)"
-                    @click="generateFieldAI(page.id, key)"
-                  >
-                    AI Generate
-                  </k-button>
-                </div>
-
-                <!-- Preview based on choice -->
-                <div class="k-meta-kit-legacy-field-preview">
-                  <div v-if="getFieldChoice(page.id, key) === 'legacy'" class="k-meta-kit-legacy-field-option">
-                    <span class="k-meta-kit-legacy-badge">Legacy Value</span>
-                    <span class="k-meta-kit-legacy-field-value">{{ formatFieldValue(value) }}</span>
-                  </div>
-
-                  <div v-else-if="(getFieldChoice(page.id, key) === 'current' || getFieldChoice(page.id, key) === 'keep') && page.current && page.current[key]"
-                       class="k-meta-kit-legacy-field-option">
-                    <span class="k-meta-kit-legacy-badge">Current Value (editable)</span>
-                    <k-input
-                      :value="getEditableValue(page.id, key, page.current[key])"
-                      @input="setManualValue(page.id, key, $event)"
-                      :placeholder="formatFieldValue(page.current[key])"
-                      type="textarea"
-                    />
-                  </div>
-
-                  <div v-else-if="getFieldChoice(page.id, key) === 'ai'" class="k-meta-kit-legacy-field-option">
-                    <span class="k-meta-kit-legacy-badge k-meta-kit-legacy-badge-ai">AI Generated (editable)</span>
-                    <span v-if="isGeneratingField(page.id, key)" class="k-meta-kit-legacy-field-generating">
-                      <k-icon class="k-meta-kit-spinner" type="loader"/>
-                      Generating...
-                    </span>
-                    <k-input
-                      v-else
-                      :value="getManualValue(page.id, key)"
-                      @input="setManualValue(page.id, key, $event)"
-                      :placeholder="`AI generated ${formatFieldName(key)}`"
-                      type="textarea"
-                    />
-                  </div>
-
-                  <div v-else class="k-meta-kit-legacy-field-option">
-                    <span class="k-meta-kit-legacy-badge-hint">Select an option above</span>
-                  </div>
-                </div>
-
-                <!-- Original values for reference -->
-                <div class="k-meta-kit-legacy-field-reference">
-                  <details>
-                    <summary>View original values</summary>
-                    <div class="k-meta-kit-legacy-field-old">
-                      <span class="k-meta-kit-legacy-badge-small">Legacy</span>
-                      <span class="k-meta-kit-legacy-field-value-small">{{ formatFieldValue(value) }}</span>
-                    </div>
-                    <div v-if="page.current && page.current[key]" class="k-meta-kit-legacy-field-new">
-                      <span class="k-meta-kit-legacy-badge-small">Current</span>
-                      <span class="k-meta-kit-legacy-field-value-small">{{ formatFieldValue(page.current[key]) }}</span>
-                    </div>
-                  </details>
-                </div>
-
-                <!-- Apply button for single field -->
-                <k-button
-                  v-if="hasFieldChanged(page.id, key, page.current ? page.current[key] : null, value)"
-                  icon="check"
-                  size="sm"
-                  theme="positive"
-                  @click="applySingleField(page.id, key)"
-                >
-                  Apply {{ formatFieldName(key) }}
-                </k-button>
-
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div v-else class="k-meta-kit-empty">
-        <k-icon type="check"/>
-        <p>No legacy SEO metadata found!</p>
       </div>
     </k-dialog>
 
@@ -789,6 +686,7 @@ export default {
       pagesData: this.pages || [],
       allPagesData: [],
       legacyPages: [],
+      legacySummary: { total: 0, byLanguage: [] },
       currentEditPage: null,
       legacyDetection: {
         show: false,
@@ -917,22 +815,22 @@ export default {
       }
 
       this.isGeneratingAll = true;
-      
+
       // Show loading notification
       const loadingNotification = window.panel.notification.open({
         message: 'Generating descriptions with AI...',
         type: 'info',
         timeout: 0 // Don't auto-close
       });
-      
+
       try {
         const response = await this.$api.post('meta-kit/generate-all');
-        
+
         // Close loading notification
         if (loadingNotification && loadingNotification.close) {
           loadingNotification.close();
         }
-        
+
         if (response.status === 'success') {
           const details = `Generated: ${response.generated || 0}, Skipped: ${response.skipped || 0}, Failed: ${response.failed || 0}`;
           window.panel.notification.success(`${response.message || 'Generation completed!'} ${details}`);
@@ -945,7 +843,7 @@ export default {
         if (loadingNotification && loadingNotification.close) {
           loadingNotification.close();
         }
-        
+
         // Extract detailed error message
         let errorMessage = 'Failed to generate descriptions';
         if (error.message) {
@@ -955,7 +853,7 @@ export default {
         } else if (typeof error === 'string') {
           errorMessage += `: ${error}`;
         }
-        
+
         window.panel.notification.error(errorMessage);
         console.error('Generation error details:', error);
       } finally {
@@ -987,32 +885,76 @@ export default {
         }
       }
     },
-    async detectLegacyMetadata() {
+    async loadLegacySummary() {
+      this.isLoadingLegacy = true;
+      try {
+        const res = await this.$api.get('meta-kit/legacy-summary');
+        if (res && res.status === 'success') {
+          this.$set(this, 'legacySummary', res);
+        } else {
+          this.$set(this, 'legacySummary', { total: 0, byLanguage: [] });
+        }
+      } catch (e) {
+        window.panel.notification.error('Failed to load legacy summary');
+        this.$set(this, 'legacySummary', { total: 0, byLanguage: [] });
+      } finally {
+        this.isLoadingLegacy = false;
+      }
+    },
+    async showLegacyDialog() {
       this.$refs.legacyDialog.open();
-      await this.reloadLegacyData();
+      await this.loadLegacySummary();
+    },
+    async migrateAllLanguages() {
+      if (this.legacySummary.total === 0) return;
+      if (!confirm('This will migrate legacy SEO fields across all languages (default first). Continue?')) {
+        return;
+      }
+      this.isMigratingAll = true;
+      const loading = window.panel.notification.open({
+        message: 'Migrating legacy fields across all languages...',
+        type: 'info',
+        timeout: 0
+      });
+      try {
+        const res = await this.$api.post('meta-kit/convert-legacy-all-languages');
+        if (loading && loading.close) loading.close();
+        if (res && res.status === 'success') {
+          window.panel.notification.success(res.message || 'Migration completed');
+          await this.refreshPages();
+          await this.loadLegacySummary();
+        } else {
+          window.panel.notification.error(res.message || 'Migration failed');
+        }
+      } catch (e) {
+        if (loading && loading.close) loading.close();
+        window.panel.notification.error('Migration failed');
+      } finally {
+        this.isMigratingAll = false;
+      }
     },
     async migrateAllToBlocks() {
       if (!confirm('This will migrate all legacy SEO fields (metatitle, metadescription, etc.) into the seo field for all pages. Continue?')) {
         return;
       }
-      
+
       this.isMigratingAll = true;
-      
+
       // Show loading notification
       const loadingNotification = window.panel.notification.open({
         message: 'Migrating legacy fields to blocks...',
         type: 'info',
         timeout: 0 // Don't auto-close
       });
-      
+
       try {
         const response = await this.$api.post('meta-kit/convert-all-to-blocks');
-        
+
         // Close loading notification
         if (loadingNotification && loadingNotification.close) {
           loadingNotification.close();
         }
-        
+
         if (response.status === 'success') {
           const details = `Converted: ${response.converted || 0}, Skipped: ${response.skipped || 0}, Errors: ${response.errors || 0}`;
           window.panel.notification.success(`Migration completed! ${details}`);
@@ -1039,7 +981,7 @@ export default {
         if (loadingNotification && loadingNotification.close) {
           loadingNotification.close();
         }
-        
+
         // Extract detailed error message
         let errorMessage = 'Migration failed';
         if (error.message) {
@@ -1049,7 +991,7 @@ export default {
         } else if (typeof error === 'string') {
           errorMessage += `: ${error}`;
         }
-        
+
         window.panel.notification.error(errorMessage);
         console.error('Migration error details:', error);
       } finally {
@@ -1075,21 +1017,18 @@ export default {
       this.legacyDetection.show = false;
       sessionStorage.setItem('metaKitLegacyDismissed', 'true');
     },
-    showLegacyDialog() {
-      this.detectLegacyMetadata();
-    },
     async convertLegacyPage(pageId) {
       try {
-        const response = await this.$api.post('meta-kit/convert-legacy', {pageId});
-        if (response.status === 'success' || response.status === 'info') {
+        const response = await this.$api.post("meta-kit/convert-legacy", { pageId });
+        if (response.status === "success" || response.status === "info") {
           window.panel.notification.success(response.message);
-          await this.detectLegacyMetadata();
+          await this.loadLegacySummary();
           await this.refreshPages();
         } else {
           window.panel.notification.error(response.message);
         }
       } catch (error) {
-        window.panel.notification.error('Failed to convert legacy data');
+        window.panel.notification.error("Failed to convert legacy data");
       }
     },
     formatFieldName(fieldName) {

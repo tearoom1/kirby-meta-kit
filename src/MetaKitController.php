@@ -60,8 +60,57 @@ class MetaKitController
         $language = $kirby->language();
         $languageCode = $language ? $language->code() : null;
 
+        // Add Site as first row
+        $site = $kirby->site();
+        $siteSeo = self::getSeoData($site->metaKitSeo());
+        $siteLegacy = [];
+        if ($site->metatitle()->isNotEmpty()) {
+            $siteLegacy['metaTitle'] = $site->metatitle()->value();
+        }
+        if ($site->metadescription()->isNotEmpty()) {
+            $siteLegacy['metaDescription'] = $site->metadescription()->value();
+        }
+        $result[] = [
+            'id' => 'site',
+            'title' => $site->title()->value(),
+            'url' => $site->url(),
+            'panelUrl' => $site->panel()->url(),
+            'template' => 'site',
+            'hasMetaTitle' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty(),
+            'hasMetaDescription' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty(),
+            'hasOgImage' => $siteSeo && $siteSeo->ogImage()->isNotEmpty(),
+            'robots' => $siteSeo && $siteSeo->robots()->isNotEmpty() ? $siteSeo->robots()->value() : 'index, follow',
+            'metaTitleLength' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
+                ? mb_strlen($siteSeo->metaTitle()->value())
+                : 0,
+            'metaDescriptionLength' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
+                ? mb_strlen($siteSeo->metaDescription()->value())
+                : 0,
+            'language' => $languageCode,
+            'legacy' => !empty($siteLegacy) ? $siteLegacy : null,
+        ];
+
         foreach ($pages as $page) {
             $seoData = self::getSeoData($page->metaKitSeo());
+            $legacy = [];
+            if ($page->metatitle()->isNotEmpty()) {
+                $legacy['metaTitle'] = $page->metatitle()->value();
+            }
+            if ($page->Metatitle()->isNotEmpty() && empty($legacy['metaTitle'])) {
+                $legacy['metaTitle'] = $page->Metatitle()->value();
+            }
+            if ($page->customtitle()->isNotEmpty() && empty($legacy['metaTitle'])) {
+                $legacy['metaTitle'] = $page->customtitle()->value();
+            }
+            if ($page->seotitle()->isNotEmpty() && empty($legacy['metaTitle'])) {
+                $legacy['metaTitle'] = $page->seotitle()->value();
+            }
+            if ($page->metadescription()->isNotEmpty()) {
+                $legacy['metaDescription'] = $page->metadescription()->value();
+            }
+            if ($page->seodescription()->isNotEmpty() && empty($legacy['metaDescription'])) {
+                $legacy['metaDescription'] = $page->seodescription()->value();
+            }
 
             $result[] = [
                 'id' => $page->id(),
@@ -80,6 +129,7 @@ class MetaKitController
                     ? mb_strlen($seoData->metaDescription()->value())
                     : 0,
                 'language' => $languageCode,
+                'legacy' => !empty($legacy) ? $legacy : null,
             ];
         }
 
@@ -386,7 +436,8 @@ class MetaKitController
     public static function applySingleField(string $pageId, string $fieldName, $value): array
     {
         $kirby = kirby();
-        $page = $kirby->page($pageId);
+        $isSite = ($pageId === 'site');
+        $page = $isSite ? $kirby->site() : $kirby->page($pageId);
 
         if (!$page) {
             return [
@@ -443,9 +494,9 @@ class MetaKitController
             $seoBlock = [
                 [
                     'content' => $seoArray,
-                    'id' => 'seo-metadata',
+                    'id' => $isSite ? 'site-seo-settings' : 'seo-metadata',
                     'isHidden' => false,
-                    'type' => 'seo'
+                    'type' => $isSite ? 'mk-site-seo' : 'seo'
                 ]
             ];
             $page->update(['metaKitSeo' => $seoBlock], $languageCode);
@@ -551,7 +602,8 @@ class MetaKitController
     public static function getSinglePage(string $pageId): array
     {
         $kirby = kirby();
-        $page = $kirby->page($pageId);
+        $isSite = ($pageId === 'site');
+        $page = $isSite ? $kirby->site() : $kirby->page($pageId);
 
         if (!$page) {
             return [
@@ -598,11 +650,11 @@ class MetaKitController
         }
 
         $result = [
-            'id' => $page->id(),
+            'id' => $isSite ? 'site' : $page->id(),
             'title' => $page->title()->value(),
             'url' => $page->url(),
             'panelUrl' => $page->panel()->url(),
-            'template' => $page->intendedTemplate()->name(),
+            'template' => $isSite ? 'site' : $page->intendedTemplate()->name(),
             'hasMetaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty(),
             'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
             'hasOgImage' => $seoData && $seoData->ogImage()->isNotEmpty(),
