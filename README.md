@@ -43,7 +43,7 @@ Core plugin settings, API credentials, and feature toggles:
 'tearoom1.meta-kit' => [
     // AI Integration
     'ai.enabled' => true,                      // Enable/disable AI features (auto-disabled if no key/model)
-    
+
     // AI Generation (Required for AI features)
     'api.key' => 'sk-or-v1-YOUR-KEY',         // Your OpenRouter API key (leave empty to disable AI)
     'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',  // AI model (leave empty to disable AI)
@@ -233,6 +233,28 @@ POST /api/seo-ai/generate
 * **Meta Descriptions:** <160 chars, unique per page, include keywords
 * **OG Images:** 1200×630px, PNG/JPG, avoid text-heavy images
 * **Auto-Generate:** Use panel button instead of auto-save for better control
+
+## Legacy Migration (old SEO fields → Meta Kit)
+
+- Runs across all languages.
+- Cleans up old legacy fields.
+
+Enable migration routes in your config:
+
+```php
+'tearoom1.meta-kit' => [
+  'legacyMigration' => true,
+]
+```
+
+Run it from the Panel:
+
+- Open the Meta Kit area
+- Click “Legacy Migration” next to the language switcher
+- Review the summary and click “Migrate All Languages”
+
+> Warning: This will remove the old SEO fields from your pages. Make sure to backup your data before running this.
+
 
 ## Requirements
 
