@@ -892,17 +892,7 @@ export default {
         window.panel.notification.success(`Updated ${appliedCount} field${appliedCount > 1 ? 's' : ''}`);
         await this.refreshPages();
 
-        // Clear manual values
-        if (this.fieldChoices[pageId]) {
-          if (this.fieldChoices[pageId]['metaTitle']) {
-            this.$set(this.fieldChoices[pageId]['metaTitle'], 'manualValue', '');
-          }
-          if (this.fieldChoices[pageId]['metaDescription']) {
-            this.$set(this.fieldChoices[pageId]['metaDescription'], 'manualValue', '');
-          }
-        }
-
-        // Update the page data in place
+        // Update the page data in place first
         const pageInAllPages = this.allPagesData.find(p => p.id === pageId);
         if (pageInAllPages) {
           if (titleValue && titleValue !== page.metaTitle) {
@@ -915,6 +905,11 @@ export default {
             this.$set(pageInAllPages, 'hasMetaDescription', descValue.length > 0);
             this.$set(pageInAllPages, 'metaDescriptionLength', descValue.length);
           }
+        }
+
+        // Clear field choices completely so they fall back to current values
+        if (this.fieldChoices[pageId]) {
+          this.$delete(this.fieldChoices, pageId);
         }
 
         this.$forceUpdate();
@@ -1011,14 +1006,6 @@ export default {
           window.panel.notification.success(`${this.formatFieldName(fieldName)} updated successfully`);
           await this.refreshPages();
 
-          // Clear the manual value completely
-          if (this.fieldChoices[pageId] && this.fieldChoices[pageId][fieldName]) {
-            this.$set(this.fieldChoices[pageId][fieldName], 'manualValue', '');
-          }
-
-          // Reset the choice to 'keep' to show current value
-          this.setFieldChoice(pageId, fieldName, 'keep');
-
           // Update the field in-place without reloading the whole dialog
           const pageInAllPages = this.allPagesData.find(p => p.id === pageId);
           if (pageInAllPages) {
@@ -1040,6 +1027,11 @@ export default {
             if (pageInAllPages.legacy && pageInAllPages.legacy[fieldName]) {
               delete pageInAllPages.legacy[fieldName];
             }
+          }
+
+          // Clear the field choice for this field so it falls back to current value
+          if (this.fieldChoices[pageId] && this.fieldChoices[pageId][fieldName]) {
+            this.$delete(this.fieldChoices[pageId], fieldName);
           }
 
           // Also update legacy pages data if this is from the legacy dialog

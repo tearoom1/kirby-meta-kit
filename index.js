@@ -629,14 +629,6 @@
         if (appliedCount > 0) {
           window.panel.notification.success(`Updated ${appliedCount} field${appliedCount > 1 ? "s" : ""}`);
           await this.refreshPages();
-          if (this.fieldChoices[pageId]) {
-            if (this.fieldChoices[pageId]["metaTitle"]) {
-              this.$set(this.fieldChoices[pageId]["metaTitle"], "manualValue", "");
-            }
-            if (this.fieldChoices[pageId]["metaDescription"]) {
-              this.$set(this.fieldChoices[pageId]["metaDescription"], "manualValue", "");
-            }
-          }
           const pageInAllPages = this.allPagesData.find((p) => p.id === pageId);
           if (pageInAllPages) {
             if (titleValue && titleValue !== page.metaTitle) {
@@ -649,6 +641,9 @@
               this.$set(pageInAllPages, "hasMetaDescription", descValue.length > 0);
               this.$set(pageInAllPages, "metaDescriptionLength", descValue.length);
             }
+          }
+          if (this.fieldChoices[pageId]) {
+            this.$delete(this.fieldChoices, pageId);
           }
           this.$forceUpdate();
         }
@@ -729,10 +724,6 @@
           if (response.status === "success") {
             window.panel.notification.success(`${this.formatFieldName(fieldName)} updated successfully`);
             await this.refreshPages();
-            if (this.fieldChoices[pageId] && this.fieldChoices[pageId][fieldName]) {
-              this.$set(this.fieldChoices[pageId][fieldName], "manualValue", "");
-            }
-            this.setFieldChoice(pageId, fieldName, "keep");
             const pageInAllPages = this.allPagesData.find((p) => p.id === pageId);
             if (pageInAllPages) {
               this.$set(pageInAllPages, fieldName, value);
@@ -748,6 +739,9 @@
               if (pageInAllPages.legacy && pageInAllPages.legacy[fieldName]) {
                 delete pageInAllPages.legacy[fieldName];
               }
+            }
+            if (this.fieldChoices[pageId] && this.fieldChoices[pageId][fieldName]) {
+              this.$delete(this.fieldChoices[pageId], fieldName);
             }
             const pageInLegacy = this.legacyPages.find((p) => p.id === pageId);
             if (pageInLegacy) {

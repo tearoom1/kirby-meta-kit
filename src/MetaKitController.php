@@ -496,7 +496,7 @@ class MetaKitController
                     'content' => $seoArray,
                     'id' => $isSite ? 'site-seo-settings' : 'seo-metadata',
                     'isHidden' => false,
-                    'type' => $isSite ? 'mk-site-seo' : 'seo'
+                    'type' => $isSite ? 'mk-site-seo' : 'mk-page-seo'
                 ]
             ];
             $page->update(['metaKitSeo' => $seoBlock], $languageCode);
@@ -516,17 +516,78 @@ class MetaKitController
     public static function getPagesWithContent(): array
     {
         $kirby = kirby();
-        $pages = $kirby->site()->index();
+        $site = $kirby->site();
+        $pages = $site->index();
 
         // Filter by specific page IDs if provided
         $pageIds = get('pageIds');
+        $includeSite = false;
+
         if ($pageIds && is_array($pageIds)) {
+            // Check if 'site' is in the pageIds
+            $includeSite = in_array('site', $pageIds);
+
             $pages = $pages->filter(function ($page) use ($pageIds) {
                 return in_array($page->id(), $pageIds);
             });
+        } else {
+            // Include site by default when no filter is applied
+            $includeSite = true;
         }
 
         $result = [];
+
+        // Add site as first entry if needed
+        if ($includeSite) {
+            $siteSeo = self::getSeoData($site->metaKitSeo());
+            $siteLegacy = [];
+
+            if ($site->metatitle()->isNotEmpty()) {
+                $siteLegacy['metaTitle'] = $site->metatitle()->value();
+            }
+            if ($site->metadescription()->isNotEmpty()) {
+                $siteLegacy['metaDescription'] = $site->metadescription()->value();
+            }
+
+            $ogImageData = null;
+            if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
+                $ogFiles = $siteSeo->ogImage()->toFiles();
+                if ($ogFiles->count() > 0) {
+                    $ogFile = $ogFiles->first();
+                    $ogImageData = [
+                        'filename' => $ogFile->filename(),
+                        'url' => $ogFile->url(),
+                        'uuid' => $ogFile->uuid()?->toString()
+                    ];
+                }
+            }
+
+            $result[] = [
+                'id' => 'site',
+                'title' => $site->title()->value(),
+                'url' => $site->url(),
+                'panelUrl' => $site->panel()->url(),
+                'template' => 'site',
+                'hasMetaTitle' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty(),
+                'hasMetaDescription' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty(),
+                'hasOgImage' => $siteSeo && $siteSeo->ogImage()->isNotEmpty(),
+                'robots' => $siteSeo && $siteSeo->robots()->isNotEmpty() ? $siteSeo->robots()->value() : 'index, follow',
+                'metaTitle' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
+                    ? $siteSeo->metaTitle()->value()
+                    : null,
+                'metaDescription' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
+                    ? $siteSeo->metaDescription()->value()
+                    : null,
+                'ogImage' => $ogImageData,
+                'metaTitleLength' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
+                    ? mb_strlen($siteSeo->metaTitle()->value())
+                    : 0,
+                'metaDescriptionLength' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
+                    ? mb_strlen($siteSeo->metaDescription()->value())
+                    : 0,
+                'legacy' => !empty($siteLegacy) ? $siteLegacy : null,
+            ];
+        }
 
         foreach ($pages as $page) {
             $seoData = self::getSeoData($page->metaKitSeo());
@@ -821,7 +882,8 @@ class MetaKitController
     public static function generateField(string $pageId, string $fieldName, string $language = null): array
     {
         $kirby = kirby();
-        $page = $kirby->page($pageId);
+        $isSite = ($pageId === 'site');
+        $page = $isSite ? $kirby->site() : $kirby->page($pageId);
 
         if (!$page) {
             return [
@@ -841,7 +903,7 @@ class MetaKitController
                 $kirby->setCurrentLanguage($language);
             }
 
-            // Extract all page content including structured fields
+            // Extract all page/site content including structured fields
             $content = self::extractPageContent($page);
 
             // Fallback to title if no content found
