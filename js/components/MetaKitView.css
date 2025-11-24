@@ -175,6 +175,33 @@
     font-weight: 400;
   }
 
+  /* Page info in edit dialog */
+  .k-meta-kit-page-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .k-meta-kit-page-id {
+    font-size: 0.75rem;
+    color: var(--color-text-dimmed);
+    font-family: var(--font-mono);
+    font-weight: 400;
+  }
+
+  /* Side-by-side layout for title and description in edit dialog */
+  .k-meta-kit-legacy-item-content-sidebyside {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 1200px) {
+    .k-meta-kit-legacy-item-content-sidebyside {
+      grid-template-columns: 1fr;
+    }
+  }
+
   .k-meta-kit-table tbody tr:last-child td {
     border-bottom: none;
   }
@@ -733,5 +760,192 @@
     cursor: pointer;
     width: 16px;
     height: 16px;
+  }
+
+  /* Dialog Table Layout */
+
+  .k-meta-kit-dialog-table-wrapper {
+    overflow-x: auto;
+    max-height: 70vh;
+    border: 1px solid var(--color-border);
+    border-radius: var(--rounded);
+    background: var(--color-back);
+  }
+
+  .k-meta-kit-dialog-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .k-meta-kit-dialog-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--color-back);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .k-meta-kit-dialog-table th {
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+    border-bottom: 2px solid var(--color-border);
+    background: var(--color-back);
+  }
+
+  .k-meta-kit-dialog-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+  }
+
+  .k-meta-kit-dialog-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .k-meta-kit-dialog-table tbody tr:hover {
+    background: var(--color-background);
+  }
+
+  .k-meta-kit-dialog-table-page {
+    width: 150px;
+    min-width: 180px;
+  }
+
+  .k-meta-kit-dialog-table-field-title {
+    width: 120px;
+    min-width: 250px;
+  }
+
+  .k-meta-kit-dialog-table-field-desc{
+    min-width: 250px;
+  }
+
+  .k-meta-kit-dialog-table-actions {
+    width: 110px;
+    text-align: center;
+  }
+
+  .k-meta-kit-dialog-page-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: start;
+    justify-content: start;
+  }
+
+  .k-meta-kit-dialog-page-info strong {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .k-meta-kit-dialog-field-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .k-meta-kit-dialog-field-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .k-meta-kit-dialog-generating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-text-dimmed);
+    font-size: 0.875rem;
+    padding: 0.5rem;
+    background: var(--color-background);
+    border-radius: var(--rounded-xs);
+  }
+
+  .k-meta-kit-dialog-actions-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  /* Dark mode for dialog table */
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-table-wrapper {
+    background: var(--color-black);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-table thead {
+    background: var(--color-back);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-table th {
+    background: var(--color-back);
+    color: var(--color-text);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-table tbody tr:hover {
+    background: var(--color-back);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-generating {
+    background: var(--color-black);
+  }
+
+  /* Single Page Edit Dialog */
+
+  .k-meta-kit-single-edit {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .k-meta-kit-single-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .k-meta-kit-single-field-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--color-text);
+  }
+
+  .k-meta-kit-single-field-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .k-meta-kit-single-field-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .k-meta-kit-og-image-empty {
+    color: var(--color-text-dimmed);
+    font-style: italic;
+    padding: 1rem;
+    background: var(--color-background);
+    border-radius: var(--rounded);
+    text-align: center;
+  }
+
+  .k-meta-kit-single-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-empty {
+    background: var(--color-black);
   }
 }
