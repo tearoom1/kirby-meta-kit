@@ -54,8 +54,8 @@ Core plugin settings, API credentials, and feature toggles:
     'maxDescriptionLength' => 160,             // Max meta description length
 
     // AI Prompts (optional - customize AI generation behavior)
-    'ai.prompt.title' => "Write a compelling meta title (30-65 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling and clickable for search results. The title MUST be between 30 and 65 characters long. {tone} Write ONLY the title, nothing else.\n\nTitle:",
-    'ai.prompt.description' => "Write a concise, engaging meta description (max 160 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling for search results. {tone} Write ONLY the description, nothing else.\n\nDescription:",
+    'ai.prompt.title' => "Write a clear, direct meta title (30-65 characters) in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be specific and factual. Focus on what the page is actually about. {tone} Write ONLY the title, nothing else.\n\nTitle:",
+    'ai.prompt.description' => "Write a clear, informative meta description (max 160 characters) in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be direct and specific. Describe what the page actually contains. {tone} Write ONLY the description, nothing else.\n\nDescription:",
 
     // Feature Toggles
     'sitemap.enabled' => true,                 // Enable/disable sitemap generation
