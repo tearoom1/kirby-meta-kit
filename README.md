@@ -48,6 +48,7 @@ Core plugin settings, API credentials, and feature toggles:
     'api.key' => 'sk-or-v1-YOUR-KEY',         // Your OpenRouter API key (leave empty to disable AI)
     'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',  // AI model (leave empty to disable AI)
     'api.temperature' => 0.7,                  // Creativity: 0.1 (focused) to 1.0 (creative)
+    'ai.tone' => 'formal',                     // Tone: formal or informal. Default is formal.
 
     // SEO Settings
     'maxDescriptionLength' => 160,             // Max meta description length
@@ -69,6 +70,7 @@ Core plugin settings, API credentials, and feature toggles:
 - **`ai.enabled`**: Explicitly enable/disable AI features. When `false`, AI buttons are hidden from the panel and all AI-related routes are disabled.
 - **Auto-Disable**: AI features are automatically disabled if both `api.key` and `api.model` are empty, even if `ai.enabled` is `true`.
 - **`api.temperature`** (0.1-1.0): Controls AI creativity. Lower values (0.3) = consistent, factual. Higher values (0.9) = varied, creative. Default 0.7 is balanced.
+- **`ai.tone`**: Controls AI tone. Can be `formal` or `informal`. Default is `formal`.
 - **`prompt.title`** / **`prompt.description`**: Customize the AI prompts. Use `{language}` for the language name and `{content}` for page content. Adjust tone, style, or specific requirements.
 - **`autoGenerate`**: When `true`, automatically generates descriptions when saving pages. Recommended: `false` (use panel button instead for control).
 - **`sitemap.exclude`**: Array of page IDs or regex patterns. Pages matching these won't appear in sitemap.

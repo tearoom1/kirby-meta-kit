@@ -17,6 +17,11 @@ return [
         // AI is automatically disabled if api.key or api.model is empty
         'ai.enabled' => true,
 
+        // Tone for AI-generated content ('formal' or 'informal')
+        // formal = Sie in German, vous in French, etc.
+        // informal = du in German, tu in French, etc.
+        'ai.tone' => 'formal',
+
         // ============================================
         // API Settings (Required for AI features)
         // ============================================

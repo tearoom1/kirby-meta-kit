@@ -51,9 +51,10 @@ class MetaKit
             'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
             'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
             'api.temperature' => 0.7,
+            'ai.tone' => 'formal',
             'maxDescriptionLength' => 160,
-            'prompt.title' => "Write a compelling meta title (30-65 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling and clickable for search results. The title MUST be between 30 and 65 characters long. Write ONLY the title, nothing else.\n\nTitle:",
-            'prompt.description' => "Write a concise, engaging meta description (max 160 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling for search results. Write ONLY the description, nothing else.\n\nDescription:",
+            'prompt.title' => "Write a compelling meta title (30-65 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling and clickable for search results. The title MUST be between 30 and 65 characters long. {tone} Write ONLY the title, nothing else.\n\nTitle:",
+            'prompt.description' => "Write a concise, engaging meta description (max 160 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling for search results. {tone} Write ONLY the description, nothing else.\n\nDescription:",
         ];
 
         // Site settings from panel (middle priority)
@@ -82,6 +83,20 @@ class MetaKit
         ]);
     }
 
+    /**
+     * Get tone instruction based on configuration
+     */
+    protected function getToneInstruction(): string
+    {
+        $tone = $this->options['ai.tone'] ?? 'formal';
+
+        if ($tone === 'informal') {
+            return "Use informal language (e.g., 'du' in German, 'tu' in French).";
+        }
+
+        return "Use formal language (e.g., 'Sie' in German, 'vous' in French).";
+    }
+
     public function generateTitle(string $content, array $context = []): ?string
     {
         $apiKey = $this->options['api.key'] ?? null;
@@ -107,8 +122,8 @@ class MetaKit
         // Get prompt template and replace placeholders
         $promptTemplate = $this->options['prompt.title'];
         $prompt = str_replace(
-            ['{language}', '{content}'],
-            [$languageName, $contentPreview],
+            ['{language}', '{content}', '{tone}'],
+            [$languageName, $contentPreview, $this->getToneInstruction()],
             $promptTemplate
         );
 
@@ -179,8 +194,8 @@ class MetaKit
         // Get prompt template and replace placeholders
         $promptTemplate = $this->options['prompt.description'];
         $prompt = str_replace(
-            ['{language}', '{content}'],
-            [$languageName, $contentPreview],
+            ['{language}', '{content}', '{tone}'],
+            [$languageName, $contentPreview, $this->getToneInstruction()],
             $promptTemplate
         );
 

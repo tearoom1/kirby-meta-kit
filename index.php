@@ -26,6 +26,7 @@ load($classes, __DIR__);
 Kirby::plugin('tearoom1/meta-kit', [
     'options' => [
         'ai.enabled' => true,
+        'ai.tone' => 'formal',
         'api.key' => null,
         'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
         'api.model' => '',
