@@ -594,15 +594,18 @@
         return false;
       },
       hasAnyFieldChanged(pageId, page) {
-        const titleValue = this.getEditableValue(pageId, "metaTitle", page.metaTitle);
-        const descValue = this.getEditableValue(pageId, "metaDescription", page.metaDescription);
-        return titleValue && titleValue !== page.metaTitle || descValue && descValue !== page.metaDescription;
+        var _a, _b, _c, _d;
+        const hasTitleChange = ((_b = (_a = this.fieldChoices[pageId]) == null ? void 0 : _a.metaTitle) == null ? void 0 : _b.manualValue) !== void 0 && this.fieldChoices[pageId].metaTitle.manualValue !== page.metaTitle;
+        const hasDescChange = ((_d = (_c = this.fieldChoices[pageId]) == null ? void 0 : _c.metaDescription) == null ? void 0 : _d.manualValue) !== void 0 && this.fieldChoices[pageId].metaDescription.manualValue !== page.metaDescription;
+        return hasTitleChange || hasDescChange;
       },
       async applyAllFields(pageId, page) {
-        const titleValue = this.getEditableValue(pageId, "metaTitle", page.metaTitle);
-        const descValue = this.getEditableValue(pageId, "metaDescription", page.metaDescription);
+        var _a, _b, _c, _d;
         let appliedCount = 0;
-        if (titleValue && titleValue !== page.metaTitle) {
+        const hasTitleChange = ((_b = (_a = this.fieldChoices[pageId]) == null ? void 0 : _a.metaTitle) == null ? void 0 : _b.manualValue) !== void 0 && this.fieldChoices[pageId].metaTitle.manualValue !== page.metaTitle;
+        const hasDescChange = ((_d = (_c = this.fieldChoices[pageId]) == null ? void 0 : _c.metaDescription) == null ? void 0 : _d.manualValue) !== void 0 && this.fieldChoices[pageId].metaDescription.manualValue !== page.metaDescription;
+        if (hasTitleChange) {
+          const titleValue = this.fieldChoices[pageId].metaTitle.manualValue;
           try {
             await this.$api.post("meta-kit/apply-single-field", {
               pageId,
@@ -614,7 +617,8 @@
             window.panel.notification.error("Failed to update meta title");
           }
         }
-        if (descValue && descValue !== page.metaDescription) {
+        if (hasDescChange) {
+          const descValue = this.fieldChoices[pageId].metaDescription.manualValue;
           try {
             await this.$api.post("meta-kit/apply-single-field", {
               pageId,
@@ -631,15 +635,17 @@
           await this.refreshPages();
           const pageInAllPages = this.allPagesData.find((p) => p.id === pageId);
           if (pageInAllPages) {
-            if (titleValue && titleValue !== page.metaTitle) {
+            if (hasTitleChange) {
+              const titleValue = this.fieldChoices[pageId].metaTitle.manualValue;
               this.$set(pageInAllPages, "metaTitle", titleValue);
-              this.$set(pageInAllPages, "hasMetaTitle", titleValue.length > 0);
-              this.$set(pageInAllPages, "metaTitleLength", titleValue.length);
+              this.$set(pageInAllPages, "hasMetaTitle", titleValue && titleValue.length > 0);
+              this.$set(pageInAllPages, "metaTitleLength", titleValue ? titleValue.length : 0);
             }
-            if (descValue && descValue !== page.metaDescription) {
+            if (hasDescChange) {
+              const descValue = this.fieldChoices[pageId].metaDescription.manualValue;
               this.$set(pageInAllPages, "metaDescription", descValue);
-              this.$set(pageInAllPages, "hasMetaDescription", descValue.length > 0);
-              this.$set(pageInAllPages, "metaDescriptionLength", descValue.length);
+              this.$set(pageInAllPages, "hasMetaDescription", descValue && descValue.length > 0);
+              this.$set(pageInAllPages, "metaDescriptionLength", descValue ? descValue.length : 0);
             }
           }
           if (this.fieldChoices[pageId]) {

@@ -176,21 +176,43 @@ class MetaKitController
     public static function generateDescription(string $pageId): array
     {
         $kirby = kirby();
-        $page = $kirby->page($pageId);
+        $isSite = ($pageId === 'site');
 
-        if (!$page) {
-            return [
-                'status' => 'error',
-                'message' => 'Page not found'
-            ];
+        if ($isSite) {
+            $page = $kirby->site();
+        } else {
+            $page = $kirby->page($pageId);
+            if (!$page) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Page not found'
+                ];
+            }
         }
 
         try {
             $metaKit = new MetaKit($kirby);
             $languageCode = $kirby->language()?->code() ?? 'en';
 
-            // Get page content for generation
-            $content = $page->text()->or($page->title())->value();
+            // For site, use home page content
+            if ($isSite) {
+                $homePage = $kirby->site()->homePage();
+                if ($homePage) {
+                    $content = self::extractPageContent($homePage);
+                    if (empty(trim($content))) {
+                        $content = $homePage->title()->value();
+                    }
+                } else {
+                    $content = $page->title()->value();
+                }
+            } else {
+                // Get page content for generation
+                $content = self::extractPageContent($page);
+                if (empty(trim($content))) {
+                    $content = $page->text()->or($page->title())->value();
+                }
+            }
+
             $description = $metaKit->generateDescription($content, ['language' => $languageCode]);
 
             if ($description) {
@@ -201,9 +223,9 @@ class MetaKitController
                 $seoBlock = [
                     [
                         'content' => $seoArray,
-                        'id' => 'seo-metadata',
+                        'id' => $isSite ? 'site-seo-settings' : 'seo-metadata',
                         'isHidden' => false,
-                        'type' => 'mk-page-seo'
+                        'type' => $isSite ? 'mk-site-seo' : 'mk-page-seo'
                     ]
                 ];
                 $page->update(['metaKitSeo' => $seoBlock], $languageCode);
@@ -225,176 +247,6 @@ class MetaKitController
                 'message' => $e->getMessage()
             ];
         }
-    }
-
-    public static function convertAllToBlocks(): array
-    {
-        $kirby = kirby();
-        $converted = 0;
-        $skipped = 0;
-        $errors = 0;
-
-        try {
-            $site = $kirby->site();
-            $updates = [];
-            $needsUpdate = false;
-
-            $seoField = $site->metaKitSeo();
-            if ($seoField->isNotEmpty()) {
-                $rawValue = $seoField->value();
-                $isBlocks = is_string($rawValue) && str_starts_with(trim($rawValue), '[') && json_decode(trim($rawValue), true) !== null;
-                if (!$isBlocks) {
-                    $obj = $seoField->toObject();
-                    if ($obj) {
-                        $updates['metaKitSeo'] = [
-                            [
-                                'content' => [
-                                    'appendSiteName' => $obj->appendsitename()->toBool(),
-                                    'titleSeparator' => $obj->titleseparator()->or('|')->value(),
-                                    'metaTitle' => $obj->metatitle()->value(),
-                                    'metaDescription' => $obj->metadescription()->value(),
-                                    'metaKeywords' => $obj->metakeywords()->value(),
-                                    'ogImage' => $obj->ogimage()->isNotEmpty() ? $obj->ogimage()->toFiles()->pluck('uuid')->toArray() : []
-                                ],
-                                'id' => 'seo-settings',
-                                'isHidden' => false,
-                                'type' => 'seo-settings'
-                            ]
-                        ];
-                        $needsUpdate = true;
-                    }
-                }
-            }
-
-            $openrouterField = $site->metaKitOpenrouter();
-            if ($openrouterField->isNotEmpty()) {
-                $rawValue = $openrouterField->value();
-                $isBlocks = is_string($rawValue) && str_starts_with(trim($rawValue), '[') && json_decode(trim($rawValue), true) !== null;
-                if (!$isBlocks) {
-                    $obj = $openrouterField->toObject();
-                    if ($obj) {
-                        $updates['openrouter'] = [
-                            [
-                                'content' => [
-                                    'apiKey' => $obj->apikey()->value(),
-                                    'model' => $obj->model()->or('meta-llama/llama-3.2-3b-instruct:free')->value(),
-                                    'temperature' => $obj->temperature()->or('0.7')->value()
-                                ],
-                                'id' => 'openrouter-settings',
-                                'isHidden' => false,
-                                'type' => 'openrouter'
-                            ]
-                        ];
-                        $needsUpdate = true;
-                    }
-                }
-            }
-
-            $sitemapField = $site->metaKitSitemap();
-            if ($sitemapField->isNotEmpty()) {
-                $rawValue = $sitemapField->value();
-                $isBlocks = is_string($rawValue) && str_starts_with(trim($rawValue), '[') && json_decode(trim($rawValue), true) !== null;
-                if (!$isBlocks) {
-                    $obj = $sitemapField->toObject();
-                    if ($obj) {
-                        $excludePages = [];
-                        if ($obj->exclude()->isNotEmpty()) {
-                            $excludePages = $obj->exclude()->toPages()->pluck('uuid')->toArray();
-                        }
-                        $updates['sitemap'] = [
-                            [
-                                'content' => [
-                                    'exclude' => $excludePages,
-                                    'priorityHome' => $obj->priorityhome()->or('1.0')->value(),
-                                    'priorityDefault' => $obj->prioritydefault()->or('0.8')->value()
-                                ],
-                                'id' => 'sitemap-settings',
-                                'isHidden' => false,
-                                'type' => 'sitemap'
-                            ]
-                        ];
-                        $needsUpdate = true;
-                    }
-                }
-            }
-
-            if ($needsUpdate) {
-                $kirby->impersonate('kirby');
-                $site->update($updates);
-                $converted++;
-            } else {
-                $skipped++;
-            }
-        } catch (\Exception $e) {
-            $errors++;
-        }
-
-        $pages = $kirby->site()->index();
-        foreach ($pages as $page) {
-            $seoField = $page->metaKitSeo();
-            if ($seoField->isEmpty()) {
-                continue;
-            }
-            $rawValue = $seoField->value();
-            $isBlocks = false;
-            if (is_string($rawValue)) {
-                $trimmed = trim($rawValue);
-                if (str_starts_with($trimmed, '[')) {
-                    $decoded = json_decode($trimmed, true);
-                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                        $isBlocks = true;
-                    }
-                }
-            }
-            if ($isBlocks) {
-                $skipped++;
-                continue;
-            }
-            $obj = $seoField->toObject();
-            if (!$obj) {
-                $skipped++;
-                continue;
-            }
-            try {
-                $ogImageUuids = [];
-                if ($obj->ogimage()->isNotEmpty()) {
-                    $files = $obj->ogimage()->toFiles();
-                    if ($files->count() > 0) {
-                        $ogImageUuids = $files->pluck('uuid')->toArray();
-                    }
-                }
-                $seoBlock = [
-                    [
-                        'content' => [
-                            'metaTitle' => $obj->metatitle()->value(),
-                            'metaDescription' => $obj->metadescription()->value(),
-                            'metaKeywords' => $obj->metakeywords()->value(),
-                            'canonicalUrl' => $obj->canonicalurl()->value(),
-                            'robots' => $obj->robots()->value(),
-                            'ogTitle' => $obj->ogtitle()->value(),
-                            'ogDescription' => $obj->ogdescription()->value(),
-                            'ogImage' => $ogImageUuids
-                        ],
-                        'id' => 'seo-metadata',
-                        'isHidden' => false,
-                        'type' => 'seo'
-                    ]
-                ];
-                $kirby->impersonate('kirby');
-                $page->update(['metaKitSeo' => $seoBlock], $kirby->language()?->code());
-                $converted++;
-            } catch (\Exception $e) {
-                $errors++;
-            }
-        }
-
-        return [
-            'status' => 'success',
-            'message' => "Converted {$converted}, skipped {$skipped}, errors {$errors}",
-            'converted' => $converted,
-            'skipped' => $skipped,
-            'errors' => $errors
-        ];
     }
 
     public static function generateAllDescriptions(): array
@@ -884,13 +736,17 @@ class MetaKitController
     {
         $kirby = kirby();
         $isSite = ($pageId === 'site');
-        $page = $isSite ? $kirby->site() : $kirby->page($pageId);
 
-        if (!$page) {
-            return [
-                'status' => 'error',
-                'message' => 'Page not found'
-            ];
+        if ($isSite) {
+            $page = $kirby->site();
+        } else {
+            $page = $kirby->page($pageId);
+            if (!$page) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Page not found'
+                ];
+            }
         }
 
         try {
@@ -904,12 +760,28 @@ class MetaKitController
                 $kirby->setCurrentLanguage($language);
             }
 
-            // Extract all page/site content including structured fields
-            $content = self::extractPageContent($page);
+            // For site, use home page content instead
+            if ($isSite) {
+                $homePage = $kirby->site()->homePage();
+                if ($homePage) {
+                    $content = self::extractPageContent($homePage);
 
-            // Fallback to title if no content found
-            if (empty(trim($content))) {
-                $content = $page->title()->value();
+                    // Fallback to home page title if no content found
+                    if (empty(trim($content))) {
+                        $content = $homePage->title()->value();
+                    }
+                } else {
+                    // Fallback to site title if no home page
+                    $content = $page->title()->value();
+                }
+            } else {
+                // Extract all page content including structured fields
+                $content = self::extractPageContent($page);
+
+                // Fallback to title if no content found
+                if (empty(trim($content))) {
+                    $content = $page->title()->value();
+                }
             }
 
             if ($fieldName === 'metaTitle') {
