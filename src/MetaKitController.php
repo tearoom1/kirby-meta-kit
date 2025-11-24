@@ -173,81 +173,6 @@ class MetaKitController
         return $result;
     }
 
-    public static function generateDescription(string $pageId): array
-    {
-        $kirby = kirby();
-        $isSite = ($pageId === 'site');
-
-        if ($isSite) {
-            $page = $kirby->site();
-        } else {
-            $page = $kirby->page($pageId);
-            if (!$page) {
-                return [
-                    'status' => 'error',
-                    'message' => 'Page not found'
-                ];
-            }
-        }
-
-        try {
-            $metaKit = new MetaKit($kirby);
-            $languageCode = $kirby->language()?->code() ?? 'en';
-
-            // For site, use home page content
-            if ($isSite) {
-                $homePage = $kirby->site()->homePage();
-                if ($homePage) {
-                    $content = self::extractPageContent($homePage);
-                    if (empty(trim($content))) {
-                        $content = $homePage->title()->value();
-                    }
-                } else {
-                    $content = $page->title()->value();
-                }
-            } else {
-                // Get page content for generation
-                $content = self::extractPageContent($page);
-                if (empty(trim($content))) {
-                    $content = $page->text()->or($page->title())->value();
-                }
-            }
-
-            $description = $metaKit->generateDescription($content, ['language' => $languageCode]);
-
-            if ($description) {
-                $seoData = self::getSeoData($page->metaKitSeo());
-                $seoArray = self::seoDataToArray($seoData);
-                $seoArray['metaDescription'] = $description;
-
-                $seoBlock = [
-                    [
-                        'content' => $seoArray,
-                        'id' => $isSite ? 'site-seo-settings' : 'seo-metadata',
-                        'isHidden' => false,
-                        'type' => $isSite ? 'mk-site-seo' : 'mk-page-seo'
-                    ]
-                ];
-                $page->update(['metaKitSeo' => $seoBlock], $languageCode);
-
-                return [
-                    'status' => 'success',
-                    'message' => 'Description generated successfully',
-                    'description' => $description
-                ];
-            } else {
-                return [
-                    'status' => 'error',
-                    'message' => 'Failed to generate description'
-                ];
-            }
-        } catch (\Exception $e) {
-            return [
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ];
-        }
-    }
 
     public static function generateAllDescriptions(): array
     {
@@ -595,6 +520,57 @@ class MetaKitController
     }
 
     /**
+     * Get page or site object from pageId
+     */
+    private static function getPageOrSite(string $pageId)
+    {
+        $kirby = kirby();
+        $isSite = ($pageId === 'site');
+
+        if ($isSite) {
+            return $kirby->site();
+        }
+
+        $page = $kirby->page($pageId);
+        if (!$page) {
+            return null;
+        }
+
+        return $page;
+    }
+
+    /**
+     * Get content for AI generation
+     * For site: uses home page content
+     * For pages: uses page content
+     */
+    private static function getContentForGeneration($page, bool $isSite = false): string
+    {
+        $kirby = kirby();
+
+        // For site, use home page content
+        if ($isSite) {
+            $homePage = $kirby->site()->homePage();
+            if ($homePage) {
+                $content = self::extractPageContent($homePage);
+                if (empty(trim($content))) {
+                    $content = $homePage->title()->value();
+                }
+            } else {
+                $content = $page->title()->value();
+            }
+        } else {
+            // Extract all page content including structured fields
+            $content = self::extractPageContent($page);
+            if (empty(trim($content))) {
+                $content = $page->title()->value();
+            }
+        }
+
+        return $content;
+    }
+
+    /**
      * Extract all text content from a page
      */
     private static function extractPageContent($page): string
@@ -678,75 +654,17 @@ class MetaKitController
         return implode(' ', $texts);
     }
 
-    function extractTextFromContent($content)
-    {
-        $texts = [];
-
-        foreach ($content->data() as $key => $field) {
-            // If it's a basic text-like field
-            if (in_array($field->type(), ['text', 'textarea', 'writer'])) {
-                $texts[] = $field->value();
-            }
-
-            // Structure fields → loop entries
-            if ($field->type() === 'structure') {
-                foreach ($field->toStructure() as $entry) {
-                    $texts = array_merge($texts, extractTextFromContent($entry));
-                }
-            }
-
-            // Layout fields → columns → blocks
-            if ($field->type() === 'layout') {
-                foreach ($field->toLayouts() as $layout) {
-                    foreach ($layout->columns() as $column) {
-                        foreach ($column->blocks() as $block) {
-                            $texts = array_merge($texts, extractTextFromBlock($block));
-                        }
-                    }
-                }
-            }
-
-            // Blocks field
-            if ($field->type() === 'blocks') {
-                foreach ($field->toBlocks() as $block) {
-                    $texts = array_merge($texts, extractTextFromBlock($block));
-                }
-            }
-        }
-
-        return $texts;
-    }
-
-    function extractTextFromBlock($block)
-    {
-        $texts = [];
-        foreach ($block->content()->data() as $key => $subfield) {
-            if (in_array($subfield->type(), ['text', 'textarea', 'writer'])) {
-                $texts[] = $subfield->value();
-            }
-            // Recursively handle nested structures/layouts/blocks inside a block
-            if (in_array($subfield->type(), ['structure', 'layout', 'blocks'])) {
-                $texts = array_merge($texts, extractTextFromContent($block->content()));
-            }
-        }
-        return $texts;
-    }
-
     public static function generateField(string $pageId, string $fieldName, string $language = null): array
     {
         $kirby = kirby();
         $isSite = ($pageId === 'site');
+        $page = self::getPageOrSite($pageId);
 
-        if ($isSite) {
-            $page = $kirby->site();
-        } else {
-            $page = $kirby->page($pageId);
-            if (!$page) {
-                return [
-                    'status' => 'error',
-                    'message' => 'Page not found'
-                ];
-            }
+        if (!$page) {
+            return [
+                'status' => 'error',
+                'message' => 'Page not found'
+            ];
         }
 
         try {
@@ -760,29 +678,8 @@ class MetaKitController
                 $kirby->setCurrentLanguage($language);
             }
 
-            // For site, use home page content instead
-            if ($isSite) {
-                $homePage = $kirby->site()->homePage();
-                if ($homePage) {
-                    $content = self::extractPageContent($homePage);
-
-                    // Fallback to home page title if no content found
-                    if (empty(trim($content))) {
-                        $content = $homePage->title()->value();
-                    }
-                } else {
-                    // Fallback to site title if no home page
-                    $content = $page->title()->value();
-                }
-            } else {
-                // Extract all page content including structured fields
-                $content = self::extractPageContent($page);
-
-                // Fallback to title if no content found
-                if (empty(trim($content))) {
-                    $content = $page->title()->value();
-                }
-            }
+            // Get content for generation
+            $content = self::getContentForGeneration($page, $isSite);
 
             if ($fieldName === 'metaTitle') {
                 $result = $metaKit->generateTitle($content, ['language' => $languageCode]);
@@ -802,6 +699,60 @@ class MetaKitController
                 'message' => 'Failed to generate content'
             ];
 
+        } catch (\Exception $e) {
+            return [
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+    public static function generateDescription(string $pageId): array
+    {
+        $kirby = kirby();
+        $isSite = ($pageId === 'site');
+        $page = self::getPageOrSite($pageId);
+
+        if (!$page) {
+            return [
+                'status' => 'error',
+                'message' => 'Page not found'
+            ];
+        }
+
+        try {
+            $metaKit = new MetaKit($kirby);
+            $languageCode = $kirby->language()?->code() ?? 'en';
+
+            // Get content for generation
+            $content = self::getContentForGeneration($page, $isSite);
+            $description = $metaKit->generateDescription($content, ['language' => $languageCode]);
+
+            if ($description) {
+                $seoData = self::getSeoData($page->metaKitSeo());
+                $seoArray = self::seoDataToArray($seoData);
+                $seoArray['metaDescription'] = $description;
+
+                $seoBlock = [
+                    [
+                        'content' => $seoArray,
+                        'id' => $isSite ? 'site-seo-settings' : 'seo-metadata',
+                        'isHidden' => false,
+                        'type' => $isSite ? 'mk-site-seo' : 'mk-page-seo'
+                    ]
+                ];
+                $page->update(['metaKitSeo' => $seoBlock], $languageCode);
+
+                return [
+                    'status' => 'success',
+                    'message' => 'Description generated successfully',
+                    'description' => $description
+                ];
+            } else {
+                return [
+                    'status' => 'error',
+                    'message' => 'Failed to generate description'
+                ];
+            }
         } catch (\Exception $e) {
             return [
                 'status' => 'error',
