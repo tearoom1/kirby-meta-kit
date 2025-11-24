@@ -20,25 +20,25 @@ class MetaKit
     public static function isAiEnabled(): bool
     {
         $kirby = kirby();
-        
+
         // Check explicit disable in config
         if (!option('tearoom1.meta-kit.ai.enabled', true)) {
             return false;
         }
-        
+
         // Check if model is configured (either in config or site settings)
         $configModel = option('tearoom1.meta-kit.api.model');
         $configKey = option('tearoom1.meta-kit.api.key');
-        
+
         // Get site settings
         $openrouter = \TearoomOne\MetaHelper::getSeoData($kirby->site()->metaKitOpenrouter());
         $siteModel = $openrouter ? $openrouter->model()->value() : null;
         $siteKey = $openrouter ? $openrouter->apiKey()->value() : null;
-        
+
         // AI is disabled if both model and key are empty
         $hasModel = !empty($configModel) || !empty($siteModel);
         $hasKey = !empty($configKey) || !empty($siteKey);
-        
+
         return $hasModel && $hasKey;
     }
 
@@ -53,8 +53,8 @@ class MetaKit
             'api.temperature' => 0.7,
             'ai.tone' => 'formal',
             'maxDescriptionLength' => 160,
-            'prompt.title' => "Write a compelling meta title (30-65 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling and clickable for search results. The title MUST be between 30 and 65 characters long. {tone} Write ONLY the title, nothing else.\n\nTitle:",
-            'prompt.description' => "Write a concise, engaging meta description (max 160 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling for search results. {tone} Write ONLY the description, nothing else.\n\nDescription:",
+            'ai.prompt.title' => "Write a compelling meta title (30-65 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling and clickable for search results. The title MUST be between 30 and 65 characters long. {tone} Write ONLY the title, nothing else.\n\nTitle:",
+            'ai.prompt.description' => "Write a concise, engaging meta description (max 160 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling for search results. {tone} Write ONLY the description, nothing else.\n\nDescription:",
         ];
 
         // Site settings from panel (middle priority)
@@ -120,7 +120,7 @@ class MetaKit
         $contentPreview = mb_substr(strip_tags($content), 0, 1000);
 
         // Get prompt template and replace placeholders
-        $promptTemplate = $this->options['prompt.title'];
+        $promptTemplate = $this->options['ai.prompt.title'];
         $prompt = str_replace(
             ['{language}', '{content}', '{tone}'],
             [$languageName, $contentPreview, $this->getToneInstruction()],
@@ -192,7 +192,7 @@ class MetaKit
         $contentPreview = mb_substr(strip_tags($content), 0, 1000);
 
         // Get prompt template and replace placeholders
-        $promptTemplate = $this->options['prompt.description'];
+        $promptTemplate = $this->options['ai.prompt.description'];
         $prompt = str_replace(
             ['{language}', '{content}', '{tone}'],
             [$languageName, $contentPreview, $this->getToneInstruction()],

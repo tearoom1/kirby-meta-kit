@@ -48,14 +48,14 @@ Core plugin settings, API credentials, and feature toggles:
     'api.key' => 'sk-or-v1-YOUR-KEY',         // Your OpenRouter API key (leave empty to disable AI)
     'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',  // AI model (leave empty to disable AI)
     'api.temperature' => 0.7,                  // Creativity: 0.1 (focused) to 1.0 (creative)
-    'ai.tone' => 'formal',                     // Tone: formal or informal. Default is formal.
+    'ai.tone' => 'formal',                     // Language tone: 'formal' (Sie/vous) or 'informal' (du/tu)
 
     // SEO Settings
     'maxDescriptionLength' => 160,             // Max meta description length
 
     // AI Prompts (optional - customize AI generation behavior)
-    'prompt.title' => "Write a compelling meta title (30-65 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling and clickable for search results. The title MUST be between 30 and 65 characters long. Write ONLY the title, nothing else.\n\nTitle:",
-    'prompt.description' => "Write a concise, engaging meta description (max 160 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling for search results. Write ONLY the description, nothing else.\n\nDescription:",
+    'ai.prompt.title' => "Write a compelling meta title (30-65 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling and clickable for search results. The title MUST be between 30 and 65 characters long. {tone} Write ONLY the title, nothing else.\n\nTitle:",
+    'ai.prompt.description' => "Write a concise, engaging meta description (max 160 characters) in {language} for the following content:\n\n{content}\n\nFocus on the main topic and include relevant keywords. Make it compelling for search results. {tone} Write ONLY the description, nothing else.\n\nDescription:",
 
     // Feature Toggles
     'sitemap.enabled' => true,                 // Enable/disable sitemap generation
@@ -70,8 +70,13 @@ Core plugin settings, API credentials, and feature toggles:
 - **`ai.enabled`**: Explicitly enable/disable AI features. When `false`, AI buttons are hidden from the panel and all AI-related routes are disabled.
 - **Auto-Disable**: AI features are automatically disabled if both `api.key` and `api.model` are empty, even if `ai.enabled` is `true`.
 - **`api.temperature`** (0.1-1.0): Controls AI creativity. Lower values (0.3) = consistent, factual. Higher values (0.9) = varied, creative. Default 0.7 is balanced.
-- **`ai.tone`**: Controls AI tone. Can be `formal` or `informal`. Default is `formal`.
-- **`prompt.title`** / **`prompt.description`**: Customize the AI prompts. Use `{language}` for the language name and `{content}` for page content. Adjust tone, style, or specific requirements.
+- **`ai.tone`**: Controls language formality in AI-generated content. Options:
+  - `'formal'` (default): Uses formal address forms (Sie in German, vous in French, usted in Spanish)
+  - `'informal'`: Uses informal address forms (du in German, tu in French, tú in Spanish)
+- **`ai.prompt.title`** / **`ai.prompt.description`**: Customize the AI prompts. Available placeholders:
+  - `{language}`: Language name (e.g., "German", "English")
+  - `{content}`: Page content for context
+  - `{tone}`: Automatically replaced with tone instruction based on `ai.tone` setting
 - **`autoGenerate`**: When `true`, automatically generates descriptions when saving pages. Recommended: `false` (use panel button instead for control).
 - **`sitemap.exclude`**: Array of page IDs or regex patterns. Pages matching these won't appear in sitemap.
 
@@ -104,7 +109,7 @@ When AI is disabled:
 **Example Custom Prompt:**
 
 ```php
-'prompt.description' => "Create a professional meta description (max 160 chars) in {language} for:\n\n{content}\n\nUse a formal tone. Focus on benefits and value. Include a call-to-action. Write ONLY the description:\n\n",
+'ai.prompt.description' => "Create a professional meta description (max 160 chars) in {language} for:\n\n{content}\n\nUse a formal tone. Focus on benefits and value. Include a call-to-action. Write ONLY the description:\n\n",
 ```
 
 ### 2. Site Settings (Panel)
@@ -187,10 +192,15 @@ tabs:
 The plugin adds a **Meta Kit** section to the Kirby Panel main menu with powerful metadata management tools:
 
 **Features:**
-- **Overview Dashboard:** Statistics showing metadata coverage across all pages
-- **Bulk Operations:** Generate or update metadata for multiple pages at once
+- **Overview Dashboard:** Statistics showing metadata coverage across all pages (including site)
+- **Bulk Operations:** Edit multiple pages at once with a table-based interface
+  - Column-based layout for efficient editing
+  - Edit meta title and description inline
+  - AI generation buttons for each field
+  - Character counters with validation (green/orange)
+  - Apply changes with a single click
 - **Legacy Migration:** Detect and convert old SEO fields to the new structure
-- **Single Page Editor:** Quick edit dialog for meta title, description, and OG image
+- **Quick Edit:** Single-page metadata editor accessible from the main table
 - **AI Generation:** Generate optimized meta titles (30-65 chars) and descriptions (max 160 chars)
 
 **Access:** Click **"Meta Kit"** (wand icon) in the Panel sidebar

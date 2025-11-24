@@ -1,5 +1,5 @@
 {
-    "name": "tearoom1/meta-kit",
+    "name": "tearoom1/kirby-meta-kit",
     "description": "AI-powered SEO plugin for Kirby with meta descriptions, previews, and Schema.org",
     "type": "kirby-plugin",
     "license": "MIT",
@@ -11,6 +11,9 @@
         "seo",
         "meta"
     ],
+    "extra": {
+        "installer-name": "meta-kit"
+    },
     "authors": [
         {
             "name": "Mathis Koblin",
