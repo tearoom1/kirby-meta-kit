@@ -30,19 +30,27 @@
     <div class="k-meta-kit-stats">
       <div class="k-meta-kit-stats-card">
         <h3>Total Pages</h3>
-        <p>{{ filteredPages.length }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{ pagesData.length }}</span></p>
+        <p>{{ filteredPages.length }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{
+            pagesData.length
+          }}</span></p>
       </div>
       <div class="k-meta-kit-stats-card">
         <h3>With Description</h3>
-        <p>{{ filteredPagesWithDescription }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{ pagesWithDescription }}</span></p>
+        <p>{{ filteredPagesWithDescription }}<span v-if="searchQuery"
+                                                   class="k-meta-kit-stats-total"> / {{ pagesWithDescription }}</span>
+        </p>
       </div>
       <div class="k-meta-kit-stats-card">
         <h3>With OG Image</h3>
-        <p>{{ filteredPagesWithOgImage }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{ pagesWithOgImage }}</span></p>
+        <p>{{ filteredPagesWithOgImage }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{
+            pagesWithOgImage
+          }}</span></p>
       </div>
       <div class="k-meta-kit-stats-card">
         <h3>No Index</h3>
-        <p>{{ filteredPagesNoIndex }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{ pagesNoIndex }}</span></p>
+        <p>{{ filteredPagesNoIndex }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{
+            pagesNoIndex
+          }}</span></p>
       </div>
     </div>
 
@@ -84,7 +92,7 @@
             @click="searchQuery = ''"
             title="Clear search"
           >
-            <k-icon type="cancel" />
+            <k-icon type="cancel"/>
           </button>
         </div>
         <select
@@ -244,107 +252,109 @@
       <div v-else-if="allPagesData.length > 0" class="k-meta-kit-dialog-table-wrapper">
         <table class="k-meta-kit-dialog-table">
           <thead>
-            <tr>
-              <th class="k-meta-kit-dialog-table-page">Page</th>
-              <th class="k-meta-kit-dialog-table-field-title">Meta Title</th>
-              <th class="k-meta-kit-dialog-table-field-desc">Meta Description</th>
-              <th class="k-meta-kit-dialog-table-actions">Actions</th>
-            </tr>
+          <tr>
+            <th class="k-meta-kit-dialog-table-page">Page</th>
+            <th class="k-meta-kit-dialog-table-field-title">Meta Title</th>
+            <th class="k-meta-kit-dialog-table-field-desc">Meta Description</th>
+            <th class="k-meta-kit-dialog-table-actions">Actions</th>
+          </tr>
           </thead>
           <tbody>
-            <tr v-for="page in allPagesData" :key="page.id">
-              <!-- Page Info -->
-              <td class="k-meta-kit-dialog-table-page">
-                <div class="k-meta-kit-dialog-page-info">
-                  <strong>{{ page.title }}</strong>
-                  <span class="k-meta-kit-page-id">{{ page.id }}</span>
-                  <k-button
-                    icon="open"
-                    size="sm"
-                    @click="editSinglePage(page.id)"
-                    title="Edit in Panel"
-                  />
-                </div>
-              </td>
+          <tr v-for="page in allPagesData" :key="page.id">
+            <!-- Page Info -->
+            <td class="k-meta-kit-dialog-table-page">
+              <div class="k-meta-kit-dialog-page-info">
+                <strong>{{ page.title }}</strong>
+                <span class="k-meta-kit-page-id">{{ page.id }}</span>
+                <k-button
+                  icon="open"
+                  size="sm"
+                  @click="editSinglePage(page.id)"
+                  title="Edit in Panel"
+                />
+              </div>
+            </td>
 
-              <!-- Meta Title -->
-              <td class="k-meta-kit-dialog-table-field-title">
-                <div class="k-meta-kit-dialog-field-wrapper">
-                  <k-input
-                    :value="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
-                    @input="setManualValue(page.id, 'metaTitle', $event)"
-                    :placeholder="page.metaTitle || 'No meta title'"
-                    type="text"
-                  />
-                  <div class="k-meta-kit-dialog-field-meta">
+            <!-- Meta Title -->
+            <td class="k-meta-kit-dialog-table-field-title">
+              <div class="k-meta-kit-dialog-field-wrapper">
+                <k-input
+                  :value="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
+                  @input="setManualValue(page.id, 'metaTitle', $event)"
+                  :placeholder="page.metaTitle || 'No meta title'"
+                  type="text"
+                />
+                <div class="k-meta-kit-dialog-field-meta">
+                  <span>
                     <span v-if="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
                           class="k-meta-kit-field-length"
                           :class="getStatusClass(true, getEditableValue(page.id, 'metaTitle', page.metaTitle).length)">
                       {{ getEditableValue(page.id, 'metaTitle', page.metaTitle).length }} chars
                     </span>
-                    <k-button
-                      v-if="aiEnabled"
-                      icon="sparkling"
-                      size="xs"
-                      :disabled="isGeneratingField(page.id, 'metaTitle')"
-                      @click="generateFieldAI(page.id, 'metaTitle')"
-                      title="AI Generate"
-                    />
-                  </div>
-                  <div v-if="isGeneratingField(page.id, 'metaTitle')" class="k-meta-kit-dialog-generating">
-                    <k-icon class="k-meta-kit-spinner" type="loader"/>
-                    <span>Generating...</span>
-                  </div>
-                </div>
-              </td>
-
-              <!-- Meta Description -->
-              <td class="k-meta-kit-dialog-table-field-desc">
-                <div class="k-meta-kit-dialog-field-wrapper">
-                  <k-input
-                    :value="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
-                    @input="setManualValue(page.id, 'metaDescription', $event)"
-                    :placeholder="page.metaDescription || 'No meta description'"
-                    type="textarea"
-                    :rows="3"
+                  </span>
+                  <k-button
+                    v-if="aiEnabled"
+                    icon="sparkling"
+                    size="xs"
+                    :disabled="isGeneratingField(page.id, 'metaTitle')"
+                    @click="generateFieldAI(page.id, 'metaTitle')"
+                    title="AI Generate"
                   />
-                  <div class="k-meta-kit-dialog-field-meta">
+                </div>
+                <div v-if="isGeneratingField(page.id, 'metaTitle')" class="k-meta-kit-dialog-generating">
+                  <k-icon class="k-meta-kit-spinner" type="loader"/>
+                  <span>Generating...</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Meta Description -->
+            <td class="k-meta-kit-dialog-table-field-desc">
+              <div class="k-meta-kit-dialog-field-wrapper">
+                <k-input
+                  :value="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
+                  @input="setManualValue(page.id, 'metaDescription', $event)"
+                  :placeholder="page.metaDescription || 'No meta description'"
+                  type="textarea"
+                  :rows="3"
+                />
+                <div class="k-meta-kit-dialog-field-meta">
                     <span v-if="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
                           class="k-meta-kit-field-length"
                           :class="getStatusClass(true, getEditableValue(page.id, 'metaDescription', page.metaDescription).length)">
                       {{ getEditableValue(page.id, 'metaDescription', page.metaDescription).length }} chars
                     </span>
-                    <k-button
-                      v-if="aiEnabled"
-                      icon="sparkling"
-                      size="xs"
-                      :disabled="isGeneratingField(page.id, 'metaDescription')"
-                      @click="generateFieldAI(page.id, 'metaDescription')"
-                      title="AI Generate"
-                    />
-                  </div>
-                  <div v-if="isGeneratingField(page.id, 'metaDescription')" class="k-meta-kit-dialog-generating">
-                    <k-icon class="k-meta-kit-spinner" type="loader"/>
-                    <span>Generating...</span>
-                  </div>
-                </div>
-              </td>
-
-              <!-- Actions -->
-              <td class="k-meta-kit-dialog-table-actions">
-                <div class="k-meta-kit-dialog-actions-group">
                   <k-button
-                    v-if="hasAnyFieldChanged(page.id, page)"
-                    icon="check"
-                    size="sm"
-                    theme="positive"
-                    @click="applyAllFields(page.id, page)"
-                  >
-                    Apply
-                  </k-button>
+                    v-if="aiEnabled"
+                    icon="sparkling"
+                    size="xs"
+                    :disabled="isGeneratingField(page.id, 'metaDescription')"
+                    @click="generateFieldAI(page.id, 'metaDescription')"
+                    title="AI Generate"
+                  />
                 </div>
-              </td>
-            </tr>
+                <div v-if="isGeneratingField(page.id, 'metaDescription')" class="k-meta-kit-dialog-generating">
+                  <k-icon class="k-meta-kit-spinner" type="loader"/>
+                  <span>Generating...</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Actions -->
+            <td class="k-meta-kit-dialog-table-actions">
+              <div class="k-meta-kit-dialog-actions-group">
+                <k-button
+                  v-if="hasAnyFieldChanged(page.id, page)"
+                  icon="check"
+                  size="sm"
+                  theme="positive"
+                  @click="applyAllFields(page.id, page)"
+                >
+                  Apply
+                </k-button>
+              </div>
+            </td>
+          </tr>
           </tbody>
         </table>
       </div>
@@ -495,7 +505,7 @@ export default {
       pagesData: this.pages || [],
       allPagesData: [],
       legacyPages: [],
-      legacySummary: { total: 0, byLanguage: [] },
+      legacySummary: {total: 0, byLanguage: []},
       currentEditPage: null,
       legacyDetection: {
         show: false,
@@ -509,10 +519,10 @@ export default {
       currentPage: 1,
       pageSize: 25,
       pageSizeOptions: [
-        { value: 25, text: '25 per page' },
-        { value: 50, text: '50 per page' },
-        { value: 100, text: '100 per page' },
-        { value: 99999, text: 'All' }
+        {value: 25, text: '25 per page'},
+        {value: 50, text: '50 per page'},
+        {value: 100, text: '100 per page'},
+        {value: 99999, text: 'All'}
       ],
       searchQuery: ''
     };
@@ -526,9 +536,9 @@ export default {
       const query = this.searchQuery.toLowerCase();
       return this.pagesData.filter(page => {
         return page.title.toLowerCase().includes(query) ||
-               page.id.toLowerCase().includes(query) ||
-               page.template.toLowerCase().includes(query) ||
-               (page.metaDescription && page.metaDescription.toLowerCase().includes(query));
+          page.id.toLowerCase().includes(query) ||
+          page.template.toLowerCase().includes(query) ||
+          (page.metaDescription && page.metaDescription.toLowerCase().includes(query));
       });
     },
     paginatedPages() {
@@ -676,11 +686,11 @@ export default {
         if (res && res.status === 'success') {
           this.$set(this, 'legacySummary', res);
         } else {
-          this.$set(this, 'legacySummary', { total: 0, byLanguage: [] });
+          this.$set(this, 'legacySummary', {total: 0, byLanguage: []});
         }
       } catch (e) {
         window.panel.notification.error('Failed to load legacy summary');
-        this.$set(this, 'legacySummary', { total: 0, byLanguage: [] });
+        this.$set(this, 'legacySummary', {total: 0, byLanguage: []});
       } finally {
         this.isLoadingLegacy = false;
       }
@@ -841,7 +851,7 @@ export default {
       const descValue = this.getEditableValue(pageId, 'metaDescription', page.metaDescription);
 
       return (titleValue && titleValue !== page.metaTitle) ||
-             (descValue && descValue !== page.metaDescription);
+        (descValue && descValue !== page.metaDescription);
     },
     async applyAllFields(pageId, page) {
       // Apply both title and description if they've changed
