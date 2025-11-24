@@ -31,10 +31,21 @@
         "getkirby/composer-installer": "^1.2",
         "guzzlehttp/guzzle": "^7.0"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
     "autoload": {
         "psr-4": {
             "TearoomOne\\": "src/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "TearoomOne\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
     },
     "config": {
         "optimize-autoloader": true,
