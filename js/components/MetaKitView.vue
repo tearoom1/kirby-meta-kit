@@ -319,11 +319,13 @@
                   :rows="3"
                 />
                 <div class="k-meta-kit-dialog-field-meta">
+                  <span>
                     <span v-if="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
                           class="k-meta-kit-field-length"
                           :class="getStatusClass(true, getEditableValue(page.id, 'metaDescription', page.metaDescription).length)">
                       {{ getEditableValue(page.id, 'metaDescription', page.metaDescription).length }} chars
                     </span>
+                  </span>
                   <k-button
                     v-if="aiEnabled"
                     icon="sparkling"
