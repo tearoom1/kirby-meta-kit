@@ -654,7 +654,7 @@ class MetaKitController
         return implode(' ', $texts);
     }
 
-    public static function generateField(string $pageId, string $fieldName, string $language = null): array
+    public static function generateField(string $pageId, string $fieldName, string $language = null, bool $save = false): array
     {
         $kirby = kirby();
         $isSite = ($pageId === 'site');
@@ -687,50 +687,18 @@ class MetaKitController
                 $result = $metaKit->generateDescription($content, ['language' => $languageCode]);
             }
 
-            if ($result) {
+            if (!$result) {
                 return [
-                    'status' => 'success',
-                    'content' => $result
+                    'status' => 'error',
+                    'message' => 'Failed to generate content'
                 ];
             }
 
-            return [
-                'status' => 'error',
-                'message' => 'Failed to generate content'
-            ];
-
-        } catch (\Exception $e) {
-            return [
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ];
-        }
-    }
-    public static function generateDescription(string $pageId): array
-    {
-        $kirby = kirby();
-        $isSite = ($pageId === 'site');
-        $page = self::getPageOrSite($pageId);
-
-        if (!$page) {
-            return [
-                'status' => 'error',
-                'message' => 'Page not found'
-            ];
-        }
-
-        try {
-            $metaKit = new MetaKit($kirby);
-            $languageCode = $kirby->language()?->code() ?? 'en';
-
-            // Get content for generation
-            $content = self::getContentForGeneration($page, $isSite);
-            $description = $metaKit->generateDescription($content, ['language' => $languageCode]);
-
-            if ($description) {
+            // Save if requested
+            if ($save) {
                 $seoData = self::getSeoData($page->metaKitSeo());
                 $seoArray = self::seoDataToArray($seoData);
-                $seoArray['metaDescription'] = $description;
+                $seoArray[$fieldName] = $result;
 
                 $seoBlock = [
                     [
@@ -744,20 +712,32 @@ class MetaKitController
 
                 return [
                     'status' => 'success',
-                    'message' => 'Description generated successfully',
-                    'description' => $description
-                ];
-            } else {
-                return [
-                    'status' => 'error',
-                    'message' => 'Failed to generate description'
+                    'message' => ucfirst(str_replace('meta', 'Meta ', $fieldName)) . ' generated successfully',
+                    'content' => $result
                 ];
             }
+
+            return [
+                'status' => 'success',
+                'content' => $result
+            ];
+
         } catch (\Exception $e) {
             return [
                 'status' => 'error',
                 'message' => $e->getMessage()
             ];
         }
+    }
+    public static function generateDescription(string $pageId): array
+    {
+        $result = self::generateField($pageId, 'metaDescription', null, true);
+
+        // For backwards compatibility, add 'description' key
+        if ($result['status'] === 'success' && isset($result['content'])) {
+            $result['description'] = $result['content'];
+        }
+
+        return $result;
     }
 }
