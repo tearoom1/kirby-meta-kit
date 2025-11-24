@@ -769,7 +769,7 @@
     max-height: 70vh;
     border: 1px solid var(--color-border);
     border-radius: var(--rounded);
-    background: var(--color-back);
+    background: var(--color-background);
   }
 
   .k-meta-kit-dialog-table {
@@ -781,7 +781,7 @@
     position: sticky;
     top: 0;
     z-index: 10;
-    background: var(--color-back);
+    background: var(--color-background);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 
@@ -792,7 +792,7 @@
     font-weight: 600;
     color: var(--color-text);
     border-bottom: 2px solid var(--color-border);
-    background: var(--color-back);
+    background: var(--color-background);
   }
 
   .k-meta-kit-dialog-table td {
