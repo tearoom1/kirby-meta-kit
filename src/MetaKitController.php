@@ -763,12 +763,13 @@ class MetaKitController
                 continue;
             }
 
-            if ($value->toFiles()->isNotEmpty()) {
-                continue;
-            }
-
             // Get raw value
             $rawValue = $value->value();
+
+            // skip files
+            if (str_starts_with(trim($rawValue), 'file:')) {
+                continue;
+            }
 
             // Check if it's JSON (blocks, layout, structure)
             if (is_string($rawValue) && (str_starts_with(trim($rawValue), '[') || str_starts_with(trim($rawValue), '{'))) {
