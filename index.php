@@ -64,7 +64,8 @@ App::plugin(
             'meta-kit/seo' => __DIR__ . '/snippets/seo.php',
         ],
         'areas' => [
-            'meta-kit' => require __DIR__ . '/src/areas/meta-kit.php',
+            'meta-kit' => fn(Plugin $plugin) => require __DIR__ . '/src/areas/meta-kit.php',
+            'system' => fn(Plugin $plugin) => $plugin->license()->activationDialog(),
         ],
         'api' => [
             'routes' => function () {
