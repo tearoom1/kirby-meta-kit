@@ -1,7 +1,8 @@
 <?php
 
+use Kirby\Cms\App;
+use Kirby\Plugin\Plugin;
 use TearoomOne\MetaKit;
-use Kirby\Http\Response;
 
 if (!option('tearoom1.meta-kit.enabled', true)) {
     return;
@@ -14,6 +15,7 @@ $classes = [
     'TearoomOne\Sitemap' => 'src/Sitemap.php',
     'TearoomOne\MetaHelper' => 'src/MetaHelper.php',
     'TearoomOne\MetaKitController' => 'src/MetaKitController.php',
+    'TearoomOne\MetaKitLicense' => 'src/MetaKitLicense.php',
 ];
 
 // Only load LegacyMigration if enabled
@@ -23,289 +25,303 @@ if (option('tearoom1.meta-kit.legacyMigration', false)) {
 
 load($classes, __DIR__);
 
-Kirby::plugin('tearoom1/meta-kit', [
-    'options' => [
-        'ai.enabled' => true,
-        'ai.tone' => 'formal',
-        'api.key' => null,
-        'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
-        'api.model' => '',
-        'api.temperature' => 0.7,
-        'maxDescriptionLength' => 160,
-        'sitemap.include' => 'all',
-        'sitemap.exclude' => ['error'],
-        'autoGenerate' => false,
-        'legacyMigration' => false,
-    ],
-    'blueprints' => [
-        'meta-kit/site' => __DIR__ . '/blueprints/site.yml',
-        'meta-kit/page' => __DIR__ . '/blueprints/page.yml',
-        'meta-kit/fields/og-image' => __DIR__ . '/blueprints/fields/og-image.php',
-        'blocks/mk-page-seo' => __DIR__ . '/blueprints/blocks/mk-page-seo.yml',
-        'blocks/mk-site-seo' => __DIR__ . '/blueprints/blocks/mk-site-seo.yml',
-        'blocks/mk-openrouter' => __DIR__ . '/blueprints/blocks/mk-openrouter.yml',
-        'blocks/mk-sitemap' => __DIR__ . '/blueprints/blocks/mk-sitemap.yml',
-    ],
-    'sections' => [
-        'seo-preview' => __DIR__ . '/sections/preview.php',
-    ],
-    'fields' => [
-        'meta-kit-generator' => [],
-    ],
-    'snippets' => [
-        'meta-kit/seo' => __DIR__ . '/snippets/seo.php',
-    ],
-    'areas' => [
-        'meta-kit' => require __DIR__ . '/src/areas/meta-kit.php',
-    ],
-    'api' => [
-        'routes' => function() {
-            $routes = [
-                [
-                    'pattern' => 'meta-kit/pages',
-                    'method' => 'GET',
-                    'auth' => true,
-                    'action' => function () {
-                        $data = \TearoomOne\MetaKitController::getPages();
-                        return [
-                            'status' => 'success',
-                            'data' => $data['pages'],
-                            'language' => $data['language'],
-                            'languages' => $data['languages'],
-                            'aiEnabled' => $data['aiEnabled']
-                        ];
-                    }
-                ],
-                [
-                    'pattern' => 'meta-kit/apply-single-field',
-                    'method' => 'POST',
-                    'auth' => true,
-                    'action' => function () {
-                        $pageId = get('pageId');
-                        $fieldName = get('fieldName');
-                        $value = get('value');
-                        return \TearoomOne\MetaKitController::applySingleField($pageId, $fieldName, $value);
-                    }
-                ],
-                [
-                    'pattern' => 'meta-kit/pages-with-content',
-                    'method' => 'GET',
-                    'auth' => true,
-                    'action' => function () {
-                        return \TearoomOne\MetaKitController::getPagesWithContent();
-                    }
-                ],
-                [
-                    'pattern' => 'meta-kit/single-page',
-                    'method' => 'GET',
-                    'auth' => true,
-                    'action' => function () {
-                        $pageId = get('pageId');
-                        return \TearoomOne\MetaKitController::getSinglePage($pageId);
-                    }
-                ]
-            ];
-
-            // Add AI-related routes only if AI is enabled
-            if (\TearoomOne\MetaKit::isAiEnabled()) {
-                $routes[] = [
-                    'pattern' => 'meta-kit/generate',
-                    'method' => 'POST',
-                    'auth' => true,
-                    'action' => require __DIR__ . '/src/api/generate.php'
-                ];
-                $routes[] = [
-                    'pattern' => 'meta-kit/generate-description',
-                    'method' => 'POST',
-                    'auth' => true,
-                    'action' => function () {
-                        $pageId = get('pageId');
-                        return \TearoomOne\MetaKitController::generateDescription($pageId);
-                    }
-                ];
-                $routes[] = [
-                    'pattern' => 'meta-kit/generate-all',
-                    'method' => 'POST',
-                    'auth' => true,
-                    'action' => function () {
-                        return \TearoomOne\MetaKitController::generateAllDescriptions();
-                    }
-                ];
-                $routes[] = [
-                    'pattern' => 'meta-kit/generate-field',
-                    'method' => 'POST',
-                    'auth' => true,
-                    'action' => function () {
-                        $pageId = get('pageId');
-                        $fieldName = get('fieldName');
-                        $language = get('language');
-                        return \TearoomOne\MetaKitController::generateField($pageId, $fieldName, $language);
-                    }
-                ];
-            }
-
-            // Add legacy migration routes only if enabled
-            if (option('tearoom1.meta-kit.legacyMigration', false)) {
-                // Summary across all languages (default first)
-                $routes[] = [
-                    'pattern' => 'meta-kit/legacy-summary',
-                    'method' => 'GET',
-                    'auth' => true,
-                    'action' => function () {
-                        return \TearoomOne\LegacyMigration::detectLegacySummaryAllLanguages();
-                    }
-                ];
-                // Convert for all languages (default first)
-                $routes[] = [
-                    'pattern' => 'meta-kit/convert-legacy-all-languages',
-                    'method' => 'POST',
-                    'auth' => true,
-                    'action' => function () {
-                        return \TearoomOne\LegacyMigration::convertAllLanguages();
-                    }
-                ];
-            }
-
-            return $routes;
-        }
-    ],
-    'routes' => [
-        [
-            'pattern' => 'sitemap.xsl',
-            'action' => require __DIR__ . '/src/routes/sitemap-xsl.php'
+App::plugin(
+    name: 'tearoom1/meta-kit',
+    license: fn(Plugin $plugin) => new \TearoomOne\MetaKitLicense($plugin,
+        'Meta-Kit License',
+        'meta-kit',
+        'https://tearoom-kirby.ddev.site/de/kirby-plugins/meta-kit'),
+    extends: [
+        'options' => [
+            'ai.enabled' => true,
+            'ai.tone' => 'formal',
+            'api.key' => null,
+            'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
+            'api.model' => '',
+            'api.temperature' => 0.7,
+            'maxDescriptionLength' => 160,
+            'sitemap.include' => 'all',
+            'sitemap.exclude' => ['error'],
+            'autoGenerate' => false,
+            'legacyMigration' => false,
         ],
-        [
-            'pattern' => 'sitemap.xml',
-            'action' => require __DIR__ . '/src/routes/sitemap.php'
-        ]
-    ],
-    'pageMethods' => [
-        'generateSeoDescription' => function (?string $content = null, ?string $languageCode = null) {
-            if (!\TearoomOne\MetaKit::isAiEnabled()) {
-                return null;
-            }
-            
-            $metaKit = new MetaKit(kirby());
-            $languageCode = $languageCode ?? kirby()->language()?->code() ?? 'en';
-            $content = $content ?? $this->text()->toString();
-
-            if (empty($content)) {
-                return null;
-            }
-
-            return $metaKit->generateDescription($content, ['language' => $languageCode]);
-        }
-    ],
-    'fieldMethods' => [
-        'toSeoDescription' => function ($field) {
-            if (!\TearoomOne\MetaKit::isAiEnabled()) {
-                return null;
-            }
-            
-            $metaKit = new MetaKit(kirby());
-            $languageCode = kirby()->language()?->code() ?? 'en';
-            return $metaKit->generateDescription($field->value(), ['language' => $languageCode]);
-        }
-    ],
-    'hooks' => [
-        'system.loadPlugins:after' => function () {
-            // Initialize site SEO objects on first load if they don't exist
-            $site = site();
-            $needsUpdate = false;
-            $updates = [];
-
-            // Check if objects need initialization
-            if ($site->metaKitSeo()->isEmpty()) {
-                $updates['metaKitSeo'] = [[
-                    'content' => [
-                        'appendSiteName' => true,
-                        'titleSeparator' => '|',
-                        'metaTitle' => '',
-                        'metaDescription' => '',
-                        'metaKeywords' => '',
-                        'ogImage' => []
+        'blueprints' => [
+            'meta-kit/site' => __DIR__ . '/blueprints/site.yml',
+            'meta-kit/page' => __DIR__ . '/blueprints/page.yml',
+            'meta-kit/fields/og-image' => __DIR__ . '/blueprints/fields/og-image.php',
+            'blocks/mk-page-seo' => __DIR__ . '/blueprints/blocks/mk-page-seo.yml',
+            'blocks/mk-site-seo' => __DIR__ . '/blueprints/blocks/mk-site-seo.yml',
+            'blocks/mk-openrouter' => __DIR__ . '/blueprints/blocks/mk-openrouter.yml',
+            'blocks/mk-sitemap' => __DIR__ . '/blueprints/blocks/mk-sitemap.yml',
+        ],
+        'sections' => [
+            'seo-preview' => __DIR__ . '/sections/preview.php',
+        ],
+        'fields' => [
+            'meta-kit-generator' => [],
+        ],
+        'snippets' => [
+            'meta-kit/seo' => __DIR__ . '/snippets/seo.php',
+        ],
+        'areas' => [
+            'meta-kit' => require __DIR__ . '/src/areas/meta-kit.php',
+        ],
+        'api' => [
+            'routes' => function () {
+                $routes = [
+                    [
+                        'pattern' => 'meta-kit/pages',
+                        'method' => 'GET',
+                        'auth' => true,
+                        'action' => function () {
+                            $data = \TearoomOne\MetaKitController::getPages();
+                            return [
+                                'status' => 'success',
+                                'data' => $data['pages'],
+                                'language' => $data['language'],
+                                'languages' => $data['languages'],
+                                'aiEnabled' => $data['aiEnabled']
+                            ];
+                        }
                     ],
-                    'id' => 'site-seo-settings',
-                    'isHidden' => false,
-                    'type' => 'mk-site-seo'
-                ]];
-                $needsUpdate = true;
-            }
-
-            if ($site->metaKitOpenrouter()->isEmpty()) {
-                $updates['metaKitOpenrouter'] = [[
-                    'content' => [
-                        'apiKey' => '',
-                        'model' => 'meta-llama/llama-3.2-3b-instruct:free',
-                        'temperature' => 0.7
+                    [
+                        'pattern' => 'meta-kit/apply-single-field',
+                        'method' => 'POST',
+                        'auth' => true,
+                        'action' => function () {
+                            $pageId = get('pageId');
+                            $fieldName = get('fieldName');
+                            $value = get('value');
+                            return \TearoomOne\MetaKitController::applySingleField($pageId, $fieldName, $value);
+                        }
                     ],
-                    'id' => 'openrouter-settings',
-                    'isHidden' => false,
-                    'type' => 'mk-openrouter'
-                ]];
-                $needsUpdate = true;
-            }
-
-            if ($site->metaKitSitemap()->isEmpty()) {
-                $updates['metaKitSitemap'] = [[
-                    'content' => [
-                        'exclude' => [],
-                        'priorityHome' => 1.0,
-                        'priorityDefault' => 0.8
+                    [
+                        'pattern' => 'meta-kit/pages-with-content',
+                        'method' => 'GET',
+                        'auth' => true,
+                        'action' => function () {
+                            return \TearoomOne\MetaKitController::getPagesWithContent();
+                        }
                     ],
-                    'id' => 'sitemap-settings',
-                    'isHidden' => false,
-                    'type' => 'mk-sitemap'
-                ]];
-                $needsUpdate = true;
-            }
+                    [
+                        'pattern' => 'meta-kit/single-page',
+                        'method' => 'GET',
+                        'auth' => true,
+                        'action' => function () {
+                            $pageId = get('pageId');
+                            return \TearoomOne\MetaKitController::getSinglePage($pageId);
+                        }
+                    ]
+                ];
 
-            // Only update if needed and not already being updated
-            if ($needsUpdate && !defined('KIRBY_META_KIT_INITIALIZING')) {
-                define('KIRBY_META_KIT_INITIALIZING', true);
-                try {
-                    kirby()->impersonate('kirby');
-                    $site->update($updates);
-                } catch (\Exception $e) {
-                    // Silently fail - site might be read-only or in a context where updates aren't allowed
+                // Add AI-related routes only if AI is enabled
+                if (\TearoomOne\MetaKit::isAiEnabled()) {
+                    $routes[] = [
+                        'pattern' => 'meta-kit/generate',
+                        'method' => 'POST',
+                        'auth' => true,
+                        'action' => require __DIR__ . '/src/api/generate.php'
+                    ];
+                    $routes[] = [
+                        'pattern' => 'meta-kit/generate-description',
+                        'method' => 'POST',
+                        'auth' => true,
+                        'action' => function () {
+                            $pageId = get('pageId');
+                            return \TearoomOne\MetaKitController::generateDescription($pageId);
+                        }
+                    ];
+                    $routes[] = [
+                        'pattern' => 'meta-kit/generate-all',
+                        'method' => 'POST',
+                        'auth' => true,
+                        'action' => function () {
+                            return \TearoomOne\MetaKitController::generateAllDescriptions();
+                        }
+                    ];
+                    $routes[] = [
+                        'pattern' => 'meta-kit/generate-field',
+                        'method' => 'POST',
+                        'auth' => true,
+                        'action' => function () {
+                            $pageId = get('pageId');
+                            $fieldName = get('fieldName');
+                            $language = get('language');
+                            return \TearoomOne\MetaKitController::generateField($pageId, $fieldName, $language);
+                        }
+                    ];
                 }
-            }
-        },
-        'page.update:after' => function ($newPage, $oldPage) {
-            // Auto-generate description if enabled and field is empty
-            $autoGenerate = option('tearoom1.meta-kit.autoGenerate', false);
 
-            if (!$autoGenerate || !\TearoomOne\MetaKit::isAiEnabled() || $newPage->intendedTemplate()->name() === 'error') {
-                return;
-            }
+                // Add legacy migration routes only if enabled
+                if (option('tearoom1.meta-kit.legacyMigration', false)) {
+                    // Summary across all languages (default first)
+                    $routes[] = [
+                        'pattern' => 'meta-kit/legacy-summary',
+                        'method' => 'GET',
+                        'auth' => true,
+                        'action' => function () {
+                            return \TearoomOne\LegacyMigration::detectLegacySummaryAllLanguages();
+                        }
+                    ];
+                    // Convert for all languages (default first)
+                    $routes[] = [
+                        'pattern' => 'meta-kit/convert-legacy-all-languages',
+                        'method' => 'POST',
+                        'auth' => true,
+                        'action' => function () {
+                            return \TearoomOne\LegacyMigration::convertAllLanguages();
+                        }
+                    ];
+                }
 
-            try {
-                // Check if SEO object exists and if metadescription is empty
-                $seoData = $newPage->metaKitSeo()->toObject();
-                if (!$seoData || $seoData->metadescription()->isNotEmpty()) {
+                return $routes;
+            }
+        ],
+        'routes' => [
+            [
+                'pattern' => 'sitemap.xsl',
+                'action' => require __DIR__ . '/src/routes/sitemap-xsl.php'
+            ],
+            [
+                'pattern' => 'sitemap.xml',
+                'action' => require __DIR__ . '/src/routes/sitemap.php'
+            ],
+            [
+                'pattern' => 'meta-kit/license/activate',
+                'method' => 'POST',
+                'auth' => true,
+                'action' => function () {
+                    return fn(Plugin $plugin) => $plugin->license()->activate();
+                }
+            ]
+        ],
+        'pageMethods' => [
+            'generateSeoDescription' => function (?string $content = null, ?string $languageCode = null) {
+                if (!\TearoomOne\MetaKit::isAiEnabled()) {
+                    return null;
+                }
+
+                $metaKit = new MetaKit(kirby());
+                $languageCode = $languageCode ?? kirby()->language()?->code() ?? 'en';
+                $content = $content ?? $this->text()->toString();
+
+                if (empty($content)) {
+                    return null;
+                }
+
+                return $metaKit->generateDescription($content, ['language' => $languageCode]);
+            }
+        ],
+        'fieldMethods' => [
+            'toSeoDescription' => function ($field) {
+                if (!\TearoomOne\MetaKit::isAiEnabled()) {
+                    return null;
+                }
+
+                $metaKit = new MetaKit(kirby());
+                $languageCode = kirby()->language()?->code() ?? 'en';
+                return $metaKit->generateDescription($field->value(), ['language' => $languageCode]);
+            }
+        ],
+        'hooks' => [
+            'system.loadPlugins:after' => function () {
+                // Initialize site SEO objects on first load if they don't exist
+                $site = site();
+                $needsUpdate = false;
+                $updates = [];
+
+                // Check if objects need initialization
+                if ($site->metaKitSeo()->isEmpty()) {
+                    $updates['metaKitSeo'] = [[
+                        'content' => [
+                            'appendSiteName' => true,
+                            'titleSeparator' => '|',
+                            'metaTitle' => '',
+                            'metaDescription' => '',
+                            'metaKeywords' => '',
+                            'ogImage' => []
+                        ],
+                        'id' => 'site-seo-settings',
+                        'isHidden' => false,
+                        'type' => 'mk-site-seo'
+                    ]];
+                    $needsUpdate = true;
+                }
+
+                if ($site->metaKitOpenrouter()->isEmpty()) {
+                    $updates['metaKitOpenrouter'] = [[
+                        'content' => [
+                            'apiKey' => '',
+                            'model' => 'meta-llama/llama-3.2-3b-instruct:free',
+                            'temperature' => 0.7
+                        ],
+                        'id' => 'openrouter-settings',
+                        'isHidden' => false,
+                        'type' => 'mk-openrouter'
+                    ]];
+                    $needsUpdate = true;
+                }
+
+                if ($site->metaKitSitemap()->isEmpty()) {
+                    $updates['metaKitSitemap'] = [[
+                        'content' => [
+                            'exclude' => [],
+                            'priorityHome' => 1.0,
+                            'priorityDefault' => 0.8
+                        ],
+                        'id' => 'sitemap-settings',
+                        'isHidden' => false,
+                        'type' => 'mk-sitemap'
+                    ]];
+                    $needsUpdate = true;
+                }
+
+                // Only update if needed and not already being updated
+                if ($needsUpdate && !defined('KIRBY_META_KIT_INITIALIZING')) {
+                    define('KIRBY_META_KIT_INITIALIZING', true);
+                    try {
+                        kirby()->impersonate('kirby');
+                        $site->update($updates);
+                    } catch (\Exception $e) {
+                        // Silently fail - site might be read-only or in a context where updates aren't allowed
+                    }
+                }
+            },
+            'page.update:after' => function ($newPage, $oldPage) {
+                // Auto-generate description if enabled and field is empty
+                $autoGenerate = option('tearoom1.meta-kit.autoGenerate', false);
+
+                if (!$autoGenerate || !\TearoomOne\MetaKit::isAiEnabled() || $newPage->intendedTemplate()->name() === 'error') {
                     return;
                 }
 
-                $content = $newPage->text()->toString();
-                if (!empty($content)) {
-                    $metaKit = new MetaKit(kirby());
-                    $languageCode = kirby()->language()?->code() ?? 'en';
-                    $description = $metaKit->generateDescription($content, ['language' => $languageCode]);
-
-                    if ($description) {
-                        // Get existing SEO data and update metadescription
-                        $existingSeo = $newPage->metaKitSeo()->yaml();
-                        $existingSeo['metadescription'] = $description;
-
-                        $newPage->update([
-                            'metaKitSeo' => $existingSeo
-                        ], kirby()->language()?->code());
+                try {
+                    // Check if SEO object exists and if metadescription is empty
+                    $seoData = $newPage->metaKitSeo()->toObject();
+                    if (!$seoData || $seoData->metadescription()->isNotEmpty()) {
+                        return;
                     }
+
+                    $content = $newPage->text()->toString();
+                    if (!empty($content)) {
+                        $metaKit = new MetaKit(kirby());
+                        $languageCode = kirby()->language()?->code() ?? 'en';
+                        $description = $metaKit->generateDescription($content, ['language' => $languageCode]);
+
+                        if ($description) {
+                            // Get existing SEO data and update metadescription
+                            $existingSeo = $newPage->metaKitSeo()->yaml();
+                            $existingSeo['metadescription'] = $description;
+
+                            $newPage->update([
+                                'metaKitSeo' => $existingSeo
+                            ], kirby()->language()?->code());
+                        }
+                    }
+                } catch (Exception $e) {
+                    // Silently fail - don't break the save operation
+                    kirbylog('Meta Kit auto-generate error: ' . $e->getMessage());
                 }
-            } catch (Exception $e) {
-                // Silently fail - don't break the save operation
-                kirbylog('Meta Kit auto-generate error: ' . $e->getMessage());
-            }
-        }
-    ]
-]);
+            },
+        ]
+    ]);

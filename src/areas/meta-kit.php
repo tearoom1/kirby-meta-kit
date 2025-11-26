@@ -12,15 +12,15 @@ return [
             'pattern' => 'meta-kit',
             'action' => function () {
                 $kirby = kirby();
-                
+
                 // Get language from query parameter
                 $languageCode = get('language');
                 if ($languageCode && $kirby->multilang()) {
                     $kirby->setCurrentLanguage($languageCode);
                 }
-                
+
                 $data = MetaKitController::getPages();
-                
+
                 return [
                     'component' => 'meta-kit-view',
                     'title' => 'Meta Kit',
