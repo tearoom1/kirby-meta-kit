@@ -3,6 +3,7 @@
 use Kirby\Cms\App;
 use Kirby\Plugin\Plugin;
 use TearoomOne\MetaKit;
+use TearoomOne\MetaKitLicense;
 
 if (!option('tearoom1.meta-kit.enabled', true)) {
     return;
@@ -25,9 +26,10 @@ if (option('tearoom1.meta-kit.legacyMigration', false)) {
 
 load($classes, __DIR__);
 
+
 App::plugin(
     name: 'tearoom1/meta-kit',
-    license: fn(Plugin $plugin) => new \TearoomOne\MetaKitLicense($plugin,
+    license: fn(Plugin $plugin) => new MetaKitLicense($plugin,
         'Meta-Kit License',
         'meta-kit',
         'https://tearoom-kirby.ddev.site/de/kirby-plugins/meta-kit'),
@@ -64,8 +66,11 @@ App::plugin(
             'meta-kit/seo' => __DIR__ . '/snippets/seo.php',
         ],
         'areas' => [
-            'meta-kit' => fn(Plugin $plugin) => require __DIR__ . '/src/areas/meta-kit.php',
-            'system' => fn(Plugin $plugin) => $plugin->license()->activationDialog(),
+            'meta-kit' => require __DIR__ . '/src/areas/meta-kit.php',
+            'system' => function () {
+                $plugin = kirby()->plugin('tearoom1/meta-kit');
+                return $plugin->license()->activationDialog();
+            },
         ],
         'api' => [
             'routes' => function () {
@@ -192,7 +197,8 @@ App::plugin(
                 'method' => 'POST',
                 'auth' => true,
                 'action' => function () {
-                    return fn(Plugin $plugin) => $plugin->license()->activate();
+                    $plugin = kirby()->plugin('tearoom1/meta-kit');
+                    return $plugin->license()->activate();
                 }
             ]
         ],
