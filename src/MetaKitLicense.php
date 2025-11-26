@@ -32,7 +32,7 @@ class MetaKitLicense extends KirbyLicense
 
     private function getLicenseFile(): string
     {
-        return kirby()->roots()->license() . $this->id;
+        return kirby()->roots()->license() . '.' . $this->id;
     }
 
     private function getLicenseStatus(): LicenseStatus
