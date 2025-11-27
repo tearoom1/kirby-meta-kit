@@ -263,12 +263,15 @@
               :placeholder="page.metaTitle || 'No meta title'"
               type="text"
             />
+            <div v-if="getEditableValue(page.id, 'metaTitle', page.metaTitle) && siteSettings.appendSiteName && siteSettings.siteMetaTitle" class="k-meta-kit-title-preview">
+              {{ getFullTitle(getEditableValue(page.id, 'metaTitle', page.metaTitle)) }}
+            </div>
             <div class="k-meta-kit-dialog-field-meta">
                   <span>
                     <span v-if="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
                           class="k-meta-kit-field-length"
-                          :class="getStatusClass(true, getEditableValue(page.id, 'metaTitle', page.metaTitle).length, 'title')">
-                      {{ getEditableValue(page.id, 'metaTitle', page.metaTitle).length }} chars
+                          :class="getStatusClass(true, getEditableValue(page.id, 'metaTitle', page.metaTitle).length, 'title', getEditableValue(page.id, 'metaTitle', page.metaTitle))">
+                      {{ siteSettings.appendSiteName && siteSettings.siteMetaTitle ? getFullTitle(getEditableValue(page.id, 'metaTitle', page.metaTitle)).length : getEditableValue(page.id, 'metaTitle', page.metaTitle).length }} chars
                     </span>
                   </span>
               <k-button
@@ -359,11 +362,14 @@
               :placeholder="currentEditPage.metaTitle || 'No meta title set'"
               type="text"
             />
+            <div v-if="getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle) && siteSettings.appendSiteName && siteSettings.siteMetaTitle" class="k-meta-kit-title-preview">
+              {{ getFullTitle(getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)) }}
+            </div>
             <div class="k-meta-kit-single-field-meta">
               <span v-if="getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)"
                     class="k-meta-kit-field-length"
-                    :class="getStatusClass(true, getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle).length, 'title')">
-                {{ getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle).length }} chars
+                    :class="getStatusClass(true, getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle).length, 'title', getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle))">
+                {{ siteSettings.appendSiteName && siteSettings.siteMetaTitle ? getFullTitle(getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)).length : getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle).length }} chars
               </span>
               <k-button
                 v-if="aiEnabled"
@@ -466,6 +472,14 @@ export default {
     aiEnabled: {
       type: Boolean,
       default: true
+    },
+    siteSettings: {
+      type: Object,
+      default: () => ({
+        appendSiteName: true,
+        siteMetaTitle: '',
+        titleSeparator: '|'
+      })
     }
   },
   data() {
@@ -561,33 +575,66 @@ export default {
   created() {
   },
   methods: {
-    getStatusClass(hasField, length, fieldType = 'description') {
+    getFullTitle(pageTitle) {
+      if (!pageTitle || !this.siteSettings.appendSiteName) {
+        return pageTitle || '';
+      }
+
+      const separator = this.siteSettings.titleSeparator || '|';
+      const siteName = this.siteSettings.siteMetaTitle || '';
+
+      if (!siteName) {
+        return pageTitle;
+      }
+
+      return `${pageTitle} ${separator} ${siteName}`;
+    },
+    getStatusClass(hasField, length, fieldType = 'description', pageTitle = null) {
       if (!hasField) return '';
 
-      let optimal, warning, error;
+      let optimal, warning;
 
       if (fieldType === 'title') {
+        // For title, calculate final length if pageTitle is provided
+        let finalLength = length;
+        if (pageTitle && this.siteSettings.appendSiteName) {
+          finalLength = this.getFullTitle(pageTitle).length;
+        }
+
         // Title: optimal 50-60, warning ±10% (45-66), error outside
         optimal = { min: 50, max: 60 };
         warning = { min: 45, max: 66 }; // 10% tolerance
+
+        // Green: within optimal range
+        if (finalLength >= optimal.min && finalLength <= optimal.max) {
+          return 'k-meta-kit-status-success';
+        }
+
+        // Yellow: within warning range (10% around optimal)
+        if (finalLength >= warning.min && finalLength <= warning.max) {
+          return 'k-meta-kit-status-warning';
+        }
+
+        // Red: outside acceptable range
+        return 'k-meta-kit-status-error';
       } else {
         // Description: optimal 140-160, warning ±10% (126-176), error outside
         optimal = { min: 140, max: 160 };
         warning = { min: 126, max: 176 }; // 10% tolerance
-      }
 
-      // Green: within optimal range
-      if (length >= optimal.min && length <= optimal.max) {
-        return 'k-meta-kit-status-success';
-      }
+        // Green: within optimal range
+        if (length >= optimal.min && length <= optimal.max) {
+          return 'k-meta-kit-status-success';
+        }
 
-      // Yellow: within warning range (10% around optimal)
-      if (length >= warning.min && length <= warning.max) {
-        return 'k-meta-kit-status-warning';
-      }
+        // Yellow: within warning range (10% around optimal)
+        if (length >= warning.min && length <= warning.max) {
+          return 'k-meta-kit-status-warning';
+        }
 
-      // Red: outside acceptable range
-      return 'k-meta-kit-status-error';
+        // Red: outside acceptable range
+        return 'k-meta-kit-status-error';
+      }
     },
     async refreshPages() {
       this.isLoadingPages = true;

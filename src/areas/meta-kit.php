@@ -29,7 +29,8 @@ return [
                         'language' => $data['language'],
                         'languages' => $data['languages'],
                         'legacyMigration' => $data['legacyMigration'],
-                        'aiEnabled' => $data['aiEnabled']
+                        'aiEnabled' => $data['aiEnabled'],
+                        'siteSettings' => $data['siteSettings']
                     ]
                 ];
             }

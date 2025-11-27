@@ -133,12 +133,29 @@ class MetaKitController
             ];
         }
 
+        // Get site SEO settings for title preview
+        $siteSeo = self::getSeoData($site->metaKitSeo());
+        $appendSiteName = $siteSeo && $siteSeo->appendSiteName()->isNotEmpty()
+            ? $siteSeo->appendSiteName()->toBool()
+            : true;
+        $siteMetaTitle = $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
+            ? $siteSeo->metaTitle()->value()
+            : $site->title()->value();
+        $titleSeparator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
+            ? $siteSeo->titleSeparator()->value()
+            : '|';
+
         return [
             'language' => $languageCode,
             'languages' => self::getLanguages(),
             'pages' => $result,
             'legacyMigration' => option('tearoom1.meta-kit.legacyMigration', false),
-            'aiEnabled' => \TearoomOne\MetaKit::isAiEnabled()
+            'aiEnabled' => \TearoomOne\MetaKit::isAiEnabled(),
+            'siteSettings' => [
+                'appendSiteName' => $appendSiteName,
+                'siteMetaTitle' => $siteMetaTitle,
+                'titleSeparator' => $titleSeparator,
+            ]
         ];
     }
 
