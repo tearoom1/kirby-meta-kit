@@ -65,6 +65,25 @@ return [
             $needsUpdate = true;
         }
 
+        if ($site->metaKitRobots()->isEmpty()) {
+            $updates["metaKitRobots"] = [
+                [
+                    "content" => [
+                        "enabled" => true,
+                        "defaultRules" => true,
+                        "includeSitemap" => true,
+                        "blockBadBots" => false,
+                        "customRules" => [],
+                        "customDirectives" => "",
+                    ],
+                    "id" => "robots-settings",
+                    "isHidden" => false,
+                    "type" => "mk-robots",
+                ],
+            ];
+            $needsUpdate = true;
+        }
+
         // Only update if needed and not already being updated
         if ($needsUpdate && !defined("KIRBY_META_KIT_INITIALIZING")) {
             define("KIRBY_META_KIT_INITIALIZING", true);

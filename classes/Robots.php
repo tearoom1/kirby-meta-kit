@@ -41,6 +41,11 @@ class Robots
         // Get robots settings from panel
         $robotsData = \TearoomOne\MetaHelper::getSeoData($site->metaKitRobots());
 
+        // If no robots data exists yet, return basic
+        if (!$robotsData) {
+            return $this->generateBasic();
+        }
+
         // Check if custom robots is enabled
         $enabled = $this->getOption($robotsData, 'enabled', true);
 
@@ -78,7 +83,7 @@ class Robots
             $lines[] = "Allow: /";
             $lines[] = "";
             // disallow panel
-            $lines[] = "Disallow: /panel";
+            $lines[] = "Disallow: /panel/";
             $lines[] = "";
         }
 
@@ -115,7 +120,7 @@ class Robots
         $lines[] = "Allow: /";
 
         // disallow panel
-        $lines[] = "Disallow: /panel";
+        $lines[] = "Disallow: /panel/";
 
         // Always include sitemap in basic mode
         $sitemapUrl = $this->kirby->url() . '/sitemap.xml';
@@ -133,7 +138,7 @@ class Robots
         $rules = [];
 
         // Get rules from panel
-        if ($robotsData && method_exists($robotsData, 'customRules') && $robotsData->customRules()->isNotEmpty()) {
+        if ($robotsData) {
             $panelRules = $robotsData->customRules()->toStructure();
             foreach ($panelRules as $rule) {
                 $userAgent = $rule->userAgent()->value();
@@ -222,7 +227,7 @@ class Robots
     protected function getOption($robotsData, string $key, $default = null)
     {
         // Try panel data first
-        if ($robotsData && method_exists($robotsData, $key)) {
+        if ($robotsData && $robotsData->has($key)) {
             $value = $robotsData->$key();
             if ($value && !$value->isEmpty()) {
                 // Handle toggle/boolean fields
