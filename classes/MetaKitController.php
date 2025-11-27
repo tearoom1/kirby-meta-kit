@@ -151,6 +151,7 @@ class MetaKitController
             'pages' => $result,
             'legacyMigration' => option('tearoom1.meta-kit.legacyMigration', false),
             'aiEnabled' => \TearoomOne\MetaKit::isAiEnabled(),
+            'hasValidLicense' => \TearoomOne\MetaKit::hasValidLicense(),
             'siteSettings' => [
                 'appendSiteName' => $appendSiteName,
                 'siteMetaTitle' => $siteMetaTitle,

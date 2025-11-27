@@ -14,6 +14,10 @@ $enableSchema = option('tearoom1.meta-kit.schema.enabled', true);
 $seoData = $page->metaKitSeo()->toBlocks()->first()?->content();
 $siteSeo = $site->metaKitSeo()->toBlocks()->first()?->content();
 
+// Check license status
+$hasValidLicense = \TearoomOne\MetaKit::hasValidLicense();
+$charLimit = $hasValidLicense ? null : 20;
+
 // ==============================================================
 // Build Common Data
 // ==============================================================
@@ -21,6 +25,14 @@ $siteSeo = $site->metaKitSeo()->toBlocks()->first()?->content();
 // Build meta title and description using helper
 $metaTitle = \TearoomOne\MetaHelper::buildTitle($page, $site, $seoData);
 $metaDescription = \TearoomOne\MetaHelper::buildDescription($page, $site, $seoData);
+
+// Limit output if unlicensed
+if ($charLimit && mb_strlen($metaTitle) > $charLimit) {
+    $metaTitle = mb_substr($metaTitle, 0, $charLimit) . '...';
+}
+if ($charLimit && mb_strlen($metaDescription) > $charLimit) {
+    $metaDescription = mb_substr($metaDescription, 0, $charLimit) . '...';
+}
 
 // Get canonical URL
 if ($seoData && $seoData->canonicalUrl()->isNotEmpty()) {
@@ -43,6 +55,14 @@ if ($seoData && $seoData->ogTitle()->isNotEmpty()) {
 
 // Get OG description using helper
 $ogDescription = \TearoomOne\MetaHelper::buildOgDescription($page, $site, $seoData, $metaDescription);
+
+// Limit OG content if unlicensed
+if ($charLimit && mb_strlen($ogTitle) > $charLimit) {
+    $ogTitle = mb_substr($ogTitle, 0, $charLimit) . '...';
+}
+if ($charLimit && mb_strlen($ogDescription) > $charLimit) {
+    $ogDescription = mb_substr($ogDescription, 0, $charLimit) . '...';
+}
 
 // Get OG image
 $ogImage = null;

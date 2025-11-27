@@ -1,5 +1,13 @@
 <template>
   <k-panel-inside class="k-meta-kit-view">
+    <!-- License Warning -->
+    <div v-if="!hasValidLicense" class="k-meta-kit-warning">
+      <k-box theme="negative">
+        <k-icon type="alert"/>
+        <span><strong>No valid license:</strong> AI generation and saving changes are disabled. Meta tags are limited to 20 characters. Please activate your license to use all features.</span>
+      </k-box>
+    </div>
+
     <!-- Language Switcher -->
     <div v-if="languages && languages.length > 1" class="k-meta-kit-language-bar">
       <k-button-group>
@@ -403,6 +411,10 @@ export default {
     aiEnabled: {
       type: Boolean,
       default: true
+    },
+    hasValidLicense: {
+      type: Boolean,
+      default: false
     },
     siteSettings: {
       type: Object,

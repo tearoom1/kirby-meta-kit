@@ -15,6 +15,20 @@ class MetaKit
     protected $httpClient;
 
     /**
+     * Check if plugin has a valid license
+     */
+    public static function hasValidLicense(): bool
+    {
+        $plugin = kirby()->plugin('tearoom1/meta-kit');
+        if (!$plugin) {
+            return false;
+        }
+
+        $license = $plugin->license();
+        return $license && $license->isValid();
+    }
+
+    /**
      * Check if AI integration is enabled
      */
     public static function isAiEnabled(): bool

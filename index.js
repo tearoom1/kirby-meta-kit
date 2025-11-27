@@ -446,6 +446,10 @@
         type: Boolean,
         default: true
       },
+      hasValidLicense: {
+        type: Boolean,
+        default: false
+      },
       siteSettings: {
         type: Object,
         default: () => ({
@@ -1156,7 +1160,7 @@
   };
   var _sfc_render = function render() {
     var _vm = this, _c = _vm._self._c;
-    return _c("k-panel-inside", { staticClass: "k-meta-kit-view" }, [_vm.languages && _vm.languages.length > 1 ? _c("div", { staticClass: "k-meta-kit-language-bar" }, [_c("k-button-group", _vm._l(_vm.languages, function(lang) {
+    return _c("k-panel-inside", { staticClass: "k-meta-kit-view" }, [!_vm.hasValidLicense ? _c("div", { staticClass: "k-meta-kit-warning" }, [_c("k-box", { attrs: { "theme": "negative" } }, [_c("k-icon", { attrs: { "type": "alert" } }), _c("span", [_c("strong", [_vm._v("No valid license:")]), _vm._v(" AI generation and saving changes are disabled. Meta tags are limited to 20 characters. Please activate your license to use all features.")])], 1)], 1) : _vm._e(), _vm.languages && _vm.languages.length > 1 ? _c("div", { staticClass: "k-meta-kit-language-bar" }, [_c("k-button-group", _vm._l(_vm.languages, function(lang) {
       return _c("k-button", { key: lang.code, attrs: { "theme": lang.code === _vm.language ? "positive" : "", "size": "xs" }, on: { "click": function($event) {
         return _vm.goToLanguage(lang.code);
       } } }, [_vm._v(" " + _vm._s(lang.code.toUpperCase()) + " ")]);

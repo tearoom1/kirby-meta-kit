@@ -28,6 +28,13 @@ return function () {
             "method" => "POST",
             "auth" => true,
             "action" => function () {
+                if (!TearoomOne\MetaKit::hasValidLicense()) {
+                    return [
+                        'status' => 'error',
+                        'message' => 'A valid license is required to save changes. Please activate your license.'
+                    ];
+                }
+
                 $pageId = get("pageId");
                 $fieldName = get("fieldName");
                 $value = get("value");
@@ -70,6 +77,13 @@ return function () {
             "method" => "POST",
             "auth" => true,
             "action" => function () {
+                if (!TearoomOne\MetaKit::hasValidLicense()) {
+                    return [
+                        'status' => 'error',
+                        'message' => 'A valid license is required to use AI generation. Please activate your license.'
+                    ];
+                }
+
                 $pageId = get("pageId");
                 return TearoomOne\MetaKitController::generateDescription(
                     $pageId,
@@ -81,6 +95,13 @@ return function () {
             "method" => "POST",
             "auth" => true,
             "action" => function () {
+                if (!TearoomOne\MetaKit::hasValidLicense()) {
+                    return [
+                        'status' => 'error',
+                        'message' => 'A valid license is required to use AI generation. Please activate your license.'
+                    ];
+                }
+
                 return TearoomOne\MetaKitController::generateAllDescriptions();
             },
         ];
@@ -89,6 +110,13 @@ return function () {
             "method" => "POST",
             "auth" => true,
             "action" => function () {
+                if (!TearoomOne\MetaKit::hasValidLicense()) {
+                    return [
+                        'status' => 'error',
+                        'message' => 'A valid license is required to use AI generation. Please activate your license.'
+                    ];
+                }
+
                 $pageId = get("pageId");
                 $fieldName = get("fieldName");
                 $language = get("language");

@@ -34,48 +34,39 @@ class MetaKitLicense extends KirbyLicense
         );
     }
 
-    private function getLicenseStatus(): LicenseStatus
+    private function getLicenseStatus(): LicenseStatus|null
     {
-        $isLocal = kirby()->environment()->isLocal();
-        if (false && $isLocal) {
-            return new LicenseStatus(
-                value: 'missing',
-                icon: 'alert',
-                label: 'Local environment, no license required',
-                theme: 'negative'
-            );
-        }
-
-        if (!$this->license) {
-            return new LicenseStatus(
-                value: 'missing',
-                icon: 'alert',
-                label: 'Get a license please',
-                dialog: 'meta-kit/license-activation',
-                theme: 'negative'
-            );
-        }
-
         if ($this->isValid()) {
+            return LicenseStatus::from('active');
+        }
+
+        if (kirby()->system()->isLocal()) {
+            $demo = LicenseStatus::from('demo');
             return new LicenseStatus(
-                value: 'valid',
-                icon: 'check',
-                label: 'Valid license',
-                theme: 'positive'
-            );
-        } else {
-            return new LicenseStatus(
-                value: 'invalid',
-                icon: 'alert',
-                label: 'Invalid license',
-                theme: 'negative'
+                value: $demo->value(),
+                icon: $demo->icon(),
+                label: $demo->label(),
+                dialog: 'meta-kit/license-activation',
+                theme: $demo->theme()
             );
         }
+
+        if ($this->license !== null) {
+            return null; // invalid
+        }
+
+        $missing = LicenseStatus::from('missing');
+        return new LicenseStatus(
+            value: $missing->value(),
+            icon: $missing->icon(),
+            label: $missing->label(),
+            dialog: 'meta-kit/license-activation',
+            theme: $missing->theme()
+        );
     }
 
     public function isValid(): bool
     {
-
         $licenseCache = App::instance()->cache('tearoom1.meta-kit.cache');
         if ($licenseCache->exists('license')) {
             $this->license = $licenseCache->get('license');
@@ -108,6 +99,9 @@ class MetaKitLicense extends KirbyLicense
      */
     public function validate(): array|null
     {
+        if ($this->license === null) {
+            return null;
+        }
         $licenseKey = $this->license['key'];
 
         $requestData = ['license_key' => $licenseKey];
@@ -230,10 +224,18 @@ class MetaKitLicense extends KirbyLicense
 
     private function getLicenseFromDisk(): array|null
     {
-        $licenseFile = kirby()->roots()->license() . '.' . $this->id;
+        $licenseFile = $this->getLicenseFile();
         if (!file_exists($licenseFile)) {
             return null;
         }
         return json_decode(file_get_contents($licenseFile), true);
+    }
+
+    /**
+     * @return string
+     */
+    public function getLicenseFile(): string
+    {
+        return kirby()->roots()->license() . '.' . $this->id;
     }
 }
