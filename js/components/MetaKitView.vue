@@ -263,15 +263,15 @@
               :placeholder="page.metaTitle || 'No meta title'"
               type="text"
             />
-            <div v-if="getEditableValue(page.id, 'metaTitle', page.metaTitle) && siteSettings.appendSiteName && siteSettings.siteMetaTitle" class="k-meta-kit-title-preview">
+            <div v-if="page.id !== 'site' && getEditableValue(page.id, 'metaTitle', page.metaTitle) && siteSettings.appendSiteName && siteSettings.siteMetaTitle" class="k-meta-kit-title-preview">
               {{ getFullTitle(getEditableValue(page.id, 'metaTitle', page.metaTitle)) }}
             </div>
             <div class="k-meta-kit-dialog-field-meta">
                   <span>
                     <span v-if="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
                           class="k-meta-kit-field-length"
-                          :class="getStatusClass(true, getEditableValue(page.id, 'metaTitle', page.metaTitle).length, 'title', getEditableValue(page.id, 'metaTitle', page.metaTitle))">
-                      {{ siteSettings.appendSiteName && siteSettings.siteMetaTitle ? getFullTitle(getEditableValue(page.id, 'metaTitle', page.metaTitle)).length : getEditableValue(page.id, 'metaTitle', page.metaTitle).length }} chars
+                          :class="getStatusClass(true, getEditableValue(page.id, 'metaTitle', page.metaTitle).length, 'title', page.id !== 'site' ? getEditableValue(page.id, 'metaTitle', page.metaTitle) : null)">
+                      {{ page.id !== 'site' && siteSettings.appendSiteName && siteSettings.siteMetaTitle ? getFullTitle(getEditableValue(page.id, 'metaTitle', page.metaTitle)).length : getEditableValue(page.id, 'metaTitle', page.metaTitle).length }} chars
                     </span>
                   </span>
               <k-button
@@ -362,14 +362,14 @@
               :placeholder="currentEditPage.metaTitle || 'No meta title set'"
               type="text"
             />
-            <div v-if="getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle) && siteSettings.appendSiteName && siteSettings.siteMetaTitle" class="k-meta-kit-title-preview">
+            <div v-if="currentEditPage.id !== 'site' && getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle) && siteSettings.appendSiteName && siteSettings.siteMetaTitle" class="k-meta-kit-title-preview">
               {{ getFullTitle(getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)) }}
             </div>
             <div class="k-meta-kit-single-field-meta">
               <span v-if="getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)"
                     class="k-meta-kit-field-length"
-                    :class="getStatusClass(true, getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle).length, 'title', getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle))">
-                {{ siteSettings.appendSiteName && siteSettings.siteMetaTitle ? getFullTitle(getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)).length : getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle).length }} chars
+                    :class="getStatusClass(true, getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle).length, 'title', currentEditPage.id !== 'site' ? getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle) : null)">
+                {{ currentEditPage.id !== 'site' && siteSettings.appendSiteName && siteSettings.siteMetaTitle ? getFullTitle(getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)).length : getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle).length }} chars
               </span>
               <k-button
                 v-if="aiEnabled"
@@ -595,7 +595,12 @@ export default {
       let optimal, warning;
 
       if (fieldType === 'title') {
-        // For title, calculate final length if pageTitle is provided
+        // For site page (pageTitle is null), no strict validation - just show the length
+        if (pageTitle === null) {
+          return ''; // No color coding for site meta title
+        }
+
+        // For regular pages, calculate final length if site name appending is enabled
         let finalLength = length;
         if (pageTitle && this.siteSettings.appendSiteName) {
           finalLength = this.getFullTitle(pageTitle).length;
