@@ -2,6 +2,7 @@
 
 namespace TearoomOne;
 
+use Kirby\Cms\App;
 use Kirby\Http\Remote;
 use Kirby\Plugin\License as KirbyLicense;
 use Kirby\Plugin\LicenseStatus;
@@ -15,6 +16,8 @@ use Kirby\Plugin\Plugin;
  */
 class MetaKitLicense extends KirbyLicense
 {
+    private $license;
+
     public function __construct(
         protected Plugin $plugin,
         protected string $name,
@@ -22,21 +25,13 @@ class MetaKitLicense extends KirbyLicense
         protected string $url
     )
     {
+        $this->license = $this->getLicenseFromDisk();
+
         parent::__construct($plugin,
             'Meta-Kit License',
             $url,
             $this->getLicenseStatus()
         );
-    }
-
-
-    private function getLicense(): array|null
-    {
-        $licenseFile = kirby()->roots()->license() . '.' . $this->id;
-        if (!file_exists($licenseFile)) {
-            return null;
-        }
-        return json_decode(file_get_contents($licenseFile), true);
     }
 
     private function getLicenseStatus(): LicenseStatus
@@ -51,9 +46,7 @@ class MetaKitLicense extends KirbyLicense
             );
         }
 
-        $license = $this->getLicense();
-
-        if (!$license) {
+        if (!$this->license) {
             return new LicenseStatus(
                 value: 'missing',
                 icon: 'alert',
@@ -63,7 +56,7 @@ class MetaKitLicense extends KirbyLicense
             );
         }
 
-        if ($license['status'] === 'active' && ($license['expires_at'] === null || $license['expires_at'] < date(DATE_ISO8601_EXPANDED))) {
+        if ($this->isValid()) {
             return new LicenseStatus(
                 value: 'valid',
                 icon: 'check',
@@ -80,49 +73,55 @@ class MetaKitLicense extends KirbyLicense
         }
     }
 
+    public function isValid(): bool
+    {
+
+        $licenseCache = App::instance()->cache('tearoom1.meta-kit.cache');
+        if ($licenseCache->exists('license')) {
+            $this->license = $licenseCache->get('license');
+            return $this->isValidLicenseKey();
+        } else {
+            $license = $this->validate();
+            if ($license) {
+                $this->license = $license;
+                $licenseCache->set('license', $this->license);
+                return $this->isValidLicenseKey();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isValidLicenseKey(): bool
+    {
+        return $this->license['status'] === 'active' &&
+            ($this->license['expires_at'] === null
+                || $this->license['expires_at'] < date(DATE_ISO8601_EXPANDED));
+    }
+
     /**
      * @param $key
      * @return LicenseStatus
      * @throws \Exception
      */
-    public function validate(): LicenseStatus
+    public function validate(): array|null
     {
-
-        $license = $this->getLicense();
-
-        $licenseKey = $license['key'];
+        $licenseKey = $this->license['key'];
 
         $requestData = ['license_key' => $licenseKey];
         $response = $this->postLicenseRequest(
             'https://api.lemonsqueezy.com/v1/licenses/validate',
             $requestData);
 
-        if ($response->code() !== 200) { // todo fixme
-            return new LicenseStatus(
-                value: 'invalid',
-                icon: 'alert',
-                label: 'Invalid license',
-                theme: 'negative'
-            );
+        if ($response->code() === 200) {
+            $data = json_decode($response->content(), true);
+            if ($data['valid'] === true) {
+                return $data['license_key'];
+            }
         }
-
-        $data = json_decode($response->content(), true);
-
-        if ($data['valid'] === true) {
-            return new LicenseStatus(
-                value: 'valid',
-                icon: 'check',
-                label: 'Valid license',
-                theme: 'positive'
-            );
-        }
-
-        return new LicenseStatus(
-            value: 'invalid',
-            icon: 'alert',
-            label: 'Invalid license',
-            theme: 'negative'
-        );
+        return null;
     }
 
     public function activate($licenseKey): array
@@ -226,5 +225,15 @@ class MetaKitLicense extends KirbyLicense
                 ]
             ]
         ];
+    }
+
+
+    private function getLicenseFromDisk(): array|null
+    {
+        $licenseFile = kirby()->roots()->license() . '.' . $this->id;
+        if (!file_exists($licenseFile)) {
+            return null;
+        }
+        return json_decode(file_get_contents($licenseFile), true);
     }
 }
