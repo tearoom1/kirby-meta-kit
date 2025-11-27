@@ -30,9 +30,13 @@ class MetaKitLicense extends KirbyLicense
     }
 
 
-    private function getLicenseFile(): string
+    private function getLicense(): array|null
     {
-        return kirby()->roots()->license() . '.' . $this->id;
+        $licenseFile = kirby()->roots()->license() . '.' . $this->id;
+        if (!file_exists($licenseFile)) {
+            return null;
+        }
+        return json_decode(file_get_contents($licenseFile), true);
     }
 
     private function getLicenseStatus(): LicenseStatus
@@ -42,14 +46,14 @@ class MetaKitLicense extends KirbyLicense
             return new LicenseStatus(
                 value: 'missing',
                 icon: 'alert',
-                label: 'Get a license please',
+                label: 'Local environment, no license required',
                 theme: 'negative'
             );
         }
 
-        $licenseFile = $this->getLicenseFile();
+        $license = $this->getLicense();
 
-        if (!file_exists($licenseFile)) {
+        if (!$license) {
             return new LicenseStatus(
                 value: 'missing',
                 icon: 'alert',
@@ -59,9 +63,34 @@ class MetaKitLicense extends KirbyLicense
             );
         }
 
-        $license = json_decode(file_get_contents($licenseFile), true);
-        $licenseKey = $license['key'];
+        if ($license['status'] === 'active' && ($license['expires_at'] === null || $license['expires_at'] < date(DATE_ISO8601_EXPANDED))) {
+            return new LicenseStatus(
+                value: 'valid',
+                icon: 'check',
+                label: 'Valid license',
+                theme: 'positive'
+            );
+        } else {
+            return new LicenseStatus(
+                value: 'invalid',
+                icon: 'alert',
+                label: 'Invalid license',
+                theme: 'negative'
+            );
+        }
+    }
 
+    /**
+     * @param $key
+     * @return LicenseStatus
+     * @throws \Exception
+     */
+    public function validate(): LicenseStatus
+    {
+
+        $license = $this->getLicense();
+
+        $licenseKey = $license['key'];
 
         $requestData = ['license_key' => $licenseKey];
         $response = $this->postLicenseRequest(
@@ -94,7 +123,6 @@ class MetaKitLicense extends KirbyLicense
             label: 'Invalid license',
             theme: 'negative'
         );
-        // check https://raw.githubusercontent.com/bnomei/kirby-kart/refs/heads/main/classes/Kart/License.php
     }
 
     public function activate($licenseKey): array
@@ -160,6 +188,7 @@ class MetaKitLicense extends KirbyLicense
 
     public function activationDialog()
     {
+        // validate license
         $url = $this->url;
         return [
             'dialogs' => [
