@@ -250,41 +250,20 @@
       </div>
 
       <div v-else-if="allPagesData.length > 0" class="k-meta-kit-dialog-table-wrapper">
-        <table class="k-meta-kit-dialog-table">
-          <thead>
-          <tr>
-            <th class="k-meta-kit-dialog-table-page">Page</th>
-            <th class="k-meta-kit-dialog-table-field-title">Meta Title</th>
-            <th class="k-meta-kit-dialog-table-field-desc">Meta Description</th>
-            <th class="k-meta-kit-dialog-table-actions">Actions</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr v-for="page in allPagesData" :key="page.id">
-            <!-- Page Info -->
-            <td class="k-meta-kit-dialog-table-page">
-              <div class="k-meta-kit-dialog-page-info">
-                <strong>{{ page.title }}</strong>
-                <span class="k-meta-kit-page-id">{{ page.id }}</span>
-                <k-button
-                  icon="open"
-                  size="sm"
-                  @click="editSinglePage(page.id)"
-                  title="Edit in Panel"
-                />
-              </div>
-            </td>
-
-            <!-- Meta Title -->
-            <td class="k-meta-kit-dialog-table-field-title">
-              <div class="k-meta-kit-dialog-field-wrapper">
-                <k-input
-                  :value="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
-                  @input="setManualValue(page.id, 'metaTitle', $event)"
-                  :placeholder="page.metaTitle || 'No meta title'"
-                  type="text"
-                />
-                <div class="k-meta-kit-dialog-field-meta">
+        <div v-for="page in allPagesData" :key="page.id" class="k-meta-kit-dialog-table-page">
+          <div class="k-meta-kit-dialog-page-info">
+            <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
+            <a :href="page.panelUrl" class="k-link k-meta-kit-page-id">{{ page.id }}</a>
+          </div>
+          <!-- Meta Title -->
+          <div class="k-meta-kit-dialog-table-field-title">
+            <k-input
+              :value="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
+              @input="setManualValue(page.id, 'metaTitle', $event)"
+              :placeholder="page.metaTitle || 'No meta title'"
+              type="text"
+            />
+            <div class="k-meta-kit-dialog-field-meta">
                   <span>
                     <span v-if="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
                           class="k-meta-kit-field-length"
@@ -292,33 +271,31 @@
                       {{ getEditableValue(page.id, 'metaTitle', page.metaTitle).length }} chars
                     </span>
                   </span>
-                  <k-button
-                    v-if="aiEnabled"
-                    icon="sparkling"
-                    size="xs"
-                    :disabled="isGeneratingField(page.id, 'metaTitle')"
-                    @click="generateFieldAI(page.id, 'metaTitle')"
-                    title="AI Generate"
-                  />
-                </div>
-                <div v-if="isGeneratingField(page.id, 'metaTitle')" class="k-meta-kit-dialog-generating">
-                  <k-icon class="k-meta-kit-spinner" type="loader"/>
-                  <span>Generating...</span>
-                </div>
-              </div>
-            </td>
+              <k-button
+                v-if="aiEnabled"
+                icon="sparkling"
+                size="xs"
+                :disabled="isGeneratingField(page.id, 'metaTitle')"
+                @click="generateFieldAI(page.id, 'metaTitle')"
+                title="AI Generate"
+              />
+            </div>
+            <div v-if="isGeneratingField(page.id, 'metaTitle')" class="k-meta-kit-dialog-generating">
+              <k-icon class="k-meta-kit-spinner" type="loader"/>
+              <span>Generating...</span>
+            </div>
+          </div>
 
-            <!-- Meta Description -->
-            <td class="k-meta-kit-dialog-table-field-desc">
-              <div class="k-meta-kit-dialog-field-wrapper">
-                <k-input
-                  :value="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
-                  @input="setManualValue(page.id, 'metaDescription', $event)"
-                  :placeholder="page.metaDescription || 'No meta description'"
-                  type="textarea"
-                  :rows="3"
-                />
-                <div class="k-meta-kit-dialog-field-meta">
+          <!-- Meta Description -->
+          <div class="k-meta-kit-dialog-table-field-desc">
+            <k-input
+              :value="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
+              @input="setManualValue(page.id, 'metaDescription', $event)"
+              :placeholder="page.metaDescription || 'No meta description'"
+              type="textarea"
+              :rows="3"
+            />
+            <div class="k-meta-kit-dialog-field-meta">
                   <span>
                     <span v-if="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
                           class="k-meta-kit-field-length"
@@ -326,39 +303,34 @@
                       {{ getEditableValue(page.id, 'metaDescription', page.metaDescription).length }} chars
                     </span>
                   </span>
-                  <k-button
-                    v-if="aiEnabled"
-                    icon="sparkling"
-                    size="xs"
-                    :disabled="isGeneratingField(page.id, 'metaDescription')"
-                    @click="generateFieldAI(page.id, 'metaDescription')"
-                    title="AI Generate"
-                  />
-                </div>
-                <div v-if="isGeneratingField(page.id, 'metaDescription')" class="k-meta-kit-dialog-generating">
-                  <k-icon class="k-meta-kit-spinner" type="loader"/>
-                  <span>Generating...</span>
-                </div>
-              </div>
-            </td>
+              <k-button
+                v-if="aiEnabled"
+                icon="sparkling"
+                size="xs"
+                :disabled="isGeneratingField(page.id, 'metaDescription')"
+                @click="generateFieldAI(page.id, 'metaDescription')"
+                title="AI Generate"
+              />
+            </div>
+            <div v-if="isGeneratingField(page.id, 'metaDescription')" class="k-meta-kit-dialog-generating">
+              <k-icon class="k-meta-kit-spinner" type="loader"/>
+              <span>Generating...</span>
+            </div>
+          </div>
 
-            <!-- Actions -->
-            <td class="k-meta-kit-dialog-table-actions">
-              <div class="k-meta-kit-dialog-actions-group">
-                <k-button
-                  v-if="hasAnyFieldChanged(page.id, page)"
-                  icon="check"
-                  size="sm"
-                  theme="positive"
-                  @click="applyAllFields(page.id, page)"
-                >
-                  Apply
-                </k-button>
-              </div>
-            </td>
-          </tr>
-          </tbody>
-        </table>
+          <!-- Actions -->
+          <div class="k-meta-kit-dialog-table-actions">
+            <k-button
+              v-if="hasAnyFieldChanged(page.id, page)"
+              icon="check"
+              size="sm"
+              theme="positive"
+              @click="applyAllFields(page.id, page)"
+            >
+              Apply
+            </k-button>
+          </div>
+        </div>
       </div>
 
       <div v-else class="k-meta-kit-empty">
@@ -851,9 +823,9 @@ export default {
       // Check if manual values exist and are different from current values
       // This allows clearing values (setting to empty string)
       const hasTitleChange = this.fieldChoices[pageId]?.metaTitle?.manualValue !== undefined &&
-                             this.fieldChoices[pageId].metaTitle.manualValue !== page.metaTitle;
+        this.fieldChoices[pageId].metaTitle.manualValue !== page.metaTitle;
       const hasDescChange = this.fieldChoices[pageId]?.metaDescription?.manualValue !== undefined &&
-                            this.fieldChoices[pageId].metaDescription.manualValue !== page.metaDescription;
+        this.fieldChoices[pageId].metaDescription.manualValue !== page.metaDescription;
 
       return hasTitleChange || hasDescChange;
     },
@@ -863,9 +835,9 @@ export default {
 
       // Check if title has been manually changed (including to empty string)
       const hasTitleChange = this.fieldChoices[pageId]?.metaTitle?.manualValue !== undefined &&
-                             this.fieldChoices[pageId].metaTitle.manualValue !== page.metaTitle;
+        this.fieldChoices[pageId].metaTitle.manualValue !== page.metaTitle;
       const hasDescChange = this.fieldChoices[pageId]?.metaDescription?.manualValue !== undefined &&
-                            this.fieldChoices[pageId].metaDescription.manualValue !== page.metaDescription;
+        this.fieldChoices[pageId].metaDescription.manualValue !== page.metaDescription;
 
       if (hasTitleChange) {
         const titleValue = this.fieldChoices[pageId].metaTitle.manualValue;

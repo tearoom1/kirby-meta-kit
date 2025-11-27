@@ -97,6 +97,45 @@ class MetaKit
         return "Use formal language (e.g., 'Sie' in German, 'vous' in French).";
     }
 
+    /**
+     * Calculate target title length accounting for site name appending
+     * Target: 50-60 chars total including site name
+     */
+    protected function calculateTargetTitleLength(): string
+    {
+        $site = $this->kirby->site();
+        $siteSeo = \TearoomOne\MetaHelper::getSeoData($site->metaKitSeo());
+
+        // Check if site name should be appended
+        $appendSiteName = $siteSeo && $siteSeo->appendSiteName()->isNotEmpty()
+            ? $siteSeo->appendSiteName()->toBool()
+            : true;
+
+        if (!$appendSiteName) {
+            // No site name appending, use full range
+            return '50-60';
+        }
+
+        // Get site name and separator
+        $siteMetaTitle = $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
+            ? $siteSeo->metaTitle()->value()
+            : $site->title()->value();
+
+        $separator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
+            ? $siteSeo->titleSeparator()->value()
+            : '|';
+
+        // Calculate space taken by site name (including spaces around separator)
+        $siteNameLength = mb_strlen($siteMetaTitle) + mb_strlen($separator) + 2; // +2 for spaces
+
+        // Target total: 50-60 chars
+        // Reserve space for site name
+        $minTarget = max(25, 50 - $siteNameLength); // Minimum 25 chars for page title
+        $maxTarget = max(30, 60 - $siteNameLength); // Minimum 30 chars for page title
+
+        return $minTarget . '-' . $maxTarget;
+    }
+
     public function generateTitle(string $content, array $context = []): ?string
     {
         $apiKey = $this->options['api.key'] ?? null;
@@ -116,11 +155,18 @@ class MetaKit
         ];
         $languageName = $languageNames[$language] ?? 'English';
 
+        // Calculate target title length accounting for site name
+        $targetLength = $this->calculateTargetTitleLength();
+
         // Limit content length to avoid token limits
         $contentPreview = mb_substr(strip_tags($content), 0, 1000);
 
         // Get prompt template and replace placeholders
         $promptTemplate = $this->options['ai.prompt.title'];
+
+        // Update prompt to include target length
+        $promptTemplate = str_replace('30-65 characters', $targetLength . ' characters', $promptTemplate);
+
         $prompt = str_replace(
             ['{language}', '{content}', '{tone}'],
             [$languageName, $contentPreview, $this->getToneInstruction()],
@@ -284,12 +330,16 @@ class MetaKit
         $title = preg_replace('/\s+/', ' ', $title);
         $title = trim($title, " \t\n\r\0\x0B\"'`");
 
-        $minLength = 30;
-        $maxLength = 65;
+        // Get target length range
+        $targetRange = $this->calculateTargetTitleLength();
+        list($minLength, $maxLength) = array_map('intval', explode('-', $targetRange));
+
+        // Allow some flexibility (+5 chars) before truncating
+        $flexibleMax = $maxLength + 5;
         $currentLength = mb_strlen($title);
 
         // If title is too long, truncate at word boundary
-        if ($currentLength > $maxLength) {
+        if ($currentLength > $flexibleMax) {
             $shortened = mb_substr($title, 0, $maxLength);
             $lastSpace = mb_strrpos($shortened, ' ');
 

@@ -4,16 +4,6 @@ preview: fields
 wysiwyg: true
 fields:
 
-  metaTitle:
-    label: Overwrite Site Name
-    type: text
-    placeholder: "{{ site.title }}"
-    help: >
-      Overwrite the site name. Will be appended to page titles if "Append Site Name to Titles" is enabled.
-    when:
-      appendSiteName: true
-    width: 1/2
-
   appendSiteName:
     label: Append Site Name to Titles
     type: toggle
@@ -23,6 +13,16 @@ fields:
     default: true
     help: Automatically add site name to all page titles (e.g., "Page Title | Site Name")
     width: 1/4
+
+  metaTitle:
+    label: Overwrite Site Name
+    type: text
+    placeholder: "{{ site.title }}"
+    help: >
+      Overwrite the site name.
+    when:
+      appendSiteName: true
+    width: 1/2
 
   titleSeparator:
     label: Title Separator

@@ -202,7 +202,9 @@ The plugin adds a **Meta Kit** section to the Kirby Panel main menu with powerfu
   - Apply changes with a single click
 - **Legacy Migration:** Detect and convert old SEO fields to the new structure
 - **Quick Edit:** Single-page metadata editor accessible from the main table
-- **AI Generation:** Generate optimized meta titles (30-65 chars) and descriptions (max 160 chars)
+- **AI Generation:** Generate optimized meta titles and descriptions
+  - **Smart Title Length:** Automatically adjusts title length (50-60 chars total) accounting for site name appending
+  - **Description Length:** Max 160 characters optimized for search engines
 
 **Access:** Click **"Meta Kit"** (wand icon) in the Panel sidebar
 
@@ -221,14 +223,19 @@ The plugin adds a **Meta Kit** section to the Kirby Panel main menu with powerfu
 * **Schema.org:** Organization, WebSite, WebPage, BreadcrumbList (JSON-LD)
 * **Sitemap:** `/sitemap.xml` with styled view, exclusions, priorities
 * **Robots.txt:** `/robots.txt` with user agent rules, bad bot blocking, and Panel configuration
-* **AI Generation:** Smart meta titles (30-65 chars) & descriptions (max 160 chars)
+* **AI Generation:** Smart meta titles (auto-adjusted for site name) & descriptions (max 160 chars)
 * **Multilanguage:** Full support with hreflang tags and og:locale
 * **Configurable:** Toggle meta/opengraph/schema individually
 
 ## Programmatic Usage
 
 ```php
-// Generate description
+// Generate meta title (auto-adjusts for site name)
+$title = $page->generateSeoTitle();
+$title = $page->generateSeoTitle($content, 'de');
+$title = $page->text()->toSeoTitle();
+
+// Generate meta description
 $desc = $page->generateSeoDescription();
 $desc = $page->generateSeoDescription($content, 'de');
 $desc = $page->text()->toSeoDescription();
@@ -244,6 +251,12 @@ POST /api/seo-ai/generate
 
 ## Best Practices
 
+* **Meta Titles:**
+  - Target 50-60 characters total (including site name)
+  - AI generation automatically accounts for site name length
+  - Place primary keywords near the beginning
+  - Make titles compelling and clickable
+  - Avoid ALL CAPS unless brand requires it
 * **Meta Descriptions:** <160 chars, unique per page, include keywords
 * **OG Images:** 1200×630px, PNG/JPG, avoid text-heavy images
 * **Auto-Generate:** Use panel button instead of auto-save for better control

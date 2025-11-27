@@ -80,12 +80,27 @@ App::plugin(
         ],
         'routes' => require __DIR__ . '/src/routes/routes.php',
         'pageMethods' => [
+            'generateSeoTitle' => function (?string $content = null, ?string $languageCode = null) {
+                if (!TearoomOne\MetaKit::isAiEnabled()) {
+                    return null;
+                }
+
+                $metaKit = new TearoomOne\MetaKit(kirby());
+                $languageCode = $languageCode ?? kirby()->language()?->code() ?? 'en';
+                $content = $content ?? $this->text()->toString();
+
+                if (empty($content)) {
+                    return null;
+                }
+
+                return $metaKit->generateTitle($content, ['language' => $languageCode]);
+            },
             'generateSeoDescription' => function (?string $content = null, ?string $languageCode = null) {
                 if (!TearoomOne\MetaKit::isAiEnabled()) {
                     return null;
                 }
 
-                $metaKit = new MetaKit(kirby());
+                $metaKit = new TearoomOne\MetaKit(kirby());
                 $languageCode = $languageCode ?? kirby()->language()?->code() ?? 'en';
                 $content = $content ?? $this->text()->toString();
 
@@ -97,12 +112,21 @@ App::plugin(
             }
         ],
         'fieldMethods' => [
+            'toSeoTitle' => function ($field) {
+                if (!TearoomOne\MetaKit::isAiEnabled()) {
+                    return null;
+                }
+
+                $metaKit = new TearoomOne\MetaKit(kirby());
+                $languageCode = kirby()->language()?->code() ?? 'en';
+                return $metaKit->generateTitle($field->value(), ['language' => $languageCode]);
+            },
             'toSeoDescription' => function ($field) {
                 if (!TearoomOne\MetaKit::isAiEnabled()) {
                     return null;
                 }
 
-                $metaKit = new MetaKit(kirby());
+                $metaKit = new TearoomOne\MetaKit(kirby());
                 $languageCode = kirby()->language()?->code() ?? 'en';
                 return $metaKit->generateDescription($field->value(), ['language' => $languageCode]);
             }
