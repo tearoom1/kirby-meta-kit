@@ -1,0 +1,131 @@
+name: Robots.txt Settings
+preview: fields
+wysiwyg: true
+tabs:
+  general:
+    label: General
+    fields:
+      info:
+        type: info
+        label: Robots.txt Configuration
+        text: |
+          Configure the robots.txt file for your site. This file tells search engine crawlers which pages they can access.
+          The robots.txt will be automatically available at `/robots.txt`
+        theme: info
+
+      enabled:
+        label: Enable Custom Robots.txt
+        type: toggle
+        default: true
+        help: When disabled, a basic robots.txt will be served
+        width: 1/3
+
+      defaultRules:
+        label: Default Rules
+        type: toggle
+        default: true
+        help: 'Include "User-agent: * / Allow: /" as fallback'
+        when:
+          enabled: true
+        width: 1/3
+
+      includeSitemap:
+        label: Include Sitemap
+        type: toggle
+        default: true
+        help: 'Add "Sitemap: [url]/sitemap.xml" to robots.txt'
+        when:
+          enabled: true
+        width: 1/3
+
+      customRules:
+        label: User Agent Rules
+        type: structure
+        help: Add custom rules for specific user agents
+        when:
+          enabled: true
+        fields:
+          userAgent:
+            label: User Agent
+            type: select
+            default: "*"
+            options:
+              - { value: '*', text: '* (All Bots)' }
+              - { value: 'Googlebot', text: 'Googlebot' }
+              - { value: 'Googlebot-Image', text: 'Googlebot-Image' }
+              - { value: 'Googlebot-News', text: 'Googlebot-News' }
+              - { value: 'Bingbot', text: 'Bingbot' }
+              - { value: 'Slurp', text: 'Yahoo Slurp' }
+              - { value: 'DuckDuckBot', text: 'DuckDuckBot' }
+              - { value: 'Baiduspider', text: 'Baiduspider' }
+              - { value: 'YandexBot', text: 'YandexBot' }
+              - { value: 'facebookexternalhit', text: 'Facebook' }
+              - { value: 'Twitterbot', text: 'Twitter' }
+              - { value: 'LinkedInBot', text: 'LinkedIn' }
+              - { value: 'custom', text: 'Custom User Agent' }
+            help: Select a user agent or choose 'Custom' to enter your own
+
+          customUserAgent:
+            label: Custom User Agent Name
+            type: text
+            placeholder: e.g., MyBot
+            when:
+              userAgent: custom
+            help: Enter the exact user agent name
+
+          allowPaths:
+            label: Allowed Paths
+            type: tags
+            placeholder: /images/, /public/
+            help: |
+              Paths that this user agent is allowed to crawl.
+              Enter paths one by one (press Enter after each).
+              Leave empty if you want to allow everything except disallowed paths.
+
+          disallowPaths:
+            label: Disallowed Paths
+            type: tags
+            placeholder: /admin/, /private/
+            help: |
+              Paths that this user agent should NOT crawl.
+              Enter paths one by one (press Enter after each).
+              Common examples: /panel/, /api/, /admin/
+
+          crawlDelay:
+            label: Crawl Delay (seconds)
+            type: number
+            min: 0
+            max: 60
+            step: 1
+            placeholder: 0
+            help: |
+              Optional delay between requests (in seconds).
+              Use this to limit server load. 0 = no delay.
+              Note: Not all bots respect this directive.
+
+  advanced:
+    label: Advanced
+    fields:
+      blockBadBots:
+        label: Block Known Bad Bots
+        type: toggle
+        default: false
+        help: |
+          Automatically block known scrapers and spam bots.
+          Includes bots like: AhrefsBot, MJ12bot, SemrushBot, etc.
+        when:
+          enabled: true
+
+      customDirectives:
+        label: Custom Directives
+        type: textarea
+        placeholder: |
+          Host: example.com
+          Request-rate: 1/1
+        help: |
+          Add custom robots.txt directives (advanced users only).
+          Each line should be a valid robots.txt directive.
+          Example: "Host: www.example.com"
+        font: monospace
+        when:
+          enabled: true

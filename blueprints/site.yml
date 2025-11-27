@@ -76,3 +76,19 @@ columns:
         empty: false
         pretty: true
 
+  robots:
+    width: 1/1
+    type: fields
+    label: Robots.txt
+    icon: robot
+    fields:
+      metaKitRobots:
+        label: Robots.txt Settings
+        type: blocks
+        fieldsets:
+          - mk-robots
+        max: 1
+        empty: false
+        pretty: true
+        help: Configure robots.txt rules for search engine crawlers. Available at /robots.txt
+

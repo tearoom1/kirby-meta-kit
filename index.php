@@ -14,6 +14,7 @@ if (!option('tearoom1.meta-kit.enabled', true)) {
 $classes = [
     'TearoomOne\MetaKit' => 'classes/MetaKit.php',
     'TearoomOne\Sitemap' => 'classes/Sitemap.php',
+    'TearoomOne\Robots' => 'classes/Robots.php',
     'TearoomOne\MetaHelper' => 'classes/MetaHelper.php',
     'TearoomOne\MetaKitController' => 'classes/MetaKitController.php',
     'TearoomOne\MetaKitLicense' => 'classes/MetaKitLicense.php',
@@ -55,6 +56,7 @@ App::plugin(
             'blocks/mk-site-seo' => __DIR__ . '/blueprints/blocks/mk-site-seo.yml',
             'blocks/mk-openrouter' => __DIR__ . '/blueprints/blocks/mk-openrouter.yml',
             'blocks/mk-sitemap' => __DIR__ . '/blueprints/blocks/mk-sitemap.yml',
+            'blocks/mk-robots' => __DIR__ . '/blueprints/blocks/mk-robots.yml',
         ],
         'sections' => [
             'seo-preview' => __DIR__ . '/sections/preview.php',

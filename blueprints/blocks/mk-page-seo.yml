@@ -11,7 +11,7 @@ fields:
     label: Meta Description
     type: textarea
     buttons: false
-    maxlength: 185
+    maxlength: 160
     counter: true
     help: Description for search engines (preferably max 160 characters)
 

@@ -16,6 +16,10 @@ return [
         "action" => require __DIR__ . "/sitemap.php",
     ],
     [
+        "pattern" => "robots.txt",
+        "action" => require __DIR__ . "/robots.txt.php",
+    ],
+    [
         "pattern" => "meta-kit/license/activate",
         "method" => "POST",
         "auth" => true,

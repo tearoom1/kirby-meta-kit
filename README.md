@@ -11,6 +11,7 @@ AI-powered SEO plugin for Kirby 4 with automatic meta descriptions, live preview
 - 👁️ Live panel previews (Google, Twitter, Facebook)
 - ⚡ Bulk operations & legacy field migration
 - 🗺️ Styled XML sitemap with multilanguage support
+- 🤖 Dynamic robots.txt with user agent rules
 - 🏗️ Schema.org JSON-LD structured data
 - 📱 OpenGraph & Twitter Cards (1200×630px)
 - 🌍 Full multilanguage support with hreflang
@@ -219,6 +220,7 @@ The plugin adds a **Meta Kit** section to the Kirby Panel main menu with powerfu
 * **Social Media:** OpenGraph & Twitter Cards with optimized images (1200×630px)
 * **Schema.org:** Organization, WebSite, WebPage, BreadcrumbList (JSON-LD)
 * **Sitemap:** `/sitemap.xml` with styled view, exclusions, priorities
+* **Robots.txt:** `/robots.txt` with user agent rules, bad bot blocking, and Panel configuration
 * **AI Generation:** Smart meta titles (30-65 chars) & descriptions (max 160 chars)
 * **Multilanguage:** Full support with hreflang tags and og:locale
 * **Configurable:** Toggle meta/opengraph/schema individually
@@ -245,6 +247,228 @@ POST /api/seo-ai/generate
 * **Meta Descriptions:** <160 chars, unique per page, include keywords
 * **OG Images:** 1200×630px, PNG/JPG, avoid text-heavy images
 * **Auto-Generate:** Use panel button instead of auto-save for better control
+
+## Robots.txt Management
+
+Meta Kit provides a powerful, fully configurable robots.txt generator that's managed through the Kirby Panel or config file.
+
+### Features
+
+- **Panel Interface**: Configure robots.txt rules visually in Site settings
+- **User Agent Rules**: Create specific rules for different crawlers (Googlebot, Bingbot, etc.)
+- **Bad Bot Blocking**: Automatically block known scrapers and spam bots
+- **Sitemap Integration**: Automatically includes sitemap reference
+- **Config Override**: Override or extend panel settings via config.php
+- **Custom Directives**: Add advanced directives like Host, Crawl-delay, etc.
+
+### Access Robots.txt
+
+Your robots.txt file is automatically available at:
+```
+https://yoursite.com/robots.txt
+```
+
+### Panel Configuration
+
+1. Go to **Site → Robots.txt** in the Panel
+2. Enable "Custom Robots.txt"
+3. Add user agent rules as needed
+4. Configure options:
+   - Include default rules (Allow: /)
+   - Include sitemap reference
+   - Block known bad bots
+
+### Adding Custom Rules
+
+**In the Panel:**
+
+1. Click "Add" under User Agent Rules
+2. Select a user agent (or choose "Custom")
+3. Add allowed/disallowed paths
+4. Set optional crawl delay
+5. Save
+
+**Example Panel Configuration:**
+
+- **User Agent**: Googlebot
+- **Allowed Paths**: /images/, /assets/
+- **Disallowed Paths**: /panel/, /api/
+- **Crawl Delay**: 0 (no delay)
+
+### Config File Configuration
+
+Override or extend panel settings in `site/config/config.php`:
+
+```php
+'tearoom1.meta-kit' => [
+    'robots' => [
+        // Enable/disable custom robots.txt
+        'enabled' => true,
+
+        // Include default "User-agent: * / Allow: /" rules
+        'defaultRules' => true,
+
+        // Include sitemap reference
+        'includeSitemap' => true,
+
+        // Block known bad bots
+        'blockBadBots' => true,
+
+        // Custom rules (extends panel rules)
+        'rules' => [
+            [
+                'userAgent' => 'Googlebot',
+                'allow' => ['/images/', '/assets/'],
+                'disallow' => ['/panel/', '/api/'],
+                'crawlDelay' => 0,
+            ],
+            [
+                'userAgent' => 'AhrefsBot',
+                'disallow' => ['/'], // Block completely
+            ],
+        ],
+
+        // Custom directives (advanced)
+        'customDirectives' => 'Host: www.example.com',
+    ],
+]
+```
+
+### Common Use Cases
+
+**1. Block Specific Directories**
+
+```php
+'rules' => [
+    [
+        'userAgent' => '*',
+        'disallow' => ['/panel/', '/api/', '/admin/'],
+    ],
+]
+```
+
+**2. Allow Only Search Engines**
+
+```php
+'rules' => [
+    [
+        'userAgent' => 'Googlebot',
+        'allow' => ['/'],
+    ],
+    [
+        'userAgent' => 'Bingbot',
+        'allow' => ['/'],
+    ],
+    [
+        'userAgent' => '*',
+        'disallow' => ['/'], // Block all others
+    ],
+]
+```
+
+**3. Rate Limiting for Aggressive Crawlers**
+
+```php
+'rules' => [
+    [
+        'userAgent' => 'Bingbot',
+        'allow' => ['/'],
+        'crawlDelay' => 10, // 10 seconds between requests
+    ],
+]
+```
+
+**4. Block Bad Bots**
+
+Enable in Panel or config:
+
+```php
+'robots' => [
+    'blockBadBots' => true, // Blocks AhrefsBot, SemrushBot, MJ12bot, etc.
+]
+```
+
+### Blocked Bad Bots
+
+When "Block Bad Bots" is enabled, these user agents are automatically blocked:
+
+- AhrefsBot
+- SemrushBot
+- MJ12bot
+- DotBot
+- BLEXBot
+- PetalBot
+- DataForSeoBot
+- Pinterestbot/1.0
+- MegaIndex.ru
+- SeekportBot
+- serpstatbot
+- AspiegelBot
+
+### Settings Priority
+
+Settings merge in this order (lowest to highest priority):
+
+1. **Plugin Defaults** - Basic allow all rules
+2. **Panel Settings** - Configured in Site → Robots.txt
+3. **Config File** - `tearoom1.meta-kit.robots` settings
+
+Rules from config **extend** (not replace) panel rules.
+
+### Generated Robots.txt Example
+
+```
+# Robots.txt for https://example.com
+# Generated by Meta Kit for Kirby
+
+User-agent: Googlebot
+Allow: /images/
+Allow: /assets/
+Disallow: /panel/
+Disallow: /api/
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 5
+
+# Block known scrapers and spam bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: *
+Allow: /
+
+Sitemap: https://example.com/sitemap.xml
+```
+
+### Testing Your Robots.txt
+
+1. Visit `https://yoursite.com/robots.txt` to see generated content
+2. Use [Google's Robots Testing Tool](https://www.google.com/webmasters/tools/robots-testing-tool)
+3. Verify syntax with [robots.txt validators](https://www.google.com/webmasters/tools/home)
+
+### Troubleshooting
+
+**Robots.txt not showing:**
+- Check route is registered in routes.php (line 19-21)
+- Clear Kirby cache
+- Verify no .htaccess rules block /robots.txt
+
+**Rules not applying:**
+- Check Panel settings are saved
+- Verify config syntax is correct
+- Review generated output at /robots.txt
+- Ensure "Enable Custom Robots.txt" toggle is ON
+
+**Bad bots still crawling:**
+- Some bots ignore robots.txt (add server-level blocks)
+- Check server logs for actual user agent names
+- Use .htaccess or firewall rules for persistent offenders
+
+---
 
 ## Legacy Migration (old SEO fields → Meta Kit)
 
