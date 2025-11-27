@@ -233,6 +233,11 @@
     font-weight: 600;
   }
 
+  .k-meta-kit-status-error {
+    color: var(--color-red-600);
+    font-weight: 600;
+  }
+
   .k-meta-kit-icon-success {
     color: var(--color-green-600);
   }
@@ -594,6 +599,10 @@
 
   .k-meta-kit-field-length.k-meta-kit-status-warning {
     color: var(--color-orange-600);
+  }
+
+  .k-meta-kit-field-length.k-meta-kit-status-error {
+    color: var(--color-red-600);
   }
 
   /* Single page edit dialog */

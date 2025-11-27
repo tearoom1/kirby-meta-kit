@@ -147,12 +147,12 @@
           </td>
           <td>{{ page.template }}</td>
           <td class="k-meta-kit-table-center">
-              <span :class="getStatusClass(page.hasMetaTitle, page.metaTitleLength)">
+              <span :class="getStatusClass(page.hasMetaTitle, page.metaTitleLength, 'title')">
                 {{ page.hasMetaTitle ? page.metaTitleLength : '—' }}
               </span>
           </td>
           <td class="k-meta-kit-table-center">
-              <span :class="getStatusClass(page.hasMetaDescription, page.metaDescriptionLength)">
+              <span :class="getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description')">
                 {{ page.hasMetaDescription ? page.metaDescriptionLength : '—' }}
               </span>
           </td>
@@ -267,7 +267,7 @@
                   <span>
                     <span v-if="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
                           class="k-meta-kit-field-length"
-                          :class="getStatusClass(true, getEditableValue(page.id, 'metaTitle', page.metaTitle).length)">
+                          :class="getStatusClass(true, getEditableValue(page.id, 'metaTitle', page.metaTitle).length, 'title')">
                       {{ getEditableValue(page.id, 'metaTitle', page.metaTitle).length }} chars
                     </span>
                   </span>
@@ -299,7 +299,7 @@
                   <span>
                     <span v-if="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
                           class="k-meta-kit-field-length"
-                          :class="getStatusClass(true, getEditableValue(page.id, 'metaDescription', page.metaDescription).length)">
+                          :class="getStatusClass(true, getEditableValue(page.id, 'metaDescription', page.metaDescription).length, 'description')">
                       {{ getEditableValue(page.id, 'metaDescription', page.metaDescription).length }} chars
                     </span>
                   </span>
@@ -362,7 +362,7 @@
             <div class="k-meta-kit-single-field-meta">
               <span v-if="getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)"
                     class="k-meta-kit-field-length"
-                    :class="getStatusClass(true, getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle).length)">
+                    :class="getStatusClass(true, getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle).length, 'title')">
                 {{ getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle).length }} chars
               </span>
               <k-button
@@ -397,7 +397,7 @@
             <div class="k-meta-kit-single-field-meta">
               <span v-if="getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription)"
                     class="k-meta-kit-field-length"
-                    :class="getStatusClass(true, getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription).length)">
+                    :class="getStatusClass(true, getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription).length, 'description')">
                 {{ getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription).length }} chars
               </span>
               <k-button
@@ -561,12 +561,33 @@ export default {
   created() {
   },
   methods: {
-    getStatusClass(hasField, length) {
+    getStatusClass(hasField, length, fieldType = 'description') {
       if (!hasField) return '';
-      if (length < 50 || length > 160) {
+
+      let optimal, warning, error;
+
+      if (fieldType === 'title') {
+        // Title: optimal 50-60, warning ±10% (45-66), error outside
+        optimal = { min: 50, max: 60 };
+        warning = { min: 45, max: 66 }; // 10% tolerance
+      } else {
+        // Description: optimal 140-160, warning ±10% (126-176), error outside
+        optimal = { min: 140, max: 160 };
+        warning = { min: 126, max: 176 }; // 10% tolerance
+      }
+
+      // Green: within optimal range
+      if (length >= optimal.min && length <= optimal.max) {
+        return 'k-meta-kit-status-success';
+      }
+
+      // Yellow: within warning range (10% around optimal)
+      if (length >= warning.min && length <= warning.max) {
         return 'k-meta-kit-status-warning';
       }
-      return 'k-meta-kit-status-success';
+
+      // Red: outside acceptable range
+      return 'k-meta-kit-status-error';
     },
     async refreshPages() {
       this.isLoadingPages = true;
