@@ -5,7 +5,7 @@ fields:
   metaTitle:
     label: Meta Title
     type: text
-    help: Title for search engines. See also the site settings.
+    help: Title for search engines. See also the site settings for additional options. <br>Around 50–60 characters. Include the main keyword once. Make it compelling for users.
 
   metaDescription:
     label: Meta Description
@@ -13,18 +13,12 @@ fields:
     buttons: false
     maxlength: 160
     counter: true
-    help: Description for search engines (preferably max 160 characters)
-
-  metaKeywords:
-    label: Keywords
-    type: tags
-    help: Comma-separated keywords
-    width: 1/2
+    help: Description for search engines. Around 140 - 160 characters. Include primary keyword and a call-to-action.
 
   metaAuthor:
     label: Author
     type: text
-    help: Author of the page
+    help: Author of the page. This field has no influence on SEO.
     width: 1/2
 
   canonicalUrl:

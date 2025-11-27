@@ -9,7 +9,7 @@ fields:
     type: text
     placeholder: "{{ site.title }}"
     help: >
-      Overwrite the site name.
+      Overwrite the site name. Will be appended to page titles if "Append Site Name to Titles" is enabled.
     when:
       appendSiteName: true
     width: 1/2
@@ -44,18 +44,12 @@ fields:
     label: Default Meta Description
     type: textarea
     buttons: false
-    help: Default description for all pages. Max 160 characters.
-
-  metaKeywords:
-    label: Default Keywords
-    type: tags
-    help: Comma-separated list of default keywords for all pages.
-    width: 1/3
+    help: Default description for search engines. Should be around 140 - 160 characters. Include primary keyword and a call-to-action.
 
   metaAuthor:
     label: Default Author
     type: text
-    help: The default author name
+    help: The default author name. This field has no influence on SEO.
     width: 1/3
 
   robots:
