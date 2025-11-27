@@ -42,6 +42,7 @@ fields:
       - { value: 'index, nofollow', text: 'Index, No Follow' }
       - { value: 'noindex, nofollow', text: 'No Index, No Follow' }
     width: 1/2
+    translate: false
 
   separator1:
     label:

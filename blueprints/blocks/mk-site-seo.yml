@@ -59,7 +59,7 @@ fields:
     width: 1/3
 
   robots:
-    label: Set a robots directive
+    label: Default robots directive
     type: select
     options:
       - { value: 'index, follow', text: 'Index, Follow' }
@@ -67,6 +67,7 @@ fields:
       - { value: 'index, nofollow', text: 'Index, No Follow' }
       - { value: 'noindex, nofollow', text: 'No Index, No Follow' }
     width: 1/3
+    translate: false
 
   ogImage:
     label: Default Social Media Image

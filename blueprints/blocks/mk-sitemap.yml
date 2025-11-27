@@ -8,6 +8,7 @@ fields:
     type: pages
     multiple: true
     help: Pages to exclude from the sitemap
+    translate: false
 
   priorityHome:
     label: Homepage Priority
@@ -17,6 +18,7 @@ fields:
     step: 0.1
     default: 1.0
     width: 1/2
+    translate: false
 
   priorityDefault:
     label: Default Page Priority
@@ -26,3 +28,4 @@ fields:
     step: 0.1
     default: 0.8
     width: 1/2
+    translate: false

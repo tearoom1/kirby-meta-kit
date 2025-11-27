@@ -39,6 +39,16 @@ columns:
             label: Profile URL
             type: url
 
+  otherSettings:
+    width: 1/1
+    type: fields
+    fields:
+      otherSettings:
+        label:
+        type: info
+        text: The following settings are language independent. Please set the in the default language. You can also set them in the options (e.g. config.php).
+        theme: positive
+
   openrouter:
     width: 1/2
     type: fields

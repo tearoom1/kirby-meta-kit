@@ -8,11 +8,13 @@ fields:
     label: AI Integration
     text: AI features will be automatically disabled if the API key and model is not configured either here or in the config.
     theme: info
+    translate: false
   apiKey:
     label: OpenRouter API Key
     type: text
     help: Your OpenRouter API key for AI-generated descriptions. Leave empty to disable AI features.
     width: 1/2
+    translate: false
 
   model:
     label: AI Model
@@ -40,6 +42,7 @@ fields:
       - { value: 'deepseek/deepseek-chat', text: 'DeepSeek Chat V3 (Paid)' }
     default: "google/gemini-2.0-flash-exp:free"
     width: 1/2
+    translate: false
 
   temperature:
     label: Creativity Level
@@ -50,3 +53,4 @@ fields:
     default: 0.7
     width: 1/2
     help: Higher values make output more random, lower values more focused
+    translate: false
