@@ -263,17 +263,17 @@
               :placeholder="page.metaTitle || 'No meta title'"
               type="text"
             />
-            <div v-if="page.id !== 'site' && getEditableValue(page.id, 'metaTitle', page.metaTitle) && siteSettings.appendSiteName && siteSettings.siteMetaTitle" class="k-meta-kit-title-preview">
+            <div v-if="shouldShowTitlePreview(page.id, getEditableValue(page.id, 'metaTitle', page.metaTitle))" class="k-meta-kit-title-preview">
               {{ getFullTitle(getEditableValue(page.id, 'metaTitle', page.metaTitle)) }}
             </div>
             <div class="k-meta-kit-dialog-field-meta">
-                  <span>
-                    <span v-if="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
-                          class="k-meta-kit-field-length"
-                          :class="getStatusClass(true, getEditableValue(page.id, 'metaTitle', page.metaTitle).length, 'title', page.id !== 'site' ? getEditableValue(page.id, 'metaTitle', page.metaTitle) : null)">
-                      {{ page.id !== 'site' && siteSettings.appendSiteName && siteSettings.siteMetaTitle ? getFullTitle(getEditableValue(page.id, 'metaTitle', page.metaTitle)).length : getEditableValue(page.id, 'metaTitle', page.metaTitle).length }} chars
-                    </span>
-                  </span>
+              <span>
+                <span v-if="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
+                      class="k-meta-kit-field-length"
+                      :class="getTitleStatusClass(page.id, getEditableValue(page.id, 'metaTitle', page.metaTitle))">
+                  {{ getTitleCharCount(page.id, getEditableValue(page.id, 'metaTitle', page.metaTitle)) }} chars
+                </span>
+              </span>
               <k-button
                 v-if="aiEnabled"
                 icon="sparkling"
@@ -299,13 +299,13 @@
               :rows="3"
             />
             <div class="k-meta-kit-dialog-field-meta">
-                  <span>
-                    <span v-if="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
-                          class="k-meta-kit-field-length"
-                          :class="getStatusClass(true, getEditableValue(page.id, 'metaDescription', page.metaDescription).length, 'description')">
-                      {{ getEditableValue(page.id, 'metaDescription', page.metaDescription).length }} chars
-                    </span>
-                  </span>
+              <span>
+                <span v-if="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
+                      class="k-meta-kit-field-length"
+                      :class="getDescriptionStatusClass(getEditableValue(page.id, 'metaDescription', page.metaDescription))">
+                  {{ getEditableValue(page.id, 'metaDescription', page.metaDescription).length }} chars
+                </span>
+              </span>
               <k-button
                 v-if="aiEnabled"
                 icon="sparkling"
@@ -362,14 +362,14 @@
               :placeholder="currentEditPage.metaTitle || 'No meta title set'"
               type="text"
             />
-            <div v-if="currentEditPage.id !== 'site' && getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle) && siteSettings.appendSiteName && siteSettings.siteMetaTitle" class="k-meta-kit-title-preview">
+            <div v-if="shouldShowTitlePreview(currentEditPage.id, getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle))" class="k-meta-kit-title-preview">
               {{ getFullTitle(getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)) }}
             </div>
             <div class="k-meta-kit-single-field-meta">
               <span v-if="getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)"
                     class="k-meta-kit-field-length"
-                    :class="getStatusClass(true, getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle).length, 'title', currentEditPage.id !== 'site' ? getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle) : null)">
-                {{ currentEditPage.id !== 'site' && siteSettings.appendSiteName && siteSettings.siteMetaTitle ? getFullTitle(getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)).length : getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle).length }} chars
+                    :class="getTitleStatusClass(currentEditPage.id, getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle))">
+                {{ getTitleCharCount(currentEditPage.id, getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)) }} chars
               </span>
               <k-button
                 v-if="aiEnabled"
@@ -403,7 +403,7 @@
             <div class="k-meta-kit-single-field-meta">
               <span v-if="getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription)"
                     class="k-meta-kit-field-length"
-                    :class="getStatusClass(true, getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription).length, 'description')">
+                    :class="getDescriptionStatusClass(getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription))">
                 {{ getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription).length }} chars
               </span>
               <k-button
@@ -868,6 +868,51 @@ export default {
         return this.fieldChoices[pageId][fieldName].manualValue;
       }
       return currentValue || '';
+    },
+    // Helper methods for title field rendering
+    isSitePage(pageId) {
+      return pageId === 'site';
+    },
+    shouldShowTitlePreview(pageId, value) {
+      return !this.isSitePage(pageId) &&
+             value &&
+             this.siteSettings.appendSiteName &&
+             this.siteSettings.siteMetaTitle;
+    },
+    getTitleCharCount(pageId, value) {
+      if (!value) return 0;
+
+      if (this.isSitePage(pageId)) {
+        return value.length;
+      }
+
+      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+        return this.getFullTitle(value).length;
+      }
+
+      return value.length;
+    },
+    getTitleStatusClass(pageId, value) {
+      if (!value) return '';
+
+      const pageTitle = this.isSitePage(pageId) ? null : value;
+      return this.getStatusClass(true, value.length, 'title', pageTitle);
+    },
+    // Get all title field data at once to avoid multiple getEditableValue calls
+    getTitleFieldData(pageId, currentValue) {
+      const value = this.getEditableValue(pageId, 'metaTitle', currentValue);
+      return {
+        value,
+        showPreview: this.shouldShowTitlePreview(pageId, value),
+        fullTitle: this.getFullTitle(value),
+        charCount: this.getTitleCharCount(pageId, value),
+        statusClass: this.getTitleStatusClass(pageId, value)
+      };
+    },
+    // Helper for description status class
+    getDescriptionStatusClass(value) {
+      if (!value) return '';
+      return this.getStatusClass(true, value.length, 'description');
     },
     hasFieldChanged(pageId, fieldName, currentValue, legacyValue) {
       const choice = this.getFieldChoice(pageId, fieldName);
