@@ -256,70 +256,31 @@
             <a :href="page.panelUrl" class="k-link k-meta-kit-page-id">{{ page.id }}</a>
           </div>
           <!-- Meta Title -->
-          <div class="k-meta-kit-dialog-table-field-title">
-            <k-input
-              :value="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
-              @input="setManualValue(page.id, 'metaTitle', $event)"
-              :placeholder="page.metaTitle || 'No meta title'"
-              type="text"
-            />
-            <div v-if="shouldShowTitlePreview(page.id, getEditableValue(page.id, 'metaTitle', page.metaTitle))" class="k-meta-kit-title-preview">
-              {{ getFullTitle(getEditableValue(page.id, 'metaTitle', page.metaTitle)) }}
-            </div>
-            <div class="k-meta-kit-dialog-field-meta">
-              <span>
-                <span v-if="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
-                      class="k-meta-kit-field-length"
-                      :class="getTitleStatusClass(page.id, getEditableValue(page.id, 'metaTitle', page.metaTitle))">
-                  {{ getTitleCharCount(page.id, getEditableValue(page.id, 'metaTitle', page.metaTitle)) }} chars
-                </span>
-              </span>
-              <k-button
-                v-if="aiEnabled"
-                icon="sparkling"
-                size="xs"
-                :disabled="isGeneratingField(page.id, 'metaTitle')"
-                @click="generateFieldAI(page.id, 'metaTitle')"
-                title="AI Generate"
-              />
-            </div>
-            <div v-if="isGeneratingField(page.id, 'metaTitle')" class="k-meta-kit-dialog-generating">
-              <k-icon class="k-meta-kit-spinner" type="loader"/>
-              <span>Generating...</span>
-            </div>
-          </div>
+          <meta-kit-title-field
+            :value="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
+            @input="setManualValue(page.id, 'metaTitle', $event)"
+            :page-id="page.id"
+            :site-settings="siteSettings"
+            :ai-enabled="aiEnabled"
+            :is-generating="isGeneratingField(page.id, 'metaTitle')"
+            @generate="generateFieldAI(page.id, 'metaTitle')"
+            :placeholder="page.metaTitle || 'No meta title'"
+            button-size="xs"
+            field-class="k-meta-kit-dialog-table-field-title"
+          />
 
           <!-- Meta Description -->
-          <div class="k-meta-kit-dialog-table-field-desc">
-            <k-input
-              :value="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
-              @input="setManualValue(page.id, 'metaDescription', $event)"
-              :placeholder="page.metaDescription || 'No meta description'"
-              type="textarea"
-              :rows="3"
-            />
-            <div class="k-meta-kit-dialog-field-meta">
-              <span>
-                <span v-if="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
-                      class="k-meta-kit-field-length"
-                      :class="getDescriptionStatusClass(getEditableValue(page.id, 'metaDescription', page.metaDescription))">
-                  {{ getEditableValue(page.id, 'metaDescription', page.metaDescription).length }} chars
-                </span>
-              </span>
-              <k-button
-                v-if="aiEnabled"
-                icon="sparkling"
-                size="xs"
-                :disabled="isGeneratingField(page.id, 'metaDescription')"
-                @click="generateFieldAI(page.id, 'metaDescription')"
-                title="AI Generate"
-              />
-            </div>
-            <div v-if="isGeneratingField(page.id, 'metaDescription')" class="k-meta-kit-dialog-generating">
-              <k-icon class="k-meta-kit-spinner" type="loader"/>
-              <span>Generating...</span>
-            </div>
-          </div>
+          <meta-kit-description-field
+            :value="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
+            @input="setManualValue(page.id, 'metaDescription', $event)"
+            :ai-enabled="aiEnabled"
+            :is-generating="isGeneratingField(page.id, 'metaDescription')"
+            @generate="generateFieldAI(page.id, 'metaDescription')"
+            :placeholder="page.metaDescription || 'No meta description'"
+            button-size="xs"
+            :rows="3"
+            field-class="k-meta-kit-dialog-table-field-desc"
+          />
 
           <!-- Actions -->
           <div class="k-meta-kit-dialog-table-actions">
@@ -355,72 +316,35 @@
         <!-- Meta Title -->
         <div class="k-meta-kit-single-field">
           <label class="k-meta-kit-single-field-label">Meta Title</label>
-          <div class="k-meta-kit-single-field-content">
-            <k-input
-              :value="getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)"
-              @input="setManualValue(currentEditPage.id, 'metaTitle', $event)"
-              :placeholder="currentEditPage.metaTitle || 'No meta title set'"
-              type="text"
-            />
-            <div v-if="shouldShowTitlePreview(currentEditPage.id, getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle))" class="k-meta-kit-title-preview">
-              {{ getFullTitle(getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)) }}
-            </div>
-            <div class="k-meta-kit-single-field-meta">
-              <span v-if="getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)"
-                    class="k-meta-kit-field-length"
-                    :class="getTitleStatusClass(currentEditPage.id, getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle))">
-                {{ getTitleCharCount(currentEditPage.id, getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)) }} chars
-              </span>
-              <k-button
-                v-if="aiEnabled"
-                icon="sparkling"
-                size="sm"
-                :disabled="isGeneratingField(currentEditPage.id, 'metaTitle')"
-                @click="generateFieldAI(currentEditPage.id, 'metaTitle')"
-              >
-                AI Generate
-              </k-button>
-            </div>
-            <div v-if="isGeneratingField(currentEditPage.id, 'metaTitle')" class="k-meta-kit-dialog-generating">
-              <k-icon class="k-meta-kit-spinner" type="loader"/>
-              <span>Generating...</span>
-            </div>
-          </div>
+          <meta-kit-title-field
+            :value="getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)"
+            @input="setManualValue(currentEditPage.id, 'metaTitle', $event)"
+            :page-id="currentEditPage.id"
+            :site-settings="siteSettings"
+            :ai-enabled="aiEnabled"
+            :is-generating="isGeneratingField(currentEditPage.id, 'metaTitle')"
+            @generate="generateFieldAI(currentEditPage.id, 'metaTitle')"
+            :placeholder="currentEditPage.metaTitle || 'No meta title set'"
+            button-size="sm"
+            field-class="k-meta-kit-single-field-content"
+          />
         </div>
 
         <!-- Meta Description -->
         <div class="k-meta-kit-single-field">
           <label class="k-meta-kit-single-field-label">Meta Description</label>
-          <div class="k-meta-kit-single-field-content">
-            <k-input
-              :value="getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription)"
-              @input="setManualValue(currentEditPage.id, 'metaDescription', $event)"
-              :placeholder="currentEditPage.metaDescription || 'No meta description set'"
-              type="textarea"
-              :rows="4"
-              buttons="false"
-            />
-            <div class="k-meta-kit-single-field-meta">
-              <span v-if="getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription)"
-                    class="k-meta-kit-field-length"
-                    :class="getDescriptionStatusClass(getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription))">
-                {{ getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription).length }} chars
-              </span>
-              <k-button
-                v-if="aiEnabled"
-                icon="sparkling"
-                size="sm"
-                :disabled="isGeneratingField(currentEditPage.id, 'metaDescription')"
-                @click="generateFieldAI(currentEditPage.id, 'metaDescription')"
-              >
-                AI Generate
-              </k-button>
-            </div>
-            <div v-if="isGeneratingField(currentEditPage.id, 'metaDescription')" class="k-meta-kit-dialog-generating">
-              <k-icon class="k-meta-kit-spinner" type="loader"/>
-              <span>Generating...</span>
-            </div>
-          </div>
+          <meta-kit-description-field
+            :value="getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription)"
+            @input="setManualValue(currentEditPage.id, 'metaDescription', $event)"
+            :ai-enabled="aiEnabled"
+            :is-generating="isGeneratingField(currentEditPage.id, 'metaDescription')"
+            @generate="generateFieldAI(currentEditPage.id, 'metaDescription')"
+            :placeholder="currentEditPage.metaDescription || 'No meta description set'"
+            button-size="sm"
+            :rows="4"
+            buttons="false"
+            field-class="k-meta-kit-single-field-content"
+          />
         </div>
 
         <!-- OG Image -->
@@ -460,7 +384,14 @@
 </template>
 
 <script>
+import MetaKitTitleField from './parts/MetaKitTitleField.vue';
+import MetaKitDescriptionField from './parts/MetaKitDescriptionField.vue';
+
 export default {
+  components: {
+    MetaKitTitleField,
+    MetaKitDescriptionField
+  },
   props: {
     pages: Array,
     language: String,
