@@ -161,9 +161,10 @@ export default {
       this.$refs.dialog.open();
 
       try {
-        const response = await this.api.get('meta-kit/pages-with-content', { pageIds });
+        const response = await this.api.get('meta-kit/pages-with-content', { pageIds: pageIds });
         if (response.status === 'success' && response.data) {
           this.pages = response.data;
+          console.log(this.pages);
 
           // Initialize edited fields and generating state for each page
           this.editedFields = {};

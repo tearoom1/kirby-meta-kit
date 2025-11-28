@@ -271,12 +271,13 @@ class MetaKitController
      * Generate selected fields (title and/or description) for specified pages
      */
     public static function generateAllFields(
-        bool $generateTitle = false,
-        bool $generateDescription = false,
-        bool $generateOgTitle = false,
-        bool $generateOgDescription = false,
+        bool  $generateTitle = false,
+        bool  $generateDescription = false,
+        bool  $generateOgTitle = false,
+        bool  $generateOgDescription = false,
         array $pageIds = []
-    ): array {
+    ): array
+    {
         $kirby = kirby();
 
         // Get pages to process
@@ -478,7 +479,7 @@ class MetaKitController
         $pages = $site->index();
 
         // Filter by specific page IDs if provided
-        $pageIds = get('pageIds');
+        $pageIds = explode(',', get('pageIds'));
         $includeSite = false;
 
         if ($pageIds && is_array($pageIds)) {
@@ -957,6 +958,7 @@ class MetaKitController
             ];
         }
     }
+
     public static function generateDescription(string $pageId): array
     {
         $result = self::generateField($pageId, 'metaDescription', null, true);
