@@ -767,6 +767,23 @@
         }
         return titleToUse.length;
       },
+      getFullOgTitleLength(page) {
+        if (page.id === "site") {
+          if (page.hasOgTitle) {
+            return page.ogTitleLength;
+          }
+          return page.title ? page.title.length : 0;
+        }
+        const titleToUse = page.hasOgTitle ? page.ogTitle : page.title;
+        if (!titleToUse) return 0;
+        if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+          const separator = this.siteSettings.titleSeparator || "|";
+          const siteName = this.siteSettings.siteMetaTitle || "";
+          const fullTitle = `${titleToUse} ${separator} ${siteName}`;
+          return fullTitle.length;
+        }
+        return titleToUse.length;
+      },
       getFullTitlePreview(page) {
         if (page.id === "site") {
           return page.hasMetaTitle ? page.metaTitle : page.title;
@@ -788,8 +805,16 @@
         const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
         return this.getStatusClass(true, fullLength, "title", titleToUse || "");
       },
+      getTableOgTitleStatusClass(page) {
+        if (page.id === "site") {
+          return "";
+        }
+        const fullLength = this.getFullOgTitleLength(page);
+        const titleToUse = page.hasOgTitle ? page.ogTitle : page.metaTitle;
+        return this.getStatusClass(true, fullLength, "ogTitle", titleToUse || "");
+      },
       getStatusClass(hasValue, length, type) {
-        if (!hasValue || !length) return "";
+        if (!hasValue || !length || length === 0) return "";
         let ranges;
         if (type === "title") {
           ranges = { optimal: { min: 50, max: 60 }, warning: { min: 45, max: 66 } };
@@ -881,7 +906,7 @@
         _vm.showPreview ? "k-meta-kit-table-preview-indicator" : "",
         _vm.showPreview ? "" : _vm.getStatusClass(page.hasOgDescription, page.ogDescriptionLength, "ogDescription"),
         "k-meta-kit-table-tooltip"
-      ], attrs: { "data-status": _vm.showPreview ? _vm.getStatusValue(_vm.getStatusClass(page.hasOgDescription, page.ogDescriptionLength, "ogDescription")) : "", "title": _vm.getOgDescriptionTooltip(page) } }, [_vm.showPreview ? [_vm._v(" " + _vm._s(page.ogDescription || "—") + " ")] : [_vm._v(" " + _vm._s(page.hasOgDescription ? page.ogDescriptionLength : "—") + " ")]], 2)]], 2) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [_vm.getTableTitleStatusClass(page), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getOgTitleTooltip(page) } }, [_vm._v(" " + _vm._s(page.hasMetaTitle ? page.metaTitleLength : "—") + " ")])]) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [_vm.getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, "description"), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getOgTitleTooltip(page) } }, [_vm._v(" " + _vm._s(page.hasMetaDescription ? page.metaDescriptionLength : "—") + " ")])]) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [_vm.getStatusClass(page.hasOgTitle, page.ogTitleLength, "ogDescription"), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getOgTitleTooltip(page) } }, [_vm._v(" " + _vm._s(page.hasOgTitle ? page.ogTitleLength : "—") + " ")])]) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [_vm.getStatusClass(page.hasOgDescription, page.ogDescriptionLength, "ogDescription"), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getOgTitleTooltip(page) } }, [_vm._v(" " + _vm._s(page.hasOgDescription ? page.ogDescriptionLength : "—") + " ")])]) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? _c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } }) : _c("span", [_vm._v("—")])], 1), !_vm.showPreview && _vm.previewMode === "meta" ? _c("td", { staticClass: "k-meta-kit-table-center" }, [page.robots && page.robots.includes("noindex") ? _c("span", { staticClass: "k-meta-kit-robots-noindex" }, [_vm._v("noindex")]) : _c("span", [_vm._v("—")])]) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("div", { staticClass: "k-meta-kit-table-actions" }, [_c("k-button", { attrs: { "icon": "edit", "size": "sm", "title": "Edit Metadata" }, on: { "click": function($event) {
+      ], attrs: { "data-status": _vm.showPreview ? _vm.getStatusValue(_vm.getStatusClass(page.hasOgDescription, page.ogDescriptionLength, "ogDescription")) : "", "title": _vm.getOgDescriptionTooltip(page) } }, [_vm.showPreview ? [_vm._v(" " + _vm._s(page.ogDescription || "—") + " ")] : [_vm._v(" " + _vm._s(page.hasOgDescription ? page.ogDescriptionLength : "—") + " ")]], 2)]], 2) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [_vm.getTableTitleStatusClass(page), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getTitleTooltip(page) } }, [_vm._v(" " + _vm._s(_vm.getFullTitleLength(page)) + " ")])]) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [_vm.getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, "description"), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getDescriptionTooltip(page) } }, [_vm._v(" " + _vm._s(page.hasMetaDescription ? page.metaDescriptionLength : "—") + " ")])]) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [_vm.getTableOgTitleStatusClass(page), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getOgDescriptionTooltip(page) } }, [_vm._v(" " + _vm._s(_vm.getFullOgTitleLength(page)) + " ")])]) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [_vm.getStatusClass(page.hasOgDescription, page.ogDescriptionLength, "ogDescription"), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getOgTitleTooltip(page) } }, [_vm._v(" " + _vm._s(page.hasOgDescription ? page.ogDescriptionLength : "—") + " ")])]) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? _c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } }) : _c("span", [_vm._v("—")])], 1), !_vm.showPreview && _vm.previewMode === "meta" ? _c("td", { staticClass: "k-meta-kit-table-center" }, [page.robots && page.robots.includes("noindex") ? _c("span", { staticClass: "k-meta-kit-robots-noindex" }, [_vm._v("noindex")]) : _c("span", [_vm._v("—")])]) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("div", { staticClass: "k-meta-kit-table-actions" }, [_c("k-button", { attrs: { "icon": "edit", "size": "sm", "title": "Edit Metadata" }, on: { "click": function($event) {
         return _vm.$emit("edit-page", page.id);
       } } }), _vm.aiEnabled ? _c("k-button", { attrs: { "icon": "sparkling", "size": "sm", "disabled": page.hasMetaDescription, "title": "Generate Description" }, on: { "click": function($event) {
         return _vm.$emit("generate-description", page.id);

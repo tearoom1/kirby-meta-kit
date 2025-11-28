@@ -107,24 +107,24 @@
         <!-- Title Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
             <span :class="[ getTableTitleStatusClass(page), 'k-meta-kit-table-tooltip']"
-                  :title="getOgTitleTooltip(page)">
-                {{ page.hasMetaTitle ? page.metaTitleLength : '—' }}
+                  :title="getTitleTooltip(page)">
+                {{ getFullTitleLength(page) }}
             </span>
         </td>
 
         <!-- Description Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
             <span :class="[getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description'), 'k-meta-kit-table-tooltip']"
-                  :title="getOgTitleTooltip(page)">
+                  :title="getDescriptionTooltip(page)">
                 {{ page.hasMetaDescription ? page.metaDescriptionLength : '—' }}
             </span>
         </td>
 
         <!-- OG Title Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
-            <span :class="[getStatusClass(page.hasOgTitle, page.ogTitleLength, 'ogDescription'), 'k-meta-kit-table-tooltip']"
-                  :title="getOgTitleTooltip(page)">
-                {{ page.hasOgTitle ? page.ogTitleLength : '—' }}
+            <span :class="[getTableOgTitleStatusClass(page), 'k-meta-kit-table-tooltip']"
+                  :title="getOgDescriptionTooltip(page)">
+                {{ getFullOgTitleLength(page) }}
             </span>
         </td>
 
@@ -231,6 +231,27 @@ export default {
       return titleToUse.length;
     },
 
+    getFullOgTitleLength(page) {
+      if (page.id === 'site') {
+        if (page.hasOgTitle) {
+          return page.ogTitleLength;
+        }
+        return page.title ? page.title.length : 0;
+      }
+
+      const titleToUse = page.hasOgTitle ? page.ogTitle : page.title;
+      if (!titleToUse) return 0;
+
+      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+        const separator = this.siteSettings.titleSeparator || '|';
+        const siteName = this.siteSettings.siteMetaTitle || '';
+        const fullTitle = `${titleToUse} ${separator} ${siteName}`;
+        return fullTitle.length;
+      }
+
+      return titleToUse.length;
+    },
+
     getFullTitlePreview(page) {
       if (page.id === 'site') {
         return page.hasMetaTitle ? page.metaTitle : page.title;
@@ -258,8 +279,18 @@ export default {
       return this.getStatusClass(true, fullLength, 'title', titleToUse || '');
     },
 
+    getTableOgTitleStatusClass(page) {
+      if (page.id === 'site') {
+        return '';
+      }
+
+      const fullLength = this.getFullOgTitleLength(page);
+      const titleToUse = page.hasOgTitle ? page.ogTitle : page.metaTitle;
+      return this.getStatusClass(true, fullLength, 'ogTitle', titleToUse || '');
+    },
+
     getStatusClass(hasValue, length, type) {
-      if (!hasValue || !length) return '';
+      if (!hasValue || !length || length === 0) return '';
 
       let ranges;
       if (type === 'title') {
