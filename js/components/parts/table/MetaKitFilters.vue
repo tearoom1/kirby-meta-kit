@@ -1,13 +1,6 @@
 <template>
   <div class="k-meta-kit-controls">
     <k-button-group>
-      <k-button
-        size="sm"
-        @click="$emit('update:show-preview', !showPreview)"
-        :title="showPreview ? 'Show character counts' : 'Show preview text'"
-      >
-        {{ showPreview ? 'Back' : 'Preview' }}
-      </k-button>
       <k-button v-if="showPreview"
         size="sm"
         :theme="previewMode === 'meta' ? 'positive' : ''"
@@ -23,6 +16,13 @@
         title="Show OG title and description"
       >
         OG
+      </k-button>
+      <k-button
+        size="sm"
+        @click="$emit('update:show-preview', !showPreview)"
+        :title="showPreview ? 'Show character counts' : 'Show preview text'"
+      >
+        {{ showPreview ? 'Overview' : 'Preview' }}
       </k-button>
     </k-button-group>
 
