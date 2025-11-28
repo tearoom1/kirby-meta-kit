@@ -68,12 +68,9 @@
           </div>
 
           <!-- OG Title -->
-          <meta-kit-title-field
+          <meta-kit-og-title-field
             :value="editedFields[page.id].ogTitle"
             @input="editedFields[page.id].ogTitle = $event"
-            :page-id="page.id"
-            :page-title="page.title"
-            :site-settings="siteSettings"
             :ai-enabled="aiEnabled"
             :is-generating="generating[page.id].ogTitle"
             @generate="generate(page.id, 'ogTitle')"
@@ -81,7 +78,7 @@
           />
 
           <!-- OG Description -->
-          <meta-kit-description-field
+          <meta-kit-og-description-field
             :value="editedFields[page.id].ogDescription"
             @input="editedFields[page.id].ogDescription = $event"
             :ai-enabled="aiEnabled"
@@ -161,10 +158,9 @@ export default {
       this.$refs.dialog.open();
 
       try {
-        const response = await this.api.get('meta-kit/pages-with-content', { pageIds: pageIds });
+        const response = await this.api.get('meta-kit/pages-with-content', { pageIds });
         if (response.status === 'success' && response.data) {
           this.pages = response.data;
-          console.log(this.pages);
 
           // Initialize edited fields and generating state for each page
           this.editedFields = {};

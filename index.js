@@ -1254,7 +1254,6 @@
           const response = await this.api.get("meta-kit/pages-with-content", { pageIds });
           if (response.status === "success" && response.data) {
             this.pages = response.data;
-            console.log(this.pages);
             this.editedFields = {};
             this.generating = {};
             this.pages.forEach((page) => {
@@ -1355,11 +1354,11 @@
         return _vm.generate(page.id, "metaDescription");
       } } })], 1);
     }), 0) : _vm._e(), _vm.activeTab === "og" ? _c("div", { staticClass: "k-meta-kit-dialog-table-wrapper" }, _vm._l(_vm.pages, function(page) {
-      return _c("div", { key: `og-${page.id}`, staticClass: "k-meta-kit-dialog-table-page" }, [_c("div", { staticClass: "k-meta-kit-dialog-page-info" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("a", { staticClass: "k-link k-meta-kit-page-id", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.id))])]), _c("meta-kit-title-field", { attrs: { "value": _vm.editedFields[page.id].ogTitle, "page-id": page.id, "page-title": page.title, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating[page.id].ogTitle, "placeholder": page.ogTitle || "No OG title" }, on: { "input": function($event) {
+      return _c("div", { key: `og-${page.id}`, staticClass: "k-meta-kit-dialog-table-page" }, [_c("div", { staticClass: "k-meta-kit-dialog-page-info" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("a", { staticClass: "k-link k-meta-kit-page-id", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.id))])]), _c("meta-kit-og-title-field", { attrs: { "value": _vm.editedFields[page.id].ogTitle, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating[page.id].ogTitle, "placeholder": page.ogTitle || "No OG title" }, on: { "input": function($event) {
         _vm.editedFields[page.id].ogTitle = $event;
       }, "generate": function($event) {
         return _vm.generate(page.id, "ogTitle");
-      } } }), _c("meta-kit-description-field", { attrs: { "value": _vm.editedFields[page.id].ogDescription, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating[page.id].ogDescription, "placeholder": page.ogDescription || "No OG description" }, on: { "input": function($event) {
+      } } }), _c("meta-kit-og-description-field", { attrs: { "value": _vm.editedFields[page.id].ogDescription, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating[page.id].ogDescription, "placeholder": page.ogDescription || "No OG description" }, on: { "input": function($event) {
         _vm.editedFields[page.id].ogDescription = $event;
       }, "generate": function($event) {
         return _vm.generate(page.id, "ogDescription");
