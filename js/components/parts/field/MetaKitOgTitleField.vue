@@ -6,6 +6,9 @@
       :placeholder="placeholder"
       type="text"
     />
+    <div v-if="showPreview" class="k-meta-kit-title-preview">
+      {{ fullTitle }}
+    </div>
     <div class="k-meta-kit-dialog-field-meta">
       <span>
         <span v-if="value"

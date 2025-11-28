@@ -12,13 +12,15 @@
         </th>
         <th>#</th>
         <th>Page</th>
-        <th v-if="!showPreview">Template</th>
-        <th class="k-meta-kit-table-center">Title</th>
-        <th>Description</th>
-        <th class="k-meta-kit-table-center">OG Title</th>
-        <th>OG Description</th>
-        <th>Image</th>
-        <th v-if="!showPreview">Robots</th>
+        <th v-if="!showPreview">Slug</th>
+        <th v-if="showPreview">{{ previewMode === 'og' ? 'OG Title' : 'Title' }}</th>
+        <th v-if="showPreview">{{ previewMode === 'og' ? 'OG Description' : 'Description' }}</th>
+        <th v-if="!showPreview">Title</th>
+        <th v-if="!showPreview">Description</th>
+        <th v-if="!showPreview">OG Title</th>
+        <th v-if="!showPreview">OG Description</th>
+        <th>OG Image</th>
+        <th v-if="!showPreview && previewMode === 'meta'">Robots</th>
         <th>Actions</th>
       </tr>
       </thead>
@@ -35,29 +37,36 @@
         <td>
           <div class="k-meta-kit-table-page">
             <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
-            <span class="k-meta-kit-table-page-id">{{ page.id }}</span>
+            <span class="k-meta-kit-table-page-id">{{ page.template }}</span>
           </div>
         </td>
-        <td v-if="!showPreview">{{ page.template }}</td>
-        <td :class="showPreview ? '' : 'k-meta-kit-table-center'">
+        <td v-if="!showPreview">{{ page.id }}</td>
+
+        <!-- Title Column (Meta or OG based on mode) -->
+        <td v-if="showPreview">
+          <template v-if="previewMode === 'meta'">
             <span
-              :class="[
-                showPreview ? 'k-meta-kit-table-preview-indicator' : '',
-                showPreview ? '' : getTableTitleStatusClass(page),
-                'k-meta-kit-table-tooltip'
-              ]"
-              :data-status="showPreview ? getStatusValue(getTableTitleStatusClass(page)) : ''"
+              :class="['k-meta-kit-table-preview-indicator', getTableTitleStatusClass(page)]"
+              :data-status="getStatusValue(getTableTitleStatusClass(page))"
               :title="getTitleTooltip(page)"
             >
-              <template v-if="showPreview">
                 {{ getFullTitlePreview(page) }}
-              </template>
-              <template v-else>
-                {{ getFullTitleLength(page) }}
-              </template>
             </span>
+          </template>
+          <template v-else>
+            <span
+              :class="['k-meta-kit-table-preview-indicator', getStatusClass(page.hasOgTitle, page.ogTitleLength, 'ogTitle')]"
+              :data-status="getStatusValue(getStatusClass(page.hasOgTitle, page.ogTitleLength, 'ogTitle'))"
+              :title="getOgTitleTooltip(page)"
+            >
+                {{ page.ogTitle || '—' }}
+            </span>
+          </template>
         </td>
-        <td :class="showPreview ? '' : 'k-meta-kit-table-center'">
+
+        <!-- Description Column (Meta or OG based on mode) -->
+        <td v-if="showPreview" :class="showPreview ? '' : 'k-meta-kit-table-center'">
+          <template v-if="previewMode === 'meta'">
             <span
               :class="[
                 showPreview ? 'k-meta-kit-table-preview-indicator' : '',
@@ -74,26 +83,8 @@
                 {{ page.hasMetaDescription ? page.metaDescriptionLength : '—' }}
               </template>
             </span>
-        </td>
-        <td :class="showPreview ? '' : 'k-meta-kit-table-center'">
-            <span
-              :class="[
-                showPreview ? 'k-meta-kit-table-preview-indicator' : '',
-                showPreview ? '' : getStatusClass(page.hasOgTitle, page.ogTitleLength, 'ogTitle'),
-                'k-meta-kit-table-tooltip'
-              ]"
-              :data-status="showPreview ? getStatusValue(getStatusClass(page.hasOgTitle, page.ogTitleLength, 'ogTitle')) : ''"
-              :title="getOgTitleTooltip(page)"
-            >
-              <template v-if="showPreview">
-                {{ page.ogTitle || '—' }}
-              </template>
-              <template v-else>
-                {{ page.hasOgTitle ? page.ogTitleLength : '—' }}
-              </template>
-            </span>
-        </td>
-        <td :class="showPreview ? '' : 'k-meta-kit-table-center'">
+          </template>
+          <template v-else>
             <span
               :class="[
                 showPreview ? 'k-meta-kit-table-preview-indicator' : '',
@@ -110,12 +101,49 @@
                 {{ page.hasOgDescription ? page.ogDescriptionLength : '—' }}
               </template>
             </span>
+          </template>
         </td>
+
+        <!-- Title Column only when not preview -->
+        <td v-if="!showPreview" class="k-meta-kit-table-center">
+            <span :class="[ getTableTitleStatusClass(page), 'k-meta-kit-table-tooltip']"
+                  :title="getOgTitleTooltip(page)">
+                {{ page.hasMetaTitle ? page.metaTitleLength : '—' }}
+            </span>
+        </td>
+
+        <!-- Description Column only when not preview -->
+        <td v-if="!showPreview" class="k-meta-kit-table-center">
+            <span :class="[getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description'), 'k-meta-kit-table-tooltip']"
+                  :title="getOgTitleTooltip(page)">
+                {{ page.hasMetaDescription ? page.metaDescriptionLength : '—' }}
+            </span>
+        </td>
+
+        <!-- OG Title Column only when not preview -->
+        <td v-if="!showPreview" class="k-meta-kit-table-center">
+            <span :class="[getStatusClass(page.hasOgTitle, page.ogTitleLength, 'ogDescription'), 'k-meta-kit-table-tooltip']"
+                  :title="getOgTitleTooltip(page)">
+                {{ page.hasOgTitle ? page.ogTitleLength : '—' }}
+            </span>
+        </td>
+
+        <!-- OG Description Column only when not preview -->
+        <td v-if="!showPreview" class="k-meta-kit-table-center">
+            <span :class="[getStatusClass(page.hasOgDescription, page.ogDescriptionLength, 'ogDescription'), 'k-meta-kit-table-tooltip']"
+                  :title="getOgTitleTooltip(page)">
+                {{ page.hasOgDescription ? page.ogDescriptionLength : '—' }}
+            </span>
+        </td>
+
+        <!-- OG Image (only in OG mode) -->
         <td class="k-meta-kit-table-center">
           <k-icon v-if="page.hasOgImage" type="check" class="k-meta-kit-icon-success"/>
           <span v-else>—</span>
         </td>
-        <td v-if="!showPreview" class="k-meta-kit-table-center">
+
+        <!-- Robots (only in meta mode when not showing preview) -->
+        <td v-if="!showPreview && previewMode === 'meta'" class="k-meta-kit-table-center">
           <span v-if="page.robots && page.robots.includes('noindex')" class="k-meta-kit-robots-noindex">noindex</span>
           <span v-else>—</span>
         </td>
@@ -165,6 +193,11 @@ export default {
     showPreview: {
       type: Boolean,
       default: false
+    },
+    previewMode: {
+      type: String,
+      default: 'meta',
+      validator: value => ['meta', 'og'].includes(value)
     },
     aiEnabled: {
       type: Boolean,
@@ -230,14 +263,14 @@ export default {
 
       let ranges;
       if (type === 'title') {
-        ranges = { optimal: {min: 50, max: 60}, warning: {min: 45, max: 66} };
+        ranges = {optimal: {min: 50, max: 60}, warning: {min: 45, max: 66}};
       } else if (type === 'ogTitle') {
-        ranges = { optimal: {min: 40, max: 60}, warning: {min: 35, max: 70} };
+        ranges = {optimal: {min: 40, max: 60}, warning: {min: 35, max: 70}};
       } else if (type === 'ogDescription') {
-        ranges = { optimal: {min: 150, max: 185}, warning: {min: 135, max: 200} };
+        ranges = {optimal: {min: 150, max: 185}, warning: {min: 135, max: 200}};
       } else {
         // description
-        ranges = { optimal: {min: 140, max: 160}, warning: {min: 126, max: 176} };
+        ranges = {optimal: {min: 140, max: 160}, warning: {min: 126, max: 176}};
       }
 
       if (length >= ranges.optimal.min && length <= ranges.optimal.max) {

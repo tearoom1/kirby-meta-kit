@@ -528,6 +528,8 @@ class MetaKitController
                 'template' => 'site',
                 'hasMetaTitle' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty(),
                 'hasMetaDescription' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty(),
+                'hasOgTitle' => $siteSeo && $siteSeo->ogTitle()->isNotEmpty(),
+                'hasOgDescription' => $siteSeo && $siteSeo->ogDescription()->isNotEmpty(),
                 'hasOgImage' => $siteSeo && $siteSeo->ogImage()->isNotEmpty(),
                 'robots' => $siteSeo && $siteSeo->robots()->isNotEmpty() ? $siteSeo->robots()->value() : 'index, follow',
                 'metaTitle' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
@@ -536,12 +538,24 @@ class MetaKitController
                 'metaDescription' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
                     ? $siteSeo->metaDescription()->value()
                     : null,
+                'ogTitle' => $siteSeo && $siteSeo->ogTitle()->isNotEmpty()
+                    ? $siteSeo->ogTitle()->value()
+                    : null,
+                'ogDescription' => $siteSeo && $siteSeo->ogDescription()->isNotEmpty()
+                    ? $siteSeo->ogDescription()->value()
+                    : null,
                 'ogImage' => $ogImageData,
                 'metaTitleLength' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
                     ? mb_strlen($siteSeo->metaTitle()->value())
                     : 0,
                 'metaDescriptionLength' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
                     ? mb_strlen($siteSeo->metaDescription()->value())
+                    : 0,
+                'ogTitleLength' => $siteSeo && $siteSeo->ogTitle()->isNotEmpty()
+                    ? mb_strlen($siteSeo->ogTitle()->value())
+                    : 0,
+                'ogDescriptionLength' => $siteSeo && $siteSeo->ogDescription()->isNotEmpty()
+                    ? mb_strlen($siteSeo->ogDescription()->value())
                     : 0,
                 'legacy' => !empty($siteLegacy) ? $siteLegacy : null,
             ];
@@ -593,6 +607,8 @@ class MetaKitController
                 'template' => $page->intendedTemplate()->name(),
                 'hasMetaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty(),
                 'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
+                'hasOgTitle' => $seoData && $seoData->ogTitle()->isNotEmpty(),
+                'hasOgDescription' => $seoData && $seoData->ogDescription()->isNotEmpty(),
                 'hasOgImage' => $seoData && $seoData->ogImage()->isNotEmpty(),
                 'robots' => $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots()->value() : 'index, follow',
                 'metaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty()
@@ -601,12 +617,24 @@ class MetaKitController
                 'metaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty()
                     ? $seoData->metaDescription()->value()
                     : null,
+                'ogTitle' => $seoData && $seoData->ogTitle()->isNotEmpty()
+                    ? $seoData->ogTitle()->value()
+                    : null,
+                'ogDescription' => $seoData && $seoData->ogDescription()->isNotEmpty()
+                    ? $seoData->ogDescription()->value()
+                    : null,
                 'ogImage' => $ogImageData,
                 'metaTitleLength' => $seoData && $seoData->metaTitle()->isNotEmpty()
                     ? mb_strlen($seoData->metaTitle()->value())
                     : 0,
                 'metaDescriptionLength' => $seoData && $seoData->metaDescription()->isNotEmpty()
                     ? mb_strlen($seoData->metaDescription()->value())
+                    : 0,
+                'ogTitleLength' => $seoData && $seoData->ogTitle()->isNotEmpty()
+                    ? mb_strlen($seoData->ogTitle()->value())
+                    : 0,
+                'ogDescriptionLength' => $seoData && $seoData->ogDescription()->isNotEmpty()
+                    ? mb_strlen($seoData->ogDescription()->value())
                     : 0,
                 'legacy' => !empty($legacy) ? $legacy : null,
             ];
@@ -676,6 +704,8 @@ class MetaKitController
             'template' => $isSite ? 'site' : $page->intendedTemplate()->name(),
             'hasMetaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty(),
             'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
+            'hasOgTitle' => $seoData && $seoData->ogTitle()->isNotEmpty(),
+            'hasOgDescription' => $seoData && $seoData->ogDescription()->isNotEmpty(),
             'hasOgImage' => $seoData && $seoData->ogImage()->isNotEmpty(),
             'robots' => $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots()->value() : 'index, follow',
             'metaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty()
@@ -684,12 +714,24 @@ class MetaKitController
             'metaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty()
                 ? $seoData->metaDescription()->value()
                 : null,
+            'ogTitle' => $seoData && $seoData->ogTitle()->isNotEmpty()
+                ? $seoData->ogTitle()->value()
+                : null,
+            'ogDescription' => $seoData && $seoData->ogDescription()->isNotEmpty()
+                ? $seoData->ogDescription()->value()
+                : null,
             'ogImage' => $ogImageData,
             'metaTitleLength' => $seoData && $seoData->metaTitle()->isNotEmpty()
                 ? mb_strlen($seoData->metaTitle()->value())
                 : 0,
             'metaDescriptionLength' => $seoData && $seoData->metaDescription()->isNotEmpty()
                 ? mb_strlen($seoData->metaDescription()->value())
+                : 0,
+            'ogTitleLength' => $seoData && $seoData->ogTitle()->isNotEmpty()
+                ? mb_strlen($seoData->ogTitle()->value())
+                : 0,
+            'ogDescriptionLength' => $seoData && $seoData->ogDescription()->isNotEmpty()
+                ? mb_strlen($seoData->ogDescription()->value())
                 : 0,
             'legacy' => !empty($legacy) ? $legacy : null,
         ];

@@ -59,6 +59,7 @@
       <template #filters>
         <meta-kit-filters
           :show-preview.sync="showPreviewInTable"
+          :preview-mode.sync="previewMode"
           :search-query.sync="searchQuery"
           :metadata-filter.sync="metadataFilter"
           :page-size="pageSize"
@@ -75,6 +76,7 @@
       :selected-pages="selectedPages"
       :is-all-selected="isAllCurrentPageSelected"
       :show-preview="showPreviewInTable"
+      :preview-mode="previewMode"
       :ai-enabled="aiEnabled"
       @toggle-select-all="toggleSelectAllCurrentPage"
       @toggle-page="togglePageSelection"
@@ -111,156 +113,23 @@
       @migrate="migrateAllLanguages"
     />
 
-    <!-- All Pages Dialog -->
+    <!-- Bulk Edit Dialog -->
     <meta-kit-bulk-edit-dialog
       ref="allPagesDialog"
-      :pages="allPagesData"
-      :is-loading="isLoadingAllPages"
-    >
-      <template #meta="{ page }">
-        <meta-kit-title-field
-          :value="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
-          @input="setManualValue(page.id, 'metaTitle', $event)"
-          :page-id="page.id"
-          :page-title="page.title"
-          :site-settings="siteSettings"
-          :ai-enabled="aiEnabled"
-          :is-generating="isGeneratingField(page.id, 'metaTitle')"
-          @generate="generateFieldAI(page.id, 'metaTitle')"
-          :placeholder="page.metaTitle || 'No meta title'"
-          button-size="xs"
-          field-class="k-meta-kit-dialog-table-field-title"
-        />
-        <meta-kit-description-field
-          :value="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
-          @input="setManualValue(page.id, 'metaDescription', $event)"
-          :ai-enabled="aiEnabled"
-          :is-generating="isGeneratingField(page.id, 'metaDescription')"
-          @generate="generateFieldAI(page.id, 'metaDescription')"
-          :placeholder="page.metaDescription || 'No meta description'"
-          button-size="xs"
-          :rows="3"
-          field-class="k-meta-kit-dialog-table-field-desc"
-        />
-        <div class="k-meta-kit-dialog-table-actions">
-          <k-button
-            v-if="hasAnyFieldChanged(page.id, page)"
-            icon="check"
-            size="sm"
-            theme="positive"
-            @click="applyAllFields(page.id, page)"
-          >
-            Apply
-          </k-button>
-        </div>
-      </template>
-      <template #og="{ page }">
-        <meta-kit-og-title-field
-          :value="getEditableValue(page.id, 'ogTitle', page.ogTitle)"
-          @input="setManualValue(page.id, 'ogTitle', $event)"
-          :ai-enabled="aiEnabled"
-          :is-generating="isGeneratingField(page.id, 'ogTitle')"
-          @generate="generateFieldAI(page.id, 'ogTitle')"
-          :placeholder="page.ogTitle || 'No OG title'"
-          button-size="xs"
-          field-class="k-meta-kit-dialog-table-field-title"
-        />
-        <meta-kit-og-description-field
-          :value="getEditableValue(page.id, 'ogDescription', page.ogDescription)"
-          @input="setManualValue(page.id, 'ogDescription', $event)"
-          :ai-enabled="aiEnabled"
-          :is-generating="isGeneratingField(page.id, 'ogDescription')"
-          @generate="generateFieldAI(page.id, 'ogDescription')"
-          :placeholder="page.ogDescription || 'No OG description'"
-          button-size="xs"
-          :rows="3"
-          field-class="k-meta-kit-dialog-table-field-desc"
-        />
-        <div class="k-meta-kit-dialog-table-actions">
-          <k-button
-            v-if="hasAnyFieldChanged(page.id, page)"
-            icon="check"
-            size="sm"
-            theme="positive"
-            @click="applyAllFields(page.id, page)"
-          >
-            Apply
-          </k-button>
-        </div>
-      </template>
-    </meta-kit-bulk-edit-dialog>
+      :api="$api"
+      :site-settings="siteSettings"
+      :ai-enabled="aiEnabled"
+      @saved="refreshPages"
+    />
 
     <!-- Single Page Edit Dialog -->
     <meta-kit-single-page-dialog
       ref="singlePageDialog"
-      :page="currentEditPage"
-      :is-loading="isLoadingSinglePage"
-      :has-changes="currentEditPage && hasAnyFieldChanged(currentEditPage.id, currentEditPage)"
-      @edit-in-panel="openPageSeoTab"
-      @apply-changes="applySingleFieldAndClose(currentEditPage.id, 'all')"
-    >
-      <template v-slot="{ page }">
-        <div class="k-meta-kit-single-field">
-          <label class="k-meta-kit-single-field-label">Meta Title</label>
-          <meta-kit-title-field
-            :value="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
-            @input="setManualValue(page.id, 'metaTitle', $event)"
-            :page-id="page.id"
-            :page-title="page.title"
-            :site-settings="siteSettings"
-            :ai-enabled="aiEnabled"
-            :is-generating="isGeneratingField(page.id, 'metaTitle')"
-            @generate="generateFieldAI(page.id, 'metaTitle')"
-            :placeholder="page.metaTitle || 'No meta title set'"
-            button-size="sm"
-            field-class="k-meta-kit-single-field-content"
-          />
-        </div>
-        <div class="k-meta-kit-single-field">
-          <label class="k-meta-kit-single-field-label">Meta Description</label>
-          <meta-kit-description-field
-            :value="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
-            @input="setManualValue(page.id, 'metaDescription', $event)"
-            :ai-enabled="aiEnabled"
-            :is-generating="isGeneratingField(page.id, 'metaDescription')"
-            @generate="generateFieldAI(page.id, 'metaDescription')"
-            :placeholder="page.metaDescription || 'No meta description set'"
-            button-size="sm"
-            :rows="4"
-            buttons="false"
-            field-class="k-meta-kit-single-field-content"
-          />
-        </div>
-        <div class="k-meta-kit-single-field">
-          <label class="k-meta-kit-single-field-label">OG Title</label>
-          <meta-kit-og-title-field
-            :value="getEditableValue(page.id, 'ogTitle', page.ogTitle)"
-            @input="setManualValue(page.id, 'ogTitle', $event)"
-            :ai-enabled="aiEnabled"
-            :is-generating="isGeneratingField(page.id, 'ogTitle')"
-            @generate="generateFieldAI(page.id, 'ogTitle')"
-            :placeholder="page.ogTitle || 'No OG title set'"
-            button-size="sm"
-            field-class="k-meta-kit-single-field-content"
-          />
-        </div>
-        <div class="k-meta-kit-single-field">
-          <label class="k-meta-kit-single-field-label">OG Description</label>
-          <meta-kit-og-description-field
-            :value="getEditableValue(page.id, 'ogDescription', page.ogDescription)"
-            @input="setManualValue(page.id, 'ogDescription', $event)"
-            :ai-enabled="aiEnabled"
-            :is-generating="isGeneratingField(page.id, 'ogDescription')"
-            @generate="generateFieldAI(page.id, 'ogDescription')"
-            :placeholder="page.ogDescription || 'No OG description set'"
-            button-size="sm"
-            :rows="4"
-            buttons="false"
-            field-class="k-meta-kit-single-field-content"
-          />
-        </div>
-      </template>
-    </meta-kit-single-page-dialog>
+      :api="$api"
+      :site-settings="siteSettings"
+      :ai-enabled="aiEnabled"
+      @saved="refreshPages"
+    />
 
     <!-- Bulk Generation Dialog -->
     <meta-kit-bulk-generate-dialog
@@ -340,14 +209,10 @@ export default {
       isLoadingPages: false,
       isGeneratingAll: false,
       isLoadingLegacy: false,
-      isLoadingAllPages: false,
-      isLoadingSinglePage: false,
       isMigratingAll: false,
       pagesData: this.pages || [],
-      allPagesData: [],
       legacyPages: [],
       legacySummary: {total: 0, byLanguage: []},
-      currentEditPage: null,
       legacyDetection: {
         show: false,
         found: 0
@@ -360,14 +225,15 @@ export default {
       currentPage: 1,
       pageSize: 25,
       pageSizeOptions: [
-        {value: 25, text: '25 per page'},
-        {value: 50, text: '50 per page'},
-        {value: 100, text: '100 per page'},
+        {value: 25, text: '25/page'},
+        {value: 50, text: '50/page'},
+        {value: 100, text: '100/page'},
         {value: 99999, text: 'All'}
       ],
       searchQuery: '',
       metadataFilter: 'all',
-      showPreviewInTable: false
+      showPreviewInTable: false,
+      previewMode: 'meta'
     };
   },
   computed: {
@@ -382,7 +248,11 @@ export default {
               return !page.hasMetaTitle;
             case 'missing-description':
               return !page.hasMetaDescription;
-            case 'missing-image':
+            case 'missing-og-title':
+              return !page.hasOgTitle;
+            case 'missing-og-description':
+              return !page.hasOgDescription;
+            case 'missing-og-image':
               return !page.hasOgImage;
             case 'complete':
               return page.hasMetaTitle && page.hasMetaDescription && page.hasOgImage;
@@ -1223,30 +1093,6 @@ export default {
         console.error('Field update error:', error);
       }
     },
-    async showAllPagesDialog() {
-      this.$refs.allPagesDialog.open();
-      await this.loadAllPages();
-    },
-    async loadAllPages() {
-      this.isLoadingAllPages = true;
-      try {
-        const response = await this.$api.get('meta-kit/pages-with-content');
-        if (response.status === 'success') {
-          this.allPagesData = response.data;
-        }
-      } catch (error) {
-        window.panel.notification.error('Failed to load pages');
-      } finally {
-        this.isLoadingAllPages = false;
-      }
-    },
-    editSinglePage(pageId) {
-      // Navigate to the page editor in the panel
-      const page = this.allPagesData.find(p => p.id === pageId);
-      if (page && page.panelUrl) {
-        window.panel.view.open(page.panelUrl);
-      }
-    },
     editPageInPanel(panelUrl) {
       // Navigate to the page editor in the panel
       if (panelUrl) {
@@ -1254,53 +1100,7 @@ export default {
       }
     },
     async editSinglePageMetadata(pageId) {
-      this.$refs.singlePageDialog.open();
-      this.isLoadingSinglePage = true;
-
-      try {
-        const response = await this.$api.get('meta-kit/single-page', {pageId});
-        if (response.status === 'success') {
-          this.currentEditPage = response.data;
-        }
-      } catch (error) {
-        window.panel.notification.error('Failed to load page');
-      } finally {
-        this.isLoadingSinglePage = false;
-      }
-    },
-    async applySingleFieldAndClose(pageId, fieldName) {
-      if (fieldName === 'all') {
-        // Apply all changed fields
-        await this.applyAllFields(pageId, this.currentEditPage);
-      } else {
-        // Apply single field
-        await this.applySingleField(pageId, fieldName);
-      }
-
-      // Reload the current page data to show updated values
-      if (this.currentEditPage && this.currentEditPage.id === pageId) {
-        try {
-          const response = await this.$api.get('meta-kit/single-page', {pageId});
-          if (response.status === 'success') {
-            this.currentEditPage = response.data;
-          }
-        } catch (error) {
-          // Silent fail
-        }
-      }
-    },
-    openPageSeoTab(page) {
-      if (!page) return;
-
-      // Close the dialog
-      this.$refs.singlePageDialog.close();
-
-      // Navigate to the page with SEO tab
-      // Panel URL format: /panel/pages/{id}
-      const pageUrl = page.panelUrl;
-
-      // Open the page - Kirby will handle the tab navigation
-      window.panel.view.open(pageUrl);
+      this.$refs.singlePageDialog.open(pageId);
     },
     goToLanguage(langCode) {
       if (langCode === this.language) return;
@@ -1357,28 +1157,7 @@ export default {
     },
     async showSelectedPagesDialog() {
       if (this.selectedPages.length === 0) return;
-
-      this.$refs.allPagesDialog.open();
-      await this.reloadSelectedPages();
-    },
-    async reloadSelectedPages() {
-      if (this.selectedPages.length === 0) return;
-
-      // Load full data for selected pages from API
-      this.isLoadingAllPages = true;
-      try {
-        const response = await this.$api.get('meta-kit/pages-with-content', {
-          pageIds: this.selectedPages
-        });
-        if (response.status === 'success') {
-          // Filter to only selected pages
-          this.allPagesData = response.data.filter(p => this.selectedPages.includes(p.id));
-        }
-      } catch (error) {
-        window.panel.notification.error('Failed to load selected pages');
-      } finally {
-        this.isLoadingAllPages = false;
-      }
+      this.$refs.allPagesDialog.open(this.selectedPages);
     }
   }
 };

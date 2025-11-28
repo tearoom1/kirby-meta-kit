@@ -12,14 +12,14 @@
       <div class="k-meta-kit-single-field">
         <label class="k-meta-kit-single-field-label">Meta Title</label>
         <meta-kit-title-field
-          :value="metaTitle"
-          @input="$emit('update:meta-title', $event)"
+          :value="editedFields.metaTitle"
+          @input="editedFields.metaTitle = $event"
           :page-id="page.id"
           :page-title="page.title"
           :site-settings="siteSettings"
           :ai-enabled="aiEnabled"
-          :is-generating="isGenerating.metaTitle"
-          @generate="$emit('generate', { pageId: page.id, fieldName: 'metaTitle' })"
+          :is-generating="generating.metaTitle"
+          @generate="generate('metaTitle')"
           :placeholder="page.metaTitle || 'No meta title set'"
           button-size="sm"
           field-class="k-meta-kit-single-field-content"
@@ -30,11 +30,11 @@
       <div class="k-meta-kit-single-field">
         <label class="k-meta-kit-single-field-label">Meta Description</label>
         <meta-kit-description-field
-          :value="metaDescription"
-          @input="$emit('update:meta-description', $event)"
+          :value="editedFields.metaDescription"
+          @input="editedFields.metaDescription = $event"
           :ai-enabled="aiEnabled"
-          :is-generating="isGenerating.metaDescription"
-          @generate="$emit('generate', { pageId: page.id, fieldName: 'metaDescription' })"
+          :is-generating="generating.metaDescription"
+          @generate="generate('metaDescription')"
           :placeholder="page.metaDescription || 'No meta description set'"
           button-size="sm"
           :rows="4"
@@ -47,11 +47,11 @@
       <div class="k-meta-kit-single-field">
         <label class="k-meta-kit-single-field-label">OG Title</label>
         <meta-kit-og-title-field
-          :value="ogTitle"
-          @input="$emit('update:og-title', $event)"
+          :value="editedFields.ogTitle"
+          @input="editedFields.ogTitle = $event"
           :ai-enabled="aiEnabled"
-          :is-generating="isGenerating.ogTitle"
-          @generate="$emit('generate', { pageId: page.id, fieldName: 'ogTitle' })"
+          :is-generating="generating.ogTitle"
+          @generate="generate('ogTitle')"
           :placeholder="page.ogTitle || 'No OG title set'"
           button-size="sm"
           field-class="k-meta-kit-single-field-content"
@@ -62,11 +62,11 @@
       <div class="k-meta-kit-single-field">
         <label class="k-meta-kit-single-field-label">OG Description</label>
         <meta-kit-og-description-field
-          :value="ogDescription"
-          @input="$emit('update:og-description', $event)"
+          :value="editedFields.ogDescription"
+          @input="editedFields.ogDescription = $event"
           :ai-enabled="aiEnabled"
-          :is-generating="isGenerating.ogDescription"
-          @generate="$emit('generate', { pageId: page.id, fieldName: 'ogDescription' })"
+          :is-generating="generating.ogDescription"
+          @generate="generate('ogDescription')"
           :placeholder="page.ogDescription || 'No OG description set'"
           button-size="sm"
           :rows="4"
@@ -91,20 +91,8 @@
 
       <!-- Actions -->
       <div class="k-meta-kit-single-actions">
-        <k-button
-          icon="open"
-          @click="$emit('edit-in-panel', page)"
-        >
-          Edit in Panel
-        </k-button>
-        <k-button
-          v-if="hasChanges"
-          icon="check"
-          theme="positive"
-          @click="$emit('apply-changes')"
-        >
-          Apply Changes
-        </k-button>
+        <k-button icon="open" @click="editInPanel">Edit in Panel</k-button>
+        <k-button v-if="hasChanges" icon="check" theme="positive" @click="save">Apply Changes</k-button>
       </div>
     </div>
   </k-dialog>
@@ -124,33 +112,9 @@ export default {
     MetaKitOgDescriptionField
   },
   props: {
-    page: {
+    api: {
       type: Object,
-      default: null
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    hasChanges: {
-      type: Boolean,
-      default: false
-    },
-    metaTitle: {
-      type: String,
-      default: ''
-    },
-    metaDescription: {
-      type: String,
-      default: ''
-    },
-    ogTitle: {
-      type: String,
-      default: ''
-    },
-    ogDescription: {
-      type: String,
-      default: ''
+      required: true
     },
     siteSettings: {
       type: Object,
@@ -159,23 +123,134 @@ export default {
     aiEnabled: {
       type: Boolean,
       default: true
-    },
-    isGenerating: {
-      type: Object,
-      default: () => ({
+    }
+  },
+  data() {
+    return {
+      page: null,
+      isLoading: false,
+      editedFields: {
+        metaTitle: '',
+        metaDescription: '',
+        ogTitle: '',
+        ogDescription: ''
+      },
+      generating: {
         metaTitle: false,
         metaDescription: false,
         ogTitle: false,
         ogDescription: false
-      })
+      }
+    };
+  },
+  computed: {
+    hasChanges() {
+      if (!this.page) return false;
+      return this.editedFields.metaTitle !== (this.page.metaTitle || '') ||
+        this.editedFields.metaDescription !== (this.page.metaDescription || '') ||
+        this.editedFields.ogTitle !== (this.page.ogTitle || '') ||
+        this.editedFields.ogDescription !== (this.page.ogDescription || '');
     }
   },
   methods: {
-    open() {
+    async open(pageId) {
+      this.isLoading = true;
       this.$refs.dialog.open();
+
+      try {
+        const response = await this.api.get('meta-kit/single-page', { pageId });
+        if (response.status === 'success') {
+          this.page = response.data;
+          this.editedFields.metaTitle = this.page.metaTitle || '';
+          this.editedFields.metaDescription = this.page.metaDescription || '';
+          this.editedFields.ogTitle = this.page.ogTitle || '';
+          this.editedFields.ogDescription = this.page.ogDescription || '';
+        }
+      } catch (error) {
+        window.panel.notification.error('Failed to load page');
+      } finally {
+        this.isLoading = false;
+      }
     },
+
     close() {
       this.$refs.dialog.close();
+      this.page = null;
+    },
+
+    async generate(fieldName) {
+      if (!this.page) return;
+
+      this.generating[fieldName] = true;
+      try {
+        const response = await this.api.post('meta-kit/generate-field', {
+          pageId: this.page.id,
+          fieldName
+        });
+        if (response.status === 'success' && response.content) {
+          this.editedFields[fieldName] = response.content;
+          window.panel.notification.success('AI content generated successfully');
+        } else {
+          window.panel.notification.error(response.message || 'Failed to generate content');
+        }
+      } catch (error) {
+        window.panel.notification.error('Failed to generate content');
+      } finally {
+        this.generating[fieldName] = false;
+      }
+    },
+
+    async save() {
+      if (!this.page || !this.hasChanges) return;
+
+      const fields = [
+        { name: 'metaTitle', value: this.editedFields.metaTitle, original: this.page.metaTitle || '' },
+        { name: 'metaDescription', value: this.editedFields.metaDescription, original: this.page.metaDescription || '' },
+        { name: 'ogTitle', value: this.editedFields.ogTitle, original: this.page.ogTitle || '' },
+        { name: 'ogDescription', value: this.editedFields.ogDescription, original: this.page.ogDescription || '' }
+      ];
+
+      let savedCount = 0;
+      for (const field of fields) {
+        if (field.value !== field.original) {
+          try {
+            await this.api.post('meta-kit/apply-single-field', {
+              pageId: this.page.id,
+              fieldName: field.name,
+              value: field.value
+            });
+            savedCount++;
+          } catch (error) {
+            window.panel.notification.error(`Failed to update ${field.name}`);
+          }
+        }
+      }
+
+      if (savedCount > 0) {
+        window.panel.notification.success(`Updated ${savedCount} field${savedCount > 1 ? 's' : ''}`);
+        this.$emit('saved');
+
+        // Reload page data
+        try {
+          const response = await this.api.get('meta-kit/single-page', { pageId: this.page.id });
+          if (response.status === 'success') {
+            this.page = response.data;
+            this.editedFields.metaTitle = this.page.metaTitle || '';
+            this.editedFields.metaDescription = this.page.metaDescription || '';
+            this.editedFields.ogTitle = this.page.ogTitle || '';
+            this.editedFields.ogDescription = this.page.ogDescription || '';
+          }
+        } catch (error) {
+          // Silent fail
+        }
+      }
+    },
+
+    editInPanel() {
+      if (this.page && this.page.panelUrl) {
+        this.close();
+        window.panel.view.open(this.page.panelUrl);
+      }
     }
   }
 };

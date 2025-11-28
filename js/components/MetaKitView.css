@@ -111,24 +111,26 @@
 
   .k-meta-kit-table th:nth-child(3),
   .k-meta-kit-table td:nth-child(3) {
-    min-width: 250px;
-    width: auto;
+    width: 250px;
   }
 
   .k-meta-kit-table th:nth-child(4),
   .k-meta-kit-table td:nth-child(4) {
-    width: 120px;
+    min-width: 150px;
+    width: auto;
   }
 
-  .k-meta-kit-table th:nth-child(5),
-  .k-meta-kit-table th:nth-child(6),
-  .k-meta-kit-table td:nth-child(5),
-  .k-meta-kit-table td:nth-child(6) {
+  .k-meta-kit-table th:nth-child(n+5),
+  .k-meta-kit-table td:nth-child(n+5) {
     width: 100px;
     max-width: 100px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .k-meta-kit-table th:nth-child(n+5) {
+    text-align: center;
   }
 
   /* When showing preview, expand columns and allow text wrapping */
@@ -162,6 +164,11 @@
   .k-meta-kit-table-preview th:nth-child(6),
   .k-meta-kit-table-preview td:nth-child(6) {
     width: 60px;
+  }
+
+
+  .k-meta-kit-table-preview th:nth-child(n+4) {
+    text-align: center;
   }
 
   .k-meta-kit-table th:nth-child(7),
@@ -750,7 +757,7 @@
   }
 
   .k-meta-kit-search {
-    min-width: 250px;
+    min-width: 150px;
     border: 1px solid var(--color-border);
   }
 
@@ -803,6 +810,14 @@
     background-repeat: no-repeat;
     background-position: right 0.5rem center;
     background-size: 12px;
+  }
+
+  .k-meta-kit-metadata-filter {
+    width: 180px;
+  }
+
+  .k-meta-kit-pagesize-select {
+    width: 110px;
   }
 
   .k-meta-kit-metadata-filter:hover,
@@ -869,6 +884,9 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
+    margin-bottom: 0.7rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
 
     > * {
       display: flex;
@@ -1072,7 +1090,7 @@
     gap: 0.75rem;
     padding-top: 1rem;
     border-top: 1px solid var(--color-border);
-    justify-content: space-between;
+    justify-content: center;
   }
 
   .k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-empty {
@@ -1083,8 +1101,6 @@
   .k-meta-kit-tabs {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border);
+    margin: 0.5rem 0;
   }
 }

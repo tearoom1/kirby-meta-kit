@@ -1,12 +1,30 @@
 <template>
   <div class="k-meta-kit-controls">
-    <k-button
-      size="sm"
-      @click="$emit('update:show-preview', !showPreview)"
-      :title="showPreview ? 'Show character counts' : 'Show preview text'"
-    >
-      {{ showPreview ? 'Count' : 'Preview' }}
-    </k-button>
+    <k-button-group>
+      <k-button
+        size="sm"
+        @click="$emit('update:show-preview', !showPreview)"
+        :title="showPreview ? 'Show character counts' : 'Show preview text'"
+      >
+        {{ showPreview ? 'Back' : 'Preview' }}
+      </k-button>
+      <k-button v-if="showPreview"
+        size="sm"
+        :theme="previewMode === 'meta' ? 'positive' : ''"
+        @click="$emit('update:preview-mode', 'meta')"
+        title="Show meta title and description"
+      >
+        Meta
+      </k-button>
+      <k-button v-if="showPreview"
+        size="sm"
+        :theme="previewMode === 'og' ? 'positive' : ''"
+        @click="$emit('update:preview-mode', 'og')"
+        title="Show OG title and description"
+      >
+        OG
+      </k-button>
+    </k-button-group>
 
     <div class="k-meta-kit-search-wrapper">
       <k-search-input
@@ -34,7 +52,9 @@
       <option value="all">All Pages</option>
       <option value="missing-title">Missing Title</option>
       <option value="missing-description">Missing Description</option>
-      <option value="missing-image">Missing OG Image</option>
+      <option value="missing-og-title">Missing OG Title</option>
+      <option value="missing-og-description">Missing OG Description</option>
+      <option value="missing-og-image">Missing OG Image</option>
       <option value="complete">Complete Metadata</option>
     </select>
 
@@ -57,6 +77,11 @@ export default {
       type: Boolean,
       default: false
     },
+    previewMode: {
+      type: String,
+      default: 'meta',
+      validator: value => ['meta', 'og'].includes(value)
+    },
     searchQuery: {
       type: String,
       default: ''
@@ -72,9 +97,9 @@ export default {
     pageSizeOptions: {
       type: Array,
       default: () => [
-        {value: 25, text: '25 per page'},
-        {value: 50, text: '50 per page'},
-        {value: 100, text: '100 per page'},
+        {value: 25, text: '25/page'},
+        {value: 50, text: '50/page'},
+        {value: 100, text: '100/page'},
         {value: 99999, text: 'All'}
       ]
     }
