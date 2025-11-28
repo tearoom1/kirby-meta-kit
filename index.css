@@ -264,6 +264,34 @@
     border-bottom-color: var(--color-focus);
   }
 
+  /* Preview mode indicators - use underline instead of text color */
+  .k-meta-kit-table-preview-indicator {
+    color: var(--color-text) !important;
+    display: inline-block;
+    padding-bottom: 2px;
+  }
+
+  .k-meta-kit-table-preview-indicator[data-status="warning"] {
+    border-bottom: 3px solid #f59e0b !important;
+  }
+
+  .k-meta-kit-table-preview-indicator[data-status="error"] {
+    border-bottom: 3px solid #dc2626 !important;
+  }
+
+  .k-meta-kit-table-preview-indicator[data-status="success"] {
+    border-bottom: none !important;
+  }
+
+  /* Dark mode support */
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-table-preview-indicator[data-status="warning"] {
+    border-bottom-color: #fbbf24 !important;
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-table-preview-indicator[data-status="error"] {
+    border-bottom-color: #ef4444 !important;
+  }
+
   .k-meta-kit-table .k-link {
     color: var(--color-blue-600);
     text-decoration: none;

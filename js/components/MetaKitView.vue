@@ -174,9 +174,13 @@
           <td v-if="!showPreviewInTable">{{ page.template }}</td>
           <td :class="showPreviewInTable ? '' : 'k-meta-kit-table-center'">
             <span
-              :class="getTableTitleStatusClass(page)"
+              :class="[
+                showPreviewInTable ? 'k-meta-kit-table-preview-indicator' : '',
+                showPreviewInTable ? '' : getTableTitleStatusClass(page),
+                'k-meta-kit-table-tooltip'
+              ]"
+              :data-status="showPreviewInTable ? getStatusValue(getTableTitleStatusClass(page)) : ''"
               :title="getTitleTooltip(page)"
-              class="k-meta-kit-table-tooltip"
             >
               <template v-if="showPreviewInTable">
                 {{ getFullTitlePreview(page) }}
@@ -188,9 +192,13 @@
           </td>
           <td :class="showPreviewInTable ? '' : 'k-meta-kit-table-center'">
             <span
-              :class="getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description')"
+              :class="[
+                showPreviewInTable ? 'k-meta-kit-table-preview-indicator' : '',
+                showPreviewInTable ? '' : getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description'),
+                'k-meta-kit-table-tooltip'
+              ]"
+              :data-status="showPreviewInTable ? getStatusValue(getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description')) : ''"
               :title="getDescriptionTooltip(page)"
-              class="k-meta-kit-table-tooltip"
             >
               <template v-if="showPreviewInTable">
                 {{ page.metaDescription || '—' }}
@@ -1047,6 +1055,13 @@ export default {
       const fullLength = this.getFullTitleLength(page);
       const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
       return this.getStatusClass(true, fullLength, 'title', titleToUse || '');
+    },
+
+    getStatusValue(statusClass) {
+      // Extract status value from class name
+      if (!statusClass) return '';
+      const match = statusClass.match(/k-meta-kit-status-(\w+)/);
+      return match ? match[1] : '';
     },
 
     getTitleTooltip(page) {
