@@ -465,6 +465,22 @@
       }
     },
     computed: {
+      // The title to use - either the meta title or fallback to page title
+      effectiveTitle() {
+        return this.value || this.pageTitle || "";
+      },
+      fullTitle() {
+        const titleToUse = this.effectiveTitle;
+        if (!titleToUse || !this.siteSettings.appendSiteName) {
+          return titleToUse;
+        }
+        const separator = this.siteSettings.titleSeparator || "|";
+        const siteName = this.siteSettings.siteMetaTitle || "";
+        if (!siteName) {
+          return titleToUse;
+        }
+        return `${titleToUse} ${separator} ${siteName}`;
+      },
       statusClass() {
         if (!this.value) return "";
         const length = this.value.length;
@@ -774,7 +790,7 @@
           }
           return page.title ? page.title.length : 0;
         }
-        const titleToUse = page.hasOgTitle ? page.ogTitle : page.title;
+        const titleToUse = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
         if (!titleToUse) return 0;
         if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
           const separator = this.siteSettings.titleSeparator || "|";

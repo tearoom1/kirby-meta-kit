@@ -61,6 +61,27 @@ export default {
     }
   },
   computed: {
+    // The title to use - either the meta title or fallback to page title
+    effectiveTitle() {
+      return this.value || this.pageTitle || '';
+    },
+    fullTitle() {
+      // todo fixme
+      const titleToUse = this.effectiveTitle;
+
+      if (!titleToUse || !this.siteSettings.appendSiteName) {
+        return titleToUse;
+      }
+
+      const separator = this.siteSettings.titleSeparator || '|';
+      const siteName = this.siteSettings.siteMetaTitle || '';
+
+      if (!siteName) {
+        return titleToUse;
+      }
+
+      return `${titleToUse} ${separator} ${siteName}`;
+    },
     statusClass() {
       if (!this.value) return '';
 

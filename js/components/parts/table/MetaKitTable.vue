@@ -239,7 +239,8 @@ export default {
         return page.title ? page.title.length : 0;
       }
 
-      const titleToUse = page.hasOgTitle ? page.ogTitle : page.title;
+      // todo make sure to go recursive to fetch meta title
+      const titleToUse = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
       if (!titleToUse) return 0;
 
       if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
