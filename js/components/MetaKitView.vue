@@ -104,6 +104,17 @@
           </button>
         </div>
         <select
+          class="k-meta-kit-metadata-filter"
+          :value="metadataFilter"
+          @change="metadataFilter = $event.target.value"
+        >
+          <option value="all">All Pages</option>
+          <option value="missing-title">Missing Title</option>
+          <option value="missing-description">Missing Description</option>
+          <option value="missing-image">Missing OG Image</option>
+          <option value="complete">Complete Metadata</option>
+        </select>
+        <select
           class="k-meta-kit-pagesize-select"
           :value="pageSize"
           @change="changePageSize($event.target.value)"
@@ -130,9 +141,9 @@
           <th>#</th>
           <th>Page</th>
           <th>Template</th>
-          <th>Meta Title</th>
+          <th class="k-meta-kit-table-center">Title</th>
           <th>Description</th>
-          <th>OG Image</th>
+          <th>Image</th>
           <th>Robots</th>
           <th>Actions</th>
         </tr>
@@ -155,8 +166,8 @@
           </td>
           <td>{{ page.template }}</td>
           <td class="k-meta-kit-table-center">
-              <span :class="getStatusClass(page.hasMetaTitle, page.metaTitleLength, 'title')">
-                {{ page.hasMetaTitle ? page.metaTitleLength : '—' }}
+              <span :class="getTableTitleStatusClass(page)">
+                {{ getFullTitleLength(page) }}
               </span>
           </td>
           <td class="k-meta-kit-table-center">
@@ -268,6 +279,7 @@
             :value="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
             @input="setManualValue(page.id, 'metaTitle', $event)"
             :page-id="page.id"
+            :page-title="page.title"
             :site-settings="siteSettings"
             :ai-enabled="aiEnabled"
             :is-generating="isGeneratingField(page.id, 'metaTitle')"
@@ -328,6 +340,7 @@
             :value="getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)"
             @input="setManualValue(currentEditPage.id, 'metaTitle', $event)"
             :page-id="currentEditPage.id"
+            :page-title="currentEditPage.title"
             :site-settings="siteSettings"
             :ai-enabled="aiEnabled"
             :is-generating="isGeneratingField(currentEditPage.id, 'metaTitle')"
@@ -372,6 +385,12 @@
         <!-- Actions -->
         <div class="k-meta-kit-single-actions">
           <k-button
+            icon="open"
+            @click="openPageSeoTab(currentEditPage)"
+          >
+            Edit in Panel
+          </k-button>
+          <k-button
             v-if="hasAnyFieldChanged(currentEditPage.id, currentEditPage)"
             icon="check"
             theme="positive"
@@ -379,14 +398,51 @@
           >
             Apply Changes
           </k-button>
-          <k-button
-            icon="open"
-            @click="openPageSeoTab(currentEditPage)"
-          >
-            Edit in Panel
-          </k-button>
         </div>
       </div>
+    </k-dialog>
+
+    <!-- Bulk Generation Dialog -->
+    <k-dialog ref="bulkGenerateDialog" size="medium">
+      <k-headline>Generate Missing Metadata</k-headline>
+      <k-text>Select which fields to generate for {{ selectedPages.length }} selected page(s):</k-text>
+
+      <div class="k-meta-kit-bulk-options">
+        <label class="k-meta-kit-bulk-option">
+          <input
+            type="checkbox"
+            v-model="bulkGenerateOptions.title"
+          />
+          <div class="k-meta-kit-bulk-option-content">
+            <strong>Meta Title</strong>
+            <span>Generate meta titles for pages without one</span>
+          </div>
+        </label>
+        <label class="k-meta-kit-bulk-option">
+          <input
+            type="checkbox"
+            v-model="bulkGenerateOptions.description"
+          />
+          <div class="k-meta-kit-bulk-option-content">
+            <strong>Meta Description</strong>
+            <span>Generate meta descriptions for pages without one</span>
+          </div>
+        </label>
+      </div>
+
+      <template #footer>
+        <k-button-group class="k-meta-kit-bulk-buttons">
+          <k-button @click="$refs.bulkGenerateDialog.close()">Cancel</k-button>
+          <k-button
+            icon="sparkling"
+            theme="positive"
+            :disabled="!bulkGenerateOptions.title && !bulkGenerateOptions.description"
+            @click="performBulkGeneration"
+          >
+            Generate
+          </k-button>
+        </k-button-group>
+      </template>
     </k-dialog>
   </k-panel-inside>
 </template>
@@ -455,22 +511,50 @@ export default {
         {value: 100, text: '100 per page'},
         {value: 99999, text: 'All'}
       ],
-      searchQuery: ''
+      searchQuery: '',
+      metadataFilter: 'all',
+
+      // Bulk generation options
+      bulkGenerateOptions: {
+        title: true,
+        description: true
+      }
     };
   },
   computed: {
     filteredPages() {
-      if (!this.searchQuery.trim()) {
-        return this.pagesData;
+      let pages = this.pagesData;
+
+      // Apply metadata filter
+      if (this.metadataFilter !== 'all') {
+        pages = pages.filter(page => {
+          switch (this.metadataFilter) {
+            case 'missing-title':
+              return !page.hasMetaTitle;
+            case 'missing-description':
+              return !page.hasMetaDescription;
+            case 'missing-image':
+              return !page.hasOgImage;
+            case 'complete':
+              return page.hasMetaTitle && page.hasMetaDescription && page.hasOgImage;
+            default:
+              return true;
+          }
+        });
       }
 
-      const query = this.searchQuery.toLowerCase();
-      return this.pagesData.filter(page => {
-        return page.title.toLowerCase().includes(query) ||
-          page.id.toLowerCase().includes(query) ||
-          page.template.toLowerCase().includes(query) ||
-          (page.metaDescription && page.metaDescription.toLowerCase().includes(query));
-      });
+      // Apply search query
+      if (this.searchQuery.trim()) {
+        const query = this.searchQuery.toLowerCase();
+        pages = pages.filter(page => {
+          return page.title.toLowerCase().includes(query) ||
+            page.id.toLowerCase().includes(query) ||
+            page.template.toLowerCase().includes(query) ||
+            (page.metaDescription && page.metaDescription.toLowerCase().includes(query));
+        });
+      }
+
+      return pages;
     },
     paginatedPages() {
       if (this.pageSize >= 99999) {
@@ -617,22 +701,45 @@ export default {
         console.error('Generation error:', error);
       }
     },
-    async generateAllDescriptions() {
-      if (!confirm('This will generate descriptions for all pages without one. Continue?')) {
+    generateAllDescriptions() {
+      // Reset options to defaults
+      this.bulkGenerateOptions.title = true;
+      this.bulkGenerateOptions.description = true;
+      // Open the dialog
+      this.$refs.bulkGenerateDialog.open();
+    },
+
+    async performBulkGeneration() {
+      // Close dialog
+      this.$refs.bulkGenerateDialog.close();
+
+      // Validate at least one option is selected
+      if (!this.bulkGenerateOptions.title && !this.bulkGenerateOptions.description) {
+        window.panel.notification.error('Please select at least one field to generate');
         return;
       }
 
       this.isGeneratingAll = true;
 
+      // Build field list for message
+      const fields = [];
+      if (this.bulkGenerateOptions.title) fields.push('titles');
+      if (this.bulkGenerateOptions.description) fields.push('descriptions');
+      const fieldText = fields.join(' and ');
+
       // Show loading notification
       const loadingNotification = window.panel.notification.open({
-        message: 'Generating descriptions with AI...',
+        message: `Generating ${fieldText} with AI...`,
         type: 'info',
         timeout: 0 // Don't auto-close
       });
 
       try {
-        const response = await this.$api.post('meta-kit/generate-all');
+        const response = await this.$api.post('meta-kit/generate-all', {
+          generateTitle: this.bulkGenerateOptions.title,
+          generateDescription: this.bulkGenerateOptions.description,
+          pageIds: this.selectedPages
+        });
 
         // Close loading notification
         if (loadingNotification && loadingNotification.close) {
@@ -653,7 +760,7 @@ export default {
         }
 
         // Extract detailed error message
-        let errorMessage = 'Failed to generate descriptions';
+        let errorMessage = `Failed to generate ${fieldText}`;
         if (error.message) {
           errorMessage += `: ${error.message}`;
         } else if (error.error) {
@@ -856,6 +963,44 @@ export default {
     getDescriptionStatusClass(value) {
       if (!value) return '';
       return this.getStatusClass(true, value.length, 'description');
+    },
+    // Helper for table title status (uses page object)
+    getFullTitleLength(page) {
+      // For site page, just return the meta title length or page title length
+      if (page.id === 'site') {
+        if (page.hasMetaTitle) {
+          return page.metaTitleLength;
+        }
+        // Fallback to page title
+        return page.title ? page.title.length : 0;
+      }
+
+      // For regular pages, use meta title or fallback to page title
+      const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
+      if (!titleToUse) return 0;
+
+      // Calculate full length with site name if enabled
+      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+        const separator = this.siteSettings.titleSeparator || '|';
+        const siteName = this.siteSettings.siteMetaTitle || '';
+        const fullTitle = `${titleToUse} ${separator} ${siteName}`;
+        return fullTitle.length;
+      }
+
+      return titleToUse.length;
+    },
+
+    getTableTitleStatusClass(page) {
+      // For site page, no color coding
+      if (page.id === 'site') {
+        return '';
+      }
+
+      // For regular pages, use the full title length (with site name)
+      // This includes pages using the page title as fallback
+      const fullLength = this.getFullTitleLength(page);
+      const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
+      return this.getStatusClass(true, fullLength, 'title', titleToUse || '');
     },
     hasFieldChanged(pageId, fieldName, currentValue, legacyValue) {
       const choice = this.getFieldChoice(pageId, fieldName);

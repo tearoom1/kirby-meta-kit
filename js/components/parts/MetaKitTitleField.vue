@@ -47,6 +47,10 @@ export default {
       type: String,
       required: true
     },
+    pageTitle: {
+      type: String,
+      default: ''
+    },
     siteSettings: {
       type: Object,
       required: true
@@ -72,48 +76,57 @@ export default {
     isSitePage() {
       return this.pageId === 'site';
     },
+    // The title to use - either the meta title or fallback to page title
+    effectiveTitle() {
+      return this.value || this.pageTitle || '';
+    },
     showPreview() {
+      // Show preview for non-site pages when we have a title (meta or page) and site settings are enabled
       return !this.isSitePage &&
-             this.value &&
+             this.effectiveTitle &&
              this.siteSettings.appendSiteName &&
              this.siteSettings.siteMetaTitle;
     },
     fullTitle() {
-      if (!this.value || !this.siteSettings.appendSiteName) {
-        return this.value || '';
+      const titleToUse = this.effectiveTitle;
+
+      if (!titleToUse || !this.siteSettings.appendSiteName) {
+        return titleToUse;
       }
 
       const separator = this.siteSettings.titleSeparator || '|';
       const siteName = this.siteSettings.siteMetaTitle || '';
 
       if (!siteName) {
-        return this.value;
+        return titleToUse;
       }
 
-      return `${this.value} ${separator} ${siteName}`;
+      return `${titleToUse} ${separator} ${siteName}`;
     },
     charCount() {
-      if (!this.value) return 0;
+      const titleToUse = this.effectiveTitle;
+      if (!titleToUse) return 0;
 
       if (this.isSitePage) {
-        return this.value.length;
+        return titleToUse.length;
       }
 
       if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
         return this.fullTitle.length;
       }
 
-      return this.value.length;
+      return titleToUse.length;
     },
     statusClass() {
-      if (!this.value) return '';
+      const titleToUse = this.effectiveTitle;
+      if (!titleToUse) return '';
 
       // For site page, no color coding
       if (this.isSitePage) {
         return '';
       }
 
-      let finalLength = this.value.length;
+      let finalLength = titleToUse.length;
       if (this.siteSettings.appendSiteName) {
         finalLength = this.fullTitle.length;
       }

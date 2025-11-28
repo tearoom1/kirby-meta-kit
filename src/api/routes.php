@@ -102,7 +102,15 @@ return function () {
                     ];
                 }
 
-                return TearoomOne\MetaKitController::generateAllDescriptions();
+                $generateTitle = get("generateTitle", false);
+                $generateDescription = get("generateDescription", false);
+                $pageIds = get("pageIds", []);
+
+                return TearoomOne\MetaKitController::generateAllFields(
+                    $generateTitle,
+                    $generateDescription,
+                    $pageIds
+                );
             },
         ];
         $routes[] = [

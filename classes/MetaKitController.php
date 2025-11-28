@@ -80,9 +80,15 @@ class MetaKitController
             'hasMetaDescription' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty(),
             'hasOgImage' => $siteSeo && $siteSeo->ogImage()->isNotEmpty(),
             'robots' => $siteSeo && $siteSeo->robots()->isNotEmpty() ? $siteSeo->robots()->value() : 'index, follow',
+            'metaTitle' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
+                ? $siteSeo->metaTitle()->value()
+                : null,
             'metaTitleLength' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
                 ? mb_strlen($siteSeo->metaTitle()->value())
                 : 0,
+            'metaDescription' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
+                ? $siteSeo->metaDescription()->value()
+                : null,
             'metaDescriptionLength' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
                 ? mb_strlen($siteSeo->metaDescription()->value())
                 : 0,
@@ -122,9 +128,15 @@ class MetaKitController
                 'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
                 'hasOgImage' => $seoData && $seoData->ogImage()->isNotEmpty(),
                 'robots' => $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots()->value() : 'index, follow',
+                'metaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty()
+                    ? $seoData->metaTitle()->value()
+                    : null,
                 'metaTitleLength' => $seoData && $seoData->metaTitle()->isNotEmpty()
                     ? mb_strlen($seoData->metaTitle()->value())
                     : 0,
+                'metaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty()
+                    ? $seoData->metaDescription()->value()
+                    : null,
                 'metaDescriptionLength' => $seoData && $seoData->metaDescription()->isNotEmpty()
                     ? mb_strlen($seoData->metaDescription()->value())
                     : 0,
@@ -221,6 +233,93 @@ class MetaKitController
         return [
             'status' => 'success',
             'message' => "Generated {$generated} descriptions, skipped {$skipped}, failed {$failed}",
+            'generated' => $generated,
+            'skipped' => $skipped,
+            'failed' => $failed
+        ];
+    }
+
+    /**
+     * Generate selected fields (title and/or description) for specified pages
+     */
+    public static function generateAllFields(
+        bool $generateTitle = false,
+        bool $generateDescription = false,
+        array $pageIds = []
+    ): array {
+        $kirby = kirby();
+
+        // Get pages to process
+        if (empty($pageIds)) {
+            $pages = $kirby->site()->index();
+        } else {
+            $pages = [];
+            foreach ($pageIds as $pageId) {
+                if ($pageId === 'site') {
+                    $pages[] = $kirby->site();
+                } else {
+                    $page = $kirby->page($pageId);
+                    if ($page) {
+                        $pages[] = $page;
+                    }
+                }
+            }
+        }
+
+        $generated = 0;
+        $failed = 0;
+        $skipped = 0;
+
+        foreach ($pages as $page) {
+            $seoData = self::getSeoData($page->metaKitSeo());
+            $pageSkipped = true;
+
+            // Generate title if requested
+            if ($generateTitle) {
+                // Skip if already has title
+                if (!$seoData || $seoData->metaTitle()->isEmpty()) {
+                    $result = self::generateField($page->id(), 'metaTitle', null, true);
+
+                    if ($result['status'] === 'success') {
+                        $generated++;
+                        $pageSkipped = false;
+                    } else {
+                        $failed++;
+                        $pageSkipped = false;
+                    }
+                }
+            }
+
+            // Generate description if requested
+            if ($generateDescription) {
+                // Skip if already has description
+                if (!$seoData || $seoData->metaDescription()->isEmpty()) {
+                    $result = self::generateField($page->id(), 'metaDescription', null, true);
+
+                    if ($result['status'] === 'success') {
+                        $generated++;
+                        $pageSkipped = false;
+                    } else {
+                        $failed++;
+                        $pageSkipped = false;
+                    }
+                }
+            }
+
+            if ($pageSkipped) {
+                $skipped++;
+            }
+        }
+
+        // Build message
+        $fields = [];
+        if ($generateTitle) $fields[] = 'titles';
+        if ($generateDescription) $fields[] = 'descriptions';
+        $fieldText = implode(' and ', $fields);
+
+        return [
+            'status' => 'success',
+            'message' => "Generated {$generated} {$fieldText}, skipped {$skipped}, failed {$failed}",
             'generated' => $generated,
             'skipped' => $skipped,
             'failed' => $failed

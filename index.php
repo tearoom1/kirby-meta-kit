@@ -36,6 +36,11 @@ App::plugin(
         'https://tearoom-kirby.ddev.site/de/kirby-plugins/meta-kit'),
     extends: [
         'options' => [
+            'cache' => [
+                'performer' => [
+                    'active' => true
+                ]
+            ],
             'ai.enabled' => true,
             'ai.tone' => 'formal',
             'api.key' => null,

@@ -5,7 +5,7 @@ fields:
   metaTitle:
     label: Meta Title
     type: text
-    help: Title for search engines. See also the site settings for additional options. <br>Around 50–60 characters. Include the main keyword once. Make it compelling for users.
+    help: Title for search engines. Defaults to the page title. See also the site settings for additional options. <br>Around 50–60 characters. Include the main keyword once. Make it compelling for users.
 
   metaDescription:
     label: Meta Description
