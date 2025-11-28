@@ -86,6 +86,13 @@
       </k-button-group>
 
       <div class="k-meta-kit-controls">
+        <k-button
+          size="sm"
+          @click="showPreviewInTable = !showPreviewInTable"
+          :title="showPreviewInTable ? 'Show character counts' : 'Show preview text'"
+        >
+          {{ showPreviewInTable ? 'Count' : 'Preview' }}
+        </k-button>
         <div class="k-meta-kit-search-wrapper">
           <k-search-input
             icon="search"
@@ -127,7 +134,7 @@
     </div>
 
     <!-- Pages Table -->
-    <div class="k-meta-kit-table">
+    <div class="k-meta-kit-table" :class="{ 'k-meta-kit-table-preview': showPreviewInTable }">
       <table>
         <thead>
         <tr>
@@ -140,11 +147,11 @@
           </th>
           <th>#</th>
           <th>Page</th>
-          <th>Template</th>
+          <th v-if="!showPreviewInTable">Template</th>
           <th class="k-meta-kit-table-center">Title</th>
           <th>Description</th>
           <th>Image</th>
-          <th>Robots</th>
+          <th v-if="!showPreviewInTable">Robots</th>
           <th>Actions</th>
         </tr>
         </thead>
@@ -164,22 +171,40 @@
               <span class="k-meta-kit-table-page-id">{{ page.id }}</span>
             </div>
           </td>
-          <td>{{ page.template }}</td>
-          <td class="k-meta-kit-table-center">
-              <span :class="getTableTitleStatusClass(page)">
+          <td v-if="!showPreviewInTable">{{ page.template }}</td>
+          <td :class="showPreviewInTable ? '' : 'k-meta-kit-table-center'">
+            <span
+              :class="getTableTitleStatusClass(page)"
+              :title="getTitleTooltip(page)"
+              class="k-meta-kit-table-tooltip"
+            >
+              <template v-if="showPreviewInTable">
+                {{ getFullTitlePreview(page) }}
+              </template>
+              <template v-else>
                 {{ getFullTitleLength(page) }}
-              </span>
+              </template>
+            </span>
           </td>
-          <td class="k-meta-kit-table-center">
-              <span :class="getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description')">
+          <td :class="showPreviewInTable ? '' : 'k-meta-kit-table-center'">
+            <span
+              :class="getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description')"
+              :title="getDescriptionTooltip(page)"
+              class="k-meta-kit-table-tooltip"
+            >
+              <template v-if="showPreviewInTable">
+                {{ page.metaDescription || '—' }}
+              </template>
+              <template v-else>
                 {{ page.hasMetaDescription ? page.metaDescriptionLength : '—' }}
-              </span>
+              </template>
+            </span>
           </td>
           <td class="k-meta-kit-table-center">
             <k-icon v-if="page.hasOgImage" type="check" class="k-meta-kit-icon-success"/>
             <span v-else>—</span>
           </td>
-          <td class="k-meta-kit-table-center">
+          <td v-if="!showPreviewInTable" class="k-meta-kit-table-center">
             <span v-if="page.robots && page.robots.includes('noindex')" class="k-meta-kit-robots-noindex">noindex</span>
             <span v-else>—</span>
           </td>
@@ -513,6 +538,7 @@ export default {
       ],
       searchQuery: '',
       metadataFilter: 'all',
+      showPreviewInTable: false,
 
       // Bulk generation options
       bulkGenerateOptions: {
@@ -990,6 +1016,26 @@ export default {
       return titleToUse.length;
     },
 
+    getFullTitlePreview(page) {
+      // For site page, just return the title
+      if (page.id === 'site') {
+        return page.hasMetaTitle ? page.metaTitle : page.title;
+      }
+
+      // For regular pages, use meta title or fallback to page title
+      const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
+      if (!titleToUse) return '—';
+
+      // Build full title with site name if enabled
+      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+        const separator = this.siteSettings.titleSeparator || '|';
+        const siteName = this.siteSettings.siteMetaTitle || '';
+        return `${titleToUse} ${separator} ${siteName}`;
+      }
+
+      return titleToUse;
+    },
+
     getTableTitleStatusClass(page) {
       // For site page, no color coding
       if (page.id === 'site') {
@@ -1002,6 +1048,55 @@ export default {
       const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
       return this.getStatusClass(true, fullLength, 'title', titleToUse || '');
     },
+
+    getTitleTooltip(page) {
+      const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
+
+      if (!titleToUse) {
+        return 'No title';
+      }
+
+      // For site page, just show the title
+      if (page.id === 'site') {
+        if (page.hasMetaTitle && page.metaTitle) {
+          return `${page.metaTitle}`;
+        }
+        return `${page.title}`;
+      }
+
+      // Build tooltip for regular pages
+      let tooltip = '';
+      if (page.hasMetaTitle && page.metaTitle) {
+        tooltip = `${page.metaTitle}`;
+      } else {
+        tooltip = `${page.title}`;
+      }
+
+      // Add preview if site name is appended
+      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+        const separator = this.siteSettings.titleSeparator || '|';
+        const siteName = this.siteSettings.siteMetaTitle || '';
+        const preview = `${titleToUse} ${separator} ${siteName}`;
+        tooltip = `${preview}`;
+      }
+
+      return tooltip;
+    },
+
+    getDescriptionTooltip(page) {
+      if (!page.hasMetaDescription || !page.metaDescription) {
+        return 'No meta description';
+      }
+
+      // Show full description or truncated
+      const desc = page.metaDescription;
+      if (desc.length > 200) {
+        return desc.substring(0, 200) + '...';
+      }
+
+      return desc;
+    },
+
     hasFieldChanged(pageId, fieldName, currentValue, legacyValue) {
       const choice = this.getFieldChoice(pageId, fieldName);
 

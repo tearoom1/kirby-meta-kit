@@ -503,6 +503,7 @@
         ],
         searchQuery: "",
         metadataFilter: "all",
+        showPreviewInTable: false,
         // Bulk generation options
         bulkGenerateOptions: {
           title: true,
@@ -900,6 +901,19 @@
         }
         return titleToUse.length;
       },
+      getFullTitlePreview(page) {
+        if (page.id === "site") {
+          return page.hasMetaTitle ? page.metaTitle : page.title;
+        }
+        const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
+        if (!titleToUse) return "—";
+        if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+          const separator = this.siteSettings.titleSeparator || "|";
+          const siteName = this.siteSettings.siteMetaTitle || "";
+          return `${titleToUse} ${separator} ${siteName}`;
+        }
+        return titleToUse;
+      },
       getTableTitleStatusClass(page) {
         if (page.id === "site") {
           return "";
@@ -907,6 +921,41 @@
         const fullLength = this.getFullTitleLength(page);
         const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
         return this.getStatusClass(true, fullLength, "title", titleToUse || "");
+      },
+      getTitleTooltip(page) {
+        const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
+        if (!titleToUse) {
+          return "No title";
+        }
+        if (page.id === "site") {
+          if (page.hasMetaTitle && page.metaTitle) {
+            return `${page.metaTitle}`;
+          }
+          return `${page.title}`;
+        }
+        let tooltip = "";
+        if (page.hasMetaTitle && page.metaTitle) {
+          tooltip = `${page.metaTitle}`;
+        } else {
+          tooltip = `${page.title}`;
+        }
+        if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+          const separator = this.siteSettings.titleSeparator || "|";
+          const siteName = this.siteSettings.siteMetaTitle || "";
+          const preview = `${titleToUse} ${separator} ${siteName}`;
+          tooltip = `${preview}`;
+        }
+        return tooltip;
+      },
+      getDescriptionTooltip(page) {
+        if (!page.hasMetaDescription || !page.metaDescription) {
+          return "No meta description";
+        }
+        const desc = page.metaDescription;
+        if (desc.length > 200) {
+          return desc.substring(0, 200) + "...";
+        }
+        return desc;
       },
       hasFieldChanged(pageId, fieldName, currentValue, legacyValue) {
         const choice = this.getFieldChoice(pageId, fieldName);
@@ -1239,7 +1288,9 @@
       return _c("k-button", { key: lang.code, attrs: { "theme": lang.code === _vm.language ? "positive" : "", "size": "xs" }, on: { "click": function($event) {
         return _vm.goToLanguage(lang.code);
       } } }, [_vm._v(" " + _vm._s(lang.code.toUpperCase()) + " ")]);
-    }), 1), _vm.legacyMigration ? _c("k-button", { attrs: { "icon": "download", "size": "xs" }, on: { "click": _vm.showLegacyDialog } }, [_vm._v("Legacy Migration")]) : _vm._e()], 1) : _vm._e(), _vm.legacyMigration && _vm.legacyDetection.show && _vm.legacyDetection.found > 0 ? _c("div", { staticClass: "k-meta-kit-warning" }, [_c("k-box", { attrs: { "theme": "info" } }, [_c("k-icon", { attrs: { "type": "info" } }), _c("span", [_vm._v("Found " + _vm._s(_vm.legacyDetection.found) + " pages with legacy SEO metadata")]), _c("k-button", { attrs: { "icon": "download" }, on: { "click": _vm.showLegacyDialog } }, [_vm._v("View & Convert")]), _c("k-button", { attrs: { "icon": "cancel" }, on: { "click": _vm.dismissLegacyWarning } }, [_vm._v("Dismiss")])], 1)], 1) : _vm._e(), _c("div", { staticClass: "k-meta-kit-stats" }, [_c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("Total Pages")]), _c("p", [_vm._v(_vm._s(_vm.filteredPages.length)), _vm.searchQuery ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.pagesData.length))]) : _vm._e()])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With Description")]), _c("p", [_vm._v(_vm._s(_vm.filteredPagesWithDescription)), _vm.searchQuery ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.pagesWithDescription))]) : _vm._e()])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With OG Image")]), _c("p", [_vm._v(_vm._s(_vm.filteredPagesWithOgImage)), _vm.searchQuery ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.pagesWithOgImage))]) : _vm._e()])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("No Index")]), _c("p", [_vm._v(_vm._s(_vm.filteredPagesNoIndex)), _vm.searchQuery ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.pagesNoIndex))]) : _vm._e()])])]), _c("div", { staticClass: "k-meta-kit-actions" }, [_c("k-button-group", [_c("k-button", { attrs: { "icon": "edit", "disabled": _vm.selectedPages.length === 0 }, on: { "click": _vm.showSelectedPagesDialog } }, [_vm._v(" Edit Selected (" + _vm._s(_vm.selectedPages.length) + ") ")]), _vm.aiEnabled ? _c("k-button", { attrs: { "icon": "sparkling", "disabled": _vm.isGeneratingAll || _vm.selectedPages.length === 0, "progress": _vm.isGeneratingAll }, on: { "click": _vm.generateAllDescriptions } }, [_vm._v(" Generate Missing (" + _vm._s(_vm.selectedPages.length) + ") ")]) : _vm._e(), _c("k-button", { attrs: { "icon": "refresh" }, on: { "click": _vm.refreshPages } })], 1), _c("div", { staticClass: "k-meta-kit-controls" }, [_c("div", { staticClass: "k-meta-kit-search-wrapper" }, [_c("k-search-input", { staticClass: "k-meta-kit-search", attrs: { "icon": "search", "value": _vm.searchQuery, "placeholder": "Filter pages..." }, on: { "input": function($event) {
+    }), 1), _vm.legacyMigration ? _c("k-button", { attrs: { "icon": "download", "size": "xs" }, on: { "click": _vm.showLegacyDialog } }, [_vm._v("Legacy Migration")]) : _vm._e()], 1) : _vm._e(), _vm.legacyMigration && _vm.legacyDetection.show && _vm.legacyDetection.found > 0 ? _c("div", { staticClass: "k-meta-kit-warning" }, [_c("k-box", { attrs: { "theme": "info" } }, [_c("k-icon", { attrs: { "type": "info" } }), _c("span", [_vm._v("Found " + _vm._s(_vm.legacyDetection.found) + " pages with legacy SEO metadata")]), _c("k-button", { attrs: { "icon": "download" }, on: { "click": _vm.showLegacyDialog } }, [_vm._v("View & Convert")]), _c("k-button", { attrs: { "icon": "cancel" }, on: { "click": _vm.dismissLegacyWarning } }, [_vm._v("Dismiss")])], 1)], 1) : _vm._e(), _c("div", { staticClass: "k-meta-kit-stats" }, [_c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("Total Pages")]), _c("p", [_vm._v(_vm._s(_vm.filteredPages.length)), _vm.searchQuery ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.pagesData.length))]) : _vm._e()])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With Description")]), _c("p", [_vm._v(_vm._s(_vm.filteredPagesWithDescription)), _vm.searchQuery ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.pagesWithDescription))]) : _vm._e()])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With OG Image")]), _c("p", [_vm._v(_vm._s(_vm.filteredPagesWithOgImage)), _vm.searchQuery ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.pagesWithOgImage))]) : _vm._e()])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("No Index")]), _c("p", [_vm._v(_vm._s(_vm.filteredPagesNoIndex)), _vm.searchQuery ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.pagesNoIndex))]) : _vm._e()])])]), _c("div", { staticClass: "k-meta-kit-actions" }, [_c("k-button-group", [_c("k-button", { attrs: { "icon": "edit", "disabled": _vm.selectedPages.length === 0 }, on: { "click": _vm.showSelectedPagesDialog } }, [_vm._v(" Edit Selected (" + _vm._s(_vm.selectedPages.length) + ") ")]), _vm.aiEnabled ? _c("k-button", { attrs: { "icon": "sparkling", "disabled": _vm.isGeneratingAll || _vm.selectedPages.length === 0, "progress": _vm.isGeneratingAll }, on: { "click": _vm.generateAllDescriptions } }, [_vm._v(" Generate Missing (" + _vm._s(_vm.selectedPages.length) + ") ")]) : _vm._e(), _c("k-button", { attrs: { "icon": "refresh" }, on: { "click": _vm.refreshPages } })], 1), _c("div", { staticClass: "k-meta-kit-controls" }, [_c("k-button", { attrs: { "size": "sm", "title": _vm.showPreviewInTable ? "Show character counts" : "Show preview text" }, on: { "click": function($event) {
+      _vm.showPreviewInTable = !_vm.showPreviewInTable;
+    } } }, [_vm._v(" " + _vm._s(_vm.showPreviewInTable ? "Count" : "Preview") + " ")]), _c("div", { staticClass: "k-meta-kit-search-wrapper" }, [_c("k-search-input", { staticClass: "k-meta-kit-search", attrs: { "icon": "search", "value": _vm.searchQuery, "placeholder": "Filter pages..." }, on: { "input": function($event) {
       _vm.searchQuery = $event;
     } } }), _vm.searchQuery ? _c("button", { staticClass: "k-meta-kit-search-clear", attrs: { "title": "Clear search" }, on: { "click": function($event) {
       _vm.searchQuery = "";
@@ -1249,10 +1300,10 @@
       return _vm.changePageSize($event.target.value);
     } } }, _vm._l(_vm.pageSizeOptions, function(option) {
       return _c("option", { key: option.value, domProps: { "value": option.value } }, [_vm._v(" " + _vm._s(option.text) + " ")]);
-    }), 0)])], 1), _c("div", { staticClass: "k-meta-kit-table" }, [_c("table", [_c("thead", [_c("tr", [_c("th", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isAllCurrentPageSelected }, on: { "change": _vm.toggleSelectAllCurrentPage } })]), _c("th", [_vm._v("#")]), _c("th", [_vm._v("Page")]), _c("th", [_vm._v("Template")]), _c("th", { staticClass: "k-meta-kit-table-center" }, [_vm._v("Title")]), _c("th", [_vm._v("Description")]), _c("th", [_vm._v("Image")]), _c("th", [_vm._v("Robots")]), _c("th", [_vm._v("Actions")])])]), _c("tbody", _vm._l(_vm.paginatedPages, function(page, index) {
+    }), 0)], 1)], 1), _c("div", { staticClass: "k-meta-kit-table", class: { "k-meta-kit-table-preview": _vm.showPreviewInTable } }, [_c("table", [_c("thead", [_c("tr", [_c("th", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isAllCurrentPageSelected }, on: { "change": _vm.toggleSelectAllCurrentPage } })]), _c("th", [_vm._v("#")]), _c("th", [_vm._v("Page")]), !_vm.showPreviewInTable ? _c("th", [_vm._v("Template")]) : _vm._e(), _c("th", { staticClass: "k-meta-kit-table-center" }, [_vm._v("Title")]), _c("th", [_vm._v("Description")]), _c("th", [_vm._v("Image")]), !_vm.showPreviewInTable ? _c("th", [_vm._v("Robots")]) : _vm._e(), _c("th", [_vm._v("Actions")])])]), _c("tbody", _vm._l(_vm.paginatedPages, function(page, index) {
       return _c("tr", { key: page.id }, [_c("td", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isPageSelected(page.id) }, on: { "change": function($event) {
         return _vm.togglePageSelection(page.id);
-      } } })]), _c("td", [_vm._v(_vm._s((_vm.currentPage - 1) * _vm.pageSize + index + 1))]), _c("td", [_c("div", { staticClass: "k-meta-kit-table-page" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("span", { staticClass: "k-meta-kit-table-page-id" }, [_vm._v(_vm._s(page.id))])])]), _c("td", [_vm._v(_vm._s(page.template))]), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: _vm.getTableTitleStatusClass(page) }, [_vm._v(" " + _vm._s(_vm.getFullTitleLength(page)) + " ")])]), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: _vm.getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, "description") }, [_vm._v(" " + _vm._s(page.hasMetaDescription ? page.metaDescriptionLength : "—") + " ")])]), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? _c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } }) : _c("span", [_vm._v("—")])], 1), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.robots && page.robots.includes("noindex") ? _c("span", { staticClass: "k-meta-kit-robots-noindex" }, [_vm._v("noindex")]) : _c("span", [_vm._v("—")])]), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("div", { staticClass: "k-meta-kit-table-actions" }, [_c("k-button", { attrs: { "icon": "edit", "size": "sm", "title": "Edit Metadata" }, on: { "click": function($event) {
+      } } })]), _c("td", [_vm._v(_vm._s((_vm.currentPage - 1) * _vm.pageSize + index + 1))]), _c("td", [_c("div", { staticClass: "k-meta-kit-table-page" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("span", { staticClass: "k-meta-kit-table-page-id" }, [_vm._v(_vm._s(page.id))])])]), !_vm.showPreviewInTable ? _c("td", [_vm._v(_vm._s(page.template))]) : _vm._e(), _c("td", { class: _vm.showPreviewInTable ? "" : "k-meta-kit-table-center" }, [_c("span", { staticClass: "k-meta-kit-table-tooltip", class: _vm.getTableTitleStatusClass(page), attrs: { "title": _vm.getTitleTooltip(page) } }, [_vm.showPreviewInTable ? [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page)) + " ")] : [_vm._v(" " + _vm._s(_vm.getFullTitleLength(page)) + " ")]], 2)]), _c("td", { class: _vm.showPreviewInTable ? "" : "k-meta-kit-table-center" }, [_c("span", { staticClass: "k-meta-kit-table-tooltip", class: _vm.getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, "description"), attrs: { "title": _vm.getDescriptionTooltip(page) } }, [_vm.showPreviewInTable ? [_vm._v(" " + _vm._s(page.metaDescription || "—") + " ")] : [_vm._v(" " + _vm._s(page.hasMetaDescription ? page.metaDescriptionLength : "—") + " ")]], 2)]), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? _c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } }) : _c("span", [_vm._v("—")])], 1), !_vm.showPreviewInTable ? _c("td", { staticClass: "k-meta-kit-table-center" }, [page.robots && page.robots.includes("noindex") ? _c("span", { staticClass: "k-meta-kit-robots-noindex" }, [_vm._v("noindex")]) : _c("span", [_vm._v("—")])]) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("div", { staticClass: "k-meta-kit-table-actions" }, [_c("k-button", { attrs: { "icon": "edit", "size": "sm", "title": "Edit Metadata" }, on: { "click": function($event) {
         return _vm.editSinglePageMetadata(page.id);
       } } }), _vm.aiEnabled ? _c("k-button", { attrs: { "icon": "sparkling", "size": "sm", "disabled": page.hasMetaDescription, "title": "Generate Description" }, on: { "click": function($event) {
         return _vm.generateDescription(page.id);
