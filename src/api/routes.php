@@ -104,11 +104,15 @@ return function () {
 
                 $generateTitle = get("generateTitle", false);
                 $generateDescription = get("generateDescription", false);
+                $generateOgTitle = get("generateOgTitle", false);
+                $generateOgDescription = get("generateOgDescription", false);
                 $pageIds = get("pageIds", []);
 
                 return TearoomOne\MetaKitController::generateAllFields(
                     $generateTitle,
                     $generateDescription,
+                    $generateOgTitle,
+                    $generateOgDescription,
                     $pageIds
                 );
             },

@@ -47,7 +47,6 @@ fields:
   ogTitle:
     label: Social Media Title
     type: text
-    placeholder: "{{ page.title }}"
     help: Title for social media shares. Uses the meta title if empty.
 
   ogDescription:

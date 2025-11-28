@@ -78,6 +78,8 @@ class MetaKitController
             'template' => 'site',
             'hasMetaTitle' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty(),
             'hasMetaDescription' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty(),
+            'hasOgTitle' => $siteSeo && $siteSeo->ogTitle()->isNotEmpty(),
+            'hasOgDescription' => $siteSeo && $siteSeo->ogDescription()->isNotEmpty(),
             'hasOgImage' => $siteSeo && $siteSeo->ogImage()->isNotEmpty(),
             'robots' => $siteSeo && $siteSeo->robots()->isNotEmpty() ? $siteSeo->robots()->value() : 'index, follow',
             'metaTitle' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
@@ -91,6 +93,18 @@ class MetaKitController
                 : null,
             'metaDescriptionLength' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
                 ? mb_strlen($siteSeo->metaDescription()->value())
+                : 0,
+            'ogTitle' => $siteSeo && $siteSeo->ogTitle()->isNotEmpty()
+                ? $siteSeo->ogTitle()->value()
+                : null,
+            'ogTitleLength' => $siteSeo && $siteSeo->ogTitle()->isNotEmpty()
+                ? mb_strlen($siteSeo->ogTitle()->value())
+                : 0,
+            'ogDescription' => $siteSeo && $siteSeo->ogDescription()->isNotEmpty()
+                ? $siteSeo->ogDescription()->value()
+                : null,
+            'ogDescriptionLength' => $siteSeo && $siteSeo->ogDescription()->isNotEmpty()
+                ? mb_strlen($siteSeo->ogDescription()->value())
                 : 0,
             'language' => $languageCode,
             'legacy' => !empty($siteLegacy) ? $siteLegacy : null,
@@ -126,6 +140,8 @@ class MetaKitController
                 'template' => $page->intendedTemplate()->name(),
                 'hasMetaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty(),
                 'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
+                'hasOgTitle' => $seoData && $seoData->ogTitle()->isNotEmpty(),
+                'hasOgDescription' => $seoData && $seoData->ogDescription()->isNotEmpty(),
                 'hasOgImage' => $seoData && $seoData->ogImage()->isNotEmpty(),
                 'robots' => $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots()->value() : 'index, follow',
                 'metaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty()
@@ -139,6 +155,18 @@ class MetaKitController
                     : null,
                 'metaDescriptionLength' => $seoData && $seoData->metaDescription()->isNotEmpty()
                     ? mb_strlen($seoData->metaDescription()->value())
+                    : 0,
+                'ogTitle' => $seoData && $seoData->ogTitle()->isNotEmpty()
+                    ? $seoData->ogTitle()->value()
+                    : null,
+                'ogTitleLength' => $seoData && $seoData->ogTitle()->isNotEmpty()
+                    ? mb_strlen($seoData->ogTitle()->value())
+                    : 0,
+                'ogDescription' => $seoData && $seoData->ogDescription()->isNotEmpty()
+                    ? $seoData->ogDescription()->value()
+                    : null,
+                'ogDescriptionLength' => $seoData && $seoData->ogDescription()->isNotEmpty()
+                    ? mb_strlen($seoData->ogDescription()->value())
                     : 0,
                 'language' => $languageCode,
                 'legacy' => !empty($legacy) ? $legacy : null,
@@ -245,6 +273,8 @@ class MetaKitController
     public static function generateAllFields(
         bool $generateTitle = false,
         bool $generateDescription = false,
+        bool $generateOgTitle = false,
+        bool $generateOgDescription = false,
         array $pageIds = []
     ): array {
         $kirby = kirby();
@@ -306,6 +336,38 @@ class MetaKitController
                 }
             }
 
+            // Generate OG title if requested
+            if ($generateOgTitle) {
+                // Skip if already has OG title
+                if (!$seoData || $seoData->ogTitle()->isEmpty()) {
+                    $result = self::generateField($page->id(), 'ogTitle', null, true);
+
+                    if ($result['status'] === 'success') {
+                        $generated++;
+                        $pageSkipped = false;
+                    } else {
+                        $failed++;
+                        $pageSkipped = false;
+                    }
+                }
+            }
+
+            // Generate OG description if requested
+            if ($generateOgDescription) {
+                // Skip if already has OG description
+                if (!$seoData || $seoData->ogDescription()->isEmpty()) {
+                    $result = self::generateField($page->id(), 'ogDescription', null, true);
+
+                    if ($result['status'] === 'success') {
+                        $generated++;
+                        $pageSkipped = false;
+                    } else {
+                        $failed++;
+                        $pageSkipped = false;
+                    }
+                }
+            }
+
             if ($pageSkipped) {
                 $skipped++;
             }
@@ -313,13 +375,15 @@ class MetaKitController
 
         // Build message
         $fields = [];
-        if ($generateTitle) $fields[] = 'titles';
-        if ($generateDescription) $fields[] = 'descriptions';
-        $fieldText = implode(' and ', $fields);
+        if ($generateTitle) $fields[] = 'meta titles';
+        if ($generateDescription) $fields[] = 'meta descriptions';
+        if ($generateOgTitle) $fields[] = 'OG titles';
+        if ($generateOgDescription) $fields[] = 'OG descriptions';
+        $fieldText = implode(', ', $fields);
 
         return [
             'status' => 'success',
-            'message' => "Generated {$generated} {$fieldText}, skipped {$skipped}, failed {$failed}",
+            'message' => "Generated {$generated} field(s) ({$fieldText}), skipped {$skipped}, failed {$failed}",
             'generated' => $generated,
             'skipped' => $skipped,
             'failed' => $failed
@@ -798,10 +862,15 @@ class MetaKitController
             // Get content for generation
             $content = self::getContentForGeneration($page, $isSite);
 
-            if ($fieldName === 'metaTitle') {
+            if ($fieldName === 'metaTitle' || $fieldName === 'ogTitle') {
                 $result = $metaKit->generateTitle($content, ['language' => $languageCode]);
-            } else {
+            } elseif ($fieldName === 'metaDescription' || $fieldName === 'ogDescription') {
                 $result = $metaKit->generateDescription($content, ['language' => $languageCode]);
+            } else {
+                return [
+                    'status' => 'error',
+                    'message' => 'Unsupported field name'
+                ];
             }
 
             if (!$result) {

@@ -35,209 +35,52 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="k-meta-kit-stats">
-      <div class="k-meta-kit-stats-card">
-        <h3>Total Pages</h3>
-        <p>{{ filteredPages.length }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{
-            pagesData.length
-          }}</span></p>
-      </div>
-      <div class="k-meta-kit-stats-card">
-        <h3>With Description</h3>
-        <p>{{ filteredPagesWithDescription }}<span v-if="searchQuery"
-                                                   class="k-meta-kit-stats-total"> / {{ pagesWithDescription }}</span>
-        </p>
-      </div>
-      <div class="k-meta-kit-stats-card">
-        <h3>With OG Image</h3>
-        <p>{{ filteredPagesWithOgImage }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{
-            pagesWithOgImage
-          }}</span></p>
-      </div>
-      <div class="k-meta-kit-stats-card">
-        <h3>No Index</h3>
-        <p>{{ filteredPagesNoIndex }}<span v-if="searchQuery" class="k-meta-kit-stats-total"> / {{
-            pagesNoIndex
-          }}</span></p>
-      </div>
-    </div>
+    <meta-kit-stats
+      :filtered-count="filteredPages.length"
+      :total-count="pagesData.length"
+      :filtered-with-description="filteredPagesWithDescription"
+      :total-with-description="pagesWithDescription"
+      :filtered-with-image="filteredPagesWithOgImage"
+      :total-with-image="pagesWithOgImage"
+      :filtered-no-index="filteredPagesNoIndex"
+      :total-no-index="pagesNoIndex"
+      :search-active="!!searchQuery"
+    />
 
     <!-- Actions & Filters -->
-    <div class="k-meta-kit-actions">
-      <k-button-group>
-        <k-button
-          icon="edit"
-          :disabled="selectedPages.length === 0"
-          @click="showSelectedPagesDialog"
-        >
-          Edit Selected ({{ selectedPages.length }})
-        </k-button>
-        <k-button
-          v-if="aiEnabled"
-          icon="sparkling"
-          :disabled="isGeneratingAll || selectedPages.length === 0"
-          :progress="isGeneratingAll"
-          @click="generateAllDescriptions"
-        >
-          Generate Missing ({{ selectedPages.length }})
-        </k-button>
-        <!-- Legacy button moved to language bar -->
-        <k-button icon="refresh" @click="refreshPages"></k-button>
-      </k-button-group>
-
-      <div class="k-meta-kit-controls">
-        <k-button
-          size="sm"
-          @click="showPreviewInTable = !showPreviewInTable"
-          :title="showPreviewInTable ? 'Show character counts' : 'Show preview text'"
-        >
-          {{ showPreviewInTable ? 'Count' : 'Preview' }}
-        </k-button>
-        <div class="k-meta-kit-search-wrapper">
-          <k-search-input
-            icon="search"
-            :value="searchQuery"
-            @input="searchQuery = $event"
-            placeholder="Filter pages..."
-            class="k-meta-kit-search"
-          />
-          <button
-            v-if="searchQuery"
-            class="k-meta-kit-search-clear"
-            @click="searchQuery = ''"
-            title="Clear search"
-          >
-            <k-icon type="cancel"/>
-          </button>
-        </div>
-        <select
-          class="k-meta-kit-metadata-filter"
-          :value="metadataFilter"
-          @change="metadataFilter = $event.target.value"
-        >
-          <option value="all">All Pages</option>
-          <option value="missing-title">Missing Title</option>
-          <option value="missing-description">Missing Description</option>
-          <option value="missing-image">Missing OG Image</option>
-          <option value="complete">Complete Metadata</option>
-        </select>
-        <select
-          class="k-meta-kit-pagesize-select"
-          :value="pageSize"
-          @change="changePageSize($event.target.value)"
-        >
-          <option v-for="option in pageSizeOptions" :key="option.value" :value="option.value">
-            {{ option.text }}
-          </option>
-        </select>
-      </div>
-    </div>
+    <meta-kit-actions
+      :selected-count="selectedPages.length"
+      :ai-enabled="aiEnabled"
+      :is-generating="isGeneratingAll"
+      @edit-selected="showSelectedPagesDialog"
+      @generate-missing="generateAllDescriptions"
+      @refresh="refreshPages"
+    >
+      <template #filters>
+        <meta-kit-filters
+          :show-preview.sync="showPreviewInTable"
+          :search-query.sync="searchQuery"
+          :metadata-filter.sync="metadataFilter"
+          :page-size="pageSize"
+          :page-size-options="pageSizeOptions"
+          @change-page-size="changePageSize"
+        />
+      </template>
+    </meta-kit-actions>
 
     <!-- Pages Table -->
-    <div class="k-meta-kit-table" :class="{ 'k-meta-kit-table-preview': showPreviewInTable }">
-      <table>
-        <thead>
-        <tr>
-          <th class="k-meta-kit-table-checkbox">
-            <input
-              type="checkbox"
-              :checked="isAllCurrentPageSelected"
-              @change="toggleSelectAllCurrentPage"
-            />
-          </th>
-          <th>#</th>
-          <th>Page</th>
-          <th v-if="!showPreviewInTable">Template</th>
-          <th class="k-meta-kit-table-center">Title</th>
-          <th>Description</th>
-          <th>Image</th>
-          <th v-if="!showPreviewInTable">Robots</th>
-          <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr v-for="(page, index) in paginatedPages" :key="page.id">
-          <td class="k-meta-kit-table-checkbox">
-            <input
-              type="checkbox"
-              :checked="isPageSelected(page.id)"
-              @change="togglePageSelection(page.id)"
-            />
-          </td>
-          <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
-          <td>
-            <div class="k-meta-kit-table-page">
-              <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
-              <span class="k-meta-kit-table-page-id">{{ page.id }}</span>
-            </div>
-          </td>
-          <td v-if="!showPreviewInTable">{{ page.template }}</td>
-          <td :class="showPreviewInTable ? '' : 'k-meta-kit-table-center'">
-            <span
-              :class="[
-                showPreviewInTable ? 'k-meta-kit-table-preview-indicator' : '',
-                showPreviewInTable ? '' : getTableTitleStatusClass(page),
-                'k-meta-kit-table-tooltip'
-              ]"
-              :data-status="showPreviewInTable ? getStatusValue(getTableTitleStatusClass(page)) : ''"
-              :title="getTitleTooltip(page)"
-            >
-              <template v-if="showPreviewInTable">
-                {{ getFullTitlePreview(page) }}
-              </template>
-              <template v-else>
-                {{ getFullTitleLength(page) }}
-              </template>
-            </span>
-          </td>
-          <td :class="showPreviewInTable ? '' : 'k-meta-kit-table-center'">
-            <span
-              :class="[
-                showPreviewInTable ? 'k-meta-kit-table-preview-indicator' : '',
-                showPreviewInTable ? '' : getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description'),
-                'k-meta-kit-table-tooltip'
-              ]"
-              :data-status="showPreviewInTable ? getStatusValue(getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description')) : ''"
-              :title="getDescriptionTooltip(page)"
-            >
-              <template v-if="showPreviewInTable">
-                {{ page.metaDescription || '—' }}
-              </template>
-              <template v-else>
-                {{ page.hasMetaDescription ? page.metaDescriptionLength : '—' }}
-              </template>
-            </span>
-          </td>
-          <td class="k-meta-kit-table-center">
-            <k-icon v-if="page.hasOgImage" type="check" class="k-meta-kit-icon-success"/>
-            <span v-else>—</span>
-          </td>
-          <td v-if="!showPreviewInTable" class="k-meta-kit-table-center">
-            <span v-if="page.robots && page.robots.includes('noindex')" class="k-meta-kit-robots-noindex">noindex</span>
-            <span v-else>—</span>
-          </td>
-          <td class="k-meta-kit-table-center">
-            <div class="k-meta-kit-table-actions">
-              <k-button
-                icon="edit"
-                size="sm"
-                @click="editSinglePageMetadata(page.id)"
-                title="Edit Metadata"
-              />
-              <k-button
-                v-if="aiEnabled"
-                icon="sparkling"
-                size="sm"
-                :disabled="page.hasMetaDescription"
-                @click="generateDescription(page.id)"
-                title="Generate Description"
-              />
-            </div>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
+    <meta-kit-table
+      :pages="paginatedPages"
+      :start-index="(currentPage - 1) * pageSize"
+      :selected-pages="selectedPages"
+      :is-all-selected="isAllCurrentPageSelected"
+      :show-preview="showPreviewInTable"
+      :ai-enabled="aiEnabled"
+      @toggle-select-all="toggleSelectAllCurrentPage"
+      @toggle-page="togglePageSelection"
+      @edit-page="editSinglePageMetadata"
+      @generate-description="generateDescription"
+    />
 
     <!-- Pagination -->
     <div v-if="totalPages > 1" class="k-meta-kit-pagination">
@@ -258,56 +101,107 @@
       />
     </div>
 
-    <!-- Legacy Migration Dialog (Summary) -->
-    <k-dialog ref="legacyDialog" size="medium" cancelButton="Close" submitButton="">
-      <k-headline>Legacy SEO Migration</k-headline>
-
-      <div v-if="isLoadingLegacy" class="k-meta-kit-loading">
-        <k-icon class="k-meta-kit-spinner" type="loader"/>
-        <span>Scanning all languages for legacy metadata...</span>
-      </div>
-      <div v-else>
-        <div class="k-meta-kit-legacy-list">
-          <p>Summary of legacy fields by language:</p>
-          <ul>
-            <li v-for="item in legacySummary.byLanguage" :key="item.code">
-              <strong>{{ item.code.toUpperCase() }}</strong>: {{ item.count }} item(s)
-            </li>
-          </ul>
-          <p><strong>Total:</strong> {{ legacySummary.total }} item(s) across all languages</p>
-          <k-box theme="negative">
-            <k-icon type="alert"/>
-            <span>Warning: Legacy metadata will be migrated to the new meta kit fields. The old fields will be removed.</span>
-          </k-box>
-          <k-button
-            icon="download"
-            :disabled="isMigratingAll || legacySummary.total === 0"
-            :progress="isMigratingAll"
-            @click="migrateAllLanguages"
-            theme="positive"
-          >
-            Migrate All Languages
-          </k-button>
-        </div>
-      </div>
-    </k-dialog>
+    <!-- Legacy Migration Dialog -->
+    <meta-kit-legacy-dialog
+      ref="legacyDialog"
+      :summary="legacySummary"
+      :is-loading="isLoadingLegacy"
+      :is-migrating="isMigratingAll"
+      @load-summary="loadLegacySummary"
+      @migrate="migrateAllLanguages"
+    />
 
     <!-- All Pages Dialog -->
-    <k-dialog ref="allPagesDialog" size="huge" cancelButton="Close" submitButton="">
-      <k-headline>Edit Selected Pages ({{ allPagesData.length }})</k-headline>
+    <meta-kit-bulk-edit-dialog
+      ref="allPagesDialog"
+      :pages="allPagesData"
+      :is-loading="isLoadingAllPages"
+    >
+      <template #meta="{ page }">
+        <meta-kit-title-field
+          :value="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
+          @input="setManualValue(page.id, 'metaTitle', $event)"
+          :page-id="page.id"
+          :page-title="page.title"
+          :site-settings="siteSettings"
+          :ai-enabled="aiEnabled"
+          :is-generating="isGeneratingField(page.id, 'metaTitle')"
+          @generate="generateFieldAI(page.id, 'metaTitle')"
+          :placeholder="page.metaTitle || 'No meta title'"
+          button-size="xs"
+          field-class="k-meta-kit-dialog-table-field-title"
+        />
+        <meta-kit-description-field
+          :value="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
+          @input="setManualValue(page.id, 'metaDescription', $event)"
+          :ai-enabled="aiEnabled"
+          :is-generating="isGeneratingField(page.id, 'metaDescription')"
+          @generate="generateFieldAI(page.id, 'metaDescription')"
+          :placeholder="page.metaDescription || 'No meta description'"
+          button-size="xs"
+          :rows="3"
+          field-class="k-meta-kit-dialog-table-field-desc"
+        />
+        <div class="k-meta-kit-dialog-table-actions">
+          <k-button
+            v-if="hasAnyFieldChanged(page.id, page)"
+            icon="check"
+            size="sm"
+            theme="positive"
+            @click="applyAllFields(page.id, page)"
+          >
+            Apply
+          </k-button>
+        </div>
+      </template>
+      <template #og="{ page }">
+        <meta-kit-og-title-field
+          :value="getEditableValue(page.id, 'ogTitle', page.ogTitle)"
+          @input="setManualValue(page.id, 'ogTitle', $event)"
+          :ai-enabled="aiEnabled"
+          :is-generating="isGeneratingField(page.id, 'ogTitle')"
+          @generate="generateFieldAI(page.id, 'ogTitle')"
+          :placeholder="page.ogTitle || 'No OG title'"
+          button-size="xs"
+          field-class="k-meta-kit-dialog-table-field-title"
+        />
+        <meta-kit-og-description-field
+          :value="getEditableValue(page.id, 'ogDescription', page.ogDescription)"
+          @input="setManualValue(page.id, 'ogDescription', $event)"
+          :ai-enabled="aiEnabled"
+          :is-generating="isGeneratingField(page.id, 'ogDescription')"
+          @generate="generateFieldAI(page.id, 'ogDescription')"
+          :placeholder="page.ogDescription || 'No OG description'"
+          button-size="xs"
+          :rows="3"
+          field-class="k-meta-kit-dialog-table-field-desc"
+        />
+        <div class="k-meta-kit-dialog-table-actions">
+          <k-button
+            v-if="hasAnyFieldChanged(page.id, page)"
+            icon="check"
+            size="sm"
+            theme="positive"
+            @click="applyAllFields(page.id, page)"
+          >
+            Apply
+          </k-button>
+        </div>
+      </template>
+    </meta-kit-bulk-edit-dialog>
 
-      <div v-if="isLoadingAllPages" class="k-meta-kit-loading">
-        <k-icon class="k-meta-kit-spinner" type="loader"/>
-        <span>Loading pages...</span>
-      </div>
-
-      <div v-else-if="allPagesData.length > 0" class="k-meta-kit-dialog-table-wrapper">
-        <div v-for="page in allPagesData" :key="page.id" class="k-meta-kit-dialog-table-page">
-          <div class="k-meta-kit-dialog-page-info">
-            <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
-            <a :href="page.panelUrl" class="k-link k-meta-kit-page-id">{{ page.id }}</a>
-          </div>
-          <!-- Meta Title -->
+    <!-- Single Page Edit Dialog -->
+    <meta-kit-single-page-dialog
+      ref="singlePageDialog"
+      :page="currentEditPage"
+      :is-loading="isLoadingSinglePage"
+      :has-changes="currentEditPage && hasAnyFieldChanged(currentEditPage.id, currentEditPage)"
+      @edit-in-panel="openPageSeoTab"
+      @apply-changes="applySingleFieldAndClose(currentEditPage.id, 'all')"
+    >
+      <template v-slot="{ page }">
+        <div class="k-meta-kit-single-field">
+          <label class="k-meta-kit-single-field-label">Meta Title</label>
           <meta-kit-title-field
             :value="getEditableValue(page.id, 'metaTitle', page.metaTitle)"
             @input="setManualValue(page.id, 'metaTitle', $event)"
@@ -317,177 +211,104 @@
             :ai-enabled="aiEnabled"
             :is-generating="isGeneratingField(page.id, 'metaTitle')"
             @generate="generateFieldAI(page.id, 'metaTitle')"
-            :placeholder="page.metaTitle || 'No meta title'"
-            button-size="xs"
-            field-class="k-meta-kit-dialog-table-field-title"
+            :placeholder="page.metaTitle || 'No meta title set'"
+            button-size="sm"
+            field-class="k-meta-kit-single-field-content"
           />
-
-          <!-- Meta Description -->
+        </div>
+        <div class="k-meta-kit-single-field">
+          <label class="k-meta-kit-single-field-label">Meta Description</label>
           <meta-kit-description-field
             :value="getEditableValue(page.id, 'metaDescription', page.metaDescription)"
             @input="setManualValue(page.id, 'metaDescription', $event)"
             :ai-enabled="aiEnabled"
             :is-generating="isGeneratingField(page.id, 'metaDescription')"
             @generate="generateFieldAI(page.id, 'metaDescription')"
-            :placeholder="page.metaDescription || 'No meta description'"
-            button-size="xs"
-            :rows="3"
-            field-class="k-meta-kit-dialog-table-field-desc"
-          />
-
-          <!-- Actions -->
-          <div class="k-meta-kit-dialog-table-actions">
-            <k-button
-              v-if="hasAnyFieldChanged(page.id, page)"
-              icon="check"
-              size="sm"
-              theme="positive"
-              @click="applyAllFields(page.id, page)"
-            >
-              Apply
-            </k-button>
-          </div>
-        </div>
-      </div>
-
-      <div v-else class="k-meta-kit-empty">
-        <k-icon type="check"/>
-        <p>No pages found!</p>
-      </div>
-    </k-dialog>
-
-    <!-- Single Page Edit Dialog -->
-    <k-dialog ref="singlePageDialog" size="large" cancelButton="Close" submitButton="">
-      <k-headline v-if="currentEditPage">Edit: {{ currentEditPage.title }}</k-headline>
-
-      <div v-if="isLoadingSinglePage" class="k-meta-kit-loading">
-        <k-icon class="k-meta-kit-spinner" type="loader"/>
-        <span>Loading page...</span>
-      </div>
-
-      <div v-else-if="currentEditPage" class="k-meta-kit-single-edit">
-        <!-- Meta Title -->
-        <div class="k-meta-kit-single-field">
-          <label class="k-meta-kit-single-field-label">Meta Title</label>
-          <meta-kit-title-field
-            :value="getEditableValue(currentEditPage.id, 'metaTitle', currentEditPage.metaTitle)"
-            @input="setManualValue(currentEditPage.id, 'metaTitle', $event)"
-            :page-id="currentEditPage.id"
-            :page-title="currentEditPage.title"
-            :site-settings="siteSettings"
-            :ai-enabled="aiEnabled"
-            :is-generating="isGeneratingField(currentEditPage.id, 'metaTitle')"
-            @generate="generateFieldAI(currentEditPage.id, 'metaTitle')"
-            :placeholder="currentEditPage.metaTitle || 'No meta title set'"
-            button-size="sm"
-            field-class="k-meta-kit-single-field-content"
-          />
-        </div>
-
-        <!-- Meta Description -->
-        <div class="k-meta-kit-single-field">
-          <label class="k-meta-kit-single-field-label">Meta Description</label>
-          <meta-kit-description-field
-            :value="getEditableValue(currentEditPage.id, 'metaDescription', currentEditPage.metaDescription)"
-            @input="setManualValue(currentEditPage.id, 'metaDescription', $event)"
-            :ai-enabled="aiEnabled"
-            :is-generating="isGeneratingField(currentEditPage.id, 'metaDescription')"
-            @generate="generateFieldAI(currentEditPage.id, 'metaDescription')"
-            :placeholder="currentEditPage.metaDescription || 'No meta description set'"
+            :placeholder="page.metaDescription || 'No meta description set'"
             button-size="sm"
             :rows="4"
             buttons="false"
             field-class="k-meta-kit-single-field-content"
           />
         </div>
-
-        <!-- OG Image -->
         <div class="k-meta-kit-single-field">
-          <label class="k-meta-kit-single-field-label">OG Image</label>
-          <div class="k-meta-kit-single-field-content">
-            <div v-if="currentEditPage.ogImage" class="k-meta-kit-og-image-current">
-              <img :src="currentEditPage.ogImage.url" :alt="currentEditPage.ogImage.filename"/>
-              <span class="k-meta-kit-og-image-filename">{{ currentEditPage.ogImage.filename }}</span>
-            </div>
-            <div v-else class="k-meta-kit-og-image-empty">
-              No OG image set
-            </div>
-          </div>
+          <label class="k-meta-kit-single-field-label">OG Title</label>
+          <meta-kit-og-title-field
+            :value="getEditableValue(page.id, 'ogTitle', page.ogTitle)"
+            @input="setManualValue(page.id, 'ogTitle', $event)"
+            :ai-enabled="aiEnabled"
+            :is-generating="isGeneratingField(page.id, 'ogTitle')"
+            @generate="generateFieldAI(page.id, 'ogTitle')"
+            :placeholder="page.ogTitle || 'No OG title set'"
+            button-size="sm"
+            field-class="k-meta-kit-single-field-content"
+          />
         </div>
-
-        <!-- Actions -->
-        <div class="k-meta-kit-single-actions">
-          <k-button
-            icon="open"
-            @click="openPageSeoTab(currentEditPage)"
-          >
-            Edit in Panel
-          </k-button>
-          <k-button
-            v-if="hasAnyFieldChanged(currentEditPage.id, currentEditPage)"
-            icon="check"
-            theme="positive"
-            @click="applySingleFieldAndClose(currentEditPage.id, 'all')"
-          >
-            Apply Changes
-          </k-button>
+        <div class="k-meta-kit-single-field">
+          <label class="k-meta-kit-single-field-label">OG Description</label>
+          <meta-kit-og-description-field
+            :value="getEditableValue(page.id, 'ogDescription', page.ogDescription)"
+            @input="setManualValue(page.id, 'ogDescription', $event)"
+            :ai-enabled="aiEnabled"
+            :is-generating="isGeneratingField(page.id, 'ogDescription')"
+            @generate="generateFieldAI(page.id, 'ogDescription')"
+            :placeholder="page.ogDescription || 'No OG description set'"
+            button-size="sm"
+            :rows="4"
+            buttons="false"
+            field-class="k-meta-kit-single-field-content"
+          />
         </div>
-      </div>
-    </k-dialog>
+      </template>
+    </meta-kit-single-page-dialog>
 
     <!-- Bulk Generation Dialog -->
-    <k-dialog ref="bulkGenerateDialog" size="medium">
-      <k-headline>Generate Missing Metadata</k-headline>
-      <k-text>Select which fields to generate for {{ selectedPages.length }} selected page(s):</k-text>
-
-      <div class="k-meta-kit-bulk-options">
-        <label class="k-meta-kit-bulk-option">
-          <input
-            type="checkbox"
-            v-model="bulkGenerateOptions.title"
-          />
-          <div class="k-meta-kit-bulk-option-content">
-            <strong>Meta Title</strong>
-            <span>Generate meta titles for pages without one</span>
-          </div>
-        </label>
-        <label class="k-meta-kit-bulk-option">
-          <input
-            type="checkbox"
-            v-model="bulkGenerateOptions.description"
-          />
-          <div class="k-meta-kit-bulk-option-content">
-            <strong>Meta Description</strong>
-            <span>Generate meta descriptions for pages without one</span>
-          </div>
-        </label>
-      </div>
-
-      <template #footer>
-        <k-button-group class="k-meta-kit-bulk-buttons">
-          <k-button @click="$refs.bulkGenerateDialog.close()">Cancel</k-button>
-          <k-button
-            icon="sparkling"
-            theme="positive"
-            :disabled="!bulkGenerateOptions.title && !bulkGenerateOptions.description"
-            @click="performBulkGeneration"
-          >
-            Generate
-          </k-button>
-        </k-button-group>
-      </template>
-    </k-dialog>
+    <meta-kit-bulk-generate-dialog
+      ref="bulkGenerateDialog"
+      :selected-count="selectedPages.length"
+      @generate="performBulkGeneration"
+    />
   </k-panel-inside>
 </template>
 
 <script>
-import MetaKitTitleField from './parts/MetaKitTitleField.vue';
-import MetaKitDescriptionField from './parts/MetaKitDescriptionField.vue';
+// Field components
+import MetaKitTitleField from './parts/field/MetaKitTitleField.vue';
+import MetaKitDescriptionField from './parts/field/MetaKitDescriptionField.vue';
+import MetaKitOgTitleField from './parts/field/MetaKitOgTitleField.vue';
+import MetaKitOgDescriptionField from './parts/field/MetaKitOgDescriptionField.vue';
+
+// Table component
+import MetaKitStats from './parts/table/MetaKitStats.vue';
+import MetaKitFilters from './parts/table/MetaKitFilters.vue';
+import MetaKitActions from './parts/table/MetaKitActions.vue';
+import MetaKitTable from './parts/table/MetaKitTable.vue';
+
+// Edit/Dialog components
+import MetaKitBulkGenerateDialog from './parts/edit/MetaKitBulkGenerateDialog.vue';
+import MetaKitSinglePageDialog from './parts/edit/MetaKitSinglePageDialog.vue';
+import MetaKitBulkEditDialog from './parts/edit/MetaKitBulkEditDialog.vue';
+import MetaKitLegacyDialog from './parts/edit/MetaKitLegacyDialog.vue';
 
 export default {
   components: {
     MetaKitTitleField,
-    MetaKitDescriptionField
+    MetaKitDescriptionField,
+    MetaKitOgTitleField,
+    MetaKitOgDescriptionField,
+    MetaKitTable,
+    MetaKitBulkGenerateDialog,
+    MetaKitSinglePageDialog,
+    MetaKitBulkEditDialog,
+    MetaKitStats,
+    MetaKitFilters,
+    MetaKitActions,
+    MetaKitLegacyDialog
+  },
+  provide() {
+    return {
+      siteSettings: this.siteSettings
+    };
   },
   props: {
     pages: Array,
@@ -546,13 +367,7 @@ export default {
       ],
       searchQuery: '',
       metadataFilter: 'all',
-      showPreviewInTable: false,
-
-      // Bulk generation options
-      bulkGenerateOptions: {
-        title: true,
-        description: true
-      }
+      showPreviewInTable: false
     };
   },
   computed: {
@@ -736,19 +551,13 @@ export default {
       }
     },
     generateAllDescriptions() {
-      // Reset options to defaults
-      this.bulkGenerateOptions.title = true;
-      this.bulkGenerateOptions.description = true;
-      // Open the dialog
+      // Open the dialog (options are reset in the dialog component)
       this.$refs.bulkGenerateDialog.open();
     },
 
-    async performBulkGeneration() {
-      // Close dialog
-      this.$refs.bulkGenerateDialog.close();
-
+    async performBulkGeneration(options) {
       // Validate at least one option is selected
-      if (!this.bulkGenerateOptions.title && !this.bulkGenerateOptions.description) {
+      if (!options.title && !options.description && !options.ogTitle && !options.ogDescription) {
         window.panel.notification.error('Please select at least one field to generate');
         return;
       }
@@ -757,9 +566,11 @@ export default {
 
       // Build field list for message
       const fields = [];
-      if (this.bulkGenerateOptions.title) fields.push('titles');
-      if (this.bulkGenerateOptions.description) fields.push('descriptions');
-      const fieldText = fields.join(' and ');
+      if (options.title) fields.push('meta titles');
+      if (options.description) fields.push('meta descriptions');
+      if (options.ogTitle) fields.push('OG titles');
+      if (options.ogDescription) fields.push('OG descriptions');
+      const fieldText = fields.join(', ');
 
       // Show loading notification
       const loadingNotification = window.panel.notification.open({
@@ -770,8 +581,10 @@ export default {
 
       try {
         const response = await this.$api.post('meta-kit/generate-all', {
-          generateTitle: this.bulkGenerateOptions.title,
-          generateDescription: this.bulkGenerateOptions.description,
+          generateTitle: options.title,
+          generateDescription: options.description,
+          generateOgTitle: options.ogTitle,
+          generateOgDescription: options.ogDescription,
           pageIds: this.selectedPages
         });
 
@@ -1142,18 +955,26 @@ export default {
         this.fieldChoices[pageId].metaTitle.manualValue !== page.metaTitle;
       const hasDescChange = this.fieldChoices[pageId]?.metaDescription?.manualValue !== undefined &&
         this.fieldChoices[pageId].metaDescription.manualValue !== page.metaDescription;
+      const hasOgTitleChange = this.fieldChoices[pageId]?.ogTitle?.manualValue !== undefined &&
+        this.fieldChoices[pageId].ogTitle.manualValue !== page.ogTitle;
+      const hasOgDescChange = this.fieldChoices[pageId]?.ogDescription?.manualValue !== undefined &&
+        this.fieldChoices[pageId].ogDescription.manualValue !== page.ogDescription;
 
-      return hasTitleChange || hasDescChange;
+      return hasTitleChange || hasDescChange || hasOgTitleChange || hasOgDescChange;
     },
     async applyAllFields(pageId, page) {
-      // Apply both title and description if they've changed
+      // Apply all changed fields
       let appliedCount = 0;
 
-      // Check if title has been manually changed (including to empty string)
+      // Check if fields have been manually changed (including to empty string)
       const hasTitleChange = this.fieldChoices[pageId]?.metaTitle?.manualValue !== undefined &&
         this.fieldChoices[pageId].metaTitle.manualValue !== page.metaTitle;
       const hasDescChange = this.fieldChoices[pageId]?.metaDescription?.manualValue !== undefined &&
         this.fieldChoices[pageId].metaDescription.manualValue !== page.metaDescription;
+      const hasOgTitleChange = this.fieldChoices[pageId]?.ogTitle?.manualValue !== undefined &&
+        this.fieldChoices[pageId].ogTitle.manualValue !== page.ogTitle;
+      const hasOgDescChange = this.fieldChoices[pageId]?.ogDescription?.manualValue !== undefined &&
+        this.fieldChoices[pageId].ogDescription.manualValue !== page.ogDescription;
 
       if (hasTitleChange) {
         const titleValue = this.fieldChoices[pageId].metaTitle.manualValue;
@@ -1183,6 +1004,34 @@ export default {
         }
       }
 
+      if (hasOgTitleChange) {
+        const ogTitleValue = this.fieldChoices[pageId].ogTitle.manualValue;
+        try {
+          await this.$api.post('meta-kit/apply-single-field', {
+            pageId,
+            fieldName: 'ogTitle',
+            value: ogTitleValue
+          });
+          appliedCount++;
+        } catch (error) {
+          window.panel.notification.error('Failed to update OG title');
+        }
+      }
+
+      if (hasOgDescChange) {
+        const ogDescValue = this.fieldChoices[pageId].ogDescription.manualValue;
+        try {
+          await this.$api.post('meta-kit/apply-single-field', {
+            pageId,
+            fieldName: 'ogDescription',
+            value: ogDescValue
+          });
+          appliedCount++;
+        } catch (error) {
+          window.panel.notification.error('Failed to update OG description');
+        }
+      }
+
       if (appliedCount > 0) {
         window.panel.notification.success(`Updated ${appliedCount} field${appliedCount > 1 ? 's' : ''}`);
         await this.refreshPages();
@@ -1201,6 +1050,18 @@ export default {
             this.$set(pageInAllPages, 'metaDescription', descValue);
             this.$set(pageInAllPages, 'hasMetaDescription', descValue && descValue.length > 0);
             this.$set(pageInAllPages, 'metaDescriptionLength', descValue ? descValue.length : 0);
+          }
+          if (hasOgTitleChange) {
+            const ogTitleValue = this.fieldChoices[pageId].ogTitle.manualValue;
+            this.$set(pageInAllPages, 'ogTitle', ogTitleValue);
+            this.$set(pageInAllPages, 'hasOgTitle', ogTitleValue && ogTitleValue.length > 0);
+            this.$set(pageInAllPages, 'ogTitleLength', ogTitleValue ? ogTitleValue.length : 0);
+          }
+          if (hasOgDescChange) {
+            const ogDescValue = this.fieldChoices[pageId].ogDescription.manualValue;
+            this.$set(pageInAllPages, 'ogDescription', ogDescValue);
+            this.$set(pageInAllPages, 'hasOgDescription', ogDescValue && ogDescValue.length > 0);
+            this.$set(pageInAllPages, 'ogDescriptionLength', ogDescValue ? ogDescValue.length : 0);
           }
         }
 
