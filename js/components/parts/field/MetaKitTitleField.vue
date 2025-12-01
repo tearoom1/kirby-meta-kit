@@ -45,9 +45,13 @@ export default {
     },
     pageId: {
       type: String,
-      required: true
+      required: false
     },
     pageTitle: {
+      type: String,
+      default: ''
+    },
+    metaTitle: {
       type: String,
       default: ''
     },
@@ -70,27 +74,53 @@ export default {
     fieldClass: {
       type: String,
       default: 'k-meta-kit-dialog-table-field-title'
+    },
+    type: {
+      type: String,
+      default: 'meta',
+      validator: value => ['meta', 'og'].includes(value)
     }
   },
   computed: {
     isSitePage() {
       return this.pageId === 'site';
     },
-    // The title to use - either the meta title or fallback to page title
+    // The title to use - with proper fallback chain based on type
     effectiveTitle() {
+      if (this.type === 'og') {
+        // OG title fallback: ogTitle -> metaTitle -> pageTitle
+        return this.value || this.metaTitle || this.pageTitle || '';
+      }
+      // Meta title fallback: metaTitle -> pageTitle
       return this.value || this.pageTitle || '';
     },
+    // Check if site name should be appended based on type and settings
+    shouldAppendSiteName() {
+      // Check if appendSiteNameTo exists (could be false, null, undefined, etc.)
+      if (this.siteSettings.appendSiteNameTo === undefined ||
+          this.siteSettings.appendSiteNameTo === null ||
+          this.siteSettings.appendSiteNameTo === '') {
+        // Fallback to old behavior if appendSiteNameTo is not set
+        return !!this.siteSettings.appendSiteName;
+      }
+
+      // appendSiteNameTo is a comma-separated string like "meta,og" or "meta" or "og"
+      const setting = this.siteSettings.appendSiteNameTo;
+
+      // Check if the type is in the comma-separated list
+      return setting.split(',').map(s => s.trim()).includes(this.type);
+    },
     showPreview() {
-      // Show preview for non-site pages when we have a title (meta or page) and site settings are enabled
+      // Show preview for non-site pages when we have a title and site name should be appended
       return !this.isSitePage &&
              this.effectiveTitle &&
-             this.siteSettings.appendSiteName &&
+             this.shouldAppendSiteName &&
              this.siteSettings.siteMetaTitle;
     },
     fullTitle() {
       const titleToUse = this.effectiveTitle;
 
-      if (!titleToUse || !this.siteSettings.appendSiteName) {
+      if (!titleToUse || !this.shouldAppendSiteName) {
         return titleToUse;
       }
 
@@ -111,7 +141,7 @@ export default {
         return titleToUse.length;
       }
 
-      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+      if (this.shouldAppendSiteName && this.siteSettings.siteMetaTitle) {
         return this.fullTitle.length;
       }
 
@@ -127,12 +157,19 @@ export default {
       }
 
       let finalLength = titleToUse.length;
-      if (this.siteSettings.appendSiteName) {
+      if (this.shouldAppendSiteName) {
         finalLength = this.fullTitle.length;
       }
 
-      const optimal = { min: 50, max: 60 };
-      const warning = { min: 45, max: 66 };
+      // Different optimal ranges for meta vs OG
+      let optimal, warning;
+      if (this.type === 'og') {
+        optimal = { min: 40, max: 60 };
+        warning = { min: 35, max: 70 };
+      } else {
+        optimal = { min: 50, max: 60 };
+        warning = { min: 45, max: 66 };
+      }
 
       if (finalLength >= optimal.min && finalLength <= optimal.max) {
         return 'k-meta-kit-status-success';

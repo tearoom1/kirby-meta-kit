@@ -144,8 +144,6 @@
 // Field components
 import MetaKitTitleField from './parts/field/MetaKitTitleField.vue';
 import MetaKitDescriptionField from './parts/field/MetaKitDescriptionField.vue';
-import MetaKitOgTitleField from './parts/field/MetaKitOgTitleField.vue';
-import MetaKitOgDescriptionField from './parts/field/MetaKitOgDescriptionField.vue';
 
 // Table component
 import MetaKitStats from './parts/table/MetaKitStats.vue';
@@ -163,8 +161,6 @@ export default {
   components: {
     MetaKitTitleField,
     MetaKitDescriptionField,
-    MetaKitOgTitleField,
-    MetaKitOgDescriptionField,
     MetaKitTable,
     MetaKitBulkGenerateDialog,
     MetaKitSinglePageDialog,

@@ -46,32 +46,32 @@
       <!-- OG Title -->
       <div class="k-meta-kit-single-field">
         <label class="k-meta-kit-single-field-label">OG Title</label>
-        <meta-kit-og-title-field
-          :value="editedFields.ogTitle"
-          @input="editedFields.ogTitle = $event"
+        <meta-kit-title-field
+          :value="editedFields[page.id].ogTitle"
+          @input="editedFields[page.id].ogTitle = $event"
+          :page-id="page.id"
+          :page-title="page.title"
+          :meta-title="page.metaTitle || editedFields[page.id].metaTitle"
+          :site-settings="siteSettings"
           :ai-enabled="aiEnabled"
-          :is-generating="generating.ogTitle"
-          @generate="generate('ogTitle')"
-          :placeholder="page.ogTitle || 'No OG title set'"
-          button-size="sm"
-          field-class="k-meta-kit-single-field-content"
+          :is-generating="generating[page.id].ogTitle"
+          @generate="generate(page.id, 'ogTitle')"
+          :placeholder="page.ogTitle || page.metaTitle || 'No OG title'"
+          type="og"
         />
       </div>
 
       <!-- OG Description -->
       <div class="k-meta-kit-single-field">
         <label class="k-meta-kit-single-field-label">OG Description</label>
-        <meta-kit-og-description-field
-          :value="editedFields.ogDescription"
-          @input="editedFields.ogDescription = $event"
+        <meta-kit-description-field
+          :value="editedFields[page.id].ogDescription"
+          @input="editedFields[page.id].ogDescription = $event"
           :ai-enabled="aiEnabled"
-          :is-generating="generating.ogDescription"
-          @generate="generate('ogDescription')"
-          :placeholder="page.ogDescription || 'No OG description set'"
-          button-size="sm"
-          :rows="4"
-          buttons="false"
-          field-class="k-meta-kit-single-field-content"
+          :is-generating="generating[page.id].ogDescription"
+          @generate="generate(page.id, 'ogDescription')"
+          :placeholder="page.ogDescription || 'No OG description'"
+          type="og"
         />
       </div>
 
@@ -101,15 +101,11 @@
 <script>
 import MetaKitTitleField from '../field/MetaKitTitleField.vue';
 import MetaKitDescriptionField from '../field/MetaKitDescriptionField.vue';
-import MetaKitOgTitleField from '../field/MetaKitOgTitleField.vue';
-import MetaKitOgDescriptionField from '../field/MetaKitOgDescriptionField.vue';
 
 export default {
   components: {
     MetaKitTitleField,
-    MetaKitDescriptionField,
-    MetaKitOgTitleField,
-    MetaKitOgDescriptionField
+    MetaKitDescriptionField
   },
   props: {
     api: {

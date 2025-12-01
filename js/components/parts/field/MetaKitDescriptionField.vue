@@ -65,6 +65,11 @@ export default {
     fieldClass: {
       type: String,
       default: 'k-meta-kit-dialog-table-field-desc'
+    },
+    type: {
+      type: String,
+      default: 'meta',
+      validator: value => ['meta', 'og'].includes(value)
     }
   },
   computed: {
@@ -72,8 +77,16 @@ export default {
       if (!this.value) return '';
 
       const length = this.value.length;
-      const optimal = { min: 140, max: 160 };
-      const warning = { min: 126, max: 176 };
+
+      // Different optimal ranges for meta vs OG
+      let optimal, warning;
+      if (this.type === 'og') {
+        optimal = { min: 150, max: 185 };
+        warning = { min: 135, max: 200 };
+      } else {
+        optimal = { min: 140, max: 160 };
+        warning = { min: 126, max: 176 };
+      }
 
       if (length >= optimal.min && length <= optimal.max) {
         return 'k-meta-kit-status-success';

@@ -45,6 +45,7 @@
             :is-generating="generating[page.id].metaTitle"
             @generate="generate(page.id, 'metaTitle')"
             :placeholder="page.metaTitle || 'No meta title'"
+            type="meta"
           />
 
           <!-- Meta Description -->
@@ -68,23 +69,29 @@
           </div>
 
           <!-- OG Title -->
-          <meta-kit-og-title-field
+          <meta-kit-title-field
             :value="editedFields[page.id].ogTitle"
             @input="editedFields[page.id].ogTitle = $event"
+            :page-id="page.id"
+            :page-title="page.title"
+            :meta-title="page.metaTitle || editedFields[page.id].metaTitle"
+            :site-settings="siteSettings"
             :ai-enabled="aiEnabled"
             :is-generating="generating[page.id].ogTitle"
             @generate="generate(page.id, 'ogTitle')"
-            :placeholder="page.ogTitle || 'No OG title'"
+            :placeholder="page.ogTitle || page.metaTitle || 'No OG title'"
+            type="og"
           />
 
           <!-- OG Description -->
-          <meta-kit-og-description-field
+          <meta-kit-description-field
             :value="editedFields[page.id].ogDescription"
             @input="editedFields[page.id].ogDescription = $event"
             :ai-enabled="aiEnabled"
             :is-generating="generating[page.id].ogDescription"
             @generate="generate(page.id, 'ogDescription')"
             :placeholder="page.ogDescription || 'No OG description'"
+            type="og"
           />
         </div>
       </div>
@@ -105,15 +112,11 @@
 <script>
 import MetaKitTitleField from '../field/MetaKitTitleField.vue';
 import MetaKitDescriptionField from '../field/MetaKitDescriptionField.vue';
-import MetaKitOgTitleField from '../field/MetaKitOgTitleField.vue';
-import MetaKitOgDescriptionField from '../field/MetaKitOgDescriptionField.vue';
 
 export default {
   components: {
     MetaKitTitleField,
-    MetaKitDescriptionField,
-    MetaKitOgTitleField,
-    MetaKitOgDescriptionField
+    MetaKitDescriptionField
   },
   props: {
     api: {

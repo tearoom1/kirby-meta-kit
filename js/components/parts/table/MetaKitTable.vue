@@ -206,6 +206,22 @@ export default {
   },
   inject: ['siteSettings'],
   methods: {
+    // Helper method to check if site name should be appended based on type and settings
+    shouldAppendSiteName(type) {
+      if (this.siteSettings.appendSiteNameTo === undefined ||
+          this.siteSettings.appendSiteNameTo === null ||
+          this.siteSettings.appendSiteNameTo === '') {
+        // Fallback to old behavior if appendSiteNameTo is not set
+        return !!this.siteSettings.appendSiteName;
+      }
+
+      // appendSiteNameTo is a comma-separated string like "meta,og" or "meta" or "og"
+      const setting = this.siteSettings.appendSiteNameTo;
+
+      // Check if the type is in the comma-separated list
+      return setting.split(',').map(s => s.trim()).includes(type);
+    },
+
     isPageSelected(pageId) {
       return this.selectedPages.includes(pageId);
     },
@@ -221,7 +237,7 @@ export default {
       const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
       if (!titleToUse) return 0;
 
-      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+      if (this.shouldAppendSiteName('meta') && this.siteSettings.siteMetaTitle) {
         const separator = this.siteSettings.titleSeparator || '|';
         const siteName = this.siteSettings.siteMetaTitle || '';
         const fullTitle = `${titleToUse} ${separator} ${siteName}`;
@@ -243,7 +259,7 @@ export default {
       const titleToUse = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
       if (!titleToUse) return 0;
 
-      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+      if (this.shouldAppendSiteName('og') && this.siteSettings.siteMetaTitle) {
         const separator = this.siteSettings.titleSeparator || '|';
         const siteName = this.siteSettings.siteMetaTitle || '';
         const fullTitle = `${titleToUse} ${separator} ${siteName}`;
@@ -261,7 +277,7 @@ export default {
       const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
       if (!titleToUse) return '—';
 
-      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+      if (this.shouldAppendSiteName('meta') && this.siteSettings.siteMetaTitle) {
         const separator = this.siteSettings.titleSeparator || '|';
         const siteName = this.siteSettings.siteMetaTitle || '';
         return `${titleToUse} ${separator} ${siteName}`;
@@ -343,7 +359,7 @@ export default {
         tooltip = `${page.title}`;
       }
 
-      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+      if (this.shouldAppendSiteName('meta') && this.siteSettings.siteMetaTitle) {
         const separator = this.siteSettings.titleSeparator || '|';
         const siteName = this.siteSettings.siteMetaTitle || '';
         const preview = `${titleToUse} ${separator} ${siteName}`;
@@ -367,11 +383,36 @@ export default {
     },
 
     getOgTitleTooltip(page) {
-      if (!page.hasOgTitle || !page.ogTitle) {
+      const titleToUse = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
+
+      if (!titleToUse) {
         return 'No OG title';
       }
 
-      return page.ogTitle;
+      if (page.id === 'site') {
+        if (page.hasOgTitle && page.ogTitle) {
+          return `${page.ogTitle}`;
+        }
+        return `${page.title}`;
+      }
+
+      let tooltip = '';
+      if (page.hasOgTitle && page.ogTitle) {
+        tooltip = `${page.ogTitle}`;
+      } else if (page.hasMetaTitle && page.metaTitle) {
+        tooltip = `${page.metaTitle}`;
+      } else {
+        tooltip = `${page.title}`;
+      }
+
+      if (this.shouldAppendSiteName('og') && this.siteSettings.siteMetaTitle) {
+        const separator = this.siteSettings.titleSeparator || '|';
+        const siteName = this.siteSettings.siteMetaTitle || '';
+        const preview = `${titleToUse} ${separator} ${siteName}`;
+        tooltip = `${preview} (${tooltip})`;
+      }
+
+      return tooltip;
     },
 
     getOgDescriptionTooltip(page) {
