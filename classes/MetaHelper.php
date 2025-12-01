@@ -32,9 +32,9 @@ class MetaHelper
         $siteSeo = self::getSeoData($site->metaKitSeo());
 
         // Get page title
-        if ($type === 'og' && $seoData->ogTitle()->isNotEmpty()) {
+        if ($type === 'og' && $seoData && $seoData->ogTitle()->isNotEmpty()) {
             $title = $seoData->ogTitle()->value();
-        } else if ($seoData->metaTitle()->isNotEmpty()) {
+        } else if ($seoData && $seoData->metaTitle()->isNotEmpty()) {
             $title = $seoData->metaTitle()->value();
         } else {
             $title = $page->title()->value();
