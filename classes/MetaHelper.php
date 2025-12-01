@@ -26,21 +26,15 @@ class MetaHelper
         return $field->toObject();
     }
 
-    public static function buildTitle(Page $page, Site $site, $seoData = null): string
+    public static function buildTitle(Page $page, Site $site, $seoData, $type): string
     {
         // Get site SEO settings
         $siteSeo = self::getSeoData($site->metaKitSeo());
 
-        // Get site settings
-        $separator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
-            ? $siteSeo->titleSeparator()->value()
-            : '|';
-        $appendSiteName = $siteSeo && $siteSeo->appendSiteName()->isNotEmpty()
-            ? $siteSeo->appendSiteName()->toBool()
-            : true;
-
         // Get page title
-        if ($seoData && $seoData->metaTitle()->isNotEmpty()) {
+        if ($type === 'og' && $seoData->ogTitle()->isNotEmpty()) {
+            $title = $seoData->ogTitle()->value();
+        } else if ($seoData->metaTitle()->isNotEmpty()) {
             $title = $seoData->metaTitle()->value();
         } else {
             $title = $page->title()->value();
@@ -53,37 +47,36 @@ class MetaHelper
             $siteMetaTitle = $site->title()->value();
         }
 
+        // Get site settings
+        $separator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
+            ? $siteSeo->titleSeparator()->value()
+            : '|';
+
+        // Check if site name should be appended based on type and settings
+        $appendSiteName = false;
+        if ($siteSeo) {
+            $appendSiteNameTo = $siteSeo->appendSiteNameTo()->isNotEmpty()
+                ? $siteSeo->appendSiteNameTo()->value()
+                : null;
+
+            if ($appendSiteNameTo === null || $appendSiteNameTo === '') {
+                // Fallback to old behavior if appendSiteNameTo is not set
+                $appendSiteName = $siteSeo->appendSiteName()->isNotEmpty()
+                    ? $siteSeo->appendSiteName()->toBool()
+                    : false;
+            } else {
+                // appendSiteNameTo is a comma-separated string like "meta,og" or "meta" or "og"
+                $types = array_map('trim', explode(',', $appendSiteNameTo));
+                $appendSiteName = in_array($type, $types);
+            }
+        }
+
         // Append site name if enabled and not already included
         if ($appendSiteName && $siteMetaTitle && !str_contains($title, $siteMetaTitle)) {
             $title = $title . ' ' . $separator . ' ' . $siteMetaTitle;
         }
 
         return $title;
-    }
-
-    public static function getSeparator(Site $site): string
-    {
-        $siteSeo = self::getSeoData($site->metaKitSeo());
-        return $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
-            ? $siteSeo->titleSeparator()->value()
-            : '|';
-    }
-
-    public static function shouldAppendSiteName(Site $site): bool
-    {
-        $siteSeo = self::getSeoData($site->metaKitSeo());
-        return $siteSeo && $siteSeo->appendSiteName()->isNotEmpty()
-            ? $siteSeo->appendSiteName()->toBool()
-            : true;
-    }
-
-    public static function getSiteMetaTitle(Site $site): string
-    {
-        $siteSeo = self::getSeoData($site->metaKitSeo());
-        if ($siteSeo && $siteSeo->metaTitle()->isNotEmpty()) {
-            return $siteSeo->metaTitle()->value();
-        }
-        return $site->title()->value();
     }
 
     public static function buildDescription(Page $page, Site $site, $seoData = null, int $maxLength = 160): string
@@ -101,8 +94,7 @@ class MetaHelper
             return $siteSeo->metaDescription()->excerpt($maxLength);
         }
 
-        // Final fallback to page text excerpt
-        return $page->text()->excerpt($maxLength);
+        return '';
     }
 
     public static function buildOgDescription(Page $page, Site $site, $seoData = null, ?string $metaDescription = null, int $maxLength = 160): string
@@ -130,7 +122,6 @@ class MetaHelper
             return $siteSeo->ogDescription()->excerpt($maxLength);
         }
 
-        // Final fallback to page text
-        return $page->text()->excerpt($maxLength);
+        return '';
     }
 }

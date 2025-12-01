@@ -1,5 +1,7 @@
 <?php
 
+use TearoomOne\MetaHelper;
+
 return [
     'props' => [
         'label' => function (string $label = 'SEO Preview') {
@@ -18,17 +20,14 @@ return [
                 }
 
                 // Get SEO data from blocks or object field
-                $seoData = \TearoomOne\MetaHelper::getSeoData($page->metaKitSeo());
+                $seoData = MetaHelper::getSeoData($page->metaKitSeo());
 
                 // Build title and descriptions using helper
-                $title = \TearoomOne\MetaHelper::buildTitle($page, site(), $seoData);
-                $description = \TearoomOne\MetaHelper::buildDescription($page, site(), $seoData);
-                
-                $ogTitle = $seoData && $seoData->ogTitle()->isNotEmpty()
-                    ? $seoData->ogTitle()->value()
-                    : $title;
+                $title = MetaHelper::buildTitle($page, site(), $seoData, 'meta');
+                $description = MetaHelper::buildDescription($page, site(), $seoData);
 
-                $ogDescription = \TearoomOne\MetaHelper::buildOgDescription($page, site(), $seoData, $description);
+                $ogTitle = MetaHelper::buildTitle($page, site(), $seoData, 'og');
+                $ogDescription = MetaHelper::buildOgDescription($page, site(), $seoData, $description);
 
                 $ogImage = null;
                 if ($seoData && $seoData->ogImage()->isNotEmpty()) {
@@ -43,7 +42,7 @@ return [
 
                 // Fallback to site default OG image
                 if (!$ogImage) {
-                    $siteSeo = \TearoomOne\MetaHelper::getSeoData(site()->metaKitSeo());
+                    $siteSeo = MetaHelper::getSeoData(site()->metaKitSeo());
                     if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
                         $siteFiles = $siteSeo->ogImage()->toFiles();
                         if ($siteFiles && $siteFiles->count() > 0) {

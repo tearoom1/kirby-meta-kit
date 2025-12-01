@@ -12,7 +12,7 @@
       options
     };
   }
-  const _sfc_main$d = {
+  const _sfc_main$b = {
     props: {
       label: String,
       parent: String,
@@ -253,20 +253,20 @@
       }
     }
   };
-  var _sfc_render$d = function render() {
+  var _sfc_render$b = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("section", { staticClass: "k-seo-preview-section" }, [_c("header", { staticClass: "k-section-header" }, [_c("h2", { staticClass: "k-headline" }, [_vm._v(_vm._s(_vm.label || "SEO Preview"))])]), _vm.meta ? _c("div", { staticClass: "k-seo-previews" }, [_c("div", { staticClass: "k-seo-preview k-seo-preview--google" }, [_c("h3", { staticClass: "k-seo-preview__title" }, [_vm._v("Google Search Preview")]), _c("div", { staticClass: "k-seo-preview__content" }, [_c("div", { staticClass: "k-google-preview" }, [_c("cite", { staticClass: "k-google-preview__url" }, [_vm._v(_vm._s(_vm.displayUrl(_vm.meta.url)))]), _c("h3", { staticClass: "k-google-preview__title" }, [_vm._v(_vm._s(_vm.meta.title || "Page Title"))]), _c("p", { staticClass: "k-google-preview__description" }, [_vm._v(_vm._s(_vm.meta.description || "No description available"))])])])]), _c("div", { staticClass: "k-seo-preview k-seo-preview--twitter" }, [_c("h3", { staticClass: "k-seo-preview__title" }, [_vm._v("Share / Card Preview")]), _c("div", { staticClass: "k-seo-preview__content" }, [_c("div", { staticClass: "k-twitter-preview" }, [_vm.meta.ogImage ? _c("div", { staticClass: "k-twitter-preview__image", style: { backgroundImage: "url(" + _vm.meta.ogImage + ")" } }) : _vm._e(), _c("div", { staticClass: "k-twitter-preview__body" }, [_c("cite", { staticClass: "k-twitter-preview__url" }, [_vm._v(_vm._s(_vm.displayUrl(_vm.meta.url)))]), _c("h4", { staticClass: "k-twitter-preview__title" }, [_vm._v(_vm._s(_vm.meta.ogTitle || _vm.meta.title || "Page Title"))]), _c("p", { staticClass: "k-twitter-preview__description" }, [_vm._v(_vm._s(_vm.truncate(_vm.meta.ogDescription || _vm.meta.description, 140) || "No description"))])])])])])]) : _c("div", { staticClass: "k-seo-preview-loading" }, [_vm._v(" Loading preview... ")])]);
   };
-  var _sfc_staticRenderFns$d = [];
-  _sfc_render$d._withStripped = true;
-  var __component__$d = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$d,
-    _sfc_render$d,
-    _sfc_staticRenderFns$d
+  var _sfc_staticRenderFns$b = [];
+  _sfc_render$b._withStripped = true;
+  var __component__$b = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$b,
+    _sfc_render$b,
+    _sfc_staticRenderFns$b
   );
-  __component__$d.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/sections/seo-preview.vue";
-  const SeoPreview = __component__$d.exports;
-  const _sfc_main$c = {
+  __component__$b.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/sections/seo-preview.vue";
+  const SeoPreview = __component__$b.exports;
+  const _sfc_main$a = {
     props: {
       value: String,
       placeholder: {
@@ -275,9 +275,13 @@
       },
       pageId: {
         type: String,
-        required: true
+        required: false
       },
       pageTitle: {
+        type: String,
+        default: ""
+      },
+      metaTitle: {
         type: String,
         default: ""
       },
@@ -300,22 +304,38 @@
       fieldClass: {
         type: String,
         default: "k-meta-kit-dialog-table-field-title"
+      },
+      type: {
+        type: String,
+        default: "meta",
+        validator: (value) => ["meta", "og"].includes(value)
       }
     },
     computed: {
       isSitePage() {
         return this.pageId === "site";
       },
-      // The title to use - either the meta title or fallback to page title
+      // The title to use - with proper fallback chain based on type
       effectiveTitle() {
+        if (this.type === "og") {
+          return this.value || this.metaTitle || this.pageTitle || "";
+        }
         return this.value || this.pageTitle || "";
       },
+      // Check if site name should be appended based on type and settings
+      shouldAppendSiteName() {
+        if (this.siteSettings.appendSiteNameTo === void 0 || this.siteSettings.appendSiteNameTo === null || this.siteSettings.appendSiteNameTo === "") {
+          return !!this.siteSettings.appendSiteName;
+        }
+        const setting = this.siteSettings.appendSiteNameTo;
+        return setting.split(",").map((s) => s.trim()).includes(this.type);
+      },
       showPreview() {
-        return !this.isSitePage && this.effectiveTitle && this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle;
+        return !this.isSitePage && this.effectiveTitle && this.shouldAppendSiteName && this.siteSettings.siteMetaTitle;
       },
       fullTitle() {
         const titleToUse = this.effectiveTitle;
-        if (!titleToUse || !this.siteSettings.appendSiteName) {
+        if (!titleToUse || !this.shouldAppendSiteName) {
           return titleToUse;
         }
         const separator = this.siteSettings.titleSeparator || "|";
@@ -331,7 +351,7 @@
         if (this.isSitePage) {
           return titleToUse.length;
         }
-        if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+        if (this.shouldAppendSiteName && this.siteSettings.siteMetaTitle) {
           return this.fullTitle.length;
         }
         return titleToUse.length;
@@ -343,11 +363,17 @@
           return "";
         }
         let finalLength = titleToUse.length;
-        if (this.siteSettings.appendSiteName) {
+        if (this.shouldAppendSiteName) {
           finalLength = this.fullTitle.length;
         }
-        const optimal = { min: 50, max: 60 };
-        const warning = { min: 45, max: 66 };
+        let optimal, warning;
+        if (this.type === "og") {
+          optimal = { min: 40, max: 60 };
+          warning = { min: 35, max: 70 };
+        } else {
+          optimal = { min: 50, max: 60 };
+          warning = { min: 45, max: 66 };
+        }
         if (finalLength >= optimal.min && finalLength <= optimal.max) {
           return "k-meta-kit-status-success";
         }
@@ -358,7 +384,7 @@
       }
     }
   };
-  var _sfc_render$c = function render() {
+  var _sfc_render$a = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("div", { class: _vm.fieldClass }, [_c("k-input", { attrs: { "value": _vm.value, "placeholder": _vm.placeholder, "type": "text" }, on: { "input": function($event) {
       return _vm.$emit("input", $event);
@@ -366,16 +392,16 @@
       return _vm.$emit("generate");
     } } }, [_vm.buttonSize !== "xs" ? [_vm._v("AI Generate")] : _vm._e()], 2) : _vm._e()], 1), _vm.isGenerating ? _c("div", { staticClass: "k-meta-kit-dialog-generating" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Generating...")])], 1) : _vm._e()], 1);
   };
-  var _sfc_staticRenderFns$c = [];
-  _sfc_render$c._withStripped = true;
-  var __component__$c = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$c,
-    _sfc_render$c,
-    _sfc_staticRenderFns$c
+  var _sfc_staticRenderFns$a = [];
+  _sfc_render$a._withStripped = true;
+  var __component__$a = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$a,
+    _sfc_render$a,
+    _sfc_staticRenderFns$a
   );
-  __component__$c.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/field/MetaKitTitleField.vue";
-  const MetaKitTitleField = __component__$c.exports;
-  const _sfc_main$b = {
+  __component__$a.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/field/MetaKitTitleField.vue";
+  const MetaKitTitleField = __component__$a.exports;
+  const _sfc_main$9 = {
     props: {
       value: String,
       placeholder: {
@@ -405,152 +431,25 @@
       fieldClass: {
         type: String,
         default: "k-meta-kit-dialog-table-field-desc"
+      },
+      type: {
+        type: String,
+        default: "meta",
+        validator: (value) => ["meta", "og"].includes(value)
       }
     },
     computed: {
       statusClass() {
         if (!this.value) return "";
         const length = this.value.length;
-        const optimal = { min: 140, max: 160 };
-        const warning = { min: 126, max: 176 };
-        if (length >= optimal.min && length <= optimal.max) {
-          return "k-meta-kit-status-success";
+        let optimal, warning;
+        if (this.type === "og") {
+          optimal = { min: 150, max: 185 };
+          warning = { min: 135, max: 200 };
+        } else {
+          optimal = { min: 140, max: 160 };
+          warning = { min: 126, max: 176 };
         }
-        if (length >= warning.min && length <= warning.max) {
-          return "k-meta-kit-status-warning";
-        }
-        return "k-meta-kit-status-error";
-      }
-    }
-  };
-  var _sfc_render$b = function render() {
-    var _vm = this, _c = _vm._self._c;
-    return _c("div", { class: _vm.fieldClass }, [_c("k-input", { attrs: { "value": _vm.value, "placeholder": _vm.placeholder, "type": "textarea", "rows": _vm.rows, "buttons": _vm.buttons }, on: { "input": function($event) {
-      return _vm.$emit("input", $event);
-    } } }), _c("div", { staticClass: "k-meta-kit-dialog-field-meta" }, [_c("span", [_vm.value ? _c("span", { staticClass: "k-meta-kit-field-length", class: _vm.statusClass }, [_vm._v(" " + _vm._s(_vm.value.length) + " chars ")]) : _vm._e()]), _vm.aiEnabled ? _c("k-button", { attrs: { "icon": "sparkling", "size": _vm.buttonSize, "disabled": _vm.isGenerating, "title": _vm.buttonSize === "xs" ? "AI Generate" : void 0 }, on: { "click": function($event) {
-      return _vm.$emit("generate");
-    } } }, [_vm.buttonSize !== "xs" ? [_vm._v("AI Generate")] : _vm._e()], 2) : _vm._e()], 1), _vm.isGenerating ? _c("div", { staticClass: "k-meta-kit-dialog-generating" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Generating...")])], 1) : _vm._e()], 1);
-  };
-  var _sfc_staticRenderFns$b = [];
-  _sfc_render$b._withStripped = true;
-  var __component__$b = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$b,
-    _sfc_render$b,
-    _sfc_staticRenderFns$b
-  );
-  __component__$b.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/field/MetaKitDescriptionField.vue";
-  const MetaKitDescriptionField = __component__$b.exports;
-  const _sfc_main$a = {
-    props: {
-      value: String,
-      placeholder: {
-        type: String,
-        default: "No OG title"
-      },
-      aiEnabled: {
-        type: Boolean,
-        default: true
-      },
-      isGenerating: {
-        type: Boolean,
-        default: false
-      },
-      buttonSize: {
-        type: String,
-        default: "xs"
-      },
-      fieldClass: {
-        type: String,
-        default: "k-meta-kit-dialog-table-field-title"
-      }
-    },
-    computed: {
-      // The title to use - either the meta title or fallback to page title
-      effectiveTitle() {
-        return this.value || this.pageTitle || "";
-      },
-      fullTitle() {
-        const titleToUse = this.effectiveTitle;
-        if (!titleToUse || !this.siteSettings.appendSiteName) {
-          return titleToUse;
-        }
-        const separator = this.siteSettings.titleSeparator || "|";
-        const siteName = this.siteSettings.siteMetaTitle || "";
-        if (!siteName) {
-          return titleToUse;
-        }
-        return `${titleToUse} ${separator} ${siteName}`;
-      },
-      statusClass() {
-        if (!this.value) return "";
-        const length = this.value.length;
-        const optimal = { min: 40, max: 60 };
-        const warning = { min: 35, max: 70 };
-        if (length >= optimal.min && length <= optimal.max) {
-          return "k-meta-kit-status-success";
-        }
-        if (length >= warning.min && length <= warning.max) {
-          return "k-meta-kit-status-warning";
-        }
-        return "k-meta-kit-status-error";
-      }
-    }
-  };
-  var _sfc_render$a = function render() {
-    var _vm = this, _c = _vm._self._c;
-    return _c("div", { class: _vm.fieldClass }, [_c("k-input", { attrs: { "value": _vm.value, "placeholder": _vm.placeholder, "type": "text" }, on: { "input": function($event) {
-      return _vm.$emit("input", $event);
-    } } }), _vm.showPreview ? _c("div", { staticClass: "k-meta-kit-title-preview" }, [_vm._v(" " + _vm._s(_vm.fullTitle) + " ")]) : _vm._e(), _c("div", { staticClass: "k-meta-kit-dialog-field-meta" }, [_c("span", [_vm.value ? _c("span", { staticClass: "k-meta-kit-field-length", class: _vm.statusClass }, [_vm._v(" " + _vm._s(_vm.value.length) + " chars ")]) : _vm._e()]), _vm.aiEnabled ? _c("k-button", { attrs: { "icon": "sparkling", "size": _vm.buttonSize, "disabled": _vm.isGenerating, "title": _vm.buttonSize === "xs" ? "AI Generate" : void 0 }, on: { "click": function($event) {
-      return _vm.$emit("generate");
-    } } }, [_vm.buttonSize !== "xs" ? [_vm._v("AI Generate")] : _vm._e()], 2) : _vm._e()], 1), _vm.isGenerating ? _c("div", { staticClass: "k-meta-kit-dialog-generating" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Generating...")])], 1) : _vm._e()], 1);
-  };
-  var _sfc_staticRenderFns$a = [];
-  _sfc_render$a._withStripped = true;
-  var __component__$a = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$a,
-    _sfc_render$a,
-    _sfc_staticRenderFns$a
-  );
-  __component__$a.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/field/MetaKitOgTitleField.vue";
-  const MetaKitOgTitleField = __component__$a.exports;
-  const _sfc_main$9 = {
-    props: {
-      value: String,
-      placeholder: {
-        type: String,
-        default: "No OG description"
-      },
-      aiEnabled: {
-        type: Boolean,
-        default: true
-      },
-      isGenerating: {
-        type: Boolean,
-        default: false
-      },
-      buttonSize: {
-        type: String,
-        default: "xs"
-      },
-      rows: {
-        type: Number,
-        default: 3
-      },
-      buttons: {
-        type: [Boolean, String],
-        default: true
-      },
-      fieldClass: {
-        type: String,
-        default: "k-meta-kit-dialog-table-field-desc"
-      }
-    },
-    computed: {
-      statusClass() {
-        if (!this.value) return "";
-        const length = this.value.length;
-        const optimal = { min: 150, max: 185 };
-        const warning = { min: 135, max: 200 };
         if (length >= optimal.min && length <= optimal.max) {
           return "k-meta-kit-status-success";
         }
@@ -576,8 +475,8 @@
     _sfc_render$9,
     _sfc_staticRenderFns$9
   );
-  __component__$9.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/field/MetaKitOgDescriptionField.vue";
-  const MetaKitOgDescriptionField = __component__$9.exports;
+  __component__$9.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/field/MetaKitDescriptionField.vue";
+  const MetaKitDescriptionField = __component__$9.exports;
   const _sfc_main$8 = {
     props: {
       filteredCount: {
@@ -763,6 +662,14 @@
     },
     inject: ["siteSettings"],
     methods: {
+      // Helper method to check if site name should be appended based on type and settings
+      shouldAppendSiteName(type) {
+        if (this.siteSettings.appendSiteNameTo === void 0 || this.siteSettings.appendSiteNameTo === null || this.siteSettings.appendSiteNameTo === "") {
+          return !!this.siteSettings.appendSiteName;
+        }
+        const setting = this.siteSettings.appendSiteNameTo;
+        return setting.split(",").map((s) => s.trim()).includes(type);
+      },
       isPageSelected(pageId) {
         return this.selectedPages.includes(pageId);
       },
@@ -775,7 +682,7 @@
         }
         const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
         if (!titleToUse) return 0;
-        if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+        if (this.shouldAppendSiteName("meta") && this.siteSettings.siteMetaTitle) {
           const separator = this.siteSettings.titleSeparator || "|";
           const siteName = this.siteSettings.siteMetaTitle || "";
           const fullTitle = `${titleToUse} ${separator} ${siteName}`;
@@ -792,7 +699,7 @@
         }
         const titleToUse = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
         if (!titleToUse) return 0;
-        if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+        if (this.shouldAppendSiteName("og") && this.siteSettings.siteMetaTitle) {
           const separator = this.siteSettings.titleSeparator || "|";
           const siteName = this.siteSettings.siteMetaTitle || "";
           const fullTitle = `${titleToUse} ${separator} ${siteName}`;
@@ -806,7 +713,7 @@
         }
         const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
         if (!titleToUse) return "—";
-        if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+        if (this.shouldAppendSiteName("meta") && this.siteSettings.siteMetaTitle) {
           const separator = this.siteSettings.titleSeparator || "|";
           const siteName = this.siteSettings.siteMetaTitle || "";
           return `${titleToUse} ${separator} ${siteName}`;
@@ -871,7 +778,7 @@
         } else {
           tooltip = `${page.title}`;
         }
-        if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
+        if (this.shouldAppendSiteName("meta") && this.siteSettings.siteMetaTitle) {
           const separator = this.siteSettings.titleSeparator || "|";
           const siteName = this.siteSettings.siteMetaTitle || "";
           const preview = `${titleToUse} ${separator} ${siteName}`;
@@ -890,10 +797,31 @@
         return desc;
       },
       getOgTitleTooltip(page) {
-        if (!page.hasOgTitle || !page.ogTitle) {
+        const titleToUse = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
+        if (!titleToUse) {
           return "No OG title";
         }
-        return page.ogTitle;
+        if (page.id === "site") {
+          if (page.hasOgTitle && page.ogTitle) {
+            return `${page.ogTitle}`;
+          }
+          return `${page.title}`;
+        }
+        let tooltip = "";
+        if (page.hasOgTitle && page.ogTitle) {
+          tooltip = `${page.ogTitle}`;
+        } else if (page.hasMetaTitle && page.metaTitle) {
+          tooltip = `${page.metaTitle}`;
+        } else {
+          tooltip = `${page.title}`;
+        }
+        if (this.shouldAppendSiteName("og") && this.siteSettings.siteMetaTitle) {
+          const separator = this.siteSettings.titleSeparator || "|";
+          const siteName = this.siteSettings.siteMetaTitle || "";
+          const preview = `${titleToUse} ${separator} ${siteName}`;
+          tooltip = `${preview} (${tooltip})`;
+        }
+        return tooltip;
       },
       getOgDescriptionTooltip(page) {
         if (!page.hasOgDescription || !page.ogDescription) {
@@ -1045,9 +973,7 @@
   const _sfc_main$3 = {
     components: {
       MetaKitTitleField,
-      MetaKitDescriptionField,
-      MetaKitOgTitleField,
-      MetaKitOgDescriptionField
+      MetaKitDescriptionField
     },
     props: {
       api: {
@@ -1187,14 +1113,14 @@
       _vm.editedFields.metaDescription = $event;
     }, "generate": function($event) {
       return _vm.generate("metaDescription");
-    } } })], 1), _c("div", { staticClass: "k-meta-kit-single-field" }, [_c("label", { staticClass: "k-meta-kit-single-field-label" }, [_vm._v("OG Title")]), _c("meta-kit-og-title-field", { attrs: { "value": _vm.editedFields.ogTitle, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating.ogTitle, "placeholder": _vm.page.ogTitle || "No OG title set", "button-size": "sm", "field-class": "k-meta-kit-single-field-content" }, on: { "input": function($event) {
-      _vm.editedFields.ogTitle = $event;
+    } } })], 1), _c("div", { staticClass: "k-meta-kit-single-field" }, [_c("label", { staticClass: "k-meta-kit-single-field-label" }, [_vm._v("OG Title")]), _c("meta-kit-title-field", { attrs: { "value": _vm.editedFields[_vm.page.id].ogTitle, "page-id": _vm.page.id, "page-title": _vm.page.title, "meta-title": _vm.page.metaTitle || _vm.editedFields[_vm.page.id].metaTitle, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating[_vm.page.id].ogTitle, "placeholder": _vm.page.ogTitle || _vm.page.metaTitle || "No OG title", "type": "og" }, on: { "input": function($event) {
+      _vm.editedFields[_vm.page.id].ogTitle = $event;
     }, "generate": function($event) {
-      return _vm.generate("ogTitle");
-    } } })], 1), _c("div", { staticClass: "k-meta-kit-single-field" }, [_c("label", { staticClass: "k-meta-kit-single-field-label" }, [_vm._v("OG Description")]), _c("meta-kit-og-description-field", { attrs: { "value": _vm.editedFields.ogDescription, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating.ogDescription, "placeholder": _vm.page.ogDescription || "No OG description set", "button-size": "sm", "rows": 4, "buttons": "false", "field-class": "k-meta-kit-single-field-content" }, on: { "input": function($event) {
-      _vm.editedFields.ogDescription = $event;
+      return _vm.generate(_vm.page.id, "ogTitle");
+    } } })], 1), _c("div", { staticClass: "k-meta-kit-single-field" }, [_c("label", { staticClass: "k-meta-kit-single-field-label" }, [_vm._v("OG Description")]), _c("meta-kit-description-field", { attrs: { "value": _vm.editedFields[_vm.page.id].ogDescription, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating[_vm.page.id].ogDescription, "placeholder": _vm.page.ogDescription || "No OG description", "type": "og" }, on: { "input": function($event) {
+      _vm.editedFields[_vm.page.id].ogDescription = $event;
     }, "generate": function($event) {
-      return _vm.generate("ogDescription");
+      return _vm.generate(_vm.page.id, "ogDescription");
     } } })], 1), _c("div", { staticClass: "k-meta-kit-single-field" }, [_c("label", { staticClass: "k-meta-kit-single-field-label" }, [_vm._v("OG Image")]), _c("div", { staticClass: "k-meta-kit-single-field-content" }, [_vm.page.ogImage ? _c("div", { staticClass: "k-meta-kit-og-image-current" }, [_c("img", { attrs: { "src": _vm.page.ogImage.url, "alt": _vm.page.ogImage.filename } }), _c("span", { staticClass: "k-meta-kit-og-image-filename" }, [_vm._v(_vm._s(_vm.page.ogImage.filename))])]) : _c("div", { staticClass: "k-meta-kit-og-image-empty" }, [_vm._v(" No OG image set ")])])]), _c("div", { staticClass: "k-meta-kit-single-actions" }, [_c("k-button", { attrs: { "icon": "open" }, on: { "click": _vm.editInPanel } }, [_vm._v("Edit in Panel")]), _vm.hasChanges ? _c("k-button", { attrs: { "icon": "check", "theme": "positive" }, on: { "click": _vm.save } }, [_vm._v("Apply Changes")]) : _vm._e()], 1)]) : _vm._e()], 1);
   };
   var _sfc_staticRenderFns$3 = [];
@@ -1209,9 +1135,7 @@
   const _sfc_main$2 = {
     components: {
       MetaKitTitleField,
-      MetaKitDescriptionField,
-      MetaKitOgTitleField,
-      MetaKitOgDescriptionField
+      MetaKitDescriptionField
     },
     props: {
       api: {
@@ -1344,7 +1268,7 @@
     } } }, [_vm._v(" Meta Tags ")]), _c("k-button", { attrs: { "theme": _vm.activeTab === "og" ? "positive" : "", "size": "sm" }, on: { "click": function($event) {
       _vm.activeTab = "og";
     } } }, [_vm._v(" Social Media (OG) ")])], 1), _vm.activeTab === "meta" ? _c("div", { staticClass: "k-meta-kit-dialog-table-wrapper" }, _vm._l(_vm.pages, function(page) {
-      return _c("div", { key: `meta-${page.id}`, staticClass: "k-meta-kit-dialog-table-page" }, [_c("div", { staticClass: "k-meta-kit-dialog-page-info" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("a", { staticClass: "k-link k-meta-kit-page-id", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.id))])]), _c("meta-kit-title-field", { attrs: { "value": _vm.editedFields[page.id].metaTitle, "page-id": page.id, "page-title": page.title, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating[page.id].metaTitle, "placeholder": page.metaTitle || "No meta title" }, on: { "input": function($event) {
+      return _c("div", { key: `meta-${page.id}`, staticClass: "k-meta-kit-dialog-table-page" }, [_c("div", { staticClass: "k-meta-kit-dialog-page-info" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("a", { staticClass: "k-link k-meta-kit-page-id", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.id))])]), _c("meta-kit-title-field", { attrs: { "value": _vm.editedFields[page.id].metaTitle, "page-id": page.id, "page-title": page.title, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating[page.id].metaTitle, "placeholder": page.metaTitle || "No meta title", "type": "meta" }, on: { "input": function($event) {
         _vm.editedFields[page.id].metaTitle = $event;
       }, "generate": function($event) {
         return _vm.generate(page.id, "metaTitle");
@@ -1354,11 +1278,11 @@
         return _vm.generate(page.id, "metaDescription");
       } } })], 1);
     }), 0) : _vm._e(), _vm.activeTab === "og" ? _c("div", { staticClass: "k-meta-kit-dialog-table-wrapper" }, _vm._l(_vm.pages, function(page) {
-      return _c("div", { key: `og-${page.id}`, staticClass: "k-meta-kit-dialog-table-page" }, [_c("div", { staticClass: "k-meta-kit-dialog-page-info" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("a", { staticClass: "k-link k-meta-kit-page-id", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.id))])]), _c("meta-kit-og-title-field", { attrs: { "value": _vm.editedFields[page.id].ogTitle, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating[page.id].ogTitle, "placeholder": page.ogTitle || "No OG title" }, on: { "input": function($event) {
+      return _c("div", { key: `og-${page.id}`, staticClass: "k-meta-kit-dialog-table-page" }, [_c("div", { staticClass: "k-meta-kit-dialog-page-info" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("a", { staticClass: "k-link k-meta-kit-page-id", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.id))])]), _c("meta-kit-title-field", { attrs: { "value": _vm.editedFields[page.id].ogTitle, "page-id": page.id, "page-title": page.title, "meta-title": page.metaTitle || _vm.editedFields[page.id].metaTitle, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating[page.id].ogTitle, "placeholder": page.ogTitle || page.metaTitle || "No OG title", "type": "og" }, on: { "input": function($event) {
         _vm.editedFields[page.id].ogTitle = $event;
       }, "generate": function($event) {
         return _vm.generate(page.id, "ogTitle");
-      } } }), _c("meta-kit-og-description-field", { attrs: { "value": _vm.editedFields[page.id].ogDescription, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating[page.id].ogDescription, "placeholder": page.ogDescription || "No OG description" }, on: { "input": function($event) {
+      } } }), _c("meta-kit-description-field", { attrs: { "value": _vm.editedFields[page.id].ogDescription, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating[page.id].ogDescription, "placeholder": page.ogDescription || "No OG description", "type": "og" }, on: { "input": function($event) {
         _vm.editedFields[page.id].ogDescription = $event;
       }, "generate": function($event) {
         return _vm.generate(page.id, "ogDescription");
@@ -1420,8 +1344,6 @@
     components: {
       MetaKitTitleField,
       MetaKitDescriptionField,
-      MetaKitOgTitleField,
-      MetaKitOgDescriptionField,
       MetaKitTable,
       MetaKitBulkGenerateDialog,
       MetaKitSinglePageDialog,

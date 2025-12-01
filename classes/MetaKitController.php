@@ -178,6 +178,9 @@ class MetaKitController
         $appendSiteName = $siteSeo && $siteSeo->appendSiteName()->isNotEmpty()
             ? $siteSeo->appendSiteName()->toBool()
             : true;
+        $appendSiteNameTo = $siteSeo && $siteSeo->appendSiteNameTo()->isNotEmpty()
+            ? $siteSeo->appendSiteNameTo()->value()
+            : null;
         $siteMetaTitle = $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
             ? $siteSeo->metaTitle()->value()
             : $site->title()->value();
@@ -194,6 +197,7 @@ class MetaKitController
             'hasValidLicense' => \TearoomOne\MetaKit::hasValidLicense(),
             'siteSettings' => [
                 'appendSiteName' => $appendSiteName,
+                'appendSiteNameTo' => $appendSiteNameTo,
                 'siteMetaTitle' => $siteMetaTitle,
                 'titleSeparator' => $titleSeparator,
             ]

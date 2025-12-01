@@ -2,6 +2,10 @@
 /**
  * Unified SEO snippet - Meta tags, OpenGraph, and Schema.org
  */
+
+use TearoomOne\MetaHelper;
+use TearoomOne\MetaKit;
+
 $site = $site ?? site();
 $page = $page ?? page();
 
@@ -15,7 +19,7 @@ $seoData = $page->metaKitSeo()->toBlocks()->first()?->content();
 $siteSeo = $site->metaKitSeo()->toBlocks()->first()?->content();
 
 // Check license status
-$hasValidLicense = \TearoomOne\MetaKit::hasValidLicense();
+$hasValidLicense = MetaKit::hasValidLicense();
 $charLimit = $hasValidLicense ? null : 20;
 
 // ==============================================================
@@ -23,8 +27,8 @@ $charLimit = $hasValidLicense ? null : 20;
 // ==============================================================
 
 // Build meta title and description using helper
-$metaTitle = \TearoomOne\MetaHelper::buildTitle($page, $site, $seoData);
-$metaDescription = \TearoomOne\MetaHelper::buildDescription($page, $site, $seoData);
+$metaTitle = MetaHelper::buildTitle($page, $site, $seoData, 'meta');
+$metaDescription = MetaHelper::buildDescription($page, $site, $seoData);
 
 // Limit output if unlicensed
 if ($charLimit && mb_strlen($metaTitle) > $charLimit) {
@@ -47,14 +51,10 @@ $keywords = $seoData && $seoData->metaKeywords()->isNotEmpty() ? $seoData->metaK
 $author = $seoData && $seoData->metaAuthor()->isNotEmpty() ? $seoData->metaAuthor() : $siteSeo?->metaAuthor() ;
 
 // Get OG title (use custom OG title or fall back to meta title)
-if ($seoData && $seoData->ogTitle()->isNotEmpty()) {
-    $ogTitle = \TearoomOne\MetaHelper::buildTitle($page, $site, $seoData);
-} else {
-    $ogTitle = $metaTitle;
-}
+$ogTitle = MetaHelper::buildTitle($page, $site, $seoData, 'og');
 
 // Get OG description using helper
-$ogDescription = \TearoomOne\MetaHelper::buildOgDescription($page, $site, $seoData, $metaDescription);
+$ogDescription = MetaHelper::buildOgDescription($page, $site, $seoData, $metaDescription);
 
 // Limit OG content if unlicensed
 if ($charLimit && mb_strlen($ogTitle) > $charLimit) {
