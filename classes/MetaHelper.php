@@ -28,52 +28,57 @@ class MetaHelper
 
     public static function buildTitle(Page $page, Site $site, $seoData, $type): string
     {
-        // Get site SEO settings
-        $siteSeo = self::getSeoData($site->metaKitSeo());
+
+        $title = $page->title()->value();
+
+        if (!$seoData) {
+            return $title;
+        }
 
         // Get page title
-        if ($type === 'og' && $seoData && $seoData->ogTitle()->isNotEmpty()) {
+        if ($type === 'og' && $seoData->ogTitle()->isNotEmpty()) {
             $title = $seoData->ogTitle()->value();
-        } else if ($seoData && $seoData->metaTitle()->isNotEmpty()) {
+        } else if ($seoData->metaTitle()->isNotEmpty()) {
             $title = $seoData->metaTitle()->value();
-        } else {
-            $title = $page->title()->value();
         }
 
-        // Get site meta title (with fallback to site title)
-        if ($siteSeo && $siteSeo->metaTitle()->isNotEmpty()) {
-            $siteMetaTitle = $siteSeo->metaTitle()->value();
-        } else {
-            $siteMetaTitle = $site->title()->value();
+        // Get site SEO settings
+        $siteSeo = self::getSeoData($site->metaKitSeo());
+        if (!$siteSeo) {
+            return $title;
         }
 
-        // Get site settings
-        $separator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
-            ? $siteSeo->titleSeparator()->value()
-            : '|';
 
         // Check if site name should be appended based on type and settings
-        $appendSiteName = false;
-        if ($siteSeo) {
+        $appendSiteName = $siteSeo->appendSiteName()->isNotEmpty() && $siteSeo->appendSiteName()->toBool();
+
+        if ($appendSiteName) {
+
+            // Get site meta title (with fallback to site title)
+            if ($siteSeo->metaTitle()->isNotEmpty()) {
+                $siteMetaTitle = $siteSeo->metaTitle()->value();
+            } else {
+                $siteMetaTitle = $site->title()->value();
+            }
+
+            // Get site settings
+            $separator = $siteSeo->titleSeparator()->isNotEmpty()
+                ? $siteSeo->titleSeparator()->value()
+                : '|';
+
             $appendSiteNameTo = $siteSeo->appendSiteNameTo()->isNotEmpty()
                 ? $siteSeo->appendSiteNameTo()->value()
                 : null;
 
-            if ($appendSiteNameTo === null || $appendSiteNameTo === '') {
-                // Fallback to old behavior if appendSiteNameTo is not set
-                $appendSiteName = $siteSeo->appendSiteName()->isNotEmpty()
-                    ? $siteSeo->appendSiteName()->toBool()
-                    : false;
-            } else {
-                // appendSiteNameTo is a comma-separated string like "meta,og" or "meta" or "og"
+            if ($appendSiteNameTo && !empty($siteMetaTitle)) {
                 $types = array_map('trim', explode(',', $appendSiteNameTo));
                 $appendSiteName = in_array($type, $types);
-            }
-        }
 
-        // Append site name if enabled and not already included
-        if ($appendSiteName && $siteMetaTitle && !str_contains($title, $siteMetaTitle)) {
-            $title = $title . ' ' . $separator . ' ' . $siteMetaTitle;
+                // Append site name if enabled and not already included
+                if ($appendSiteName) {
+                    $title = $title . ' ' . $separator . ' ' . $siteMetaTitle;
+                }
+            }
         }
 
         return $title;
