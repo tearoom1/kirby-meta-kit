@@ -69,13 +69,13 @@ $ogImage = null;
 if ($seoData && $seoData->ogImage()->isNotEmpty()) {
     $ogImageFile = $seoData->ogImage()->toFile();
     if ($ogImageFile) {
-        $ogImage = $ogImageFile->crop(1200, 630);
+        $ogImage = $ogImageFile->resize(1200, 630);
     }
 } else {
     if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
         $ogImageFile = $siteSeo->ogImage()->toFile();
         if ($ogImageFile) {
-            $ogImage = $ogImageFile->crop(1200, 630);
+            $ogImage = $ogImageFile->resize(1200, 630);
         }
     }
 }
