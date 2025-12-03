@@ -46,7 +46,7 @@
         <td v-if="showPreview">
           <template v-if="previewMode === 'meta'">
             <span
-              :class="['k-meta-kit-table-preview-indicator', getTableTitleStatusClass(page)]"
+              :class="['k-meta-kit-table-preview-indicator']"
               :data-status="getStatusValue(getTableTitleStatusClass(page))"
               :title="getTitleTooltip(page)"
             >
@@ -55,51 +55,46 @@
           </template>
           <template v-else>
             <span
-              :class="['k-meta-kit-table-preview-indicator', getStatusClass(page.hasOgTitle, page.ogTitleLength, 'ogTitle')]"
-              :data-status="getStatusValue(getStatusClass(page.hasOgTitle, page.ogTitleLength, 'ogTitle'))"
+              :class="['k-meta-kit-table-preview-indicator']"
+              :data-status="getStatusValue(getStatusClass(page.hasOgTitle || page.hasMetaTitle, page.hasOgTitle ? page.ogTitleLength : page.metaTitleLength, 'ogTitle'))"
               :title="getOgTitleTooltip(page)"
             >
-                {{ getFullTitlePreview(page, 'og') }}
+                <template v-if="page.hasOgTitle">
+                  {{ getFullTitlePreview(page, 'og') }}
+                </template>
+                <template v-else>
+                  <span class="k-meta-kit-table-preview-fallback">
+                    {{ getFullTitlePreview(page, 'og') }}
+                  </span>
+                </template>
             </span>
           </template>
         </td>
 
         <!-- Description Column (Meta or OG based on mode) -->
-        <td v-if="showPreview" :class="showPreview ? '' : 'k-meta-kit-table-center'">
+        <td v-if="showPreview">
           <template v-if="previewMode === 'meta'">
-            <span
-              :class="[
-                showPreview ? 'k-meta-kit-table-preview-indicator' : '',
-                showPreview ? '' : getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description'),
-                'k-meta-kit-table-tooltip'
-              ]"
-              :data-status="showPreview ? getStatusValue(getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description')) : ''"
-              :title="getDescriptionTooltip(page)"
+            <span class="k-meta-kit-table-preview-indicator"
+                  :data-status="getStatusValue(getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description'))"
             >
-              <template v-if="showPreview">
                 {{ page.metaDescription || '—' }}
-              </template>
-              <template v-else>
-                {{ page.hasMetaDescription ? page.metaDescriptionLength : '—' }}
-              </template>
             </span>
           </template>
           <template v-else>
-            <span
-              :class="[
-                showPreview ? 'k-meta-kit-table-preview-indicator' : '',
-                showPreview ? '' : getStatusClass(page.hasOgDescription, page.ogDescriptionLength, 'ogDescription'),
-                'k-meta-kit-table-tooltip'
-              ]"
-              :data-status="showPreview ? getStatusValue(getStatusClass(page.hasOgDescription, page.ogDescriptionLength, 'ogDescription')) : ''"
-              :title="getOgDescriptionTooltip(page)"
+            <span class="k-meta-kit-table-preview-indicator"
+                  :data-status="getStatusValue(getStatusClass(
+                    page.hasOgDescription || page.hasMetaDescription,
+                  page.hasOgDescription? page.ogDescriptionLength :page.metaDescriptionLength,
+                  'ogDescription'))"
             >
-              <template v-if="showPreview">
-                {{ page.ogDescription || '—' }}
-              </template>
-              <template v-else>
-                {{ page.hasOgDescription ? page.ogDescriptionLength : '—' }}
-              </template>
+                <template v-if="page.hasOgDescription">
+                  {{ page.ogDescription }}
+                </template>
+                <template v-else>
+                  <span class="k-meta-kit-table-preview-fallback">
+                    {{ page.metaDescription || '—' }}
+                  </span>
+                </template>
             </span>
           </template>
         </td>
@@ -114,8 +109,9 @@
 
         <!-- Description Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
-            <span :class="[getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description'), 'k-meta-kit-table-tooltip']"
-                  :title="getDescriptionTooltip(page)">
+            <span
+              :class="[getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description'), 'k-meta-kit-table-tooltip']"
+              :title="getDescriptionTooltip(page)">
                 {{ page.hasMetaDescription ? page.metaDescriptionLength : '—' }}
             </span>
         </td>
@@ -130,8 +126,9 @@
 
         <!-- OG Description Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
-            <span :class="[getStatusClass(page.hasOgDescription, page.ogDescriptionLength, 'ogDescription'), 'k-meta-kit-table-tooltip']"
-                  :title="getOgTitleTooltip(page)">
+            <span
+              :class="[getStatusClass(page.hasOgDescription, page.ogDescriptionLength, 'ogDescription'), 'k-meta-kit-table-tooltip']"
+              :title="getOgTitleTooltip(page)">
                 {{ page.hasOgDescription ? page.ogDescriptionLength : '—' }}
             </span>
         </td>
@@ -209,8 +206,8 @@ export default {
     // Helper method to check if site name should be appended based on type and settings
     shouldAppendSiteName(type) {
       if (this.siteSettings.appendSiteNameTo === undefined ||
-          this.siteSettings.appendSiteNameTo === null ||
-          this.siteSettings.appendSiteNameTo === '') {
+        this.siteSettings.appendSiteNameTo === null ||
+        this.siteSettings.appendSiteNameTo === '') {
         // Fallback to old behavior if appendSiteNameTo is not set
         return !!this.siteSettings.appendSiteName;
       }
@@ -274,7 +271,10 @@ export default {
         return page.hasMetaTitle ? page.metaTitle : page.title;
       }
 
-      const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
+      var titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
+      if (type === 'og' && page.hasOgTitle) {
+        titleToUse = page.ogTitle;
+      }
       if (!titleToUse) return '—';
 
       if (this.shouldAppendSiteName(type) && this.siteSettings.siteMetaTitle) {

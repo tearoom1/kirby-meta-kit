@@ -278,6 +278,10 @@
     padding-bottom: 2px;
   }
 
+  .k-meta-kit-table-preview-fallback {
+    color: var(--color-text-dimmed);
+  }
+
   .k-meta-kit-table-preview-indicator[data-status="warning"] {
     border-bottom: 3px solid #f59e0b !important;
   }
