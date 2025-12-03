@@ -123,8 +123,8 @@
         <!-- OG Title Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
             <span :class="[getTableOgTitleStatusClass(page), 'k-meta-kit-table-tooltip']"
-                  :title="getOgDescriptionTooltip(page)">
-                {{ getFullOgTitleLength(page) }}
+                  :title="getOgTitleTooltip(page)">
+                {{ page.hasOgTitle ? getFullOgTitleLength(page) : '—' }}
             </span>
         </td>
 
@@ -297,7 +297,7 @@ export default {
     },
 
     getTableOgTitleStatusClass(page) {
-      if (page.id === 'site') {
+      if (page.id === 'site' || !page.hasOgTitle || page.ogTitle.length === 0) {
         return '';
       }
 
