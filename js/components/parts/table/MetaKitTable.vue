@@ -50,7 +50,7 @@
               :data-status="getStatusValue(getTableTitleStatusClass(page))"
               :title="getTitleTooltip(page)"
             >
-                {{ getFullTitlePreview(page) }}
+                {{ getFullTitlePreview(page, 'meta') }}
             </span>
           </template>
           <template v-else>
@@ -59,7 +59,7 @@
               :data-status="getStatusValue(getStatusClass(page.hasOgTitle, page.ogTitleLength, 'ogTitle'))"
               :title="getOgTitleTooltip(page)"
             >
-                {{ page.ogTitle || '—' }}
+                {{ getFullTitlePreview(page, 'og') }}
             </span>
           </template>
         </td>
@@ -269,7 +269,7 @@ export default {
       return titleToUse.length;
     },
 
-    getFullTitlePreview(page) {
+    getFullTitlePreview(page, type) {
       if (page.id === 'site') {
         return page.hasMetaTitle ? page.metaTitle : page.title;
       }
@@ -277,7 +277,7 @@ export default {
       const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
       if (!titleToUse) return '—';
 
-      if (this.shouldAppendSiteName('meta') && this.siteSettings.siteMetaTitle) {
+      if (this.shouldAppendSiteName(type) && this.siteSettings.siteMetaTitle) {
         const separator = this.siteSettings.titleSeparator || '|';
         const siteName = this.siteSettings.siteMetaTitle || '';
         return `${titleToUse} ${separator} ${siteName}`;
