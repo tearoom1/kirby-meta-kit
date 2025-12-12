@@ -441,16 +441,6 @@ class MetaKitController
             } else {
                 // Update the specific field normally
                 $seoArray[$fieldName] = $value;
-
-                // Also update OG description when updating meta description
-                if ($fieldName === 'metaDescription') {
-                    $seoArray['ogDescription'] = $value;
-                }
-
-                // Also update OG title when updating meta title
-                if ($fieldName === 'metaTitle') {
-                    $seoArray['ogTitle'] = $value;
-                }
             }
 
             $languageCode = $kirby->language()?->code();
