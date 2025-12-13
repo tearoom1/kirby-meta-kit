@@ -189,6 +189,7 @@ class MetaKitController
         $siteMetaDescription = $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
             ? $siteSeo->metaDescription()->value()
             : null;
+        $siteHasOgImage = $siteSeo && $siteSeo->ogImage()->isNotEmpty();
         $titleSeparator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
             ? $siteSeo->titleSeparator()->value()
             : '|';
@@ -205,6 +206,7 @@ class MetaKitController
                 'appendSiteNameTo' => $appendSiteNameTo,
                 'siteMetaTitle' => $siteMetaTitle,
                 'siteMetaDescription' => $siteMetaDescription,
+                'siteHasOgImage' => $siteHasOgImage,
                 'titleSeparator' => $titleSeparator,
             ]
         ];

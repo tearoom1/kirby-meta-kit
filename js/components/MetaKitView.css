@@ -286,6 +286,11 @@
     }
   }
 
+  .k-meta-kit-og-image-indicator {
+    display: inline-block;
+    padding-bottom: 2px;
+  }
+
   .k-meta-kit-table-tooltip {
     cursor: help;
     border-bottom: 1px dotted rgba(128, 128, 128, 0.5);

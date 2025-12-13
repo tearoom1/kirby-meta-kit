@@ -16,10 +16,10 @@
         <th v-if="showPreview">{{ previewMode === 'og' ? 'OG Title' : 'Title' }}</th>
         <th v-if="showPreview">{{ previewMode === 'og' ? 'OG Description' : 'Description' }}</th>
         <th v-if="!showPreview">Title</th>
-        <th v-if="!showPreview">Description</th>
+        <th v-if="!showPreview">Desc.</th>
         <th v-if="!showPreview">OG Title</th>
-        <th v-if="!showPreview">OG Description</th>
-        <th>OG Image</th>
+        <th v-if="!showPreview">OG Desc.</th>
+        <th>OG Img</th>
         <th v-if="!showPreview && previewMode === 'meta'">Robots</th>
         <th>Actions</th>
       </tr>
@@ -158,8 +158,13 @@
 
         <!-- OG Image (only in OG mode) -->
         <td class="k-meta-kit-table-center">
-          <k-icon v-if="page.hasOgImage" type="check" class="k-meta-kit-icon-success"/>
-          <span v-else>—</span>
+          <span v-if="page.hasOgImage" class="k-meta-kit-og-image-indicator" title="Has OG image">
+            <k-icon type="check" class="k-meta-kit-icon-success"/>
+          </span>
+          <span v-else-if="!page.hasOgImage && siteSettings.siteHasOgImage" class="k-meta-kit-og-image-indicator k-meta-kit-inherited" title="OG image inherited from site">
+            <k-icon type="check" class="k-meta-kit-icon-success"/>
+          </span>
+          <span v-else title="No OG image">—</span>
         </td>
 
         <!-- Robots (only in meta mode when not showing preview) -->
