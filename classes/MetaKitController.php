@@ -53,7 +53,7 @@ class MetaKitController
     public static function getPages(): array
     {
         $kirby = kirby();
-        $pages = $kirby->site()->index();
+        $pages = $kirby->site()->index(true);
         $result = [];
 
         // Get current language

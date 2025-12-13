@@ -835,6 +835,48 @@
           return desc.substring(0, 200) + "...";
         }
         return desc;
+      },
+      getSlug(page) {
+        if (page.id === "site") {
+          return "";
+        }
+        const parts = page.id.split("/");
+        return parts[parts.length - 1];
+      },
+      getSlugWordCount(slug) {
+        if (!slug) return 0;
+        return slug.split(/[-_]/).filter((word) => word.length > 0).length;
+      },
+      getSlugStatusClass(page) {
+        if (page.id === "site") {
+          return "";
+        }
+        const slug = this.getSlug(page);
+        const wordCount = this.getSlugWordCount(slug);
+        const length = slug.length;
+        page.id.indexOf("/") === -1;
+        const numSlashes = page.id.split("/").length - 1;
+        if (numSlashes <= 2 && wordCount <= 8 && length <= wordCount * 15 && length <= 60) {
+          return "";
+        }
+        return "k-meta-kit-status-warning";
+      },
+      getSlugTooltip(page) {
+        if (page.id === "site") {
+          return "Site root";
+        }
+        const slug = this.getSlug(page);
+        const wordCount = this.getSlugWordCount(slug);
+        const length = slug.length;
+        return `Slug: ${slug}
+Words: ${wordCount}
+Length: ${length} characters
+
+Recommendation:
+
+Core pages: 1 word, ≤ 15 chars.
+Articles: 4-8 words, ≤ 60 chars. 
+Nesting: 2 levels.`;
       }
     }
   };
@@ -845,7 +887,7 @@
     } } })]), _c("th", [_vm._v("#")]), _c("th", [_vm._v("Page")]), !_vm.showPreview ? _c("th", [_vm._v("Slug")]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Title" : "Title"))]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Description" : "Description"))]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Description")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Description")]) : _vm._e(), _c("th", [_vm._v("OG Image")]), !_vm.showPreview && _vm.previewMode === "meta" ? _c("th", [_vm._v("Robots")]) : _vm._e(), _c("th", [_vm._v("Actions")])])]), _c("tbody", _vm._l(_vm.pages, function(page, index) {
       return _c("tr", { key: page.id }, [_c("td", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isPageSelected(page.id) }, on: { "change": function($event) {
         return _vm.$emit("toggle-page", page.id);
-      } } })]), _c("td", [_vm._v(_vm._s(_vm.startIndex + index + 1))]), _c("td", [_c("div", { staticClass: "k-meta-kit-table-page" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("span", { staticClass: "k-meta-kit-table-page-id" }, [_vm._v(_vm._s(page.template))])])]), !_vm.showPreview ? _c("td", [_vm._v(_vm._s(page.id))]) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("span", { class: ["k-meta-kit-table-preview-indicator"], attrs: { "data-status": _vm.getStatusValue(_vm.getTableTitleStatusClass(page)), "title": _vm.getTitleTooltip(page) } }, [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "meta")) + " ")])] : [_c("span", { class: ["k-meta-kit-table-preview-indicator"], attrs: { "data-status": _vm.getStatusValue(_vm.getStatusClass(page.hasOgTitle || page.hasMetaTitle, page.hasOgTitle ? page.ogTitleLength : page.metaTitleLength, "ogTitle")), "title": _vm.getOgTitleTooltip(page) } }, [page.hasOgTitle ? [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")] : [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")])]], 2)]], 2) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("span", { staticClass: "k-meta-kit-table-preview-indicator", attrs: { "data-status": _vm.getStatusValue(_vm.getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, "description")) } }, [_vm._v(" " + _vm._s(page.metaDescription || "—") + " ")])] : [_c("span", { staticClass: "k-meta-kit-table-preview-indicator", attrs: { "data-status": _vm.getStatusValue(_vm.getStatusClass(
+      } } })]), _c("td", [_vm._v(_vm._s(_vm.startIndex + index + 1))]), _c("td", [_c("div", { staticClass: "k-meta-kit-table-page" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("span", { staticClass: "k-meta-kit-table-page-id" }, [_vm._v(_vm._s(page.template))])])]), !_vm.showPreview ? _c("td", [_c("span", { class: [_vm.getSlugStatusClass(page), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getSlugTooltip(page) } }, [_vm._v(" " + _vm._s(page.id) + " ")])]) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("span", { class: ["k-meta-kit-table-preview-indicator"], attrs: { "data-status": _vm.getStatusValue(_vm.getTableTitleStatusClass(page)), "title": _vm.getTitleTooltip(page) } }, [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "meta")) + " ")])] : [_c("span", { class: ["k-meta-kit-table-preview-indicator"], attrs: { "data-status": _vm.getStatusValue(_vm.getStatusClass(page.hasOgTitle || page.hasMetaTitle, page.hasOgTitle ? page.ogTitleLength : page.metaTitleLength, "ogTitle")), "title": _vm.getOgTitleTooltip(page) } }, [page.hasOgTitle ? [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")] : [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")])]], 2)]], 2) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("span", { staticClass: "k-meta-kit-table-preview-indicator", attrs: { "data-status": _vm.getStatusValue(_vm.getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, "description")) } }, [_vm._v(" " + _vm._s(page.metaDescription || "—") + " ")])] : [_c("span", { staticClass: "k-meta-kit-table-preview-indicator", attrs: { "data-status": _vm.getStatusValue(_vm.getStatusClass(
         page.hasOgDescription || page.hasMetaDescription,
         page.hasOgDescription ? page.ogDescriptionLength : page.metaDescriptionLength,
         "ogDescription"

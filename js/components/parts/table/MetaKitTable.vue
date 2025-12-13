@@ -40,7 +40,14 @@
             <span class="k-meta-kit-table-page-id">{{ page.template }}</span>
           </div>
         </td>
-        <td v-if="!showPreview">{{ page.id }}</td>
+        <td v-if="!showPreview">
+          <span
+            :class="[getSlugStatusClass(page), 'k-meta-kit-table-tooltip']"
+            :title="getSlugTooltip(page)"
+          >
+            {{ page.id }}
+          </span>
+        </td>
 
         <!-- Title Column (Meta or OG based on mode) -->
         <td v-if="showPreview">
@@ -426,6 +433,55 @@ export default {
       }
 
       return desc;
+    },
+
+    getSlug(page) {
+      // Extract the actual slug (last part) from the full page ID
+      if (page.id === 'site') {
+        return '';
+      }
+      const parts = page.id.split('/');
+      return parts[parts.length - 1];
+    },
+
+    getSlugWordCount(slug) {
+      // Count words in slug (separated by hyphens or underscores)
+      if (!slug) return 0;
+      return slug.split(/[-_]/).filter(word => word.length > 0).length;
+    },
+
+    getSlugStatusClass(page) {
+      if (page.id === 'site') {
+        return '';
+      }
+
+      const slug = this.getSlug(page);
+      const wordCount = this.getSlugWordCount(slug);
+      const length = slug.length;
+      const isCore = page.id.indexOf('/') === -1;
+      const numSlashes = page.id.split('/').length - 1;
+
+      // Optimal: 1-5 keywords AND under 60 characters
+      // Warning: 6 keywords OR 60-70 characters
+      // Error: 7+ keywords OR over 70 characters
+
+      if (numSlashes <= 2 && wordCount <= 8 && length <= wordCount * 15 && length <= 60) {
+        return '';
+      }
+
+      return 'k-meta-kit-status-warning';
+    },
+
+    getSlugTooltip(page) {
+      if (page.id === 'site') {
+        return 'Site root';
+      }
+
+      const slug = this.getSlug(page);
+      const wordCount = this.getSlugWordCount(slug);
+      const length = slug.length;
+
+      return `Slug: ${slug}\nWords: ${wordCount}\nLength: ${length} characters\n\nRecommendation:\n\nCore pages: 1 word, ≤ 15 chars.\nArticles: 4-8 words, ≤ 60 chars. \nNesting: 2 levels.`;
     }
   }
 };
