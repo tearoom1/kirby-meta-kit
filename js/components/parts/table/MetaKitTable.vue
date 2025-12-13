@@ -36,7 +36,10 @@
         <td>{{ startIndex + index + 1 }}</td>
         <td>
           <div class="k-meta-kit-table-page">
-            <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
+            <div class="k-meta-kit-page-title-wrapper">
+              <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
+              <span :class="['k-meta-kit-status-dot', getStatusDotClass(page)]" :title="getStatusLabel(page)"></span>
+            </div>
             <span class="k-meta-kit-table-page-id">{{ page.template }}</span>
           </div>
         </td>
@@ -63,7 +66,7 @@
           <template v-else>
             <span
               :class="['k-meta-kit-table-preview-indicator']"
-              :data-status="getStatusValue(getStatusClass(page.hasOgTitle || page.hasMetaTitle, page.hasOgTitle ? page.ogTitleLength : page.metaTitleLength, 'ogTitle'))"
+              :data-status="getStatusValue(getStatusClass(page,page.hasOgTitle || page.hasMetaTitle, page.hasOgTitle ? page.ogTitleLength : page.metaTitleLength, 'ogTitle'))"
               :title="getOgTitleTooltip(page)"
             >
                 <template v-if="page.hasOgTitle">
@@ -82,14 +85,14 @@
         <td v-if="showPreview">
           <template v-if="previewMode === 'meta'">
             <span class="k-meta-kit-table-preview-indicator"
-                  :data-status="getStatusValue(getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description'))"
+                  :data-status="getStatusValue(getStatusClass(page, page.hasMetaDescription, page.metaDescriptionLength, 'description'))"
             >
                 {{ page.metaDescription || '—' }}
             </span>
           </template>
           <template v-else>
             <span class="k-meta-kit-table-preview-indicator"
-                  :data-status="getStatusValue(getStatusClass(
+                  :data-status="getStatusValue(getStatusClass(page,
                     page.hasOgDescription || page.hasMetaDescription,
                   page.hasOgDescription? page.ogDescriptionLength :page.metaDescriptionLength,
                   'ogDescription'))"
@@ -117,7 +120,7 @@
         <!-- Description Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
             <span
-              :class="[getStatusClass(page.hasMetaDescription, page.metaDescriptionLength, 'description'), 'k-meta-kit-table-tooltip']"
+              :class="[getStatusClass(page, page.hasMetaDescription, page.metaDescriptionLength, 'description'), 'k-meta-kit-table-tooltip']"
               :title="getDescriptionTooltip(page)">
                 {{ page.hasMetaDescription ? page.metaDescriptionLength : '—' }}
             </span>
@@ -125,18 +128,21 @@
 
         <!-- OG Title Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
-            <span :class="[getTableOgTitleStatusClass(page), 'k-meta-kit-table-tooltip']"
+            <span :class="[
+              getTableOgTitleStatusClass(page),
+              'k-meta-kit-table-tooltip'
+              ]"
                   :title="getOgTitleTooltip(page)">
-                {{ page.hasOgTitle ? getFullOgTitleLength(page) : '—' }}
+                {{ getFullOgTitleLength(page) }}
             </span>
         </td>
 
         <!-- OG Description Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
             <span
-              :class="[getStatusClass(page.hasOgDescription, page.ogDescriptionLength, 'ogDescription'), 'k-meta-kit-table-tooltip']"
-              :title="getOgTitleTooltip(page)">
-                {{ page.hasOgDescription ? page.ogDescriptionLength : '—' }}
+              :class="[getStatusClass(page, page.hasOgDescription, page.ogDescriptionLength, 'ogDescription', !page.hasOgDescription), 'k-meta-kit-table-tooltip']"
+              :title="getOgDescriptionTooltip(page)">
+                {{ page.hasOgDescription ? page.ogDescriptionLength : page.hasMetaDescription ? page.metaDescriptionLength : '—' }}
             </span>
         </td>
 
@@ -299,28 +305,26 @@ export default {
       }
 
       const fullLength = this.getFullTitleLength(page);
-      const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
-      return this.getStatusClass(true, fullLength, 'title', titleToUse || '');
+      return this.getStatusClass(page,true, fullLength, 'title');
     },
 
     getTableOgTitleStatusClass(page) {
-      if (page.id === 'site' || !page.hasOgTitle || page.ogTitle.length === 0) {
+      if (page.id === 'site') {
         return '';
       }
 
       const fullLength = this.getFullOgTitleLength(page);
-      const titleToUse = page.hasOgTitle ? page.ogTitle : page.metaTitle;
-      return this.getStatusClass(true, fullLength, 'ogTitle', titleToUse || '');
+      return this.getStatusClass(page,true, fullLength, 'ogTitle', !page.hasOgTitle);
     },
 
-    getStatusClass(hasValue, length, type) {
-      if (!hasValue || !length || length === 0) return '';
+    getStatusClass(page, hasValue, length, type, fallback = false) {
+      if (!length || length === 0) return '';
 
       let ranges;
       if (type === 'title') {
-        ranges = {optimal: {min: 50, max: 60}, warning: {min: 45, max: 66}};
+        ranges = {optimal: {min: 20, max: 60}, warning: {min: 15, max: 75}};
       } else if (type === 'ogTitle') {
-        ranges = {optimal: {min: 40, max: 60}, warning: {min: 35, max: 70}};
+        ranges = {optimal: {min: 20, max: 60}, warning: {min: 15, max: 75}};
       } else if (type === 'ogDescription') {
         ranges = {optimal: {min: 150, max: 185}, warning: {min: 135, max: 200}};
       } else {
@@ -329,14 +333,17 @@ export default {
       }
 
       if (length >= ranges.optimal.min && length <= ranges.optimal.max) {
-        return 'k-meta-kit-status-success';
+        if (fallback) {
+          return 'k-meta-kit-table-preview-fallback';
+        }
+        return '';
       }
 
       if (length >= ranges.warning.min && length <= ranges.warning.max) {
-        return 'k-meta-kit-status-warning';
+        return 'k-meta-kit-status-warning' + (fallback ? '-fallback' : '');
       }
 
-      return 'k-meta-kit-status-error';
+      return 'k-meta-kit-status-error' + (fallback ? '-fallback' : '');
     },
 
     getStatusValue(statusClass) {
@@ -370,7 +377,7 @@ export default {
         const separator = this.siteSettings.titleSeparator || '|';
         const siteName = this.siteSettings.siteMetaTitle || '';
         const preview = `${titleToUse} ${separator} ${siteName}`;
-        tooltip = `${preview} (${tooltip})`;
+        tooltip = `${preview}`;
       }
 
       return tooltip;
@@ -416,7 +423,7 @@ export default {
         const separator = this.siteSettings.titleSeparator || '|';
         const siteName = this.siteSettings.siteMetaTitle || '';
         const preview = `${titleToUse} ${separator} ${siteName}`;
-        tooltip = `${preview} (${tooltip})`;
+        tooltip = `${preview}`;
       }
 
       return tooltip;
@@ -481,7 +488,40 @@ export default {
       const wordCount = this.getSlugWordCount(slug);
       const length = slug.length;
 
-      return `Slug: ${slug}\nWords: ${wordCount}\nLength: ${length} characters\n\nRecommendation:\n\nCore pages: 1 word, ≤ 15 chars.\nArticles: 4-8 words, ≤ 60 chars. \nNesting: 2 levels.`;
+      return `Slug: ${slug}\nWords: ${wordCount}\nLength: ${length} characters\n\nGeneral recommendation:\n\nCore pages: 1 word, ≤ 15 chars.\nArticles: 4-8 words, ≤ 60 chars. \nNesting: <= 2 levels.`;
+    },
+
+    getStatusLabel(page) {
+      if (!page.status) return '—';
+
+      const status = page.status;
+
+      // Map Kirby status to display labels
+      if (status === 'listed') return 'Published';
+      if (status === 'unlisted') return 'Unlisted';
+      if (status === 'draft') return 'Draft';
+      if (status === 'published') return 'Published';
+
+      return status.charAt(0).toUpperCase() + status.slice(1);
+    },
+
+    getStatusDotClass(page) {
+      if (!page.status) return '';
+
+      const status = page.status;
+
+      // Return appropriate CSS class based on status
+      if (status === 'listed') {
+        return 'k-meta-kit-status-dot-listed';
+      }
+      if (status === 'unlisted') {
+        return 'k-meta-kit-status-dot-unlisted';
+      }
+      if (status === 'draft') {
+        return 'k-meta-kit-status-dot-draft';
+      }
+
+      return '';
     }
   }
 };

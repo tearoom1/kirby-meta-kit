@@ -211,6 +211,31 @@
     gap: 0.25rem;
   }
 
+  .k-meta-kit-page-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .k-meta-kit-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .k-meta-kit-status-dot-listed {
+    background-color: var(--color-green-600);
+  }
+
+  .k-meta-kit-status-dot-unlisted {
+    background-color: var(--color-blue-600);
+  }
+
+  .k-meta-kit-status-dot-draft {
+    background-color: var(--color-red-500);
+  }
+
   .k-meta-kit-table-page-id {
     font-size: 0.75rem;
     color: var(--color-text-dimmed);
@@ -316,15 +341,24 @@
     color: var(--color-green-600);
     font-weight: 600;
   }
+  .k-meta-kit-status-success-fallback {
+    color: var(--color-green-600);
+  }
 
   .k-meta-kit-status-warning {
     color: var(--color-orange-600);
     font-weight: 600;
   }
+  .k-meta-kit-status-warning-fallback {
+    color: var(--color-orange-600);
+  }
 
   .k-meta-kit-status-error {
     color: var(--color-red-600);
     font-weight: 600;
+  }
+  .k-meta-kit-status-error-fallback {
+    color: var(--color-red-700);
   }
 
   .k-meta-kit-icon-success {
@@ -509,6 +543,30 @@
 
   .k-panel[data-color-scheme="dark"] .k-meta-kit-table .k-link {
     color: var(--color-blue-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-status-published {
+    color: var(--color-green-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-status-unlisted {
+    color: var(--color-orange-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-status-draft {
+    color: var(--color-gray-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-status-dot-published {
+    background-color: var(--color-green-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-status-dot-unlisted {
+    background-color: var(--color-orange-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-status-dot-draft {
+    background-color: var(--color-gray-400);
   }
 
   .k-panel[data-color-scheme="dark"] .k-tag {
