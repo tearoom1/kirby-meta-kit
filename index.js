@@ -728,16 +728,16 @@
           return "";
         }
         const fullLength = this.getFullTitleLength(page);
-        return this.getStatusClass(page, true, fullLength, "title");
+        return this.getStatusClass(fullLength, "title");
       },
       getTableOgTitleStatusClass(page) {
         if (page.id === "site") {
           return "";
         }
         const fullLength = this.getFullOgTitleLength(page);
-        return this.getStatusClass(page, true, fullLength, "ogTitle", !page.hasOgTitle);
+        return this.getStatusClass(fullLength, "ogTitle");
       },
-      getStatusClass(page, hasValue, length, type, fallback = false) {
+      getStatusClass(length, type) {
         if (!length || length === 0) return "";
         let ranges;
         if (type === "title") {
@@ -750,15 +750,12 @@
           ranges = { optimal: { min: 140, max: 160 }, warning: { min: 126, max: 176 } };
         }
         if (length >= ranges.optimal.min && length <= ranges.optimal.max) {
-          if (fallback) {
-            return "k-meta-kit-table-preview-fallback";
-          }
           return "";
         }
         if (length >= ranges.warning.min && length <= ranges.warning.max) {
-          return "k-meta-kit-status-warning" + (fallback ? "-fallback" : "");
+          return "k-meta-kit-status-warning";
         }
-        return "k-meta-kit-status-error" + (fallback ? "-fallback" : "");
+        return "k-meta-kit-status-error";
       },
       getStatusValue(statusClass) {
         if (!statusClass) return "";
@@ -901,6 +898,54 @@ Nesting: <= 2 levels.`;
           return "k-meta-kit-status-dot-draft";
         }
         return "";
+      },
+      // Title display and inheritance
+      getTitleDisplay(page) {
+        const length = this.getFullTitleLength(page);
+        if (!length) return "—";
+        return this.isTitleInherited(page) ? `${length}` : length;
+      },
+      isTitleInherited(page) {
+        if (page.id === "site") return false;
+        return !page.hasMetaTitle;
+      },
+      // Description display and inheritance
+      getDescriptionDisplay(page) {
+        if (!page.hasMetaDescription) return "—";
+        return page.metaDescriptionLength;
+      },
+      isDescriptionInherited(page) {
+        return false;
+      },
+      getDescriptionStatusClass(page) {
+        return this.getStatusClass(page.metaDescriptionLength, "description");
+      },
+      // OG Title display and inheritance
+      getOgTitleDisplay(page) {
+        const length = this.getFullOgTitleLength(page);
+        if (!length) return "—";
+        return this.isOgTitleInherited(page) ? `${length}` : length;
+      },
+      isOgTitleInherited(page) {
+        if (page.id === "site") return false;
+        return !page.hasOgTitle;
+      },
+      // OG Description display and inheritance
+      getOgDescriptionDisplay(page) {
+        if (page.hasOgDescription) {
+          return page.ogDescriptionLength;
+        }
+        if (page.hasMetaDescription) {
+          return `${page.metaDescriptionLength}`;
+        }
+        return "—";
+      },
+      isOgDescriptionInherited(page) {
+        return !page.hasOgDescription && page.hasMetaDescription;
+      },
+      getOgDescriptionStatusClass(page) {
+        const length = page.hasOgDescription ? page.ogDescriptionLength : page.metaDescriptionLength;
+        return this.getStatusClass(length, "ogDescription");
       }
     }
   };
@@ -911,15 +956,23 @@ Nesting: <= 2 levels.`;
     } } })]), _c("th", [_vm._v("#")]), _c("th", [_vm._v("Page")]), !_vm.showPreview ? _c("th", [_vm._v("Slug")]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Title" : "Title"))]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Description" : "Description"))]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Description")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Description")]) : _vm._e(), _c("th", [_vm._v("OG Image")]), !_vm.showPreview && _vm.previewMode === "meta" ? _c("th", [_vm._v("Robots")]) : _vm._e(), _c("th", [_vm._v("Actions")])])]), _c("tbody", _vm._l(_vm.pages, function(page, index) {
       return _c("tr", { key: page.id }, [_c("td", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isPageSelected(page.id) }, on: { "change": function($event) {
         return _vm.$emit("toggle-page", page.id);
-      } } })]), _c("td", [_vm._v(_vm._s(_vm.startIndex + index + 1))]), _c("td", [_c("div", { staticClass: "k-meta-kit-table-page" }, [_c("div", { staticClass: "k-meta-kit-page-title-wrapper" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("span", { class: ["k-meta-kit-status-dot", _vm.getStatusDotClass(page)], attrs: { "title": _vm.getStatusLabel(page) } })]), _c("span", { staticClass: "k-meta-kit-table-page-id" }, [_vm._v(_vm._s(page.template))])])]), !_vm.showPreview ? _c("td", [_c("span", { class: [_vm.getSlugStatusClass(page), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getSlugTooltip(page) } }, [_vm._v(" " + _vm._s(page.id) + " ")])]) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("span", { class: ["k-meta-kit-table-preview-indicator"], attrs: { "data-status": _vm.getStatusValue(_vm.getTableTitleStatusClass(page)), "title": _vm.getTitleTooltip(page) } }, [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "meta")) + " ")])] : [_c("span", { class: ["k-meta-kit-table-preview-indicator"], attrs: { "data-status": _vm.getStatusValue(_vm.getStatusClass(page, page.hasOgTitle || page.hasMetaTitle, page.hasOgTitle ? page.ogTitleLength : page.metaTitleLength, "ogTitle")), "title": _vm.getOgTitleTooltip(page) } }, [page.hasOgTitle ? [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")] : [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")])]], 2)]], 2) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("span", { staticClass: "k-meta-kit-table-preview-indicator", attrs: { "data-status": _vm.getStatusValue(_vm.getStatusClass(page, page.hasMetaDescription, page.metaDescriptionLength, "description")) } }, [_vm._v(" " + _vm._s(page.metaDescription || "—") + " ")])] : [_c("span", { staticClass: "k-meta-kit-table-preview-indicator", attrs: { "data-status": _vm.getStatusValue(_vm.getStatusClass(
-        page,
-        page.hasOgDescription || page.hasMetaDescription,
-        page.hasOgDescription ? page.ogDescriptionLength : page.metaDescriptionLength,
-        "ogDescription"
-      )) } }, [page.hasOgDescription ? [_vm._v(" " + _vm._s(page.ogDescription) + " ")] : [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(page.metaDescription || "—") + " ")])]], 2)]], 2) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [_vm.getTableTitleStatusClass(page), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getTitleTooltip(page) } }, [_vm._v(" " + _vm._s(_vm.getFullTitleLength(page)) + " ")])]) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [_vm.getStatusClass(page, page.hasMetaDescription, page.metaDescriptionLength, "description"), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getDescriptionTooltip(page) } }, [_vm._v(" " + _vm._s(page.hasMetaDescription ? page.metaDescriptionLength : "—") + " ")])]) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [
-        _vm.getTableOgTitleStatusClass(page),
+      } } })]), _c("td", [_vm._v(_vm._s(_vm.startIndex + index + 1))]), _c("td", [_c("div", { staticClass: "k-meta-kit-table-page" }, [_c("div", { staticClass: "k-meta-kit-page-title-wrapper" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("span", { class: ["k-meta-kit-status-dot", _vm.getStatusDotClass(page)], attrs: { "title": _vm.getStatusLabel(page) } })]), _c("span", { staticClass: "k-meta-kit-table-page-id" }, [_vm._v(_vm._s(page.template))])])]), !_vm.showPreview ? _c("td", [_c("span", { class: [_vm.getSlugStatusClass(page), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getSlugTooltip(page) } }, [_vm._v(" " + _vm._s(page.id) + " ")])]) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("span", { class: ["k-meta-kit-table-preview-indicator"], attrs: { "data-status": _vm.getStatusValue(_vm.getTableTitleStatusClass(page)), "title": _vm.getTitleTooltip(page) } }, [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "meta")) + " ")])] : [_c("span", { class: ["k-meta-kit-table-preview-indicator"], attrs: { "data-status": _vm.getStatusValue(_vm.getStatusClass(page.hasOgTitle ? page.ogTitleLength : page.metaTitleLength, "ogTitle")), "title": _vm.getOgTitleTooltip(page) } }, [page.hasOgTitle ? [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")] : [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")])]], 2)]], 2) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("span", { staticClass: "k-meta-kit-table-preview-indicator", attrs: { "data-status": _vm.getStatusValue(_vm.getStatusClass(page.metaDescriptionLength, "description")) } }, [_vm._v(" " + _vm._s(page.metaDescription || "—") + " ")])] : [_c("span", { staticClass: "k-meta-kit-table-preview-indicator", attrs: { "data-status": _vm.getStatusValue(_vm.getStatusClass(page.hasOgDescription ? page.ogDescriptionLength : page.metaDescriptionLength, "ogDescription")) } }, [page.hasOgDescription ? [_vm._v(" " + _vm._s(page.ogDescription) + " ")] : [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(page.metaDescription || "—") + " ")])]], 2)]], 2) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [
+        _vm.getTableTitleStatusClass(page),
+        _vm.isTitleInherited(page) ? "k-meta-kit-inherited" : "",
         "k-meta-kit-table-tooltip"
-      ], attrs: { "title": _vm.getOgTitleTooltip(page) } }, [_vm._v(" " + _vm._s(_vm.getFullOgTitleLength(page)) + " ")])]) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [_vm.getStatusClass(page, page.hasOgDescription, page.ogDescriptionLength, "ogDescription", !page.hasOgDescription), "k-meta-kit-table-tooltip"], attrs: { "title": _vm.getOgDescriptionTooltip(page) } }, [_vm._v(" " + _vm._s(page.hasOgDescription ? page.ogDescriptionLength : page.hasMetaDescription ? page.metaDescriptionLength : "—") + " ")])]) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? _c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } }) : _c("span", [_vm._v("—")])], 1), !_vm.showPreview && _vm.previewMode === "meta" ? _c("td", { staticClass: "k-meta-kit-table-center" }, [page.robots && page.robots.includes("noindex") ? _c("span", { staticClass: "k-meta-kit-robots-noindex" }, [_vm._v("noindex")]) : _c("span", [_vm._v("—")])]) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("div", { staticClass: "k-meta-kit-table-actions" }, [_c("k-button", { attrs: { "icon": "edit", "size": "sm", "title": "Edit Metadata" }, on: { "click": function($event) {
+      ], attrs: { "title": _vm.getTitleTooltip(page) } }, [_vm._v(" " + _vm._s(_vm.getTitleDisplay(page)) + " ")])]) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [
+        _vm.getDescriptionStatusClass(page),
+        _vm.isDescriptionInherited(page) ? "k-meta-kit-inherited" : "",
+        "k-meta-kit-table-tooltip"
+      ], attrs: { "title": _vm.getDescriptionTooltip(page) } }, [_vm._v(" " + _vm._s(_vm.getDescriptionDisplay(page)) + " ")])]) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [
+        _vm.getTableOgTitleStatusClass(page),
+        _vm.isOgTitleInherited(page) ? "k-meta-kit-inherited" : "",
+        "k-meta-kit-table-tooltip"
+      ], attrs: { "title": _vm.getOgTitleTooltip(page) } }, [_vm._v(" " + _vm._s(_vm.getOgTitleDisplay(page)) + " ")])]) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("span", { class: [
+        _vm.getOgDescriptionStatusClass(page),
+        _vm.isOgDescriptionInherited(page) ? "k-meta-kit-inherited" : "",
+        "k-meta-kit-table-tooltip"
+      ], attrs: { "title": _vm.getOgDescriptionTooltip(page) } }, [_vm._v(" " + _vm._s(_vm.getOgDescriptionDisplay(page)) + " ")])]) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? _c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } }) : _c("span", [_vm._v("—")])], 1), !_vm.showPreview && _vm.previewMode === "meta" ? _c("td", { staticClass: "k-meta-kit-table-center" }, [page.robots && page.robots.includes("noindex") ? _c("span", { staticClass: "k-meta-kit-robots-noindex" }, [_vm._v("noindex")]) : _c("span", [_vm._v("—")])]) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("div", { staticClass: "k-meta-kit-table-actions" }, [_c("k-button", { attrs: { "icon": "edit", "size": "sm", "title": "Edit Metadata" }, on: { "click": function($event) {
         return _vm.$emit("edit-page", page.id);
       } } }), _vm.aiEnabled ? _c("k-button", { attrs: { "icon": "sparkling", "size": "sm", "disabled": page.hasMetaDescription, "title": "Generate Description" }, on: { "click": function($event) {
         return _vm.$emit("generate-description", page.id);

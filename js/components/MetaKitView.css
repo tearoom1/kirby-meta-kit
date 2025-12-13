@@ -341,24 +341,33 @@
     color: var(--color-green-600);
     font-weight: 600;
   }
-  .k-meta-kit-status-success-fallback {
-    color: var(--color-green-600);
-  }
 
   .k-meta-kit-status-warning {
     color: var(--color-orange-600);
     font-weight: 600;
-  }
-  .k-meta-kit-status-warning-fallback {
-    color: var(--color-orange-600);
   }
 
   .k-meta-kit-status-error {
     color: var(--color-red-600);
     font-weight: 600;
   }
-  .k-meta-kit-status-error-fallback {
-    color: var(--color-red-700);
+
+  /* Inherited values - dimmed but keep status colors */
+  .k-meta-kit-inherited {
+    opacity: 0.6;
+    font-style: italic;
+  }
+
+  .k-meta-kit-inherited.k-meta-kit-status-success {
+    color: var(--color-green-500);
+  }
+
+  .k-meta-kit-inherited.k-meta-kit-status-warning {
+    color: var(--color-orange-500);
+  }
+
+  .k-meta-kit-inherited.k-meta-kit-status-error {
+    color: var(--color-red-500);
   }
 
   .k-meta-kit-icon-success {
@@ -567,6 +576,18 @@
 
   .k-panel[data-color-scheme="dark"] .k-meta-kit-status-dot-draft {
     background-color: var(--color-gray-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-inherited.k-meta-kit-status-success {
+    color: var(--color-green-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-inherited.k-meta-kit-status-warning {
+    color: var(--color-orange-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-inherited.k-meta-kit-status-error {
+    color: var(--color-red-400);
   }
 
   .k-panel[data-color-scheme="dark"] .k-tag {

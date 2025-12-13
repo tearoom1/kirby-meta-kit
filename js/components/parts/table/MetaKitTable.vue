@@ -66,7 +66,7 @@
           <template v-else>
             <span
               :class="['k-meta-kit-table-preview-indicator']"
-              :data-status="getStatusValue(getStatusClass(page,page.hasOgTitle || page.hasMetaTitle, page.hasOgTitle ? page.ogTitleLength : page.metaTitleLength, 'ogTitle'))"
+              :data-status="getStatusValue(getStatusClass(page.hasOgTitle ? page.ogTitleLength : page.metaTitleLength, 'ogTitle'))"
               :title="getOgTitleTooltip(page)"
             >
                 <template v-if="page.hasOgTitle">
@@ -85,17 +85,14 @@
         <td v-if="showPreview">
           <template v-if="previewMode === 'meta'">
             <span class="k-meta-kit-table-preview-indicator"
-                  :data-status="getStatusValue(getStatusClass(page, page.hasMetaDescription, page.metaDescriptionLength, 'description'))"
+                  :data-status="getStatusValue(getStatusClass(page.metaDescriptionLength, 'description'))"
             >
                 {{ page.metaDescription || '—' }}
             </span>
           </template>
           <template v-else>
             <span class="k-meta-kit-table-preview-indicator"
-                  :data-status="getStatusValue(getStatusClass(page,
-                    page.hasOgDescription || page.hasMetaDescription,
-                  page.hasOgDescription? page.ogDescriptionLength :page.metaDescriptionLength,
-                  'ogDescription'))"
+                  :data-status="getStatusValue(getStatusClass(page.hasOgDescription ? page.ogDescriptionLength : page.metaDescriptionLength, 'ogDescription'))"
             >
                 <template v-if="page.hasOgDescription">
                   {{ page.ogDescription }}
@@ -111,18 +108,26 @@
 
         <!-- Title Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
-            <span :class="[ getTableTitleStatusClass(page), 'k-meta-kit-table-tooltip']"
+            <span :class="[
+              getTableTitleStatusClass(page),
+              isTitleInherited(page) ? 'k-meta-kit-inherited' : '',
+              'k-meta-kit-table-tooltip'
+            ]"
                   :title="getTitleTooltip(page)">
-                {{ getFullTitleLength(page) }}
+                {{ getTitleDisplay(page) }}
             </span>
         </td>
 
         <!-- Description Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
             <span
-              :class="[getStatusClass(page, page.hasMetaDescription, page.metaDescriptionLength, 'description'), 'k-meta-kit-table-tooltip']"
+              :class="[
+                getDescriptionStatusClass(page),
+                isDescriptionInherited(page) ? 'k-meta-kit-inherited' : '',
+                'k-meta-kit-table-tooltip'
+              ]"
               :title="getDescriptionTooltip(page)">
-                {{ page.hasMetaDescription ? page.metaDescriptionLength : '—' }}
+                {{ getDescriptionDisplay(page) }}
             </span>
         </td>
 
@@ -130,19 +135,24 @@
         <td v-if="!showPreview" class="k-meta-kit-table-center">
             <span :class="[
               getTableOgTitleStatusClass(page),
+              isOgTitleInherited(page) ? 'k-meta-kit-inherited' : '',
               'k-meta-kit-table-tooltip'
               ]"
                   :title="getOgTitleTooltip(page)">
-                {{ getFullOgTitleLength(page) }}
+                {{ getOgTitleDisplay(page) }}
             </span>
         </td>
 
         <!-- OG Description Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
             <span
-              :class="[getStatusClass(page, page.hasOgDescription, page.ogDescriptionLength, 'ogDescription', !page.hasOgDescription), 'k-meta-kit-table-tooltip']"
+              :class="[
+                getOgDescriptionStatusClass(page),
+                isOgDescriptionInherited(page) ? 'k-meta-kit-inherited' : '',
+                'k-meta-kit-table-tooltip'
+              ]"
               :title="getOgDescriptionTooltip(page)">
-                {{ page.hasOgDescription ? page.ogDescriptionLength : page.hasMetaDescription ? page.metaDescriptionLength : '—' }}
+                {{ getOgDescriptionDisplay(page) }}
             </span>
         </td>
 
@@ -305,7 +315,7 @@ export default {
       }
 
       const fullLength = this.getFullTitleLength(page);
-      return this.getStatusClass(page,true, fullLength, 'title');
+      return this.getStatusClass(fullLength, 'title');
     },
 
     getTableOgTitleStatusClass(page) {
@@ -314,10 +324,10 @@ export default {
       }
 
       const fullLength = this.getFullOgTitleLength(page);
-      return this.getStatusClass(page,true, fullLength, 'ogTitle', !page.hasOgTitle);
+      return this.getStatusClass(fullLength, 'ogTitle');
     },
 
-    getStatusClass(page, hasValue, length, type, fallback = false) {
+    getStatusClass(length, type) {
       if (!length || length === 0) return '';
 
       let ranges;
@@ -333,17 +343,14 @@ export default {
       }
 
       if (length >= ranges.optimal.min && length <= ranges.optimal.max) {
-        if (fallback) {
-          return 'k-meta-kit-table-preview-fallback';
-        }
         return '';
       }
 
       if (length >= ranges.warning.min && length <= ranges.warning.max) {
-        return 'k-meta-kit-status-warning' + (fallback ? '-fallback' : '');
+        return 'k-meta-kit-status-warning';
       }
 
-      return 'k-meta-kit-status-error' + (fallback ? '-fallback' : '');
+      return 'k-meta-kit-status-error';
     },
 
     getStatusValue(statusClass) {
@@ -522,6 +529,64 @@ export default {
       }
 
       return '';
+    },
+
+    // Title display and inheritance
+    getTitleDisplay(page) {
+      const length = this.getFullTitleLength(page);
+      if (!length) return '—';
+      return this.isTitleInherited(page) ? `${length}` : length;
+    },
+
+    isTitleInherited(page) {
+      if (page.id === 'site') return false;
+      return !page.hasMetaTitle;
+    },
+
+    // Description display and inheritance
+    getDescriptionDisplay(page) {
+      if (!page.hasMetaDescription) return '—';
+      return page.metaDescriptionLength;
+    },
+
+    isDescriptionInherited(page) {
+      return false; // Descriptions don't inherit
+    },
+
+    getDescriptionStatusClass(page) {
+      return this.getStatusClass(page.metaDescriptionLength, 'description');
+    },
+
+    // OG Title display and inheritance
+    getOgTitleDisplay(page) {
+      const length = this.getFullOgTitleLength(page);
+      if (!length) return '—';
+      return this.isOgTitleInherited(page) ? `${length}` : length;
+    },
+
+    isOgTitleInherited(page) {
+      if (page.id === 'site') return false;
+      return !page.hasOgTitle;
+    },
+
+    // OG Description display and inheritance
+    getOgDescriptionDisplay(page) {
+      if (page.hasOgDescription) {
+        return page.ogDescriptionLength;
+      }
+      if (page.hasMetaDescription) {
+        return `${page.metaDescriptionLength}`;
+      }
+      return '—';
+    },
+
+    isOgDescriptionInherited(page) {
+      return !page.hasOgDescription && page.hasMetaDescription;
+    },
+
+    getOgDescriptionStatusClass(page) {
+      const length = page.hasOgDescription ? page.ogDescriptionLength : page.metaDescriptionLength;
+      return this.getStatusClass(length, 'ogDescription');
     }
   }
 };
