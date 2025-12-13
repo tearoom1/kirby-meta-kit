@@ -1456,3 +1456,28 @@
     color: #8ab4f8;
   }
 }
+
+.k-meta-kit-tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.k-meta-kit-tooltip-content {
+  position: fixed;
+  z-index: 9999;
+  background: var(--color-black);
+  color: var(--color-white);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--rounded-sm);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  max-width: 300px;
+  word-wrap: break-word;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  white-space: pre-wrap;
+}
+.k-panel[data-color-scheme="dark"] .k-meta-kit-tooltip-content {
+  background: var(--color-gray-800);
+  color: var(--color-white);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}

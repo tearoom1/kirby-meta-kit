@@ -38,157 +38,180 @@
           <div class="k-meta-kit-table-page">
             <div class="k-meta-kit-page-title-wrapper">
               <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
-              <span :class="['k-meta-kit-status-dot', getStatusDotClass(page)]" :title="getStatusLabel(page)"></span>
+              <Tooltip :content="getStatusLabel(page)">
+                <span :class="['k-meta-kit-status-dot', getStatusDotClass(page)]"></span>
+              </Tooltip>
             </div>
             <span class="k-meta-kit-table-page-id">{{ page.template }}</span>
           </div>
         </td>
         <td v-if="!showPreview">
-          <span
-            :class="[getSlugStatusClass(page), 'k-meta-kit-table-tooltip']"
-            :title="getSlugTooltip(page)"
-          >
-            {{ page.id }}
-          </span>
+          <Tooltip :content="getSlugTooltip(page)">
+            <span
+              :class="[getSlugStatusClass(page), 'k-meta-kit-table-tooltip']"
+            >
+              {{ page.id }}
+            </span>
+          </Tooltip>
         </td>
 
         <!-- Title Column (Meta or OG based on mode) -->
         <td v-if="showPreview">
           <template v-if="previewMode === 'meta'">
-            <span
-              :class="['k-meta-kit-table-preview-indicator',
-                'k-meta-kit-table-tooltip',
-                isTitleInherited(page) ? 'k-meta-kit-inherited-preview' : '']"
-              :data-status="getStatusValue(getTableTitleStatusClass(page))"
-              :title="getTitleTooltip(page)"
-            >
-                {{ getFullTitlePreview(page, 'meta') }}
-            </span>
+            <Tooltip :content="getTitleTooltip(page)">
+              <span
+                :class="['k-meta-kit-table-preview-indicator',
+                  'k-meta-kit-table-tooltip',
+                  isTitleInherited(page) ? 'k-meta-kit-inherited-preview' : '']"
+                :data-status="getStatusValue(getTableTitleStatusClass(page))"
+              >
+                  {{ getFullTitlePreview(page, 'meta') }}
+              </span>
+            </Tooltip>
           </template>
           <template v-else>
-            <span
-              :class="['k-meta-kit-table-preview-indicator',
-                'k-meta-kit-table-tooltip',
-                isOgTitleInherited(page) ? 'k-meta-kit-inherited-preview' : '']"
-              :data-status="getStatusValue(getTableOgTitleStatusClass(page))"
-              :title="getOgTitleTooltip(page)"
-            >
-                <template v-if="page.hasOgTitle">
-                  {{ getFullTitlePreview(page, 'og') }}
-                </template>
-                <template v-else>
-                  <span class="k-meta-kit-table-preview-fallback">
+            <Tooltip :content="getOgTitleTooltip(page)">
+              <span
+                :class="['k-meta-kit-table-preview-indicator',
+                  'k-meta-kit-table-tooltip',
+                  isOgTitleInherited(page) ? 'k-meta-kit-inherited-preview' : '']"
+                :data-status="getStatusValue(getTableOgTitleStatusClass(page))"
+              >
+                  <template v-if="page.hasOgTitle">
                     {{ getFullTitlePreview(page, 'og') }}
-                  </span>
-                </template>
-            </span>
+                  </template>
+                  <template v-else>
+                    <span class="k-meta-kit-table-preview-fallback">
+                      {{ getFullTitlePreview(page, 'og') }}
+                    </span>
+                  </template>
+              </span>
+            </Tooltip>
           </template>
         </td>
 
         <!-- Description Column (Meta or OG based on mode) -->
         <td v-if="showPreview">
           <template v-if="previewMode === 'meta'">
-            <span class="k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip"
-                  :data-status="getStatusValue(getDescriptionStatusClass(page))"
-                  :title="getDescriptionTooltip(page)"
-            >
-                <template v-if="page.hasMetaDescription">
-                  {{ page.metaDescription }}
-                </template>
-                <template v-else-if="siteSettings.siteMetaDescription">
-                  <span class="k-meta-kit-table-preview-fallback">
-                    {{ siteSettings.siteMetaDescription }}
-                  </span>
-                </template>
-                <template v-else>
-                  —
-                </template>
-            </span>
+            <Tooltip :content="getDescriptionTooltip(page)">
+              <span class="k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip"
+                    :data-status="getStatusValue(getDescriptionStatusClass(page))"
+              >
+                  <template v-if="page.hasMetaDescription">
+                    {{ page.metaDescription }}
+                  </template>
+                  <template v-else-if="siteSettings.siteMetaDescription">
+                    <span class="k-meta-kit-table-preview-fallback">
+                      {{ siteSettings.siteMetaDescription }}
+                    </span>
+                  </template>
+                  <template v-else>
+                    —
+                  </template>
+              </span>
+            </Tooltip>
           </template>
           <template v-else>
-            <span class="k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip"
-                  :data-status="getStatusValue(getOgDescriptionStatusClass(page))"
-                  :title="getOgDescriptionTooltip(page)"
-            >
-                <template v-if="page.hasOgDescription">
-                  {{ page.ogDescription }}
-                </template>
-                <template v-else-if="page.hasMetaDescription">
-                  <span class="k-meta-kit-table-preview-fallback">
-                    {{ page.metaDescription }}
-                  </span>
-                </template>
-                <template v-else-if="siteSettings.siteMetaDescription">
-                  <span class="k-meta-kit-table-preview-fallback">
-                    {{ siteSettings.siteMetaDescription }}
-                  </span>
-                </template>
-                <template v-else>
-                  —
-                </template>
-            </span>
+            <Tooltip :content="getOgDescriptionTooltip(page)">
+              <span class="k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip"
+                    :data-status="getStatusValue(getOgDescriptionStatusClass(page))"
+              >
+                  <template v-if="page.hasOgDescription">
+                    {{ page.ogDescription }}
+                  </template>
+                  <template v-else-if="page.hasMetaDescription">
+                    <span class="k-meta-kit-table-preview-fallback">
+                      {{ page.metaDescription }}
+                    </span>
+                  </template>
+                  <template v-else-if="siteSettings.siteMetaDescription">
+                    <span class="k-meta-kit-table-preview-fallback">
+                      {{ siteSettings.siteMetaDescription }}
+                    </span>
+                  </template>
+                  <template v-else>
+                    —
+                  </template>
+              </span>
+            </Tooltip>
           </template>
         </td>
 
         <!-- Title Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
-            <span :class="[
-              getTableTitleStatusClass(page),
-              isTitleInherited(page) ? 'k-meta-kit-inherited' : '',
-              'k-meta-kit-table-tooltip'
-            ]"
-                  :title="getTitleTooltip(page)">
-                {{ getTitleDisplay(page) }}
-            </span>
+            <Tooltip :content="getTitleTooltip(page)">
+              <span :class="[
+                getTableTitleStatusClass(page),
+                isTitleInherited(page) ? 'k-meta-kit-inherited' : '',
+                'k-meta-kit-table-tooltip'
+              ]">
+                  {{ getTitleDisplay(page) }}
+              </span>
+            </Tooltip>
         </td>
 
         <!-- Description Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
-            <span
-              :class="[
-                getDescriptionStatusClass(page),
-                isDescriptionInherited(page) ? 'k-meta-kit-inherited' : '',
-                'k-meta-kit-table-tooltip'
-              ]"
-              :title="getDescriptionTooltip(page)">
-                {{ getDescriptionDisplay(page) }}
-            </span>
+            <Tooltip :content="getDescriptionTooltip(page)">
+              <span
+                :class="[
+                  getDescriptionStatusClass(page),
+                  isDescriptionInherited(page) ? 'k-meta-kit-inherited' : '',
+                  'k-meta-kit-table-tooltip'
+                ]">
+                  {{ getDescriptionDisplay(page) }}
+              </span>
+            </Tooltip>
         </td>
 
         <!-- OG Title Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
-            <span :class="[
-              getTableOgTitleStatusClass(page),
-              isOgTitleInherited(page) ? 'k-meta-kit-inherited' : '',
-              'k-meta-kit-table-tooltip'
-              ]"
-                  :title="getOgTitleTooltip(page)">
-                {{ getOgTitleDisplay(page) }}
-            </span>
+            <Tooltip :content="getOgTitleTooltip(page)">
+              <span :class="[
+                getTableOgTitleStatusClass(page),
+                isOgTitleInherited(page) ? 'k-meta-kit-inherited' : '',
+                'k-meta-kit-table-tooltip'
+                ]">
+                  {{ getOgTitleDisplay(page) }}
+              </span>
+            </Tooltip>
         </td>
 
         <!-- OG Description Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
-            <span
-              :class="[
-                getOgDescriptionStatusClass(page),
-                isOgDescriptionInherited(page) ? 'k-meta-kit-inherited' : '',
-                'k-meta-kit-table-tooltip'
-              ]"
-              :title="getOgDescriptionTooltip(page)">
-                {{ getOgDescriptionDisplay(page) }}
-            </span>
+            <Tooltip :content="getOgDescriptionTooltip(page)">
+              <span
+                :class="[
+                  getOgDescriptionStatusClass(page),
+                  isOgDescriptionInherited(page) ? 'k-meta-kit-inherited' : '',
+                  'k-meta-kit-table-tooltip'
+                ]">
+                  {{ getOgDescriptionDisplay(page) }}
+              </span>
+            </Tooltip>
         </td>
 
         <!-- OG Image (only in OG mode) -->
         <td class="k-meta-kit-table-center">
-          <span v-if="page.hasOgImage" class="k-meta-kit-og-image-indicator" title="Has OG image">
-            <k-icon type="check" class="k-meta-kit-icon-success"/>
-          </span>
-          <span v-else-if="!page.hasOgImage && siteSettings.siteHasOgImage" class="k-meta-kit-og-image-indicator k-meta-kit-inherited" title="OG image inherited from site">
-            <k-icon type="check" class="k-meta-kit-icon-success"/>
-          </span>
-          <span v-else title="No OG image">—</span>
+          <template v-if="page.hasOgImage">
+            <Tooltip content="Has OG image">
+              <span class="k-meta-kit-og-image-indicator">
+                <k-icon type="check" class="k-meta-kit-icon-success"/>
+              </span>
+            </Tooltip>
+          </template>
+          <template v-else-if="!page.hasOgImage && siteSettings.siteHasOgImage">
+            <Tooltip content="OG image inherited from site">
+              <span class="k-meta-kit-og-image-indicator k-meta-kit-inherited">
+                <k-icon type="check" class="k-meta-kit-icon-success"/>
+              </span>
+            </Tooltip>
+          </template>
+          <template v-else>
+            <Tooltip content="No OG image">
+              <span>—</span>
+            </Tooltip>
+          </template>
         </td>
 
         <!-- Robots (only in meta mode when not showing preview) -->
@@ -221,7 +244,12 @@
 </template>
 
 <script>
+import Tooltip from '../common/Tooltip.vue';
+
 export default {
+  components: {
+    Tooltip
+  },
   props: {
     pages: {
       type: Array,
