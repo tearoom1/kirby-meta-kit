@@ -56,7 +56,9 @@
         <td v-if="showPreview">
           <template v-if="previewMode === 'meta'">
             <span
-              :class="['k-meta-kit-table-preview-indicator', isTitleInherited(page) ? 'k-meta-kit-inherited-preview' : '']"
+              :class="['k-meta-kit-table-preview-indicator',
+                'k-meta-kit-table-tooltip',
+                isTitleInherited(page) ? 'k-meta-kit-inherited-preview' : '']"
               :data-status="getStatusValue(getTableTitleStatusClass(page))"
               :title="getTitleTooltip(page)"
             >
@@ -65,8 +67,10 @@
           </template>
           <template v-else>
             <span
-              :class="['k-meta-kit-table-preview-indicator', isOgTitleInherited(page) ? 'k-meta-kit-inherited-preview' : '']"
-              :data-status="getStatusValue(getStatusClass(page.hasOgTitle ? page.ogTitleLength : page.metaTitleLength, 'ogTitle'))"
+              :class="['k-meta-kit-table-preview-indicator',
+                'k-meta-kit-table-tooltip',
+                isOgTitleInherited(page) ? 'k-meta-kit-inherited-preview' : '']"
+              :data-status="getStatusValue(getTableOgTitleStatusClass(page))"
               :title="getOgTitleTooltip(page)"
             >
                 <template v-if="page.hasOgTitle">
@@ -84,7 +88,7 @@
         <!-- Description Column (Meta or OG based on mode) -->
         <td v-if="showPreview">
           <template v-if="previewMode === 'meta'">
-            <span class="k-meta-kit-table-preview-indicator"
+            <span class="k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip"
                   :data-status="getStatusValue(getDescriptionStatusClass(page))"
                   :title="getDescriptionTooltip(page)"
             >
@@ -102,7 +106,7 @@
             </span>
           </template>
           <template v-else>
-            <span class="k-meta-kit-table-preview-indicator"
+            <span class="k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip"
                   :data-status="getStatusValue(getOgDescriptionStatusClass(page))"
                   :title="getOgDescriptionTooltip(page)"
             >

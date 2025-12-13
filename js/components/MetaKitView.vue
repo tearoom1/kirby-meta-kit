@@ -774,6 +774,14 @@ export default {
     async showSelectedPagesDialog() {
       if (this.selectedPages.length === 0) return;
       this.$refs.allPagesDialog.open(this.selectedPages);
+    },
+    refreshPages() {
+      // Reload the panel view to get fresh data
+      if (window.panel && window.panel.$reload) {
+        window.panel.$reload();
+      } else {
+        window.location.reload();
+      }
     }
   }
 };

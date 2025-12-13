@@ -293,7 +293,7 @@
 
   .k-meta-kit-table-tooltip {
     cursor: help;
-    border-bottom: 1px dotted rgba(128, 128, 128, 0.5);
+    /*border-bottom: 1px dotted rgba(128, 128, 128, 0.5);*/
     display: inline-block;
   }
 
