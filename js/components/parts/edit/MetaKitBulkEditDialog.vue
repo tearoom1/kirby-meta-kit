@@ -44,7 +44,7 @@
             :ai-enabled="aiEnabled"
             :is-generating="generating[page.id].metaTitle"
             @generate="generate(page.id, 'metaTitle')"
-            :placeholder="page.metaTitle || 'No meta title'"
+            :placeholder="page.metaTitle || page.title || 'No meta title'"
             type="meta"
           />
 
@@ -55,7 +55,7 @@
             :ai-enabled="aiEnabled"
             :is-generating="generating[page.id].metaDescription"
             @generate="generate(page.id, 'metaDescription')"
-            :placeholder="page.metaDescription || 'No meta description'"
+            :placeholder="page.metaDescription || siteSettings.siteMetaDescription || 'No meta description'"
           />
         </div>
       </div>
@@ -79,7 +79,7 @@
             :ai-enabled="aiEnabled"
             :is-generating="generating[page.id].ogTitle"
             @generate="generate(page.id, 'ogTitle')"
-            :placeholder="page.ogTitle || page.metaTitle || 'No OG title'"
+            :placeholder="page.ogTitle || page.metaTitle || page.title || 'No OG title'"
             type="og"
           />
 
@@ -90,7 +90,7 @@
             :ai-enabled="aiEnabled"
             :is-generating="generating[page.id].ogDescription"
             @generate="generate(page.id, 'ogDescription')"
-            :placeholder="page.ogDescription || 'No OG description'"
+            :placeholder="page.ogDescription || page.metaDescription || siteSettings.siteMetaDescription || 'No OG description'"
             type="og"
           />
         </div>
