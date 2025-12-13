@@ -375,6 +375,12 @@
     color: var(--color-red-500);
   }
 
+  /* Inherited values in preview mode */
+  .k-meta-kit-inherited-preview {
+    opacity: 0.6;
+    font-style: italic;
+  }
+
   .k-meta-kit-icon-success {
     color: var(--color-green-600);
   }

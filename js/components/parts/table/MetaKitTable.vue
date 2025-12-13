@@ -56,7 +56,7 @@
         <td v-if="showPreview">
           <template v-if="previewMode === 'meta'">
             <span
-              :class="['k-meta-kit-table-preview-indicator']"
+              :class="['k-meta-kit-table-preview-indicator', isTitleInherited(page) ? 'k-meta-kit-inherited-preview' : '']"
               :data-status="getStatusValue(getTableTitleStatusClass(page))"
               :title="getTitleTooltip(page)"
             >
@@ -65,7 +65,7 @@
           </template>
           <template v-else>
             <span
-              :class="['k-meta-kit-table-preview-indicator']"
+              :class="['k-meta-kit-table-preview-indicator', isOgTitleInherited(page) ? 'k-meta-kit-inherited-preview' : '']"
               :data-status="getStatusValue(getStatusClass(page.hasOgTitle ? page.ogTitleLength : page.metaTitleLength, 'ogTitle'))"
               :title="getOgTitleTooltip(page)"
             >
@@ -85,22 +85,42 @@
         <td v-if="showPreview">
           <template v-if="previewMode === 'meta'">
             <span class="k-meta-kit-table-preview-indicator"
-                  :data-status="getStatusValue(getStatusClass(page.metaDescriptionLength, 'description'))"
+                  :data-status="getStatusValue(getDescriptionStatusClass(page))"
+                  :title="getDescriptionTooltip(page)"
             >
-                {{ page.metaDescription || '—' }}
+                <template v-if="page.hasMetaDescription">
+                  {{ page.metaDescription }}
+                </template>
+                <template v-else-if="siteSettings.siteMetaDescription">
+                  <span class="k-meta-kit-table-preview-fallback">
+                    {{ siteSettings.siteMetaDescription }}
+                  </span>
+                </template>
+                <template v-else>
+                  —
+                </template>
             </span>
           </template>
           <template v-else>
             <span class="k-meta-kit-table-preview-indicator"
-                  :data-status="getStatusValue(getStatusClass(page.hasOgDescription ? page.ogDescriptionLength : page.metaDescriptionLength, 'ogDescription'))"
+                  :data-status="getStatusValue(getOgDescriptionStatusClass(page))"
+                  :title="getOgDescriptionTooltip(page)"
             >
                 <template v-if="page.hasOgDescription">
                   {{ page.ogDescription }}
                 </template>
-                <template v-else>
+                <template v-else-if="page.hasMetaDescription">
                   <span class="k-meta-kit-table-preview-fallback">
-                    {{ page.metaDescription || '—' }}
+                    {{ page.metaDescription }}
                   </span>
+                </template>
+                <template v-else-if="siteSettings.siteMetaDescription">
+                  <span class="k-meta-kit-table-preview-fallback">
+                    {{ siteSettings.siteMetaDescription }}
+                  </span>
+                </template>
+                <template v-else>
+                  —
                 </template>
             </span>
           </template>
