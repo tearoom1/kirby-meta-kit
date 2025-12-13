@@ -336,7 +336,7 @@ export default {
       } else if (type === 'ogTitle') {
         ranges = {optimal: {min: 20, max: 60}, warning: {min: 15, max: 75}};
       } else if (type === 'ogDescription') {
-        ranges = {optimal: {min: 150, max: 185}, warning: {min: 135, max: 200}};
+        ranges = {optimal: {min: 150, max: 250}, warning: {min: 135, max: 300}};
       } else {
         // description
         ranges = {optimal: {min: 140, max: 160}, warning: {min: 126, max: 176}};
@@ -374,33 +374,42 @@ export default {
       }
 
       let tooltip = '';
+      let prefix = '';
+
       if (page.hasMetaTitle && page.metaTitle) {
-        tooltip = `${page.metaTitle}`;
+        tooltip = page.metaTitle;
       } else {
-        tooltip = `${page.title}`;
+        prefix = 'Inherited from page title:\n\n';
+        tooltip = page.title;
       }
 
       if (this.shouldAppendSiteName('meta') && this.siteSettings.siteMetaTitle) {
         const separator = this.siteSettings.titleSeparator || '|';
         const siteName = this.siteSettings.siteMetaTitle || '';
         const preview = `${titleToUse} ${separator} ${siteName}`;
-        tooltip = `${preview}`;
+        return prefix + preview;
       }
 
-      return tooltip;
+      return prefix + tooltip;
     },
 
     getDescriptionTooltip(page) {
-      if (!page.hasMetaDescription || !page.metaDescription) {
+      if (page.hasMetaDescription && page.metaDescription) {
+        const desc = page.metaDescription;
+        if (desc.length > 200) {
+          return desc.substring(0, 200) + '...';
+        }
+        return desc;
+      } else if (this.siteSettings.siteMetaDescription) {
+        const desc = this.siteSettings.siteMetaDescription;
+        const prefix = 'Inherited from site:\n\n';
+        if (desc.length > 200) {
+          return prefix + desc.substring(0, 200) + '...';
+        }
+        return prefix + desc;
+      } else {
         return 'No meta description';
       }
-
-      const desc = page.metaDescription;
-      if (desc.length > 200) {
-        return desc.substring(0, 200) + '...';
-      }
-
-      return desc;
     },
 
     getOgTitleTooltip(page) {
@@ -418,35 +427,52 @@ export default {
       }
 
       let tooltip = '';
+      let prefix = '';
+
       if (page.hasOgTitle && page.ogTitle) {
-        tooltip = `${page.ogTitle}`;
+        tooltip = page.ogTitle;
       } else if (page.hasMetaTitle && page.metaTitle) {
-        tooltip = `${page.metaTitle}`;
+        prefix = 'Inherited from meta title:\n\n';
+        tooltip = page.metaTitle;
       } else {
-        tooltip = `${page.title}`;
+        prefix = 'Inherited from page title:\n\n';
+        tooltip = page.title;
       }
 
       if (this.shouldAppendSiteName('og') && this.siteSettings.siteMetaTitle) {
         const separator = this.siteSettings.titleSeparator || '|';
         const siteName = this.siteSettings.siteMetaTitle || '';
         const preview = `${titleToUse} ${separator} ${siteName}`;
-        tooltip = `${preview}`;
+        return prefix + preview;
       }
 
-      return tooltip;
+      return prefix + tooltip;
     },
 
     getOgDescriptionTooltip(page) {
-      if (!page.hasOgDescription || !page.ogDescription) {
+      if (page.hasOgDescription && page.ogDescription) {
+        const desc = page.ogDescription;
+        if (desc.length > 200) {
+          return desc.substring(0, 200) + '...';
+        }
+        return desc;
+      } else if (page.hasMetaDescription && page.metaDescription) {
+        const desc = page.metaDescription;
+        const prefix = 'Inherited from meta description:\n\n';
+        if (desc.length > 200) {
+          return prefix + desc.substring(0, 200) + '...';
+        }
+        return prefix + desc;
+      } else if (this.siteSettings.siteMetaDescription) {
+        const desc = this.siteSettings.siteMetaDescription;
+        const prefix = 'Inherited from site:\n\n';
+        if (desc.length > 200) {
+          return prefix + desc.substring(0, 200) + '...';
+        }
+        return prefix + desc;
+      } else {
         return 'No OG description';
       }
-
-      const desc = page.ogDescription;
-      if (desc.length > 200) {
-        return desc.substring(0, 200) + '...';
-      }
-
-      return desc;
     },
 
     getSlug(page) {
@@ -545,16 +571,25 @@ export default {
 
     // Description display and inheritance
     getDescriptionDisplay(page) {
-      if (!page.hasMetaDescription) return '—';
-      return page.metaDescriptionLength;
+      if (page.hasMetaDescription) {
+        return page.metaDescriptionLength;
+      }
+      // Inherit from site
+      if (this.siteSettings.siteMetaDescription) {
+        return `${this.siteSettings.siteMetaDescription.length}`;
+      }
+      return '—';
     },
 
     isDescriptionInherited(page) {
-      return false; // Descriptions don't inherit
+      return !page.hasMetaDescription && this.siteSettings.siteMetaDescription;
     },
 
     getDescriptionStatusClass(page) {
-      return this.getStatusClass(page.metaDescriptionLength, 'description');
+      const length = page.hasMetaDescription
+        ? page.metaDescriptionLength
+        : (this.siteSettings.siteMetaDescription ? this.siteSettings.siteMetaDescription.length : 0);
+      return this.getStatusClass(length, 'description');
     },
 
     // OG Title display and inheritance
@@ -577,15 +612,27 @@ export default {
       if (page.hasMetaDescription) {
         return `${page.metaDescriptionLength}`;
       }
+      // Inherit from site
+      if (this.siteSettings.siteMetaDescription) {
+        return `${this.siteSettings.siteMetaDescription.length}`;
+      }
       return '—';
     },
 
     isOgDescriptionInherited(page) {
-      return !page.hasOgDescription && page.hasMetaDescription;
+      if (page.hasOgDescription) return false;
+      return page.hasMetaDescription || this.siteSettings.siteMetaDescription;
     },
 
     getOgDescriptionStatusClass(page) {
-      const length = page.hasOgDescription ? page.ogDescriptionLength : page.metaDescriptionLength;
+      let length = 0;
+      if (page.hasOgDescription) {
+        length = page.ogDescriptionLength;
+      } else if (page.hasMetaDescription) {
+        length = page.metaDescriptionLength;
+      } else if (this.siteSettings.siteMetaDescription) {
+        length = this.siteSettings.siteMetaDescription.length;
+      }
       return this.getStatusClass(length, 'ogDescription');
     }
   }

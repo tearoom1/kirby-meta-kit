@@ -186,6 +186,9 @@ class MetaKitController
         $siteMetaTitle = $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
             ? $siteSeo->metaTitle()->value()
             : $site->title()->value();
+        $siteMetaDescription = $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
+            ? $siteSeo->metaDescription()->value()
+            : null;
         $titleSeparator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
             ? $siteSeo->titleSeparator()->value()
             : '|';
@@ -201,6 +204,7 @@ class MetaKitController
                 'appendSiteName' => $appendSiteName,
                 'appendSiteNameTo' => $appendSiteNameTo,
                 'siteMetaTitle' => $siteMetaTitle,
+                'siteMetaDescription' => $siteMetaDescription,
                 'titleSeparator' => $titleSeparator,
             ]
         ];
