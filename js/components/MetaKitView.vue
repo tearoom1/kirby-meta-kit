@@ -252,6 +252,12 @@ export default {
               return !page.hasOgImage;
             case 'complete':
               return page.hasMetaTitle && page.hasMetaDescription && page.hasOgImage;
+            case 'listed':
+              return page.status === 'listed' || page.status === 'published';
+            case 'unlisted':
+              return page.status === 'unlisted';
+            case 'drafts':
+              return page.status === 'draft';
             default:
               return true;
           }

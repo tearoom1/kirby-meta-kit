@@ -56,6 +56,9 @@
       <option value="missing-og-description">Missing OG Description</option>
       <option value="missing-og-image">Missing OG Image</option>
       <option value="complete">Complete Metadata</option>
+      <option value="listed">Listed</option>
+      <option value="unlisted">Unlisted</option>
+      <option value="drafts">Drafts</option>
     </select>
 
     <select
