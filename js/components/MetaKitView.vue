@@ -254,10 +254,20 @@ export default {
     filteredPages() {
       let pages = this.pagesData;
 
-      // Apply active filters (AND logic - page must match all filters)
+      // Apply active filters
       if (this.activeFilters.length > 0) {
+        // Separate filters by type
+        const metadataFilters = this.activeFilters.filter(f =>
+          ['missing-title', 'missing-description', 'missing-og-title',
+           'missing-og-description', 'missing-og-image', 'complete'].includes(f)
+        );
+        const statusFilters = this.activeFilters.filter(f =>
+          ['listed', 'unlisted', 'drafts'].includes(f)
+        );
+
         pages = pages.filter(page => {
-          return this.activeFilters.every(filter => {
+          // Metadata filters use AND logic (must match all)
+          const matchesMetadata = metadataFilters.length === 0 || metadataFilters.every(filter => {
             switch (filter) {
               case 'missing-title':
                 return !page.hasMetaTitle;
@@ -271,6 +281,14 @@ export default {
                 return !page.hasOgImage;
               case 'complete':
                 return page.hasMetaTitle && page.hasMetaDescription && page.hasOgImage;
+              default:
+                return true;
+            }
+          });
+
+          // Status filters use OR logic (match any)
+          const matchesStatus = statusFilters.length === 0 || statusFilters.some(filter => {
+            switch (filter) {
               case 'listed':
                 return page.status === 'listed' || page.status === 'published';
               case 'unlisted':
@@ -278,9 +296,12 @@ export default {
               case 'drafts':
                 return page.status === 'draft';
               default:
-                return true;
+                return false;
             }
           });
+
+          // Page must match both groups
+          return matchesMetadata && matchesStatus;
         });
       }
 
