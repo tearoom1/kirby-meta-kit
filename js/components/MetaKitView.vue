@@ -61,7 +61,7 @@
           :show-preview.sync="showPreviewInTable"
           :preview-mode.sync="previewMode"
           :search-query.sync="searchQuery"
-          :metadata-filter.sync="metadataFilter"
+          :active-filters.sync="activeFilters"
           :page-size="pageSize"
           :page-size-options="pageSizeOptions"
           @change-page-size="changePageSize"
@@ -137,6 +137,23 @@
       :selected-count="selectedPages.length"
       @generate="performBulkGeneration"
     />
+
+    <!-- Loading Overlay -->
+    <div v-if="isGeneratingAll || isLoadingPages || isMigratingAll" class="k-meta-kit-loading-overlay">
+      <div class="k-meta-kit-loading-content">
+        <div class="k-meta-kit-loading-spinner">
+          <k-icon type="loader" />
+        </div>
+        <div class="k-meta-kit-loading-text">
+          <template v-if="isGeneratingAll">Generating metadata with AI...</template>
+          <template v-else-if="isLoadingPages">Refreshing pages...</template>
+          <template v-else-if="isMigratingAll">Migrating legacy fields...</template>
+        </div>
+        <div v-if="loadingProgress" class="k-meta-kit-loading-progress">
+          {{ loadingProgress }}
+        </div>
+      </div>
+    </div>
   </k-panel-inside>
 </template>
 
@@ -227,40 +244,43 @@ export default {
         {value: 99999, text: 'All'}
       ],
       searchQuery: '',
-      metadataFilter: 'all',
+      activeFilters: [],
       showPreviewInTable: false,
-      previewMode: 'meta'
+      previewMode: 'meta',
+      loadingProgress: ''
     };
   },
   computed: {
     filteredPages() {
       let pages = this.pagesData;
 
-      // Apply metadata filter
-      if (this.metadataFilter !== 'all') {
+      // Apply active filters (AND logic - page must match all filters)
+      if (this.activeFilters.length > 0) {
         pages = pages.filter(page => {
-          switch (this.metadataFilter) {
-            case 'missing-title':
-              return !page.hasMetaTitle;
-            case 'missing-description':
-              return !page.hasMetaDescription;
-            case 'missing-og-title':
-              return !page.hasOgTitle;
-            case 'missing-og-description':
-              return !page.hasOgDescription;
-            case 'missing-og-image':
-              return !page.hasOgImage;
-            case 'complete':
-              return page.hasMetaTitle && page.hasMetaDescription && page.hasOgImage;
-            case 'listed':
-              return page.status === 'listed' || page.status === 'published';
-            case 'unlisted':
-              return page.status === 'unlisted';
-            case 'drafts':
-              return page.status === 'draft';
-            default:
-              return true;
-          }
+          return this.activeFilters.every(filter => {
+            switch (filter) {
+              case 'missing-title':
+                return !page.hasMetaTitle;
+              case 'missing-description':
+                return !page.hasMetaDescription;
+              case 'missing-og-title':
+                return !page.hasOgTitle;
+              case 'missing-og-description':
+                return !page.hasOgDescription;
+              case 'missing-og-image':
+                return !page.hasOgImage;
+              case 'complete':
+                return page.hasMetaTitle && page.hasMetaDescription && page.hasOgImage;
+              case 'listed':
+                return page.status === 'listed' || page.status === 'published';
+              case 'unlisted':
+                return page.status === 'unlisted';
+              case 'drafts':
+                return page.status === 'draft';
+              default:
+                return true;
+            }
+          });
         });
       }
 
@@ -444,13 +464,6 @@ export default {
       if (options.ogDescription) fields.push('OG descriptions');
       const fieldText = fields.join(', ');
 
-      // Show loading notification
-      const loadingNotification = window.panel.notification.open({
-        message: `Generating ${fieldText} with AI...`,
-        type: 'info',
-        timeout: 0 // Don't auto-close
-      });
-
       try {
         const response = await this.$api.post('meta-kit/generate-all', {
           generateTitle: options.title,
@@ -460,11 +473,6 @@ export default {
           pageIds: this.selectedPages
         });
 
-        // Close loading notification
-        if (loadingNotification && loadingNotification.close) {
-          loadingNotification.close();
-        }
-
         if (response.status === 'success') {
           const details = `Generated: ${response.generated || 0}, Skipped: ${response.skipped || 0}, Failed: ${response.failed || 0}`;
           window.panel.notification.success(`${response.message || 'Generation completed!'} ${details}`);
@@ -473,11 +481,6 @@ export default {
           window.panel.notification.error(response.message || 'Generation failed');
         }
       } catch (error) {
-        // Close loading notification
-        if (loadingNotification && loadingNotification.close) {
-          loadingNotification.close();
-        }
-
         // Extract detailed error message
         let errorMessage = `Failed to generate ${fieldText}`;
         if (error.message) {
@@ -492,6 +495,7 @@ export default {
         console.error('Generation error details:', error);
       } finally {
         this.isGeneratingAll = false;
+        this.loadingProgress = '';
       }
     },
 
@@ -521,14 +525,8 @@ export default {
         return;
       }
       this.isMigratingAll = true;
-      const loading = window.panel.notification.open({
-        message: 'Migrating legacy fields across all languages...',
-        type: 'info',
-        timeout: 0
-      });
       try {
         const res = await this.$api.post('meta-kit/convert-legacy-all-languages');
-        if (loading && loading.close) loading.close();
         if (res && res.status === 'success') {
           window.panel.notification.success(res.message || 'Migration completed');
           await this.refreshPages();
@@ -537,7 +535,6 @@ export default {
           window.panel.notification.error(res.message || 'Migration failed');
         }
       } catch (e) {
-        if (loading && loading.close) loading.close();
         window.panel.notification.error('Migration failed');
       } finally {
         this.isMigratingAll = false;

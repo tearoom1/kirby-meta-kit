@@ -44,22 +44,115 @@
       </button>
     </div>
 
-    <select
-      class="k-meta-kit-metadata-filter"
-      :value="metadataFilter"
-      @change="$emit('update:metadata-filter', $event.target.value)"
-    >
-      <option value="all">All Pages</option>
-      <option value="missing-title">Missing Title</option>
-      <option value="missing-description">Missing Description</option>
-      <option value="missing-og-title">Missing OG Title</option>
-      <option value="missing-og-description">Missing OG Description</option>
-      <option value="missing-og-image">Missing OG Image</option>
-      <option value="complete">Complete Metadata</option>
-      <option value="listed">Listed</option>
-      <option value="unlisted">Unlisted</option>
-      <option value="drafts">Drafts</option>
-    </select>
+    <div class="k-meta-kit-filter-dropdown">
+      <button
+        class="k-meta-kit-filter-button"
+        @click="toggleFilterDropdown"
+        :class="{ 'active': isDropdownOpen || activeFilters.length > 0 }"
+      >
+        <k-icon type="filter" />
+        <span>Filters</span>
+        <span v-if="activeFilters.length > 0" class="k-meta-kit-filter-count">{{ activeFilters.length }}</span>
+        <k-icon :type="isDropdownOpen ? 'angle-up' : 'angle-down'" />
+      </button>
+
+      <div v-if="isDropdownOpen" class="k-meta-kit-filter-dropdown-content">
+        <div class="k-meta-kit-filter-group">
+          <div class="k-meta-kit-filter-group-title">Metadata</div>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="missing-title"
+              :checked="isFilterActive('missing-title')"
+              @change="toggleFilter('missing-title')"
+            />
+            <span>Missing Title</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="missing-description"
+              :checked="isFilterActive('missing-description')"
+              @change="toggleFilter('missing-description')"
+            />
+            <span>Missing Description</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="missing-og-title"
+              :checked="isFilterActive('missing-og-title')"
+              @change="toggleFilter('missing-og-title')"
+            />
+            <span>Missing OG Title</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="missing-og-description"
+              :checked="isFilterActive('missing-og-description')"
+              @change="toggleFilter('missing-og-description')"
+            />
+            <span>Missing OG Description</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="missing-og-image"
+              :checked="isFilterActive('missing-og-image')"
+              @change="toggleFilter('missing-og-image')"
+            />
+            <span>Missing OG Image</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="complete"
+              :checked="isFilterActive('complete')"
+              @change="toggleFilter('complete')"
+            />
+            <span>Complete Metadata</span>
+          </label>
+        </div>
+
+        <div class="k-meta-kit-filter-group">
+          <div class="k-meta-kit-filter-group-title">Status</div>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="listed"
+              :checked="isFilterActive('listed')"
+              @change="toggleFilter('listed')"
+            />
+            <span>Listed</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="unlisted"
+              :checked="isFilterActive('unlisted')"
+              @change="toggleFilter('unlisted')"
+            />
+            <span>Unlisted</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="drafts"
+              :checked="isFilterActive('drafts')"
+              @change="toggleFilter('drafts')"
+            />
+            <span>Drafts</span>
+          </label>
+        </div>
+
+        <div v-if="activeFilters.length > 0" class="k-meta-kit-filter-actions">
+          <button @click="clearFilters" class="k-meta-kit-filter-clear">
+            Clear all
+          </button>
+        </div>
+      </div>
+    </div>
 
     <select
       class="k-meta-kit-pagesize-select"
@@ -89,9 +182,9 @@ export default {
       type: String,
       default: ''
     },
-    metadataFilter: {
-      type: String,
-      default: 'all'
+    activeFilters: {
+      type: Array,
+      default: () => []
     },
     pageSize: {
       type: Number,
@@ -106,6 +199,43 @@ export default {
         {value: 99999, text: 'All'}
       ]
     }
+  },
+  data() {
+    return {
+      isDropdownOpen: false
+    };
+  },
+  methods: {
+    toggleFilterDropdown() {
+      this.isDropdownOpen = !this.isDropdownOpen;
+    },
+    isFilterActive(filter) {
+      return this.activeFilters.includes(filter);
+    },
+    toggleFilter(filter) {
+      const filters = [...this.activeFilters];
+      const index = filters.indexOf(filter);
+
+      if (index > -1) {
+        filters.splice(index, 1);
+      } else {
+        filters.push(filter);
+      }
+
+      this.$emit('update:active-filters', filters);
+    },
+    clearFilters() {
+      this.$emit('update:active-filters', []);
+      this.isDropdownOpen = false;
+    }
+  },
+  mounted() {
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!this.$el.contains(e.target)) {
+        this.isDropdownOpen = false;
+      }
+    });
   }
 };
 </script>
