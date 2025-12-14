@@ -226,7 +226,7 @@
               title="Edit Metadata"
             />
             <k-button
-              v-if="aiEnabled"
+              v-if="aiEnabled && false"
               icon="sparkling"
               size="sm"
               :disabled="page.hasMetaDescription"

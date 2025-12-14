@@ -73,7 +73,7 @@ export default {
   data() {
     return {
       options: {
-        title: true,
+        title: false,
         description: true,
         ogTitle: false,
         ogDescription: false
@@ -88,7 +88,7 @@ export default {
   methods: {
     open() {
       // Reset to defaults
-      this.options.title = true;
+      this.options.title = false;
       this.options.description = true;
       this.options.ogTitle = false;
       this.options.ogDescription = false;
