@@ -832,12 +832,15 @@
         const match = statusClass.match(/k-meta-kit-status-(\w+)/);
         return match ? match[1] : "";
       },
-      getTitleTooltip(page) {
+      getTitleTooltip(page, showContent = true) {
         const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
         if (!titleToUse) {
           return "No title";
         }
         if (page.id === "site") {
+          if (!showContent) {
+            return "";
+          }
           if (page.hasMetaTitle && page.metaTitle) {
             return `${page.metaTitle}`;
           }
@@ -848,41 +851,34 @@
         if (page.hasMetaTitle && page.metaTitle) {
           tooltip = page.metaTitle;
         } else {
-          prefix = "Inherited from page title:\n\n";
+          prefix = "page title";
           tooltip = page.title;
         }
         if (this.shouldAppendSiteName("meta") && this.siteSettings.siteMetaTitle) {
           const separator = this.siteSettings.titleSeparator || "|";
           const siteName = this.siteSettings.siteMetaTitle || "";
-          const preview = `${titleToUse} ${separator} ${siteName}`;
-          return prefix + preview;
+          tooltip = `${titleToUse} ${separator} ${siteName}`;
         }
-        return prefix + tooltip;
+        return this.tooltipText(tooltip, prefix, showContent);
       },
-      getDescriptionTooltip(page) {
+      getDescriptionTooltip(page, showContent = true) {
         if (page.hasMetaDescription && page.metaDescription) {
-          const desc = page.metaDescription;
-          if (desc.length > 200) {
-            return desc.substring(0, 200) + "...";
-          }
-          return desc;
+          return this.tooltipText(page.metaDescription, false, showContent);
         } else if (this.siteSettings.siteMetaDescription) {
-          const desc = this.siteSettings.siteMetaDescription;
-          const prefix = "Inherited from site:\n\n";
-          if (desc.length > 200) {
-            return prefix + desc.substring(0, 200) + "...";
-          }
-          return prefix + desc;
+          return this.tooltipText(this.siteSettings.siteMetaDescription, "site", showContent);
         } else {
           return "No meta description";
         }
       },
-      getOgTitleTooltip(page) {
+      getOgTitleTooltip(page, showContent = true) {
         const titleToUse = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
         if (!titleToUse) {
           return "No OG title";
         }
         if (page.id === "site") {
+          if (!showContent) {
+            return "";
+          }
           if (page.hasOgTitle && page.ogTitle) {
             return `${page.ogTitle}`;
           }
@@ -893,44 +889,43 @@
         if (page.hasOgTitle && page.ogTitle) {
           tooltip = page.ogTitle;
         } else if (page.hasMetaTitle && page.metaTitle) {
-          prefix = "Inherited from meta title:\n\n";
+          prefix = "meta title";
           tooltip = page.metaTitle;
         } else {
-          prefix = "Inherited from page title:\n\n";
+          prefix = "page title";
           tooltip = page.title;
         }
         if (this.shouldAppendSiteName("og") && this.siteSettings.siteMetaTitle) {
           const separator = this.siteSettings.titleSeparator || "|";
           const siteName = this.siteSettings.siteMetaTitle || "";
-          const preview = `${titleToUse} ${separator} ${siteName}`;
-          return prefix + preview;
+          tooltip = `${titleToUse} ${separator} ${siteName}`;
         }
-        return prefix + tooltip;
+        return this.tooltipText(tooltip, prefix, showContent);
       },
-      getOgDescriptionTooltip(page) {
+      getOgDescriptionTooltip(page, showContent = true) {
         if (page.hasOgDescription && page.ogDescription) {
-          const desc = page.ogDescription;
-          if (desc.length > 200) {
-            return desc.substring(0, 200) + "...";
-          }
-          return desc;
+          return this.tooltipText(page.ogDescription, false, showContent);
         } else if (page.hasMetaDescription && page.metaDescription) {
-          const desc = page.metaDescription;
-          const prefix = "Inherited from meta description:\n\n";
-          if (desc.length > 200) {
-            return prefix + desc.substring(0, 200) + "...";
-          }
-          return prefix + desc;
+          return this.tooltipText(page.metaDescription, "meta description", showContent);
         } else if (this.siteSettings.siteMetaDescription) {
-          const desc = this.siteSettings.siteMetaDescription;
-          const prefix = "Inherited from site:\n\n";
-          if (desc.length > 200) {
-            return prefix + desc.substring(0, 200) + "...";
-          }
-          return prefix + desc;
+          return this.tooltipText(this.siteSettings.siteMetaDescription, "site", showContent);
         } else {
           return "No OG description";
         }
+      },
+      tooltipText(desc, inheritance, showContent) {
+        let prefix = "";
+        if (desc && desc.length > 200) {
+          desc = desc.substring(0, 200) + "...";
+        }
+        if (inheritance) {
+          prefix = "Inherited from " + inheritance;
+        }
+        if (showContent) {
+          desc = (inheritance ? ":\n\n" : "") + desc;
+          return prefix + desc;
+        }
+        return prefix;
       },
       getSlug(page) {
         if (page.id === "site") {
@@ -1071,15 +1066,15 @@ Nesting: <= 2 levels.`;
     } } })]), _c("th", [_vm._v("#")]), _c("th", [_vm._v("Page")]), !_vm.showPreview ? _c("th", [_vm._v("Slug")]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Title" : "Title"))]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Description" : "Description"))]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Desc.")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Desc.")]) : _vm._e(), _c("th", [_vm._v("OG Img")]), !_vm.showPreview && _vm.previewMode === "meta" ? _c("th", [_vm._v("Robots")]) : _vm._e(), _c("th", [_vm._v("Actions")])])]), _c("tbody", _vm._l(_vm.pages, function(page, index) {
       return _c("tr", { key: page.id }, [_c("td", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isPageSelected(page.id) }, on: { "change": function($event) {
         return _vm.$emit("toggle-page", page.id);
-      } } })]), _c("td", [_vm._v(_vm._s(_vm.startIndex + index + 1))]), _c("td", [_c("div", { staticClass: "k-meta-kit-table-page" }, [_c("div", { staticClass: "k-meta-kit-page-title-wrapper" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("Tooltip", { attrs: { "content": _vm.getStatusLabel(page) } }, [_c("span", { class: ["k-meta-kit-status-dot", _vm.getStatusDotClass(page)] })])], 1), _c("span", { staticClass: "k-meta-kit-table-page-id" }, [_vm._v(_vm._s(page.template))])])]), !_vm.showPreview ? _c("td", [_c("Tooltip", { attrs: { "content": _vm.getSlugTooltip(page) } }, [_c("span", { class: [_vm.getSlugStatusClass(page), "k-meta-kit-table-tooltip"] }, [_vm._v(" " + _vm._s(page.id) + " ")])])], 1) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("Tooltip", { attrs: { "content": _vm.getTitleTooltip(page) } }, [_c("span", { class: [
+      } } })]), _c("td", [_vm._v(_vm._s(_vm.startIndex + index + 1))]), _c("td", [_c("div", { staticClass: "k-meta-kit-table-page" }, [_c("div", { staticClass: "k-meta-kit-page-title-wrapper" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("Tooltip", { attrs: { "content": _vm.getStatusLabel(page) } }, [_c("span", { class: ["k-meta-kit-status-dot", _vm.getStatusDotClass(page)] })])], 1), _c("span", { staticClass: "k-meta-kit-table-page-id" }, [_vm._v(_vm._s(page.template))])])]), !_vm.showPreview ? _c("td", [_c("Tooltip", { attrs: { "content": _vm.getSlugTooltip(page) } }, [_c("span", { class: [_vm.getSlugStatusClass(page), "k-meta-kit-table-tooltip"] }, [_vm._v(" " + _vm._s(page.id) + " ")])])], 1) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("Tooltip", { attrs: { "content": _vm.getTitleTooltip(page, false) } }, [_c("span", { class: [
         "k-meta-kit-table-preview-indicator",
         "k-meta-kit-table-tooltip",
         _vm.isTitleInherited(page) ? "k-meta-kit-inherited-preview" : ""
-      ], attrs: { "data-status": _vm.getStatusValue(_vm.getTableTitleStatusClass(page)) } }, [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "meta")) + " ")])])] : [_c("Tooltip", { attrs: { "content": _vm.getOgTitleTooltip(page) } }, [_c("span", { class: [
+      ], attrs: { "data-status": _vm.getStatusValue(_vm.getTableTitleStatusClass(page)) } }, [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "meta")) + " ")])])] : [_c("Tooltip", { attrs: { "content": _vm.getOgTitleTooltip(page, false) } }, [_c("span", { class: [
         "k-meta-kit-table-preview-indicator",
         "k-meta-kit-table-tooltip",
         _vm.isOgTitleInherited(page) ? "k-meta-kit-inherited-preview" : ""
-      ], attrs: { "data-status": _vm.getStatusValue(_vm.getTableOgTitleStatusClass(page)) } }, [page.hasOgTitle ? [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")] : [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")])]], 2)])]], 2) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("Tooltip", { attrs: { "content": _vm.getDescriptionTooltip(page) } }, [_c("span", { staticClass: "k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip", attrs: { "data-status": _vm.getStatusValue(_vm.getDescriptionStatusClass(page)) } }, [page.hasMetaDescription ? [_vm._v(" " + _vm._s(page.metaDescription) + " ")] : _vm.siteSettings.siteMetaDescription ? [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(_vm.siteSettings.siteMetaDescription) + " ")])] : [_vm._v(" — ")]], 2)])] : [_c("Tooltip", { attrs: { "content": _vm.getOgDescriptionTooltip(page) } }, [_c("span", { staticClass: "k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip", attrs: { "data-status": _vm.getStatusValue(_vm.getOgDescriptionStatusClass(page)) } }, [page.hasOgDescription ? [_vm._v(" " + _vm._s(page.ogDescription) + " ")] : page.hasMetaDescription ? [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(page.metaDescription) + " ")])] : _vm.siteSettings.siteMetaDescription ? [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(_vm.siteSettings.siteMetaDescription) + " ")])] : [_vm._v(" — ")]], 2)])]], 2) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("Tooltip", { attrs: { "content": _vm.getTitleTooltip(page) } }, [_c("span", { class: [
+      ], attrs: { "data-status": _vm.getStatusValue(_vm.getTableOgTitleStatusClass(page)) } }, [page.hasOgTitle ? [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")] : [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")])]], 2)])]], 2) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("Tooltip", { attrs: { "content": _vm.getDescriptionTooltip(page, false) } }, [_c("span", { staticClass: "k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip", attrs: { "data-status": _vm.getStatusValue(_vm.getDescriptionStatusClass(page)) } }, [page.hasMetaDescription ? [_vm._v(" " + _vm._s(page.metaDescription) + " ")] : _vm.siteSettings.siteMetaDescription ? [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(_vm.siteSettings.siteMetaDescription) + " ")])] : [_vm._v(" — ")]], 2)])] : [_c("Tooltip", { attrs: { "content": _vm.getOgDescriptionTooltip(page, false) } }, [_c("span", { staticClass: "k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip", attrs: { "data-status": _vm.getStatusValue(_vm.getOgDescriptionStatusClass(page)) } }, [page.hasOgDescription ? [_vm._v(" " + _vm._s(page.ogDescription) + " ")] : page.hasMetaDescription ? [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(page.metaDescription) + " ")])] : _vm.siteSettings.siteMetaDescription ? [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(_vm.siteSettings.siteMetaDescription) + " ")])] : [_vm._v(" — ")]], 2)])]], 2) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("Tooltip", { attrs: { "content": _vm.getTitleTooltip(page) } }, [_c("span", { class: [
         _vm.getTableTitleStatusClass(page),
         _vm.isTitleInherited(page) ? "k-meta-kit-inherited" : "",
         "k-meta-kit-table-tooltip"

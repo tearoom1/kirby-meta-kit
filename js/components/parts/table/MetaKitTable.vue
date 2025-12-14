@@ -58,7 +58,7 @@
         <!-- Title Column (Meta or OG based on mode) -->
         <td v-if="showPreview">
           <template v-if="previewMode === 'meta'">
-            <Tooltip :content="getTitleTooltip(page)">
+            <Tooltip :content="getTitleTooltip(page, false)">
               <span
                 :class="['k-meta-kit-table-preview-indicator',
                   'k-meta-kit-table-tooltip',
@@ -70,7 +70,7 @@
             </Tooltip>
           </template>
           <template v-else>
-            <Tooltip :content="getOgTitleTooltip(page)">
+            <Tooltip :content="getOgTitleTooltip(page, false)">
               <span
                 :class="['k-meta-kit-table-preview-indicator',
                   'k-meta-kit-table-tooltip',
@@ -93,7 +93,7 @@
         <!-- Description Column (Meta or OG based on mode) -->
         <td v-if="showPreview">
           <template v-if="previewMode === 'meta'">
-            <Tooltip :content="getDescriptionTooltip(page)">
+            <Tooltip :content="getDescriptionTooltip(page, false)">
               <span class="k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip"
                     :data-status="getStatusValue(getDescriptionStatusClass(page))"
               >
@@ -112,7 +112,7 @@
             </Tooltip>
           </template>
           <template v-else>
-            <Tooltip :content="getOgDescriptionTooltip(page)">
+            <Tooltip :content="getOgDescriptionTooltip(page, false)">
               <span class="k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip"
                     :data-status="getStatusValue(getOgDescriptionStatusClass(page))"
               >
@@ -139,7 +139,7 @@
 
         <!-- Title Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
-            <Tooltip :content="getTitleTooltip(page)">
+          <Tooltip :content="getTitleTooltip(page)">
               <span :class="[
                 getTableTitleStatusClass(page),
                 isTitleInherited(page) ? 'k-meta-kit-inherited' : '',
@@ -147,12 +147,12 @@
               ]">
                   {{ getTitleDisplay(page) }}
               </span>
-            </Tooltip>
+          </Tooltip>
         </td>
 
         <!-- Description Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
-            <Tooltip :content="getDescriptionTooltip(page)">
+          <Tooltip :content="getDescriptionTooltip(page)">
               <span
                 :class="[
                   getDescriptionStatusClass(page),
@@ -161,12 +161,12 @@
                 ]">
                   {{ getDescriptionDisplay(page) }}
               </span>
-            </Tooltip>
+          </Tooltip>
         </td>
 
         <!-- OG Title Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
-            <Tooltip :content="getOgTitleTooltip(page)">
+          <Tooltip :content="getOgTitleTooltip(page)">
               <span :class="[
                 getTableOgTitleStatusClass(page),
                 isOgTitleInherited(page) ? 'k-meta-kit-inherited' : '',
@@ -174,12 +174,12 @@
                 ]">
                   {{ getOgTitleDisplay(page) }}
               </span>
-            </Tooltip>
+          </Tooltip>
         </td>
 
         <!-- OG Description Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
-            <Tooltip :content="getOgDescriptionTooltip(page)">
+          <Tooltip :content="getOgDescriptionTooltip(page)">
               <span
                 :class="[
                   getOgDescriptionStatusClass(page),
@@ -188,7 +188,7 @@
                 ]">
                   {{ getOgDescriptionDisplay(page) }}
               </span>
-            </Tooltip>
+          </Tooltip>
         </td>
 
         <!-- OG Image (only in OG mode) -->
@@ -416,7 +416,7 @@ export default {
       return match ? match[1] : '';
     },
 
-    getTitleTooltip(page) {
+    getTitleTooltip(page, showContent = true) {
       const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
 
       if (!titleToUse) {
@@ -424,6 +424,9 @@ export default {
       }
 
       if (page.id === 'site') {
+        if (!showContent) {
+          return '';
+        }
         if (page.hasMetaTitle && page.metaTitle) {
           return `${page.metaTitle}`;
         }
@@ -436,40 +439,30 @@ export default {
       if (page.hasMetaTitle && page.metaTitle) {
         tooltip = page.metaTitle;
       } else {
-        prefix = 'Inherited from page title:\n\n';
+        prefix = 'page title';
         tooltip = page.title;
       }
 
       if (this.shouldAppendSiteName('meta') && this.siteSettings.siteMetaTitle) {
         const separator = this.siteSettings.titleSeparator || '|';
         const siteName = this.siteSettings.siteMetaTitle || '';
-        const preview = `${titleToUse} ${separator} ${siteName}`;
-        return prefix + preview;
+        tooltip = `${titleToUse} ${separator} ${siteName}`;
       }
 
-      return prefix + tooltip;
+      return this.tooltipText(tooltip, prefix, showContent);
     },
 
-    getDescriptionTooltip(page) {
+    getDescriptionTooltip(page, showContent = true) {
       if (page.hasMetaDescription && page.metaDescription) {
-        const desc = page.metaDescription;
-        if (desc.length > 200) {
-          return desc.substring(0, 200) + '...';
-        }
-        return desc;
+        return this.tooltipText(page.metaDescription, false, showContent);
       } else if (this.siteSettings.siteMetaDescription) {
-        const desc = this.siteSettings.siteMetaDescription;
-        const prefix = 'Inherited from site:\n\n';
-        if (desc.length > 200) {
-          return prefix + desc.substring(0, 200) + '...';
-        }
-        return prefix + desc;
+        return this.tooltipText(this.siteSettings.siteMetaDescription, 'site', showContent);
       } else {
         return 'No meta description';
       }
     },
 
-    getOgTitleTooltip(page) {
+    getOgTitleTooltip(page, showContent = true) {
       const titleToUse = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
 
       if (!titleToUse) {
@@ -477,6 +470,9 @@ export default {
       }
 
       if (page.id === 'site') {
+        if (!showContent) {
+          return '';
+        }
         if (page.hasOgTitle && page.ogTitle) {
           return `${page.ogTitle}`;
         }
@@ -489,47 +485,47 @@ export default {
       if (page.hasOgTitle && page.ogTitle) {
         tooltip = page.ogTitle;
       } else if (page.hasMetaTitle && page.metaTitle) {
-        prefix = 'Inherited from meta title:\n\n';
+        prefix = 'meta title';
         tooltip = page.metaTitle;
       } else {
-        prefix = 'Inherited from page title:\n\n';
+        prefix = 'page title';
         tooltip = page.title;
       }
 
       if (this.shouldAppendSiteName('og') && this.siteSettings.siteMetaTitle) {
         const separator = this.siteSettings.titleSeparator || '|';
         const siteName = this.siteSettings.siteMetaTitle || '';
-        const preview = `${titleToUse} ${separator} ${siteName}`;
-        return prefix + preview;
+        tooltip = `${titleToUse} ${separator} ${siteName}`;
       }
 
-      return prefix + tooltip;
+      return this.tooltipText(tooltip, prefix, showContent);
     },
 
-    getOgDescriptionTooltip(page) {
+    getOgDescriptionTooltip(page, showContent = true) {
       if (page.hasOgDescription && page.ogDescription) {
-        const desc = page.ogDescription;
-        if (desc.length > 200) {
-          return desc.substring(0, 200) + '...';
-        }
-        return desc;
+        return this.tooltipText(page.ogDescription, false, showContent);
       } else if (page.hasMetaDescription && page.metaDescription) {
-        const desc = page.metaDescription;
-        const prefix = 'Inherited from meta description:\n\n';
-        if (desc.length > 200) {
-          return prefix + desc.substring(0, 200) + '...';
-        }
-        return prefix + desc;
+        return this.tooltipText(page.metaDescription, 'meta description', showContent);
       } else if (this.siteSettings.siteMetaDescription) {
-        const desc = this.siteSettings.siteMetaDescription;
-        const prefix = 'Inherited from site:\n\n';
-        if (desc.length > 200) {
-          return prefix + desc.substring(0, 200) + '...';
-        }
-        return prefix + desc;
+        return this.tooltipText(this.siteSettings.siteMetaDescription, 'site', showContent);
       } else {
         return 'No OG description';
       }
+    },
+
+    tooltipText(desc, inheritance, showContent) {
+      let prefix = '';
+      if (desc && desc.length > 200) {
+        desc = desc.substring(0, 200) + '...';
+      }
+      if (inheritance) {
+        prefix = 'Inherited from ' + inheritance;
+      }
+      if (showContent) {
+        desc = (inheritance ? ':\n\n' : '') + desc;
+        return prefix + desc;
+      }
+      return prefix;
     },
 
     getSlug(page) {
