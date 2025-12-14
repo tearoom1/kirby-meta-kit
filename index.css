@@ -222,6 +222,7 @@
     height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
+    /*margin-left: -16px;*/
   }
 
   .k-meta-kit-status-dot-listed {

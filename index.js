@@ -731,6 +731,23 @@
       }
     },
     inject: ["siteSettings"],
+    data() {
+      return {
+        // SEO length ranges for different field types
+        seoRanges: {
+          title: { optimal: { min: 20, max: 60 }, warning: { min: 15, max: 75 } },
+          ogTitle: { optimal: { min: 20, max: 60 }, warning: { min: 15, max: 75 } },
+          description: { optimal: { min: 140, max: 160 }, warning: { min: 126, max: 176 } },
+          ogDescription: { optimal: { min: 150, max: 250 }, warning: { min: 135, max: 300 } }
+        },
+        // Status mappings
+        statusMappings: {
+          listed: { label: "Listed", dotClass: "k-meta-kit-status-dot-listed" },
+          unlisted: { label: "Unlisted", dotClass: "k-meta-kit-status-dot-unlisted" },
+          draft: { label: "Draft", dotClass: "k-meta-kit-status-dot-draft" }
+        }
+      };
+    },
     methods: {
       // Helper method to check if site name should be appended based on type and settings
       shouldAppendSiteName(type) {
@@ -743,37 +760,20 @@
       isPageSelected(pageId) {
         return this.selectedPages.includes(pageId);
       },
-      getFullTitleLength(page) {
+      // Unified title length calculator
+      getTitleLength(page, type = "meta") {
+        const isOg = type === "og";
         if (page.id === "site") {
-          if (page.hasMetaTitle) {
-            return page.metaTitleLength;
-          }
+          if (isOg && page.hasOgTitle) return page.ogTitleLength;
+          if (!isOg && page.hasMetaTitle) return page.metaTitleLength;
           return page.title ? page.title.length : 0;
         }
-        const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
+        const titleToUse = isOg ? page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title : page.hasMetaTitle ? page.metaTitle : page.title;
         if (!titleToUse) return 0;
-        if (this.shouldAppendSiteName("meta") && this.siteSettings.siteMetaTitle) {
+        if (this.shouldAppendSiteName(type) && this.siteSettings.siteMetaTitle) {
           const separator = this.siteSettings.titleSeparator || "|";
           const siteName = this.siteSettings.siteMetaTitle || "";
-          const fullTitle = `${titleToUse} ${separator} ${siteName}`;
-          return fullTitle.length;
-        }
-        return titleToUse.length;
-      },
-      getFullOgTitleLength(page) {
-        if (page.id === "site") {
-          if (page.hasOgTitle) {
-            return page.ogTitleLength;
-          }
-          return page.title ? page.title.length : 0;
-        }
-        const titleToUse = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
-        if (!titleToUse) return 0;
-        if (this.shouldAppendSiteName("og") && this.siteSettings.siteMetaTitle) {
-          const separator = this.siteSettings.titleSeparator || "|";
-          const siteName = this.siteSettings.siteMetaTitle || "";
-          const fullTitle = `${titleToUse} ${separator} ${siteName}`;
-          return fullTitle.length;
+          return `${titleToUse} ${separator} ${siteName}`.length;
         }
         return titleToUse.length;
       },
@@ -797,28 +797,20 @@
         if (page.id === "site") {
           return "";
         }
-        const fullLength = this.getFullTitleLength(page);
+        const fullLength = this.getTitleLength(page, "meta");
         return this.getStatusClass(fullLength, "title");
       },
       getTableOgTitleStatusClass(page) {
         if (page.id === "site") {
           return "";
         }
-        const fullLength = this.getFullOgTitleLength(page);
+        const fullLength = this.getTitleLength(page, "og");
         return this.getStatusClass(fullLength, "ogTitle");
       },
       getStatusClass(length, type) {
         if (!length || length === 0) return "";
-        let ranges;
-        if (type === "title") {
-          ranges = { optimal: { min: 20, max: 60 }, warning: { min: 15, max: 75 } };
-        } else if (type === "ogTitle") {
-          ranges = { optimal: { min: 20, max: 60 }, warning: { min: 15, max: 75 } };
-        } else if (type === "ogDescription") {
-          ranges = { optimal: { min: 150, max: 250 }, warning: { min: 135, max: 300 } };
-        } else {
-          ranges = { optimal: { min: 140, max: 160 }, warning: { min: 126, max: 176 } };
-        }
+        const ranges = this.seoRanges[type];
+        if (!ranges) return "";
         if (length >= ranges.optimal.min && length <= ranges.optimal.max) {
           return "";
         }
@@ -970,31 +962,18 @@ Articles: 4-8 words, ≤ 60 chars.
 Nesting: <= 2 levels.`;
       },
       getStatusLabel(page) {
+        var _a;
         if (!page.status) return "—";
-        const status = page.status;
-        if (status === "listed") return "Published";
-        if (status === "unlisted") return "Unlisted";
-        if (status === "draft") return "Draft";
-        if (status === "published") return "Published";
-        return status.charAt(0).toUpperCase() + status.slice(1);
+        return ((_a = this.statusMappings[page.status]) == null ? void 0 : _a.label) || page.status.charAt(0).toUpperCase() + page.status.slice(1);
       },
       getStatusDotClass(page) {
+        var _a;
         if (!page.status) return "";
-        const status = page.status;
-        if (status === "listed") {
-          return "k-meta-kit-status-dot-listed";
-        }
-        if (status === "unlisted") {
-          return "k-meta-kit-status-dot-unlisted";
-        }
-        if (status === "draft") {
-          return "k-meta-kit-status-dot-draft";
-        }
-        return "";
+        return ((_a = this.statusMappings[page.status]) == null ? void 0 : _a.dotClass) || "";
       },
       // Title display and inheritance
       getTitleDisplay(page) {
-        const length = this.getFullTitleLength(page);
+        const length = this.getTitleLength(page, "meta");
         if (!length) return "—";
         return this.isTitleInherited(page) ? `${length}` : length;
       },
@@ -1021,7 +1000,7 @@ Nesting: <= 2 levels.`;
       },
       // OG Title display and inheritance
       getOgTitleDisplay(page) {
-        const length = this.getFullOgTitleLength(page);
+        const length = this.getTitleLength(page, "og");
         if (!length) return "—";
         return this.isOgTitleInherited(page) ? `${length}` : length;
       },
@@ -1066,7 +1045,7 @@ Nesting: <= 2 levels.`;
     } } })]), _c("th", [_vm._v("#")]), _c("th", [_vm._v("Page")]), !_vm.showPreview ? _c("th", [_vm._v("Slug")]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Title" : "Title"))]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Description" : "Description"))]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Desc.")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Desc.")]) : _vm._e(), _c("th", [_vm._v("OG Img")]), !_vm.showPreview && _vm.previewMode === "meta" ? _c("th", [_vm._v("Robots")]) : _vm._e(), _c("th", [_vm._v("Actions")])])]), _c("tbody", _vm._l(_vm.pages, function(page, index) {
       return _c("tr", { key: page.id }, [_c("td", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isPageSelected(page.id) }, on: { "change": function($event) {
         return _vm.$emit("toggle-page", page.id);
-      } } })]), _c("td", [_vm._v(_vm._s(_vm.startIndex + index + 1))]), _c("td", [_c("div", { staticClass: "k-meta-kit-table-page" }, [_c("div", { staticClass: "k-meta-kit-page-title-wrapper" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("Tooltip", { attrs: { "content": _vm.getStatusLabel(page) } }, [_c("span", { class: ["k-meta-kit-status-dot", _vm.getStatusDotClass(page)] })])], 1), _c("span", { staticClass: "k-meta-kit-table-page-id" }, [_vm._v(_vm._s(page.template))])])]), !_vm.showPreview ? _c("td", [_c("Tooltip", { attrs: { "content": _vm.getSlugTooltip(page) } }, [_c("span", { class: [_vm.getSlugStatusClass(page), "k-meta-kit-table-tooltip"] }, [_vm._v(" " + _vm._s(page.id) + " ")])])], 1) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("Tooltip", { attrs: { "content": _vm.getTitleTooltip(page, false) } }, [_c("span", { class: [
+      } } })]), _c("td", [_vm._v(_vm._s(_vm.startIndex + index + 1))]), _c("td", [_c("div", { staticClass: "k-meta-kit-table-page" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("div", { staticClass: "k-meta-kit-page-title-wrapper" }, [_c("span", { staticClass: "k-meta-kit-table-page-id" }, [_vm._v(_vm._s(page.template))]), _c("span", { class: ["k-meta-kit-status-dot", _vm.getStatusDotClass(page)], attrs: { "title": _vm.getStatusLabel(page) } })])])]), !_vm.showPreview ? _c("td", [_c("Tooltip", { attrs: { "content": _vm.getSlugTooltip(page) } }, [_c("span", { class: [_vm.getSlugStatusClass(page), "k-meta-kit-table-tooltip"] }, [_vm._v(" " + _vm._s(page.id) + " ")])])], 1) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("Tooltip", { attrs: { "content": _vm.getTitleTooltip(page, false) } }, [_c("span", { class: [
         "k-meta-kit-table-preview-indicator",
         "k-meta-kit-table-tooltip",
         _vm.isTitleInherited(page) ? "k-meta-kit-inherited-preview" : ""

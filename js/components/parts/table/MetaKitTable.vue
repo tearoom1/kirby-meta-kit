@@ -36,14 +36,12 @@
         <td>{{ startIndex + index + 1 }}</td>
         <td>
           <div class="k-meta-kit-table-page">
-            <div class="k-meta-kit-page-title-wrapper">
               <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
-              <Tooltip :content="getStatusLabel(page)">
-                <span :class="['k-meta-kit-status-dot', getStatusDotClass(page)]"></span>
-              </Tooltip>
-            </div>
+          <div class="k-meta-kit-page-title-wrapper">
             <span class="k-meta-kit-table-page-id">{{ page.template }}</span>
-          </div>
+            <span :class="['k-meta-kit-status-dot', getStatusDotClass(page)]" :title="getStatusLabel(page)"></span>
+
+          </div></div>
         </td>
         <td v-if="!showPreview">
           <Tooltip :content="getSlugTooltip(page)">
@@ -282,6 +280,23 @@ export default {
     }
   },
   inject: ['siteSettings'],
+  data() {
+    return {
+      // SEO length ranges for different field types
+      seoRanges: {
+        title: { optimal: { min: 20, max: 60 }, warning: { min: 15, max: 75 } },
+        ogTitle: { optimal: { min: 20, max: 60 }, warning: { min: 15, max: 75 } },
+        description: { optimal: { min: 140, max: 160 }, warning: { min: 126, max: 176 } },
+        ogDescription: { optimal: { min: 150, max: 250 }, warning: { min: 135, max: 300 } }
+      },
+      // Status mappings
+      statusMappings: {
+        listed: { label: 'Listed', dotClass: 'k-meta-kit-status-dot-listed' },
+        unlisted: { label: 'Unlisted', dotClass: 'k-meta-kit-status-dot-unlisted' },
+        draft: { label: 'Draft', dotClass: 'k-meta-kit-status-dot-draft' }
+      }
+    };
+  },
   methods: {
     // Helper method to check if site name should be appended based on type and settings
     shouldAppendSiteName(type) {
@@ -303,44 +318,26 @@ export default {
       return this.selectedPages.includes(pageId);
     },
 
-    getFullTitleLength(page) {
+    // Unified title length calculator
+    getTitleLength(page, type = 'meta') {
+      const isOg = type === 'og';
+
       if (page.id === 'site') {
-        if (page.hasMetaTitle) {
-          return page.metaTitleLength;
-        }
+        if (isOg && page.hasOgTitle) return page.ogTitleLength;
+        if (!isOg && page.hasMetaTitle) return page.metaTitleLength;
         return page.title ? page.title.length : 0;
       }
 
-      const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
+      const titleToUse = isOg
+        ? (page.hasOgTitle ? page.ogTitle : (page.hasMetaTitle ? page.metaTitle : page.title))
+        : (page.hasMetaTitle ? page.metaTitle : page.title);
+
       if (!titleToUse) return 0;
 
-      if (this.shouldAppendSiteName('meta') && this.siteSettings.siteMetaTitle) {
+      if (this.shouldAppendSiteName(type) && this.siteSettings.siteMetaTitle) {
         const separator = this.siteSettings.titleSeparator || '|';
         const siteName = this.siteSettings.siteMetaTitle || '';
-        const fullTitle = `${titleToUse} ${separator} ${siteName}`;
-        return fullTitle.length;
-      }
-
-      return titleToUse.length;
-    },
-
-    getFullOgTitleLength(page) {
-      if (page.id === 'site') {
-        if (page.hasOgTitle) {
-          return page.ogTitleLength;
-        }
-        return page.title ? page.title.length : 0;
-      }
-
-      // todo make sure to go recursive to fetch meta title
-      const titleToUse = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
-      if (!titleToUse) return 0;
-
-      if (this.shouldAppendSiteName('og') && this.siteSettings.siteMetaTitle) {
-        const separator = this.siteSettings.titleSeparator || '|';
-        const siteName = this.siteSettings.siteMetaTitle || '';
-        const fullTitle = `${titleToUse} ${separator} ${siteName}`;
-        return fullTitle.length;
+        return `${titleToUse} ${separator} ${siteName}`.length;
       }
 
       return titleToUse.length;
@@ -371,7 +368,7 @@ export default {
         return '';
       }
 
-      const fullLength = this.getFullTitleLength(page);
+      const fullLength = this.getTitleLength(page, 'meta');
       return this.getStatusClass(fullLength, 'title');
     },
 
@@ -380,24 +377,15 @@ export default {
         return '';
       }
 
-      const fullLength = this.getFullOgTitleLength(page);
+      const fullLength = this.getTitleLength(page, 'og');
       return this.getStatusClass(fullLength, 'ogTitle');
     },
 
     getStatusClass(length, type) {
       if (!length || length === 0) return '';
 
-      let ranges;
-      if (type === 'title') {
-        ranges = {optimal: {min: 20, max: 60}, warning: {min: 15, max: 75}};
-      } else if (type === 'ogTitle') {
-        ranges = {optimal: {min: 20, max: 60}, warning: {min: 15, max: 75}};
-      } else if (type === 'ogDescription') {
-        ranges = {optimal: {min: 150, max: 250}, warning: {min: 135, max: 300}};
-      } else {
-        // description
-        ranges = {optimal: {min: 140, max: 160}, warning: {min: 126, max: 176}};
-      }
+      const ranges = this.seoRanges[type];
+      if (!ranges) return '';
 
       if (length >= ranges.optimal.min && length <= ranges.optimal.max) {
         return '';
@@ -580,39 +568,19 @@ export default {
     getStatusLabel(page) {
       if (!page.status) return '—';
 
-      const status = page.status;
-
-      // Map Kirby status to display labels
-      if (status === 'listed') return 'Published';
-      if (status === 'unlisted') return 'Unlisted';
-      if (status === 'draft') return 'Draft';
-      if (status === 'published') return 'Published';
-
-      return status.charAt(0).toUpperCase() + status.slice(1);
+      return this.statusMappings[page.status]?.label ||
+             page.status.charAt(0).toUpperCase() + page.status.slice(1);
     },
 
     getStatusDotClass(page) {
       if (!page.status) return '';
 
-      const status = page.status;
-
-      // Return appropriate CSS class based on status
-      if (status === 'listed') {
-        return 'k-meta-kit-status-dot-listed';
-      }
-      if (status === 'unlisted') {
-        return 'k-meta-kit-status-dot-unlisted';
-      }
-      if (status === 'draft') {
-        return 'k-meta-kit-status-dot-draft';
-      }
-
-      return '';
+      return this.statusMappings[page.status]?.dotClass || '';
     },
 
     // Title display and inheritance
     getTitleDisplay(page) {
-      const length = this.getFullTitleLength(page);
+      const length = this.getTitleLength(page, 'meta');
       if (!length) return '—';
       return this.isTitleInherited(page) ? `${length}` : length;
     },
@@ -647,7 +615,7 @@ export default {
 
     // OG Title display and inheritance
     getOgTitleDisplay(page) {
-      const length = this.getFullOgTitleLength(page);
+      const length = this.getTitleLength(page, 'og');
       if (!length) return '—';
       return this.isOgTitleInherited(page) ? `${length}` : length;
     },
