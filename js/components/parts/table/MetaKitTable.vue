@@ -670,12 +670,16 @@ export default {
 
       const issues = [];
       for (const check of checks) {
+        const optimal = `${check.optimal.min}-${check.optimal.max}`;
+        const warning = `${check.warning.min}-${check.warning.max}`;
+
         if (this.isOutsideRange(check.value, check.warning)) {
           issues.push({
             severity: 'error',
             key: check.key,
             value: check.value,
-            expected: `${check.optimal.min}-${check.optimal.max}`
+            optimal,
+            warning
           });
           continue;
         }
@@ -685,7 +689,8 @@ export default {
             severity: 'warning',
             key: check.key,
             value: check.value,
-            expected: `${check.optimal.min}-${check.optimal.max}`
+            optimal,
+            warning
           });
         }
       }
@@ -715,7 +720,12 @@ export default {
 
       const reasons = issues.length
         ? `\n\nWhy ${status}:\n` + issues
-          .map(i => `${i.severity.toUpperCase()}: ${i.key} = ${i.value} (expected ${i.expected})`)
+          .map(i => {
+            if (i.severity === 'warning') {
+              return `${i.key} ${i.value} is outside optimal (${i.optimal}), but within warning (${i.warning}).`;
+            }
+            return `${i.key} ${i.value} is outside warning (${i.warning}). Optimal is ${i.optimal}.`;
+          })
           .join('\n')
         : '';
 

@@ -94,7 +94,7 @@ export default {
   font-size: 0.8125rem;
   line-height: 1.4;
   text-align: left;
-  max-width: 300px;
+  max-width: 320px;
   word-wrap: break-word;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   pointer-events: none;
