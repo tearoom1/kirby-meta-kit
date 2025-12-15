@@ -117,7 +117,7 @@ When AI is disabled:
 
 The Meta Kit table validates the character lengths for title/description fields. You can configure the ranges globally and override them per template.
 
-The template key must match `page.template` as shown in the Meta Kit table (e.g. `default`, `home`, `news-article`, ...).
+The template key must match `page.template` as shown in the Meta Kit table (e.g. `default`, `home`, `article`, ...).
 
 **Example: base page like `/products` (template: `default`)**
 
