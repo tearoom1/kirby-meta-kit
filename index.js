@@ -895,6 +895,30 @@
         const match = statusClass.match(/k-meta-kit-status-(\w+)/);
         return match ? match[1] : "";
       },
+      isOutsideRange(value, range) {
+        if (!range) return false;
+        if (typeof range.min === "number" && value < range.min) return true;
+        if (typeof range.max === "number" && value > range.max) return true;
+        return false;
+      },
+      getLengthValidationReason(page, type, length) {
+        const ranges = this.getRangesForPageAndType(page, type);
+        if (!ranges || !length) return "";
+        const statusClass = this.getStatusClass(page, length, type);
+        if (!statusClass) return "";
+        const optimal = `${ranges.optimal.min}-${ranges.optimal.max}`;
+        const warning = `${ranges.warning.min}-${ranges.warning.max}`;
+        if (statusClass === "k-meta-kit-status-warning") {
+          return `
+
+Why warning:
+Length ${length} is outside optimal (${optimal}), but within warning (${warning}).`;
+        }
+        return `
+
+Why error:
+Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
+      },
       getTitleTooltip(page, showContent = true) {
         const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
         if (!titleToUse) {
@@ -922,16 +946,23 @@
           const siteName = this.siteSettings.siteMetaTitle || "";
           tooltip = `${titleToUse} ${separator} ${siteName}`;
         }
-        return this.tooltipText(tooltip, prefix, showContent);
+        const base = this.tooltipText(tooltip, prefix, showContent);
+        const length = this.getTitleLength(page, "meta");
+        return `${base}${this.getLengthValidationReason(page, "title", length)}`;
       },
       getDescriptionTooltip(page, showContent = true) {
+        let text = null;
+        let inheritance = false;
         if (page.hasMetaDescription && page.metaDescription) {
-          return this.tooltipText(page.metaDescription, false, showContent);
+          text = page.metaDescription;
         } else if (this.siteSettings.siteMetaDescription) {
-          return this.tooltipText(this.siteSettings.siteMetaDescription, "site", showContent);
-        } else {
-          return "No meta description";
+          text = this.siteSettings.siteMetaDescription;
+          inheritance = "site";
         }
+        if (!text) return "No meta description";
+        const base = this.tooltipText(text, inheritance, showContent);
+        const length = text.length;
+        return `${base}${this.getLengthValidationReason(page, "description", length)}`;
       },
       getOgTitleTooltip(page, showContent = true) {
         const titleToUse = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
@@ -963,18 +994,26 @@
           const siteName = this.siteSettings.siteMetaTitle || "";
           tooltip = `${titleToUse} ${separator} ${siteName}`;
         }
-        return this.tooltipText(tooltip, prefix, showContent);
+        const base = this.tooltipText(tooltip, prefix, showContent);
+        const length = this.getTitleLength(page, "og");
+        return `${base}${this.getLengthValidationReason(page, "ogTitle", length)}`;
       },
       getOgDescriptionTooltip(page, showContent = true) {
+        let text = null;
+        let inheritance = false;
         if (page.hasOgDescription && page.ogDescription) {
-          return this.tooltipText(page.ogDescription, false, showContent);
+          text = page.ogDescription;
         } else if (page.hasMetaDescription && page.metaDescription) {
-          return this.tooltipText(page.metaDescription, "meta description", showContent);
+          text = page.metaDescription;
+          inheritance = "meta description";
         } else if (this.siteSettings.siteMetaDescription) {
-          return this.tooltipText(this.siteSettings.siteMetaDescription, "site", showContent);
-        } else {
-          return "No OG description";
+          text = this.siteSettings.siteMetaDescription;
+          inheritance = "site";
         }
+        if (!text) return "No OG description";
+        const base = this.tooltipText(text, inheritance, showContent);
+        const length = text.length;
+        return `${base}${this.getLengthValidationReason(page, "ogDescription", length)}`;
       },
       tooltipText(desc, inheritance, showContent) {
         let prefix = "";
@@ -1031,7 +1070,6 @@
         };
       },
       getSlugStatusClass(page) {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
         if (page.id === "site") {
           return "";
         }
@@ -1041,17 +1079,45 @@
         const numSlashes = page.id.split("/").length - 1;
         const cfg = this.getSlugValidationConfigForPage(page);
         const avgWordLength = wordCount > 0 ? Math.ceil(length / wordCount) : length;
-        const isOutsideRange = (value, range) => {
-          if (!range) return false;
-          if (typeof range.min === "number" && value < range.min) return true;
-          if (typeof range.max === "number" && value > range.max) return true;
-          return false;
-        };
-        const isError = isOutsideRange(numSlashes, (_a = cfg.depth) == null ? void 0 : _a.warning) || isOutsideRange(wordCount, (_b = cfg.words) == null ? void 0 : _b.warning) || isOutsideRange(length, (_c = cfg.length) == null ? void 0 : _c.warning) || isOutsideRange(avgWordLength, (_d = cfg.wordLength) == null ? void 0 : _d.warning);
-        if (isError) return "k-meta-kit-status-error";
-        const isWarning = isOutsideRange(numSlashes, (_e = cfg.depth) == null ? void 0 : _e.optimal) || isOutsideRange(wordCount, (_f = cfg.words) == null ? void 0 : _f.optimal) || isOutsideRange(length, (_g = cfg.length) == null ? void 0 : _g.optimal) || isOutsideRange(avgWordLength, (_h = cfg.wordLength) == null ? void 0 : _h.optimal);
-        if (isWarning) return "k-meta-kit-status-warning";
+        const issues = this.getSlugValidationIssues({
+          numSlashes,
+          wordCount,
+          length,
+          avgWordLength,
+          cfg
+        });
+        if (issues.some((issue) => issue.severity === "error")) return "k-meta-kit-status-error";
+        if (issues.some((issue) => issue.severity === "warning")) return "k-meta-kit-status-warning";
         return "";
+      },
+      getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg }) {
+        var _a, _b, _c, _d, _e, _f;
+        const checks = [
+          { key: "Depth", value: numSlashes, optimal: (_a = cfg.depth) == null ? void 0 : _a.optimal, warning: (_b = cfg.depth) == null ? void 0 : _b.warning },
+          { key: "Words", value: wordCount, optimal: (_c = cfg.words) == null ? void 0 : _c.optimal, warning: (_d = cfg.words) == null ? void 0 : _d.warning },
+          { key: "Length", value: length, optimal: (_e = cfg.length) == null ? void 0 : _e.optimal, warning: (_f = cfg.length) == null ? void 0 : _f.warning }
+        ];
+        const issues = [];
+        for (const check of checks) {
+          if (this.isOutsideRange(check.value, check.warning)) {
+            issues.push({
+              severity: "error",
+              key: check.key,
+              value: check.value,
+              expected: `${check.optimal.min}-${check.optimal.max}`
+            });
+            continue;
+          }
+          if (this.isOutsideRange(check.value, check.optimal)) {
+            issues.push({
+              severity: "warning",
+              key: check.key,
+              value: check.value,
+              expected: `${check.optimal.min}-${check.optimal.max}`
+            });
+          }
+        }
+        return issues;
       },
       getSlugTooltip(page) {
         if (page.id === "site") {
@@ -1061,7 +1127,18 @@
         const wordCount = this.getSlugWordCount(slug);
         const length = slug.length;
         const cfg = this.getSlugValidationConfigForPage(page);
+        const numSlashes = page.id.split("/").length - 1;
+        const avgWordLength = wordCount > 0 ? Math.ceil(length / wordCount) : length;
+        const issues = this.getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg });
+        const statusClass = this.getSlugStatusClass(page);
+        const status = statusClass === "k-meta-kit-status-error" ? "error" : statusClass === "k-meta-kit-status-warning" ? "warning" : "ok";
+        const reasons = issues.length ? `
+
+Why ${status}:
+` + issues.map((i) => `${i.severity.toUpperCase()}: ${i.key} = ${i.value} (expected ${i.expected})`).join("\n") : "";
         return `Slug: ${slug}
+
+Depth: ${numSlashes}
 Words: ${wordCount}
 Length: ${length} characters
 
@@ -1070,7 +1147,7 @@ Ranges (optimal / warning):
 Depth: ${cfg.depth.optimal.min}-${cfg.depth.optimal.max} / ${cfg.depth.warning.min}-${cfg.depth.warning.max}
 Words: ${cfg.words.optimal.min}-${cfg.words.optimal.max} / ${cfg.words.warning.min}-${cfg.words.warning.max}
 Length: ${cfg.length.optimal.min}-${cfg.length.optimal.max} / ${cfg.length.warning.min}-${cfg.length.warning.max}
-Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / ${cfg.wordLength.warning.min}-${cfg.wordLength.warning.max}`;
+Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / ${cfg.wordLength.warning.min}-${cfg.wordLength.warning.max}${reasons}`;
       },
       getStatusLabel(page) {
         var _a;

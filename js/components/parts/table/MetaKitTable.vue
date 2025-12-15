@@ -428,6 +428,30 @@ export default {
       return match ? match[1] : '';
     },
 
+    isOutsideRange(value, range) {
+      if (!range) return false;
+      if (typeof range.min === 'number' && value < range.min) return true;
+      if (typeof range.max === 'number' && value > range.max) return true;
+      return false;
+    },
+
+    getLengthValidationReason(page, type, length) {
+      const ranges = this.getRangesForPageAndType(page, type);
+      if (!ranges || !length) return '';
+
+      const statusClass = this.getStatusClass(page, length, type);
+      if (!statusClass) return '';
+
+      const optimal = `${ranges.optimal.min}-${ranges.optimal.max}`;
+      const warning = `${ranges.warning.min}-${ranges.warning.max}`;
+
+      if (statusClass === 'k-meta-kit-status-warning') {
+        return `\n\nWhy warning:\nLength ${length} is outside optimal (${optimal}), but within warning (${warning}).`;
+      }
+
+      return `\n\nWhy error:\nLength ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
+    },
+
     getTitleTooltip(page, showContent = true) {
       const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
 
@@ -461,17 +485,26 @@ export default {
         tooltip = `${titleToUse} ${separator} ${siteName}`;
       }
 
-      return this.tooltipText(tooltip, prefix, showContent);
+      const base = this.tooltipText(tooltip, prefix, showContent);
+      const length = this.getTitleLength(page, 'meta');
+      return `${base}${this.getLengthValidationReason(page, 'title', length)}`;
     },
 
     getDescriptionTooltip(page, showContent = true) {
+      let text = null;
+      let inheritance = false;
       if (page.hasMetaDescription && page.metaDescription) {
-        return this.tooltipText(page.metaDescription, false, showContent);
+        text = page.metaDescription;
       } else if (this.siteSettings.siteMetaDescription) {
-        return this.tooltipText(this.siteSettings.siteMetaDescription, 'site', showContent);
-      } else {
-        return 'No meta description';
+        text = this.siteSettings.siteMetaDescription;
+        inheritance = 'site';
       }
+
+      if (!text) return 'No meta description';
+
+      const base = this.tooltipText(text, inheritance, showContent);
+      const length = text.length;
+      return `${base}${this.getLengthValidationReason(page, 'description', length)}`;
     },
 
     getOgTitleTooltip(page, showContent = true) {
@@ -510,19 +543,29 @@ export default {
         tooltip = `${titleToUse} ${separator} ${siteName}`;
       }
 
-      return this.tooltipText(tooltip, prefix, showContent);
+      const base = this.tooltipText(tooltip, prefix, showContent);
+      const length = this.getTitleLength(page, 'og');
+      return `${base}${this.getLengthValidationReason(page, 'ogTitle', length)}`;
     },
 
     getOgDescriptionTooltip(page, showContent = true) {
+      let text = null;
+      let inheritance = false;
       if (page.hasOgDescription && page.ogDescription) {
-        return this.tooltipText(page.ogDescription, false, showContent);
+        text = page.ogDescription;
       } else if (page.hasMetaDescription && page.metaDescription) {
-        return this.tooltipText(page.metaDescription, 'meta description', showContent);
+        text = page.metaDescription;
+        inheritance = 'meta description';
       } else if (this.siteSettings.siteMetaDescription) {
-        return this.tooltipText(this.siteSettings.siteMetaDescription, 'site', showContent);
-      } else {
-        return 'No OG description';
+        text = this.siteSettings.siteMetaDescription;
+        inheritance = 'site';
       }
+
+      if (!text) return 'No OG description';
+
+      const base = this.tooltipText(text, inheritance, showContent);
+      const length = text.length;
+      return `${base}${this.getLengthValidationReason(page, 'ogDescription', length)}`;
     },
 
     tooltipText(desc, inheritance, showContent) {
@@ -605,30 +648,49 @@ export default {
       const cfg = this.getSlugValidationConfigForPage(page);
       const avgWordLength = wordCount > 0 ? Math.ceil(length / wordCount) : length;
 
-      const isOutsideRange = (value, range) => {
-        if (!range) return false;
-        if (typeof range.min === 'number' && value < range.min) return true;
-        if (typeof range.max === 'number' && value > range.max) return true;
-        return false;
-      };
+      const issues = this.getSlugValidationIssues({
+        numSlashes,
+        wordCount,
+        length,
+        avgWordLength,
+        cfg
+      });
 
-      const isError =
-        isOutsideRange(numSlashes, cfg.depth?.warning) ||
-        isOutsideRange(wordCount, cfg.words?.warning) ||
-        isOutsideRange(length, cfg.length?.warning) ||
-        isOutsideRange(avgWordLength, cfg.wordLength?.warning);
-
-      if (isError) return 'k-meta-kit-status-error';
-
-      const isWarning =
-        isOutsideRange(numSlashes, cfg.depth?.optimal) ||
-        isOutsideRange(wordCount, cfg.words?.optimal) ||
-        isOutsideRange(length, cfg.length?.optimal) ||
-        isOutsideRange(avgWordLength, cfg.wordLength?.optimal);
-
-      if (isWarning) return 'k-meta-kit-status-warning';
-
+      if (issues.some(issue => issue.severity === 'error')) return 'k-meta-kit-status-error';
+      if (issues.some(issue => issue.severity === 'warning')) return 'k-meta-kit-status-warning';
       return '';
+    },
+
+    getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg }) {
+      const checks = [
+        { key: 'Depth', value: numSlashes, optimal: cfg.depth?.optimal, warning: cfg.depth?.warning },
+        { key: 'Words', value: wordCount, optimal: cfg.words?.optimal, warning: cfg.words?.warning },
+        { key: 'Length', value: length, optimal: cfg.length?.optimal, warning: cfg.length?.warning },
+      ];
+
+      const issues = [];
+      for (const check of checks) {
+        if (this.isOutsideRange(check.value, check.warning)) {
+          issues.push({
+            severity: 'error',
+            key: check.key,
+            value: check.value,
+            expected: `${check.optimal.min}-${check.optimal.max}`
+          });
+          continue;
+        }
+
+        if (this.isOutsideRange(check.value, check.optimal)) {
+          issues.push({
+            severity: 'warning',
+            key: check.key,
+            value: check.value,
+            expected: `${check.optimal.min}-${check.optimal.max}`
+          });
+        }
+      }
+
+      return issues;
     },
 
     getSlugTooltip(page) {
@@ -641,7 +703,23 @@ export default {
       const length = slug.length;
 
       const cfg = this.getSlugValidationConfigForPage(page);
-      return `Slug: ${slug}\nWords: ${wordCount}\nLength: ${length} characters\n\nRanges (optimal / warning):\n\nDepth: ${cfg.depth.optimal.min}-${cfg.depth.optimal.max} / ${cfg.depth.warning.min}-${cfg.depth.warning.max}\nWords: ${cfg.words.optimal.min}-${cfg.words.optimal.max} / ${cfg.words.warning.min}-${cfg.words.warning.max}\nLength: ${cfg.length.optimal.min}-${cfg.length.optimal.max} / ${cfg.length.warning.min}-${cfg.length.warning.max}\nAvg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / ${cfg.wordLength.warning.min}-${cfg.wordLength.warning.max}`;
+
+      const numSlashes = page.id.split('/').length - 1;
+      const avgWordLength = wordCount > 0 ? Math.ceil(length / wordCount) : length;
+      const issues = this.getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg });
+
+      const statusClass = this.getSlugStatusClass(page);
+      const status = statusClass === 'k-meta-kit-status-error'
+        ? 'error'
+        : (statusClass === 'k-meta-kit-status-warning' ? 'warning' : 'ok');
+
+      const reasons = issues.length
+        ? `\n\nWhy ${status}:\n` + issues
+          .map(i => `${i.severity.toUpperCase()}: ${i.key} = ${i.value} (expected ${i.expected})`)
+          .join('\n')
+        : '';
+
+      return `Slug: ${slug}\n\nDepth: ${numSlashes}\nWords: ${wordCount}\nLength: ${length} characters\n\nRanges (optimal / warning):\n\nDepth: ${cfg.depth.optimal.min}-${cfg.depth.optimal.max} / ${cfg.depth.warning.min}-${cfg.depth.warning.max}\nWords: ${cfg.words.optimal.min}-${cfg.words.optimal.max} / ${cfg.words.warning.min}-${cfg.words.warning.max}\nLength: ${cfg.length.optimal.min}-${cfg.length.optimal.max} / ${cfg.length.warning.min}-${cfg.length.warning.max}\nAvg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / ${cfg.wordLength.warning.min}-${cfg.wordLength.warning.max}${reasons}`;
     },
 
     getStatusLabel(page) {
