@@ -75,6 +75,8 @@ App::plugin(
                 ],
                 'templates' => []
             ],
+            'excludeTemplates' => [],
+            'excludeStatus' => [],
             'sitemap.include' => 'all',
             'sitemap.exclude' => ['error'],
             'autoGenerate' => false,

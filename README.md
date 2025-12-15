@@ -63,6 +63,8 @@ Core plugin settings, API credentials, and feature toggles:
     'sitemap.exclude' => ['error', 'drafts'],  // Page IDs to exclude from sitemap
     'schema.enabled' => true,                  // Enable/disable Schema.org JSON-LD
     'autoGenerate' => false,                   // Auto-generate descriptions on page save
+    'excludeTemplates' => [],                  // Page templates to exclude from table (e.g. ['error', 'assets'])
+    'excludeStatus' => [],                     // Page status to exclude from table (e.g. ['draft', 'unlisted'])
 ]
 ```
 

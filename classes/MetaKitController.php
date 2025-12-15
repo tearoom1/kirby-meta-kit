@@ -56,6 +56,15 @@ class MetaKitController
         $pages = $kirby->site()->index(true);
         $result = [];
 
+        $excludeTemplates = option('tearoom1.meta-kit.excludeTemplates', []);
+        $excludeStatus = option('tearoom1.meta-kit.excludeStatus', []);
+        if (!is_array($excludeTemplates)) {
+            $excludeTemplates = [$excludeTemplates];
+        }
+        if (!is_array($excludeStatus)) {
+            $excludeStatus = [$excludeStatus];
+        }
+
         // Get current language
         $language = $kirby->language();
         $languageCode = $language ? $language->code() : null;
@@ -112,6 +121,12 @@ class MetaKitController
         ];
 
         foreach ($pages as $page) {
+            $template = $page->intendedTemplate()->name();
+            $status = $page->status();
+            if (in_array($template, $excludeTemplates, true) || in_array($status, $excludeStatus, true)) {
+                continue;
+            }
+
             $seoData = self::getSeoData($page->metaKitSeo());
             $legacy = [];
             if ($page->metatitle()->isNotEmpty()) {
@@ -138,8 +153,8 @@ class MetaKitController
                 'title' => $page->title()->value(),
                 'url' => $page->url(),
                 'panelUrl' => $page->panel()->url(),
-                'template' => $page->intendedTemplate()->name(),
-                'status' => $page->status(),
+                'template' => $template,
+                'status' => $status,
                 'hasMetaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty(),
                 'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
                 'hasOgTitle' => $seoData && $seoData->ogTitle()->isNotEmpty(),
@@ -483,6 +498,15 @@ class MetaKitController
         $site = $kirby->site();
         $pages = $site->index();
 
+        $excludeTemplates = option('tearoom1.meta-kit.excludeTemplates', []);
+        $excludeStatus = option('tearoom1.meta-kit.excludeStatus', []);
+        if (!is_array($excludeTemplates)) {
+            $excludeTemplates = [$excludeTemplates];
+        }
+        if (!is_array($excludeStatus)) {
+            $excludeStatus = [$excludeStatus];
+        }
+
         // Filter by specific page IDs if provided
         $pageIds = explode(',', get('pageIds'));
         $includeSite = false;
@@ -569,6 +593,12 @@ class MetaKitController
         }
 
         foreach ($pages as $page) {
+            $template = $page->intendedTemplate()->name();
+            $status = $page->status();
+            if (in_array($template, $excludeTemplates, true) || in_array($status, $excludeStatus, true)) {
+                continue;
+            }
+
             $seoData = self::getSeoData($page->metaKitSeo());
             $legacy = [];
 
@@ -611,8 +641,8 @@ class MetaKitController
                 'title' => $page->title()->value(),
                 'url' => $page->url(),
                 'panelUrl' => $page->panel()->url(),
-                'template' => $page->intendedTemplate()->name(),
-                'status' => $page->status(),
+                'template' => $template,
+                'status' => $status,
                 'hasMetaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty(),
                 'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
                 'hasOgTitle' => $seoData && $seoData->ogTitle()->isNotEmpty(),
