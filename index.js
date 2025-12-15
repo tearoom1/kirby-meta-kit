@@ -883,7 +883,7 @@
         const ranges = this.getRangesForPageAndType(page, type);
         if (!ranges) return "";
         if (length >= ranges.optimal.min && length <= ranges.optimal.max) {
-          return "";
+          return "k-meta-kit-status-optimal";
         }
         if (length >= ranges.warning.min && length <= ranges.warning.max) {
           return "k-meta-kit-status-warning";
@@ -1088,7 +1088,7 @@ Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
         });
         if (issues.some((issue) => issue.severity === "error")) return "k-meta-kit-status-error";
         if (issues.some((issue) => issue.severity === "warning")) return "k-meta-kit-status-warning";
-        return "";
+        return "k-meta-kit-status-optimal";
       },
       getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg }) {
         var _a, _b, _c, _d, _e, _f;

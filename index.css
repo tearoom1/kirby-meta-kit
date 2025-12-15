@@ -348,6 +348,9 @@
     font-weight: 600;
   }
 
+  .k-meta-kit-status-optimal {
+  }
+
   .k-meta-kit-status-warning {
     color: var(--color-orange-600);
     font-weight: 600;

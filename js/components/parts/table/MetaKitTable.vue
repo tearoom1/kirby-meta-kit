@@ -412,7 +412,7 @@ export default {
       if (!ranges) return '';
 
       if (length >= ranges.optimal.min && length <= ranges.optimal.max) {
-        return '';
+        return 'k-meta-kit-status-optimal';
       }
 
       if (length >= ranges.warning.min && length <= ranges.warning.max) {
@@ -658,7 +658,7 @@ export default {
 
       if (issues.some(issue => issue.severity === 'error')) return 'k-meta-kit-status-error';
       if (issues.some(issue => issue.severity === 'warning')) return 'k-meta-kit-status-warning';
-      return '';
+      return 'k-meta-kit-status-optimal';
     },
 
     getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg }) {
