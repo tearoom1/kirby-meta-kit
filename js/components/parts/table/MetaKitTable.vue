@@ -412,7 +412,7 @@ export default {
       if (!ranges) return '';
 
       if (length >= ranges.optimal.min && length <= ranges.optimal.max) {
-        return 'k-meta-kit-status-success';
+        return '';
       }
 
       if (length >= ranges.warning.min && length <= ranges.warning.max) {
@@ -545,6 +545,7 @@ export default {
       if (page.id === 'site') {
         return '';
       }
+
       const parts = page.id.split('/');
       return parts[parts.length - 1];
     },
@@ -555,6 +556,42 @@ export default {
       return slug.split(/[-_]/).filter(word => word.length > 0).length;
     },
 
+    getSlugValidationConfigForPage(page) {
+      const defaults = this.validationSettings?.slug || {};
+      const templates = this.validationSettings?.templates || {};
+
+      const templateName = page?.template;
+      const templateConfig = templateName && templates[templateName] ? templates[templateName] : {};
+      const templateSlug = templateConfig?.slug || {};
+
+      const mergeRule = (key, fallbackOptimal, fallbackWarning) => {
+        const raw = { ...(defaults[key] || {}), ...(templateSlug[key] || {}) };
+
+        // New format
+        if (raw.optimal && raw.warning) {
+          return {
+            optimal: { ...fallbackOptimal, ...(raw.optimal || {}) },
+            warning: { ...fallbackWarning, ...(raw.warning || {}) }
+          };
+        }
+
+        // Backward compatibility: warningMax/errorMax
+        const warningMax = typeof raw.warningMax === 'number' ? raw.warningMax : fallbackWarning.max;
+        const errorMax = typeof raw.errorMax === 'number' ? raw.errorMax : fallbackWarning.max;
+        return {
+          optimal: { ...fallbackOptimal, max: warningMax },
+          warning: { ...fallbackWarning, max: errorMax }
+        };
+      };
+
+      return {
+        depth: mergeRule('depth', { min: 0, max: 2 }, { min: 0, max: 3 }),
+        words: mergeRule('words', { min: 1, max: 8 }, { min: 1, max: 10 }),
+        length: mergeRule('length', { min: 1, max: 60 }, { min: 1, max: 70 }),
+        wordLength: mergeRule('wordLength', { min: 1, max: 15 }, { min: 1, max: 20 })
+      };
+    },
+
     getSlugStatusClass(page) {
       if (page.id === 'site') {
         return '';
@@ -563,18 +600,35 @@ export default {
       const slug = this.getSlug(page);
       const wordCount = this.getSlugWordCount(slug);
       const length = slug.length;
-      const isCore = page.id.indexOf('/') === -1;
       const numSlashes = page.id.split('/').length - 1;
 
-      // Optimal: 1-5 keywords AND under 60 characters
-      // Warning: 6 keywords OR 60-70 characters
-      // Error: 7+ keywords OR over 70 characters
+      const cfg = this.getSlugValidationConfigForPage(page);
+      const avgWordLength = wordCount > 0 ? Math.ceil(length / wordCount) : length;
 
-      if (numSlashes <= 2 && wordCount <= 8 && length <= wordCount * 15 && length <= 60) {
-        return '';
-      }
+      const isOutsideRange = (value, range) => {
+        if (!range) return false;
+        if (typeof range.min === 'number' && value < range.min) return true;
+        if (typeof range.max === 'number' && value > range.max) return true;
+        return false;
+      };
 
-      return 'k-meta-kit-status-warning';
+      const isError =
+        isOutsideRange(numSlashes, cfg.depth?.warning) ||
+        isOutsideRange(wordCount, cfg.words?.warning) ||
+        isOutsideRange(length, cfg.length?.warning) ||
+        isOutsideRange(avgWordLength, cfg.wordLength?.warning);
+
+      if (isError) return 'k-meta-kit-status-error';
+
+      const isWarning =
+        isOutsideRange(numSlashes, cfg.depth?.optimal) ||
+        isOutsideRange(wordCount, cfg.words?.optimal) ||
+        isOutsideRange(length, cfg.length?.optimal) ||
+        isOutsideRange(avgWordLength, cfg.wordLength?.optimal);
+
+      if (isWarning) return 'k-meta-kit-status-warning';
+
+      return '';
     },
 
     getSlugTooltip(page) {
@@ -586,7 +640,8 @@ export default {
       const wordCount = this.getSlugWordCount(slug);
       const length = slug.length;
 
-      return `Slug: ${slug}\nWords: ${wordCount}\nLength: ${length} characters\n\nGeneral recommendation:\n\nCore pages: 1 word, ≤ 15 chars.\nArticles: 4-8 words, ≤ 60 chars. \nNesting: <= 2 levels.`;
+      const cfg = this.getSlugValidationConfigForPage(page);
+      return `Slug: ${slug}\nWords: ${wordCount}\nLength: ${length} characters\n\nRanges (optimal / warning):\n\nDepth: ${cfg.depth.optimal.min}-${cfg.depth.optimal.max} / ${cfg.depth.warning.min}-${cfg.depth.warning.max}\nWords: ${cfg.words.optimal.min}-${cfg.words.optimal.max} / ${cfg.words.warning.min}-${cfg.words.warning.max}\nLength: ${cfg.length.optimal.min}-${cfg.length.optimal.max} / ${cfg.length.warning.min}-${cfg.length.warning.max}\nAvg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / ${cfg.wordLength.warning.min}-${cfg.wordLength.warning.max}`;
     },
 
     getStatusLabel(page) {

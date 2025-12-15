@@ -119,7 +119,9 @@ The Meta Kit table validates the character lengths for title/description fields.
 
 The template key must match `page.template` as shown in the Meta Kit table (e.g. `default`, `home`, `article`, ...).
 
-**Example: base page like `/products` (template: `default`)**
+Slug validation uses the page `id` (path) and validates depth (slashes), word count (split by `-` and `_`), total length and average word length.
+
+**Example: base page like `/products` (template: `default`) + news article (template: `article`)**
 
 ```php
 'tearoom1.meta-kit' => [
@@ -130,29 +132,46 @@ The template key must match `page.template` as shown in the Meta Kit table (e.g.
       'description' => ['optimal' => ['min' => 140, 'max' => 160], 'warning' => ['min' => 126, 'max' => 176]],
       'ogDescription' => ['optimal' => ['min' => 150, 'max' => 250], 'warning' => ['min' => 135, 'max' => 300]],
     ],
+    'slug' => [
+      'depth' => [
+        'optimal' => ['min' => 0, 'max' => 2],
+        'warning' => ['min' => 0, 'max' => 3],
+      ],
+      'words' => [
+        'optimal' => ['min' => 1, 'max' => 8],
+        'warning' => ['min' => 1, 'max' => 10],
+      ],
+      'length' => [
+        'optimal' => ['min' => 1, 'max' => 60],
+        'warning' => ['min' => 1, 'max' => 70],
+      ],
+      'wordLength' => [
+        'optimal' => ['min' => 1, 'max' => 15],
+        'warning' => ['min' => 1, 'max' => 20],
+      ],
+    ],
     'templates' => [
       'default' => [
         'ranges' => [
           'title' => ['optimal' => ['min' => 40, 'max' => 60], 'warning' => ['min' => 30, 'max' => 75]],
-        ]
+        ],
       ],
-    ]
-  ],
-]
-```
-
-**Example: news article (template: `article`)**
-
-```php
-'tearoom1.meta-kit' => [
-  'validation' => [
-    'templates' => [
       'article' => [
         'ranges' => [
           'title' => ['optimal' => ['min' => 40, 'max' => 65], 'warning' => ['min' => 30, 'max' => 75]],
-        ]
+        ],
+        'slug' => [
+          'words' => [
+            'optimal' => ['min' => 5, 'max' => 8],
+            'warning' => ['min' => 3, 'max' => 10],
+          ],
+          'length' => [
+            'optimal' => ['min' => 20, 'max' => 60],
+            'warning' => ['min' => 15, 'max' => 75],
+          ],
+        ],
       ],
-    ]
+    ],
   ],
 ]
 ```
