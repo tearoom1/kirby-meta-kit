@@ -194,6 +194,8 @@ class MetaKitController
             ? $siteSeo->titleSeparator()->value()
             : '|';
 
+        $validationSettings = option('tearoom1.meta-kit.validation', []);
+
         return [
             'language' => $languageCode,
             'languages' => self::getLanguages(),
@@ -201,6 +203,7 @@ class MetaKitController
             'legacyMigration' => option('tearoom1.meta-kit.legacyMigration', false),
             'aiEnabled' => \TearoomOne\MetaKit::isAiEnabled(),
             'hasValidLicense' => \TearoomOne\MetaKit::hasValidLicense(),
+            'validationSettings' => $validationSettings,
             'siteSettings' => [
                 'appendSiteName' => $appendSiteName,
                 'appendSiteNameTo' => $appendSiteNameTo,

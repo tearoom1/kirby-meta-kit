@@ -778,6 +778,10 @@
       aiEnabled: {
         type: Boolean,
         default: true
+      },
+      validationSettings: {
+        type: Object,
+        default: () => ({})
       }
     },
     inject: ["siteSettings"],
@@ -799,6 +803,23 @@
       };
     },
     methods: {
+      getRangeConfigForPage(page) {
+        var _a, _b;
+        const defaults = ((_a = this.validationSettings) == null ? void 0 : _a.ranges) || {};
+        const templates = ((_b = this.validationSettings) == null ? void 0 : _b.templates) || {};
+        const templateName = page == null ? void 0 : page.template;
+        const templateConfig = templateName && templates[templateName] ? templates[templateName] : {};
+        const templateRanges = (templateConfig == null ? void 0 : templateConfig.ranges) || {};
+        return {
+          ...this.seoRanges,
+          ...defaults,
+          ...templateRanges
+        };
+      },
+      getRangesForPageAndType(page, type) {
+        const merged = this.getRangeConfigForPage(page);
+        return merged == null ? void 0 : merged[type];
+      },
       // Helper method to check if site name should be appended based on type and settings
       shouldAppendSiteName(type) {
         if (this.siteSettings.appendSiteNameTo === void 0 || this.siteSettings.appendSiteNameTo === null || this.siteSettings.appendSiteNameTo === "") {
@@ -848,21 +869,21 @@
           return "";
         }
         const fullLength = this.getTitleLength(page, "meta");
-        return this.getStatusClass(fullLength, "title");
+        return this.getStatusClass(page, fullLength, "title");
       },
       getTableOgTitleStatusClass(page) {
         if (page.id === "site") {
           return "";
         }
         const fullLength = this.getTitleLength(page, "og");
-        return this.getStatusClass(fullLength, "ogTitle");
+        return this.getStatusClass(page, fullLength, "ogTitle");
       },
-      getStatusClass(length, type) {
+      getStatusClass(page, length, type) {
         if (!length || length === 0) return "";
-        const ranges = this.seoRanges[type];
+        const ranges = this.getRangesForPageAndType(page, type);
         if (!ranges) return "";
         if (length >= ranges.optimal.min && length <= ranges.optimal.max) {
-          return "";
+          return "k-meta-kit-status-success";
         }
         if (length >= ranges.warning.min && length <= ranges.warning.max) {
           return "k-meta-kit-status-warning";
@@ -1046,7 +1067,7 @@ Nesting: <= 2 levels.`;
       },
       getDescriptionStatusClass(page) {
         const length = page.hasMetaDescription ? page.metaDescriptionLength : this.siteSettings.siteMetaDescription ? this.siteSettings.siteMetaDescription.length : 0;
-        return this.getStatusClass(length, "description");
+        return this.getStatusClass(page, length, "description");
       },
       // OG Title display and inheritance
       getOgTitleDisplay(page) {
@@ -1084,7 +1105,7 @@ Nesting: <= 2 levels.`;
         } else if (this.siteSettings.siteMetaDescription) {
           length = this.siteSettings.siteMetaDescription.length;
         }
-        return this.getStatusClass(length, "ogDescription");
+        return this.getStatusClass(page, length, "ogDescription");
       }
     }
   };
@@ -1631,6 +1652,10 @@ Nesting: <= 2 levels.`;
       pages: Array,
       language: String,
       languages: Array,
+      validationSettings: {
+        type: Object,
+        default: () => ({})
+      },
       legacyMigration: {
         type: Boolean,
         default: false
@@ -1659,6 +1684,7 @@ Nesting: <= 2 levels.`;
         isLoadingLegacy: false,
         isMigratingAll: false,
         pagesData: this.pages || [],
+        validationSettingsData: this.validationSettings || {},
         legacyPages: [],
         legacySummary: { total: 0, byLanguage: [] },
         legacyDetection: {
@@ -1839,6 +1865,9 @@ Nesting: <= 2 levels.`;
           const response = await this.$api.get("meta-kit/pages");
           if (response.status === "success") {
             this.pagesData = response.data;
+            if (response.validationSettings) {
+              this.validationSettingsData = response.validationSettings;
+            }
           }
         } catch (error) {
           window.panel.notification.error("Failed to refresh pages");
@@ -2176,7 +2205,7 @@ Nesting: <= 2 levels.`;
       }, "update:active-filters": function($event) {
         _vm.activeFilters = $event;
       }, "change-page-size": _vm.changePageSize } })];
-    }, proxy: true }]) }), _c("meta-kit-table", { attrs: { "pages": _vm.paginatedPages, "start-index": (_vm.currentPage - 1) * _vm.pageSize, "selected-pages": _vm.selectedPages, "is-all-selected": _vm.isAllCurrentPageSelected, "show-preview": _vm.showPreviewInTable, "preview-mode": _vm.previewMode, "ai-enabled": _vm.aiEnabled }, on: { "toggle-select-all": _vm.toggleSelectAllCurrentPage, "toggle-page": _vm.togglePageSelection, "edit-page": _vm.editSinglePageMetadata, "generate-description": _vm.generateDescription } }), _vm.totalPages > 1 ? _c("div", { staticClass: "k-meta-kit-pagination" }, [_c("k-button", { attrs: { "icon": "angle-left", "disabled": _vm.currentPage === 1 }, on: { "click": _vm.previousPage } }), _c("span", { staticClass: "k-meta-kit-pagination-info" }, [_vm._v(" Page " + _vm._s(_vm.currentPage) + " of " + _vm._s(_vm.totalPages) + " "), _vm.searchQuery ? [_vm._v("(" + _vm._s(_vm.filteredPages.length) + " of " + _vm._s(_vm.pagesData.length) + ")")] : [_vm._v("(" + _vm._s(_vm.pagesData.length) + " total)")]], 2), _c("k-button", { attrs: { "icon": "angle-right", "disabled": _vm.currentPage === _vm.totalPages }, on: { "click": _vm.nextPage } })], 1) : _vm._e(), _c("meta-kit-legacy-dialog", { ref: "legacyDialog", attrs: { "summary": _vm.legacySummary, "is-loading": _vm.isLoadingLegacy, "is-migrating": _vm.isMigratingAll }, on: { "load-summary": _vm.loadLegacySummary, "migrate": _vm.migrateAllLanguages } }), _c("meta-kit-bulk-edit-dialog", { ref: "allPagesDialog", attrs: { "api": _vm.$api, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled }, on: { "saved": _vm.refreshPages } }), _c("meta-kit-single-page-dialog", { ref: "singlePageDialog", attrs: { "api": _vm.$api, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled }, on: { "saved": _vm.refreshPages } }), _c("meta-kit-bulk-generate-dialog", { ref: "bulkGenerateDialog", attrs: { "selected-count": _vm.selectedPages.length }, on: { "generate": _vm.performBulkGeneration } }), _vm.isGeneratingAll || _vm.isLoadingPages || _vm.isMigratingAll ? _c("div", { staticClass: "k-meta-kit-loading-overlay" }, [_c("div", { staticClass: "k-meta-kit-loading-content" }, [_c("div", { staticClass: "k-meta-kit-loading-spinner" }, [_c("k-icon", { attrs: { "type": "loader" } })], 1), _c("div", { staticClass: "k-meta-kit-loading-text" }, [_vm.isGeneratingAll ? [_vm._v("Generating metadata with AI...")] : _vm.isLoadingPages ? [_vm._v("Refreshing pages...")] : _vm.isMigratingAll ? [_vm._v("Migrating legacy fields...")] : _vm._e()], 2), _vm.loadingProgress ? _c("div", { staticClass: "k-meta-kit-loading-progress" }, [_vm._v(" " + _vm._s(_vm.loadingProgress) + " ")]) : _vm._e()])]) : _vm._e()], 1);
+    }, proxy: true }]) }), _c("meta-kit-table", { attrs: { "pages": _vm.paginatedPages, "start-index": (_vm.currentPage - 1) * _vm.pageSize, "selected-pages": _vm.selectedPages, "is-all-selected": _vm.isAllCurrentPageSelected, "show-preview": _vm.showPreviewInTable, "preview-mode": _vm.previewMode, "ai-enabled": _vm.aiEnabled, "validation-settings": _vm.validationSettingsData }, on: { "toggle-select-all": _vm.toggleSelectAllCurrentPage, "toggle-page": _vm.togglePageSelection, "edit-page": _vm.editSinglePageMetadata, "generate-description": _vm.generateDescription } }), _vm.totalPages > 1 ? _c("div", { staticClass: "k-meta-kit-pagination" }, [_c("k-button", { attrs: { "icon": "angle-left", "disabled": _vm.currentPage === 1 }, on: { "click": _vm.previousPage } }), _c("span", { staticClass: "k-meta-kit-pagination-info" }, [_vm._v(" Page " + _vm._s(_vm.currentPage) + " of " + _vm._s(_vm.totalPages) + " "), _vm.searchQuery ? [_vm._v("(" + _vm._s(_vm.filteredPages.length) + " of " + _vm._s(_vm.pagesData.length) + ")")] : [_vm._v("(" + _vm._s(_vm.pagesData.length) + " total)")]], 2), _c("k-button", { attrs: { "icon": "angle-right", "disabled": _vm.currentPage === _vm.totalPages }, on: { "click": _vm.nextPage } })], 1) : _vm._e(), _c("meta-kit-legacy-dialog", { ref: "legacyDialog", attrs: { "summary": _vm.legacySummary, "is-loading": _vm.isLoadingLegacy, "is-migrating": _vm.isMigratingAll }, on: { "load-summary": _vm.loadLegacySummary, "migrate": _vm.migrateAllLanguages } }), _c("meta-kit-bulk-edit-dialog", { ref: "allPagesDialog", attrs: { "api": _vm.$api, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled }, on: { "saved": _vm.refreshPages } }), _c("meta-kit-single-page-dialog", { ref: "singlePageDialog", attrs: { "api": _vm.$api, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled }, on: { "saved": _vm.refreshPages } }), _c("meta-kit-bulk-generate-dialog", { ref: "bulkGenerateDialog", attrs: { "selected-count": _vm.selectedPages.length }, on: { "generate": _vm.performBulkGeneration } }), _vm.isGeneratingAll || _vm.isLoadingPages || _vm.isMigratingAll ? _c("div", { staticClass: "k-meta-kit-loading-overlay" }, [_c("div", { staticClass: "k-meta-kit-loading-content" }, [_c("div", { staticClass: "k-meta-kit-loading-spinner" }, [_c("k-icon", { attrs: { "type": "loader" } })], 1), _c("div", { staticClass: "k-meta-kit-loading-text" }, [_vm.isGeneratingAll ? [_vm._v("Generating metadata with AI...")] : _vm.isLoadingPages ? [_vm._v("Refreshing pages...")] : _vm.isMigratingAll ? [_vm._v("Migrating legacy fields...")] : _vm._e()], 2), _vm.loadingProgress ? _c("div", { staticClass: "k-meta-kit-loading-progress" }, [_vm._v(" " + _vm._s(_vm.loadingProgress) + " ")]) : _vm._e()])]) : _vm._e()], 1);
   };
   var _sfc_staticRenderFns = [];
   _sfc_render._withStripped = true;

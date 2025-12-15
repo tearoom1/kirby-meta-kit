@@ -113,6 +113,50 @@ When AI is disabled:
 'ai.prompt.description' => "Create a professional meta description (max 160 chars) in {language} for:\n\n{content}\n\nUse a formal tone. Focus on benefits and value. Include a call-to-action. Write ONLY the description:\n\n",
 ```
 
+### Validation ranges (Panel table)
+
+The Meta Kit table validates the character lengths for title/description fields. You can configure the ranges globally and override them per template.
+
+The template key must match `page.template` as shown in the Meta Kit table (e.g. `default`, `home`, `news-article`, ...).
+
+**Example: base page like `/products` (template: `default`)**
+
+```php
+'tearoom1.meta-kit' => [
+  'validation' => [
+    'ranges' => [
+      'title' => ['optimal' => ['min' => 20, 'max' => 60], 'warning' => ['min' => 15, 'max' => 75]],
+      'ogTitle' => ['optimal' => ['min' => 20, 'max' => 60], 'warning' => ['min' => 15, 'max' => 75]],
+      'description' => ['optimal' => ['min' => 140, 'max' => 160], 'warning' => ['min' => 126, 'max' => 176]],
+      'ogDescription' => ['optimal' => ['min' => 150, 'max' => 250], 'warning' => ['min' => 135, 'max' => 300]],
+    ],
+    'templates' => [
+      'default' => [
+        'ranges' => [
+          'title' => ['optimal' => ['min' => 40, 'max' => 60], 'warning' => ['min' => 30, 'max' => 75]],
+        ]
+      ],
+    ]
+  ],
+]
+```
+
+**Example: news article (template: `article`)**
+
+```php
+'tearoom1.meta-kit' => [
+  'validation' => [
+    'templates' => [
+      'article' => [
+        'ranges' => [
+          'title' => ['optimal' => ['min' => 40, 'max' => 65], 'warning' => ['min' => 30, 'max' => 75]],
+        ]
+      ],
+    ]
+  ],
+]
+```
+
 ### 2. Site Settings (Panel)
 
 Content-focused settings managed in **Site → SEO & Social Media**:

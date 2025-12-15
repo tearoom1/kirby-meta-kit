@@ -20,6 +20,7 @@ return function () {
                     "language" => $data["language"],
                     "languages" => $data["languages"],
                     "aiEnabled" => $data["aiEnabled"],
+                    "validationSettings" => $data["validationSettings"] ?? [],
                 ];
             },
         ],

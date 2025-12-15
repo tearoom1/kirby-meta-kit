@@ -48,6 +48,15 @@ App::plugin(
             'api.model' => '',
             'api.temperature' => 0.7,
             'maxDescriptionLength' => 160,
+            'validation' => [
+                'ranges' => [
+                    'title' => ['optimal' => ['min' => 20, 'max' => 60], 'warning' => ['min' => 15, 'max' => 75]],
+                    'ogTitle' => ['optimal' => ['min' => 20, 'max' => 60], 'warning' => ['min' => 15, 'max' => 75]],
+                    'description' => ['optimal' => ['min' => 140, 'max' => 160], 'warning' => ['min' => 126, 'max' => 176]],
+                    'ogDescription' => ['optimal' => ['min' => 150, 'max' => 250], 'warning' => ['min' => 135, 'max' => 300]],
+                ],
+                'templates' => []
+            ],
             'sitemap.include' => 'all',
             'sitemap.exclude' => ['error'],
             'autoGenerate' => false,

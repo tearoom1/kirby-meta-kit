@@ -78,6 +78,7 @@
       :show-preview="showPreviewInTable"
       :preview-mode="previewMode"
       :ai-enabled="aiEnabled"
+      :validation-settings="validationSettingsData"
       @toggle-select-all="toggleSelectAllCurrentPage"
       @toggle-page="togglePageSelection"
       @edit-page="editSinglePageMetadata"
@@ -196,6 +197,10 @@ export default {
     pages: Array,
     language: String,
     languages: Array,
+    validationSettings: {
+      type: Object,
+      default: () => ({})
+    },
     legacyMigration: {
       type: Boolean,
       default: false
@@ -224,6 +229,7 @@ export default {
       isLoadingLegacy: false,
       isMigratingAll: false,
       pagesData: this.pages || [],
+      validationSettingsData: this.validationSettings || {},
       legacyPages: [],
       legacySummary: {total: 0, byLanguage: []},
       legacyDetection: {
@@ -436,6 +442,9 @@ export default {
         const response = await this.$api.get('meta-kit/pages');
         if (response.status === 'success') {
           this.pagesData = response.data;
+          if (response.validationSettings) {
+            this.validationSettingsData = response.validationSettings;
+          }
         }
       } catch (error) {
         window.panel.notification.error('Failed to refresh pages');

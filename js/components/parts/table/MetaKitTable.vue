@@ -277,6 +277,10 @@ export default {
     aiEnabled: {
       type: Boolean,
       default: true
+    },
+    validationSettings: {
+      type: Object,
+      default: () => ({})
     }
   },
   inject: ['siteSettings'],
@@ -298,6 +302,26 @@ export default {
     };
   },
   methods: {
+    getRangeConfigForPage(page) {
+      const defaults = this.validationSettings?.ranges || {};
+      const templates = this.validationSettings?.templates || {};
+
+      const templateName = page?.template;
+      const templateConfig = templateName && templates[templateName] ? templates[templateName] : {};
+
+      const templateRanges = templateConfig?.ranges || {};
+      return {
+        ...this.seoRanges,
+        ...defaults,
+        ...templateRanges
+      };
+    },
+
+    getRangesForPageAndType(page, type) {
+      const merged = this.getRangeConfigForPage(page);
+      return merged?.[type];
+    },
+
     // Helper method to check if site name should be appended based on type and settings
     shouldAppendSiteName(type) {
       if (this.siteSettings.appendSiteNameTo === undefined ||
@@ -369,7 +393,7 @@ export default {
       }
 
       const fullLength = this.getTitleLength(page, 'meta');
-      return this.getStatusClass(fullLength, 'title');
+      return this.getStatusClass(page, fullLength, 'title');
     },
 
     getTableOgTitleStatusClass(page) {
@@ -378,17 +402,17 @@ export default {
       }
 
       const fullLength = this.getTitleLength(page, 'og');
-      return this.getStatusClass(fullLength, 'ogTitle');
+      return this.getStatusClass(page, fullLength, 'ogTitle');
     },
 
-    getStatusClass(length, type) {
+    getStatusClass(page, length, type) {
       if (!length || length === 0) return '';
 
-      const ranges = this.seoRanges[type];
+      const ranges = this.getRangesForPageAndType(page, type);
       if (!ranges) return '';
 
       if (length >= ranges.optimal.min && length <= ranges.optimal.max) {
-        return '';
+        return 'k-meta-kit-status-success';
       }
 
       if (length >= ranges.warning.min && length <= ranges.warning.max) {
@@ -610,7 +634,7 @@ export default {
       const length = page.hasMetaDescription
         ? page.metaDescriptionLength
         : (this.siteSettings.siteMetaDescription ? this.siteSettings.siteMetaDescription.length : 0);
-      return this.getStatusClass(length, 'description');
+      return this.getStatusClass(page, length, 'description');
     },
 
     // OG Title display and inheritance
@@ -654,7 +678,7 @@ export default {
       } else if (this.siteSettings.siteMetaDescription) {
         length = this.siteSettings.siteMetaDescription.length;
       }
-      return this.getStatusClass(length, 'ogDescription');
+      return this.getStatusClass(page, length, 'ogDescription');
     }
   }
 };
