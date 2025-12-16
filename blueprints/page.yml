@@ -21,17 +21,6 @@ columns:
     width: 1/3
     sticky: true
     sections:
-
-      aiGenerator:
-        type: fields
-        fields:
-          aiGenerator:
-            label: AI Description Generator
-            type: meta-kit-generator
-#            help: Generate descriptions automatically using AI
-            sourceField: text
-            targetField: metaDescription
-
       seoPreview:
         type: seo-preview
         label: SEO Preview

@@ -11,8 +11,26 @@
       <div v-if="titlePreview && shouldAppendSiteName" class="k-mk-title-preview">
         Preview: {{ titlePreview }}
       </div>
-      <k-text v-if="validation.message" class="k-mk-validation-message" :theme="validation.theme">
-        <span :class="'k-mk-validation-status-' + validation.status">{{ charCount }}</span> - {{ validation.message }}
+      <k-text :theme="validation.theme">
+        <span class="k-mk-validation-row">
+          <span>
+          <span v-if="validation.message" :theme="validation.theme"
+                class="k-mk-validation-message k-mk-validation-left">
+           <span :class="'k-mk-validation-status-' + validation.status">{{
+               charCount
+             }}</span> - {{ validation.message }}
+          </span>
+            </span>
+          <k-button
+            class="k-mk-ai-button"
+            size="xs"
+            icon="ai"
+            :text="isGenerating ? 'Generating…' : 'Generate with AI'"
+            :disabled="disabled || isGenerating"
+            @click="generateWithAi"
+          />
+        </span>
+        <span v-if="aiError" class="k-mk-ai-error">{{ aiError }}</span>
       </k-text>
     </template>
   </k-field>
@@ -36,6 +54,12 @@ export default {
       type: Object,
       default: () => ({})
     }
+  },
+  data() {
+    return {
+      isGenerating: false,
+      aiError: null
+    };
   },
   computed: {
     charCount() {
@@ -96,14 +120,14 @@ export default {
 
       const length = this.charCount;
       const ranges = this.validationSettings.ranges || {};
-      const optimal = ranges.optimal || { min: 20, max: 60 };
-      const warning = ranges.warning || { min: 15, max: 75 };
+      const optimal = ranges.optimal || {min: 20, max: 60};
+      const warning = ranges.warning || {min: 15, max: 75};
 
       if (length >= optimal.min && length <= optimal.max) {
         return {
           status: 'optimal',
           theme: 'positive',
-          message: `Optimal length (${optimal.min}-${optimal.max} characters recommended)`
+          message: `Optimal length. ${optimal.min}-${optimal.max} characters recommended. ${this.shouldAppendSiteName ? '(Includes length of site name)' : ''}`
         };
       }
 
@@ -112,13 +136,13 @@ export default {
           return {
             status: 'warning',
             theme: 'notice',
-            message: `Too short. Add ${optimal.min - length} more characters for optimal length (${optimal.min}-${optimal.max} recommended)`
+            message: `Too short. ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? '(Includes length of site name)' : ''}`
           };
         } else {
           return {
             status: 'warning',
             theme: 'notice',
-            message: `Slightly too long. Remove ${length - optimal.max} characters for optimal length (${optimal.min}-${optimal.max} recommended)`
+            message: `Slightly too long. ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? '(Includes length of site name)' : ''}`
           };
         }
       }
@@ -127,72 +151,131 @@ export default {
         return {
           status: 'error',
           theme: 'negative',
-          message: `Much too short! Add at least ${warning.min - length} more characters (${optimal.min}-${optimal.max} recommended)`
+          message: `Much too short! ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? '(Includes length of site name)' : ''}`
         };
       }
 
       return {
         status: 'error',
         theme: 'negative',
-        message: `Too long! Reduce by ${length - warning.max} characters (${optimal.min}-${optimal.max} recommended)`
+        message: `Too long! ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? '(Includes length of site name)' : ''}`
       };
     }
   },
   methods: {
     onInput(value) {
       this.$emit('input', value);
+    },
+    getLanguageCode() {
+      return (
+        this.$language?.code ||
+        window.panel?.view?.props?.language ||
+        window.panel?.language?.code ||
+        'en'
+      );
+    },
+    async generateWithAi() {
+      this.isGenerating = true;
+      this.aiError = null;
+
+      try {
+        const pageId = this.pageId || this.validationSettings.pageId;
+        const fieldName = this.fieldType === 'og' ? 'ogTitle' : 'metaTitle';
+        const language = this.getLanguageCode();
+
+        const response = await this.$api.post('meta-kit/generate-field', {
+          pageId,
+          fieldName,
+          language
+        });
+
+        if (response.status !== 'success' || !response.content) {
+          throw new Error(response.message || 'Failed to generate');
+        }
+
+        this.$emit('input', response.content);
+      } catch (e) {
+        this.aiError = e.message || 'AI generation failed';
+      } finally {
+        this.isGenerating = false;
+      }
     }
   }
 };
 </script>
 
 <style>
-.k-mk-title-field .k-mk-validation-message {
-  display: block;
-  padding: 0 1rem;
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-}
+.k-mk-title-field {
 
-.k-mk-title-preview {
-  display: none;
-  margin-top: 0.5rem;
-  padding: 0.2rem 1rem 0;
-  background: var(--color-background);
-  border-radius: var(--rounded-xs);
-  font-size: 0.875rem;
-  color: var(--color-text-dimmed);
-  font-style: italic;
-}
+  .k-mk-validation-message {
+    display: block;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+  }
 
-.k-mk-validation-status-optimal {
-  font-weight: 600;
-  color: var(--color-green-600);
-}
+  .k-mk-validation-row {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
 
-.k-mk-validation-status-warning {
-  font-weight: 600;
-  color: var(--color-orange-600);
-}
+  .k-mk-validation-left {
+    flex: 1;
+    min-width: 0;
+  }
 
-.k-mk-validation-status-error {
-  font-weight: 600;
-  color: var(--color-red-600);
-}
+  .k-mk-ai-button {
+    flex: none;
+    color: var(--color-green-600);
+  }
 
-.k-panel[data-color-scheme="dark"] .k-mk-title-preview {
-  background: var(--color-black);
-}
+  .k-mk-ai-error {
+    display: block;
+    margin-top: 0.25rem;
+  }
 
-.k-panel[data-color-scheme="dark"] .k-mk-validation-status-optimal {
-  color: var(--color-green-400);
-}
+  .k-mk-title-preview {
+    display: none;
+    margin-top: 0.5rem;
+    padding: 0.2rem 1rem 0;
+    background: var(--color-background);
+    border-radius: var(--rounded-xs);
+    font-size: 0.875rem;
+    color: var(--color-text-dimmed);
+    font-style: italic;
+  }
 
-.k-panel[data-color-scheme="dark"] .k-mk-validation-status-warning {
-  color: var(--color-orange-400);
-}
+  .k-mk-validation-status-optimal {
+    font-weight: 600;
+    color: var(--color-green-600);
+  }
 
-.k-panel[data-color-scheme="dark"] .k-mk-validation-status-error {
-  color: var(--color-red-400);
+  .k-mk-validation-status-warning {
+    font-weight: 600;
+    color: var(--color-orange-600);
+  }
+
+  .k-mk-validation-status-error {
+    font-weight: 600;
+    color: var(--color-red-600);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-mk-title-preview {
+    background: var(--color-black);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-mk-validation-status-optimal {
+    color: var(--color-green-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-mk-validation-status-warning {
+    color: var(--color-orange-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-mk-validation-status-error {
+    color: var(--color-red-400);
+  }
 }
 </style>

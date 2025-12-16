@@ -2430,6 +2430,12 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         default: () => ({})
       }
     },
+    data() {
+      return {
+        isGenerating: false,
+        aiError: null
+      };
+    },
     computed: {
       charCount() {
         if (!this.value) return 0;
@@ -2480,7 +2486,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
           return {
             status: "optimal",
             theme: "positive",
-            message: `Optimal length (${optimal.min}-${optimal.max} characters recommended)`
+            message: `Optimal length. ${optimal.min}-${optimal.max} characters recommended. ${this.shouldAppendSiteName ? "(Includes length of site name)" : ""}`
           };
         }
         if (length >= warning.min && length <= warning.max) {
@@ -2488,13 +2494,13 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
             return {
               status: "warning",
               theme: "notice",
-              message: `Too short. Add ${optimal.min - length} more characters for optimal length (${optimal.min}-${optimal.max} recommended)`
+              message: `Too short. ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? "(Includes length of site name)" : ""}`
             };
           } else {
             return {
               status: "warning",
               theme: "notice",
-              message: `Slightly too long. Remove ${length - optimal.max} characters for optimal length (${optimal.min}-${optimal.max} recommended)`
+              message: `Slightly too long. ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? "(Includes length of site name)" : ""}`
             };
           }
         }
@@ -2502,26 +2508,52 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
           return {
             status: "error",
             theme: "negative",
-            message: `Much too short! Add at least ${warning.min - length} more characters (${optimal.min}-${optimal.max} recommended)`
+            message: `Much too short! ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? "(Includes length of site name)" : ""}`
           };
         }
         return {
           status: "error",
           theme: "negative",
-          message: `Too long! Reduce by ${length - warning.max} characters (${optimal.min}-${optimal.max} recommended)`
+          message: `Too long! ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? "(Includes length of site name)" : ""}`
         };
       }
     },
     methods: {
       onInput(value) {
         this.$emit("input", value);
+      },
+      getLanguageCode() {
+        var _a, _b, _c, _d, _e, _f;
+        return ((_a = this.$language) == null ? void 0 : _a.code) || ((_d = (_c = (_b = window.panel) == null ? void 0 : _b.view) == null ? void 0 : _c.props) == null ? void 0 : _d.language) || ((_f = (_e = window.panel) == null ? void 0 : _e.language) == null ? void 0 : _f.code) || "en";
+      },
+      async generateWithAi() {
+        this.isGenerating = true;
+        this.aiError = null;
+        try {
+          const pageId = this.pageId || this.validationSettings.pageId;
+          const fieldName = this.fieldType === "og" ? "ogTitle" : "metaTitle";
+          const language = this.getLanguageCode();
+          const response = await this.$api.post("meta-kit/generate-field", {
+            pageId,
+            fieldName,
+            language
+          });
+          if (response.status !== "success" || !response.content) {
+            throw new Error(response.message || "Failed to generate");
+          }
+          this.$emit("input", response.content);
+        } catch (e) {
+          this.aiError = e.message || "AI generation failed";
+        } finally {
+          this.isGenerating = false;
+        }
       }
     }
   };
   var _sfc_render$2 = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("k-field", _vm._b({ staticClass: "k-mk-title-field", scopedSlots: _vm._u([{ key: "default", fn: function() {
-      return [_c("k-input", { attrs: { "value": _vm.value, "type": "text", "placeholder": _vm.placeholder, "disabled": _vm.disabled }, on: { "input": _vm.onInput } }), _vm.titlePreview && _vm.shouldAppendSiteName ? _c("div", { staticClass: "k-mk-title-preview" }, [_vm._v(" Preview: " + _vm._s(_vm.titlePreview) + " ")]) : _vm._e(), _vm.validation.message ? _c("k-text", { staticClass: "k-mk-validation-message", attrs: { "theme": _vm.validation.theme } }, [_c("span", { class: "k-mk-validation-status-" + _vm.validation.status }, [_vm._v(_vm._s(_vm.charCount))]), _vm._v(" - " + _vm._s(_vm.validation.message) + " ")]) : _vm._e()];
+      return [_c("k-input", { attrs: { "value": _vm.value, "type": "text", "placeholder": _vm.placeholder, "disabled": _vm.disabled }, on: { "input": _vm.onInput } }), _vm.titlePreview && _vm.shouldAppendSiteName ? _c("div", { staticClass: "k-mk-title-preview" }, [_vm._v(" Preview: " + _vm._s(_vm.titlePreview) + " ")]) : _vm._e(), _c("k-text", { attrs: { "theme": _vm.validation.theme } }, [_c("span", { staticClass: "k-mk-validation-row" }, [_c("span", [_vm.validation.message ? _c("span", { staticClass: "k-mk-validation-message k-mk-validation-left", attrs: { "theme": _vm.validation.theme } }, [_c("span", { class: "k-mk-validation-status-" + _vm.validation.status }, [_vm._v(_vm._s(_vm.charCount))]), _vm._v(" - " + _vm._s(_vm.validation.message) + " ")]) : _vm._e()]), _c("k-button", { staticClass: "k-mk-ai-button", attrs: { "size": "xs", "icon": "ai", "text": _vm.isGenerating ? "Generating…" : "Generate with AI", "disabled": _vm.disabled || _vm.isGenerating }, on: { "click": _vm.generateWithAi } })], 1), _vm.aiError ? _c("span", { staticClass: "k-mk-ai-error" }, [_vm._v(_vm._s(_vm.aiError))]) : _vm._e()])];
     }, proxy: true }]) }, "k-field", _vm.$props, false));
   };
   var _sfc_staticRenderFns$2 = [];
@@ -2541,6 +2573,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         type: String,
         default: "meta"
       },
+      pageId: String,
       maxlength: Number,
       disabled: Boolean,
       label: String,
@@ -2550,6 +2583,12 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         type: Object,
         default: () => ({})
       }
+    },
+    data() {
+      return {
+        isGenerating: false,
+        aiError: null
+      };
     },
     computed: {
       charCount() {
@@ -2606,13 +2645,39 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
     methods: {
       onInput(value) {
         this.$emit("input", value);
+      },
+      getLanguageCode() {
+        var _a, _b, _c, _d, _e, _f;
+        return ((_a = this.$language) == null ? void 0 : _a.code) || ((_d = (_c = (_b = window.panel) == null ? void 0 : _b.view) == null ? void 0 : _c.props) == null ? void 0 : _d.language) || ((_f = (_e = window.panel) == null ? void 0 : _e.language) == null ? void 0 : _f.code) || "en";
+      },
+      async generateWithAi() {
+        this.isGenerating = true;
+        this.aiError = null;
+        try {
+          const pageId = this.pageId || this.validationSettings.pageId;
+          const fieldName = this.fieldType === "og" ? "ogDescription" : "metaDescription";
+          const language = this.getLanguageCode();
+          const response = await this.$api.post("meta-kit/generate-field", {
+            pageId,
+            fieldName,
+            language
+          });
+          if (response.status !== "success" || !response.content) {
+            throw new Error(response.message || "Failed to generate");
+          }
+          this.$emit("input", response.content);
+        } catch (e) {
+          this.aiError = e.message || "AI generation failed";
+        } finally {
+          this.isGenerating = false;
+        }
       }
     }
   };
   var _sfc_render$1 = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("k-field", _vm._b({ staticClass: "k-mk-description-field", scopedSlots: _vm._u([{ key: "default", fn: function() {
-      return [_c("k-input", { staticClass: "k-mk-description-textarea", attrs: { "type": "textarea", "value": _vm.value, "placeholder": _vm.placeholder, "disabled": _vm.disabled, "buttons": false, "maxlength": _vm.maxlength, "counter": false }, on: { "input": _vm.onInput } }), _vm.validation.message ? _c("k-text", { staticClass: "k-mk-validation-message", attrs: { "theme": _vm.validation.theme } }, [_c("span", { class: "k-mk-validation-status-" + _vm.validation.status }, [_vm._v(_vm._s(_vm.charCount))]), _vm._v(" - " + _vm._s(_vm.validation.message) + " ")]) : _vm._e()];
+      return [_c("k-input", { staticClass: "k-mk-description-textarea", attrs: { "type": "textarea", "value": _vm.value, "placeholder": _vm.placeholder, "disabled": _vm.disabled, "buttons": false, "maxlength": _vm.maxlength, "counter": false }, on: { "input": _vm.onInput } }), _c("k-text", [_c("span", { staticClass: "k-mk-validation-row" }, [_c("span", [_vm.validation.message ? _c("span", { staticClass: "k-mk-validation-message k-mk-validation-left", attrs: { "theme": _vm.validation.theme } }, [_c("span", { class: "k-mk-validation-status-" + _vm.validation.status }, [_vm._v(_vm._s(_vm.charCount))]), _vm._v(" - " + _vm._s(_vm.validation.message) + " ")]) : _vm._e()]), _c("k-button", { staticClass: "k-mk-ai-button", attrs: { "size": "xs", "icon": "ai", "text": _vm.isGenerating ? "Generating…" : "Generate with AI", "disabled": _vm.disabled || _vm.isGenerating }, on: { "click": _vm.generateWithAi } })], 1), _vm.aiError ? _c("span", { staticClass: "k-mk-ai-error" }, [_vm._v(_vm._s(_vm.aiError))]) : _vm._e()])];
     }, proxy: true }]) }, "k-field", _vm.$props, false));
   };
   var _sfc_staticRenderFns$1 = [];
@@ -2784,254 +2849,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
     fields: {
       "mk-title": MkTitle,
       "mk-description": MkDescription,
-      "mk-slug-info": MkSlugInfo,
-      "meta-kit-generator": {
-        props: {
-          label: String,
-          help: String,
-          sourceField: {
-            type: String,
-            default: "text"
-          },
-          targetField: {
-            type: String,
-            default: "metaDescription"
-          }
-        },
-        data() {
-          return {
-            loading: false,
-            error: null,
-            generatedText: null,
-            aiEnabled: true
-          };
-        },
-        async created() {
-          try {
-            const response = await this.$api.get("meta-kit/pages");
-            this.aiEnabled = response.aiEnabled ?? true;
-          } catch (error) {
-            console.warn("Could not check AI status:", error);
-            this.aiEnabled = false;
-          }
-        },
-        template: `
-        <k-field v-bind="$props" class="k-meta-kit-generator-field">
-          <div v-if="!aiEnabled" class="k-meta-kit-generator__disabled">
-            <k-box theme="info">
-              <k-text>AI generation is disabled.</k-text>
-            </k-box>
-          </div>
-          <template v-else>
-            <k-button
-              icon="ai"
-              :text="buttonText"
-              @click="generate"
-              :disabled="loading"
-              theme="positive"
-            />
-            <div v-if="loading" class="k-meta-kit-generator__status">
-              <k-loader />
-              <span>Generating description...</span>
-            </div>
-            <div v-if="error" class="k-meta-kit-generator__error">
-              {{ error }}
-            </div>
-            <div v-if="generatedText" class="k-meta-kit-generator__result">
-              <strong>✓ Description generated and filled</strong>
-<!--            <div class="k-meta-kit-generator__text">{{ generatedText }}</div>-->
-<!--            <small>The description has been added to both Meta Description and OG Description fields below. Scroll down to review and save.</small>-->
-            </div>
-          </template>
-        </k-field>
-      `,
-        computed: {
-          buttonText() {
-            return this.loading ? "Generating..." : "Generate with AI";
-          }
-        },
-        methods: {
-          extractTextFromValue(value, depth = 0) {
-            if (depth > 5) return "";
-            if (value == null) return "";
-            if (typeof value === "string") {
-              const skipValues = ["none", "full", "default", "1/1", "1/2", "1/3", "2/3", "1/4", "3/4"];
-              if (skipValues.includes(value.trim().toLowerCase())) {
-                return "";
-              }
-              return value.trim().length > 2 ? value : "";
-            }
-            if (Array.isArray(value)) {
-              return value.map((item) => this.extractTextFromValue(item, depth + 1)).join(" ");
-            }
-            if (typeof value === "object") {
-              let texts = [];
-              const textProps = ["text", "content", "heading", "headline", "subheadline", "title", "description", "caption", "body"];
-              for (const prop of textProps) {
-                if (value[prop]) {
-                  texts.push(this.extractTextFromValue(value[prop], depth + 1));
-                }
-              }
-              if (texts.length === 0) {
-                for (const [key, val] of Object.entries(value)) {
-                  if (key.startsWith("_") || key.startsWith("$") || key === "__ob__" || key === "id" || key === "type" || key === "attrs" || key === "width" || key === "location") {
-                    continue;
-                  }
-                  texts.push(this.extractTextFromValue(val, depth + 1));
-                }
-              }
-              return texts.filter((t) => t && t.trim()).join(" ");
-            }
-            return "";
-          },
-          extractTextFromBlocks(blocks) {
-            if (!blocks) return "";
-            try {
-              if (typeof blocks === "string") {
-                try {
-                  blocks = JSON.parse(blocks);
-                } catch {
-                  return blocks.trim().length > 10 ? blocks : "";
-                }
-              }
-              if (Array.isArray(blocks)) {
-                let texts = [];
-                for (const layout of blocks) {
-                  if (layout.columns && Array.isArray(layout.columns)) {
-                    for (const column of layout.columns) {
-                      if (column.blocks && Array.isArray(column.blocks)) {
-                        for (const block of column.blocks) {
-                          if (block.content) {
-                            const blockText = this.extractTextFromValue(block.content);
-                            if (blockText && blockText.length > 3) {
-                              texts.push(blockText);
-                            }
-                          }
-                        }
-                      }
-                    }
-                  } else {
-                    const text = this.extractTextFromValue(layout);
-                    if (text && text.length > 3) {
-                      texts.push(text);
-                    }
-                  }
-                }
-                return texts.join(" ");
-              }
-              return this.extractTextFromValue(blocks);
-            } catch (e) {
-              console.warn("Could not parse blocks:", e);
-              return "";
-            }
-          },
-          extractAllText(values) {
-            let texts = [];
-            const skipFields = ["title", "slug", "template", "ogimage"];
-            if (values.title && typeof values.title === "string") {
-              texts.push(values.title);
-            }
-            for (const [key, value] of Object.entries(values)) {
-              if (skipFields.includes(key)) {
-                continue;
-              }
-              if (!value || typeof value === "string" && !value.trim()) {
-                continue;
-              }
-              const extracted = this.extractTextFromBlocks(value);
-              if (extracted && extracted.trim().length > 0) {
-                texts.push(extracted);
-              }
-            }
-            const result = texts.filter((t) => t && t.trim()).join(" ").replace(/\s+/g, " ").trim();
-            return result;
-          },
-          async generate() {
-            var _a, _b, _c, _d, _e, _f;
-            this.loading = true;
-            this.error = null;
-            this.success = false;
-            try {
-              let parent = this.$parent;
-              while (parent && !parent.value) {
-                parent = parent.$parent;
-              }
-              if (!parent || !parent.value) {
-                throw new Error("Cannot access form values");
-              }
-              const allText = this.extractAllText(parent.value);
-              if (!allText || allText.trim() === "") {
-                const availableFields = Object.keys(parent.value).join(", ");
-                throw new Error(`No content available to generate description. Available fields: ${availableFields}`);
-              }
-              let language = "en";
-              if ((_c = (_b = (_a = window.panel) == null ? void 0 : _a.view) == null ? void 0 : _b.props) == null ? void 0 : _c.language) {
-                language = window.panel.view.props.language;
-              } else if ((_e = (_d = window.panel) == null ? void 0 : _d.language) == null ? void 0 : _e.code) {
-                language = window.panel.language.code;
-              } else if ((_f = this.$language) == null ? void 0 : _f.code) {
-                language = this.$language.code;
-              }
-              const response = await this.$api.post("meta-kit/generate", {
-                text: allText,
-                language
-              });
-              if (response.status === "success" && response.description) {
-                this.generatedText = response.description;
-                if (parent && parent.value) {
-                  if (!parent.value.metakitseo || !Array.isArray(parent.value.metakitseo)) {
-                    this.$set(parent.value, "seo", [{
-                      id: "seo-metadata",
-                      type: "mk-page-seo",
-                      isHidden: false,
-                      content: {}
-                    }]);
-                  }
-                  if (parent.value.metakitseo.length === 0) {
-                    parent.value.metakitseo.push({
-                      id: "seo-metadata",
-                      type: "mk-page-seo",
-                      isHidden: false,
-                      content: {}
-                    });
-                  }
-                  const seoBlock = parent.value.metakitseo[0];
-                  if (!seoBlock.content) {
-                    this.$set(seoBlock, "content", {});
-                  }
-                  this.$set(seoBlock.content, "metadescription", response.description);
-                  this.$set(seoBlock.content, "ogdescription", response.description);
-                  if (parent.update) {
-                    parent.update({
-                      seo: parent.value.metakitseo
-                    });
-                  }
-                  setTimeout(() => {
-                    const event = new CustomEvent("seo-field-updated", {
-                      bubbles: true,
-                      detail: {
-                        field: "metadescription",
-                        value: response.description,
-                        seoData: seoBlock.content,
-                        pageTitle: parent.value.title
-                      }
-                    });
-                    document.dispatchEvent(event);
-                  }, 100);
-                }
-              } else {
-                console.error("API returned error:", response);
-                throw new Error(response.message || "Failed to generate description");
-              }
-            } catch (error) {
-              this.error = error.message || "An error occurred while generating the description";
-              console.error("SEO AI Generator Error:", error);
-            } finally {
-              this.loading = false;
-            }
-          }
-        }
-      }
+      "mk-slug-info": MkSlugInfo
     }
   });
 })();

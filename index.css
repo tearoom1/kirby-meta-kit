@@ -1709,76 +1709,116 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.k-mk-title-field .k-mk-validation-message {
-  display: block;
-  padding: 0 1rem;
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
+.k-mk-title-field {
+.k-mk-validation-message {
+    display: block;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+}
+.k-mk-validation-row {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+.k-mk-validation-left {
+    flex: 1;
+    min-width: 0;
+}
+.k-mk-ai-button {
+    flex: none;
+    color: var(--color-green-600);
+}
+.k-mk-ai-error {
+    display: block;
+    margin-top: 0.25rem;
 }
 .k-mk-title-preview {
-  display: none;
-  margin-top: 0.5rem;
-  padding: 0.2rem 1rem 0;
-  background: var(--color-background);
-  border-radius: var(--rounded-xs);
-  font-size: 0.875rem;
-  color: var(--color-text-dimmed);
-  font-style: italic;
+    display: none;
+    margin-top: 0.5rem;
+    padding: 0.2rem 1rem 0;
+    background: var(--color-background);
+    border-radius: var(--rounded-xs);
+    font-size: 0.875rem;
+    color: var(--color-text-dimmed);
+    font-style: italic;
 }
 .k-mk-validation-status-optimal {
-  font-weight: 600;
-  color: var(--color-green-600);
+    font-weight: 600;
+    color: var(--color-green-600);
 }
 .k-mk-validation-status-warning {
-  font-weight: 600;
-  color: var(--color-orange-600);
+    font-weight: 600;
+    color: var(--color-orange-600);
 }
 .k-mk-validation-status-error {
-  font-weight: 600;
-  color: var(--color-red-600);
+    font-weight: 600;
+    color: var(--color-red-600);
 }
 .k-panel[data-color-scheme="dark"] .k-mk-title-preview {
-  background: var(--color-black);
+    background: var(--color-black);
 }
 .k-panel[data-color-scheme="dark"] .k-mk-validation-status-optimal {
-  color: var(--color-green-400);
+    color: var(--color-green-400);
 }
 .k-panel[data-color-scheme="dark"] .k-mk-validation-status-warning {
-  color: var(--color-orange-400);
+    color: var(--color-orange-400);
 }
 .k-panel[data-color-scheme="dark"] .k-mk-validation-status-error {
-  color: var(--color-red-400);
+    color: var(--color-red-400);
+}
 }
 
-.k-mk-description-field .k-mk-description-textarea {
-  display: block;
+.k-mk-description-field {
+.k-mk-description-textarea {
+    display: block;
 }
 .k-mk-description-field .k-mk-validation-message {
-  display: block;
-  margin-top: 0.5rem;
-  padding: 0 1rem;
-  font-size: 0.875rem;
+    display: block;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+}
+.k-mk-validation-row {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+.k-mk-validation-left {
+    flex: 1;
+    min-width: 0;
+}
+.k-mk-ai-button {
+    flex: none;
+    color: var(--color-green-600);
+}
+.k-mk-ai-error {
+    display: block;
+    margin-top: 0.25rem;
 }
 .k-mk-validation-status-optimal {
-  font-weight: 600;
-  color: var(--color-green-600);
+    font-weight: 600;
+    color: var(--color-green-600);
 }
 .k-mk-validation-status-warning {
-  font-weight: 600;
-  color: var(--color-orange-600);
+    font-weight: 600;
+    color: var(--color-orange-600);
 }
 .k-mk-validation-status-error {
-  font-weight: 600;
-  color: var(--color-red-600);
+    font-weight: 600;
+    color: var(--color-red-600);
 }
 .k-panel[data-color-scheme="dark"] .k-mk-validation-status-optimal {
-  color: var(--color-green-400);
+    color: var(--color-green-400);
 }
 .k-panel[data-color-scheme="dark"] .k-mk-validation-status-warning {
-  color: var(--color-orange-400);
+    color: var(--color-orange-400);
 }
 .k-panel[data-color-scheme="dark"] .k-mk-validation-status-error {
-  color: var(--color-red-400);
+    color: var(--color-red-400);
+}
 }
 
 .k-mk-slug-info-field .k-mk-slug-validation-box {

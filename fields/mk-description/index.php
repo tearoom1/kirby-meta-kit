@@ -11,6 +11,9 @@ return [
         'fieldType' => function ($fieldType = 'meta') {
             return $fieldType;
         },
+        'pageId' => function ($pageId = null) {
+            return $pageId;
+        },
         'maxlength' => function ($maxlength = null) {
             return $maxlength;
         }
@@ -45,6 +48,7 @@ return [
             return [
                 'ranges' => $this->validationRanges(),
                 'fieldType' => $this->fieldType(),
+                'pageId' => $this->pageId() ?? $this->model()->id(),
                 'template' => $this->model()->intendedTemplate()->name()
             ];
         }
