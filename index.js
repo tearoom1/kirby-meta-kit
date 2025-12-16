@@ -12,7 +12,7 @@
       options
     };
   }
-  const _sfc_main$c = {
+  const _sfc_main$f = {
     props: {
       label: String,
       parent: String,
@@ -253,20 +253,20 @@
       }
     }
   };
-  var _sfc_render$c = function render() {
+  var _sfc_render$f = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("section", { staticClass: "k-seo-preview-section" }, [_c("header", { staticClass: "k-section-header" }, [_c("h2", { staticClass: "k-headline" }, [_vm._v(_vm._s(_vm.label || "SEO Preview"))])]), _vm.meta ? _c("div", { staticClass: "k-seo-previews" }, [_c("div", { staticClass: "k-seo-preview k-seo-preview--google" }, [_c("h3", { staticClass: "k-seo-preview__title" }, [_vm._v("Google Search Preview")]), _c("div", { staticClass: "k-seo-preview__content" }, [_c("div", { staticClass: "k-google-preview" }, [_c("cite", { staticClass: "k-google-preview__url" }, [_vm._v(_vm._s(_vm.displayUrl(_vm.meta.url)))]), _c("h3", { staticClass: "k-google-preview__title" }, [_vm._v(_vm._s(_vm.meta.title || "Page Title"))]), _c("p", { staticClass: "k-google-preview__description" }, [_vm._v(_vm._s(_vm.meta.description || "No description available"))])])])]), _c("div", { staticClass: "k-seo-preview k-seo-preview--twitter" }, [_c("h3", { staticClass: "k-seo-preview__title" }, [_vm._v("Share / Card Preview")]), _c("div", { staticClass: "k-seo-preview__content" }, [_c("div", { staticClass: "k-twitter-preview" }, [_vm.meta.ogImage ? _c("div", { staticClass: "k-twitter-preview__image", style: { backgroundImage: "url(" + _vm.meta.ogImage + ")" } }) : _vm._e(), _c("div", { staticClass: "k-twitter-preview__body" }, [_c("cite", { staticClass: "k-twitter-preview__url" }, [_vm._v(_vm._s(_vm.displayUrl(_vm.meta.url)))]), _c("h4", { staticClass: "k-twitter-preview__title" }, [_vm._v(_vm._s(_vm.meta.ogTitle || _vm.meta.title || "Page Title"))]), _c("p", { staticClass: "k-twitter-preview__description" }, [_vm._v(_vm._s(_vm.truncate(_vm.meta.ogDescription || _vm.meta.description, 140) || "No description"))])])])])])]) : _c("div", { staticClass: "k-seo-preview-loading" }, [_vm._v(" Loading preview... ")])]);
   };
-  var _sfc_staticRenderFns$c = [];
-  _sfc_render$c._withStripped = true;
-  var __component__$c = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$c,
-    _sfc_render$c,
-    _sfc_staticRenderFns$c
+  var _sfc_staticRenderFns$f = [];
+  _sfc_render$f._withStripped = true;
+  var __component__$f = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$f,
+    _sfc_render$f,
+    _sfc_staticRenderFns$f
   );
-  __component__$c.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/sections/seo-preview.vue";
-  const SeoPreview = __component__$c.exports;
-  const _sfc_main$b = {
+  __component__$f.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/sections/seo-preview.vue";
+  const SeoPreview = __component__$f.exports;
+  const _sfc_main$e = {
     props: {
       value: String,
       placeholder: {
@@ -384,7 +384,7 @@
       }
     }
   };
-  var _sfc_render$b = function render() {
+  var _sfc_render$e = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("div", { class: _vm.fieldClass }, [_c("k-input", { attrs: { "value": _vm.value, "placeholder": _vm.placeholder, "type": "text" }, on: { "input": function($event) {
       return _vm.$emit("input", $event);
@@ -392,16 +392,16 @@
       return _vm.$emit("generate");
     } } }, [_vm.buttonSize !== "xs" ? [_vm._v("AI Generate")] : _vm._e()], 2) : _vm._e()], 1), _vm.isGenerating ? _c("div", { staticClass: "k-meta-kit-dialog-generating" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Generating...")])], 1) : _vm._e()], 1);
   };
-  var _sfc_staticRenderFns$b = [];
-  _sfc_render$b._withStripped = true;
-  var __component__$b = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$b,
-    _sfc_render$b,
-    _sfc_staticRenderFns$b
+  var _sfc_staticRenderFns$e = [];
+  _sfc_render$e._withStripped = true;
+  var __component__$e = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$e,
+    _sfc_render$e,
+    _sfc_staticRenderFns$e
   );
-  __component__$b.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/field/MetaKitTitleField.vue";
-  const MetaKitTitleField = __component__$b.exports;
-  const _sfc_main$a = {
+  __component__$e.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/field/MetaKitTitleField.vue";
+  const MetaKitTitleField = __component__$e.exports;
+  const _sfc_main$d = {
     props: {
       value: String,
       placeholder: {
@@ -460,7 +460,7 @@
       }
     }
   };
-  var _sfc_render$a = function render() {
+  var _sfc_render$d = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("div", { class: _vm.fieldClass }, [_c("k-input", { attrs: { "value": _vm.value, "placeholder": _vm.placeholder, "type": "textarea", "rows": _vm.rows, "buttons": _vm.buttons }, on: { "input": function($event) {
       return _vm.$emit("input", $event);
@@ -468,16 +468,16 @@
       return _vm.$emit("generate");
     } } }, [_vm.buttonSize !== "xs" ? [_vm._v("AI Generate")] : _vm._e()], 2) : _vm._e()], 1), _vm.isGenerating ? _c("div", { staticClass: "k-meta-kit-dialog-generating" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Generating...")])], 1) : _vm._e()], 1);
   };
-  var _sfc_staticRenderFns$a = [];
-  _sfc_render$a._withStripped = true;
-  var __component__$a = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$a,
-    _sfc_render$a,
-    _sfc_staticRenderFns$a
+  var _sfc_staticRenderFns$d = [];
+  _sfc_render$d._withStripped = true;
+  var __component__$d = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$d,
+    _sfc_render$d,
+    _sfc_staticRenderFns$d
   );
-  __component__$a.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/field/MetaKitDescriptionField.vue";
-  const MetaKitDescriptionField = __component__$a.exports;
-  const _sfc_main$9 = {
+  __component__$d.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/field/MetaKitDescriptionField.vue";
+  const MetaKitDescriptionField = __component__$d.exports;
+  const _sfc_main$c = {
     props: {
       filteredCount: {
         type: Number,
@@ -517,20 +517,20 @@
       }
     }
   };
-  var _sfc_render$9 = function render() {
+  var _sfc_render$c = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("div", { staticClass: "k-meta-kit-stats" }, [_c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("Total Pages")]), _c("p", [_vm._v(_vm._s(_vm.filteredCount)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.totalCount))]) : _vm._e()])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With Description")]), _c("p", [_vm._v(_vm._s(_vm.filteredWithDescription)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.totalWithDescription))]) : _vm._e()])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With OG Image")]), _c("p", [_vm._v(_vm._s(_vm.filteredWithImage)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.totalWithImage))]) : _vm._e()])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("No Index")]), _c("p", [_vm._v(_vm._s(_vm.filteredNoIndex)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.totalNoIndex))]) : _vm._e()])])]);
   };
-  var _sfc_staticRenderFns$9 = [];
-  _sfc_render$9._withStripped = true;
-  var __component__$9 = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$9,
-    _sfc_render$9,
-    _sfc_staticRenderFns$9
+  var _sfc_staticRenderFns$c = [];
+  _sfc_render$c._withStripped = true;
+  var __component__$c = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$c,
+    _sfc_render$c,
+    _sfc_staticRenderFns$c
   );
-  __component__$9.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/table/MetaKitStats.vue";
-  const MetaKitStats = __component__$9.exports;
-  const _sfc_main$8 = {
+  __component__$c.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/table/MetaKitStats.vue";
+  const MetaKitStats = __component__$c.exports;
+  const _sfc_main$b = {
     props: {
       showPreview: {
         type: Boolean,
@@ -598,7 +598,7 @@
       });
     }
   };
-  var _sfc_render$8 = function render() {
+  var _sfc_render$b = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("div", { staticClass: "k-meta-kit-controls" }, [_c("k-button-group", [_vm.showPreview ? _c("k-button", { attrs: { "size": "sm", "theme": _vm.previewMode === "meta" ? "positive" : "", "title": "Show meta title and description" }, on: { "click": function($event) {
       return _vm.$emit("update:preview-mode", "meta");
@@ -634,16 +634,16 @@
       return _c("option", { key: option.value, domProps: { "value": option.value } }, [_vm._v(" " + _vm._s(option.text) + " ")]);
     }), 0)], 1);
   };
-  var _sfc_staticRenderFns$8 = [];
-  _sfc_render$8._withStripped = true;
-  var __component__$8 = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$8,
-    _sfc_render$8,
-    _sfc_staticRenderFns$8
+  var _sfc_staticRenderFns$b = [];
+  _sfc_render$b._withStripped = true;
+  var __component__$b = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$b,
+    _sfc_render$b,
+    _sfc_staticRenderFns$b
   );
-  __component__$8.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/table/MetaKitFilters.vue";
-  const MetaKitFilters = __component__$8.exports;
-  const _sfc_main$7 = {
+  __component__$b.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/table/MetaKitFilters.vue";
+  const MetaKitFilters = __component__$b.exports;
+  const _sfc_main$a = {
     props: {
       selectedCount: {
         type: Number,
@@ -659,7 +659,7 @@
       }
     }
   };
-  var _sfc_render$7 = function render() {
+  var _sfc_render$a = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("div", { staticClass: "k-meta-kit-actions" }, [_c("k-button-group", [_c("k-button", { attrs: { "icon": "edit", "disabled": _vm.selectedCount === 0 }, on: { "click": function($event) {
       return _vm.$emit("edit-selected");
@@ -669,16 +669,16 @@
       return _vm.$emit("refresh");
     } } })], 1), _vm._t("filters")], 2);
   };
-  var _sfc_staticRenderFns$7 = [];
-  _sfc_render$7._withStripped = true;
-  var __component__$7 = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$7,
-    _sfc_render$7,
-    _sfc_staticRenderFns$7
+  var _sfc_staticRenderFns$a = [];
+  _sfc_render$a._withStripped = true;
+  var __component__$a = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$a,
+    _sfc_render$a,
+    _sfc_staticRenderFns$a
   );
-  __component__$7.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/table/MetaKitActions.vue";
-  const MetaKitActions = __component__$7.exports;
-  const _sfc_main$6 = {
+  __component__$a.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/table/MetaKitActions.vue";
+  const MetaKitActions = __component__$a.exports;
+  const _sfc_main$9 = {
     props: {
       content: {
         type: String,
@@ -732,20 +732,20 @@
       }
     }
   };
-  var _sfc_render$6 = function render() {
+  var _sfc_render$9 = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("div", { staticClass: "k-meta-kit-tooltip-wrapper", on: { "mouseenter": _vm.show, "mouseleave": _vm.hide } }, [_vm._t("default"), _vm.isVisible && _vm.content ? _c("div", { staticClass: "k-meta-kit-tooltip-content", style: _vm.tooltipStyle, domProps: { "innerHTML": _vm._s(_vm.formattedContent) } }) : _vm._e()], 2);
   };
-  var _sfc_staticRenderFns$6 = [];
-  _sfc_render$6._withStripped = true;
-  var __component__$6 = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$6,
-    _sfc_render$6,
-    _sfc_staticRenderFns$6
+  var _sfc_staticRenderFns$9 = [];
+  _sfc_render$9._withStripped = true;
+  var __component__$9 = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$9,
+    _sfc_render$9,
+    _sfc_staticRenderFns$9
   );
-  __component__$6.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/common/Tooltip.vue";
-  const Tooltip = __component__$6.exports;
-  const _sfc_main$5 = {
+  __component__$9.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/common/Tooltip.vue";
+  const Tooltip = __component__$9.exports;
+  const _sfc_main$8 = {
     components: {
       Tooltip
     },
@@ -1235,7 +1235,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       }
     }
   };
-  var _sfc_render$5 = function render() {
+  var _sfc_render$8 = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("div", { staticClass: "k-meta-kit-table", class: { "k-meta-kit-table-preview": _vm.showPreview } }, [_c("table", [_c("thead", [_c("tr", [_c("th", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isAllSelected }, on: { "change": function($event) {
       return _vm.$emit("toggle-select-all");
@@ -1273,16 +1273,16 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       } } }) : _vm._e()], 1)])]);
     }), 0)])]);
   };
-  var _sfc_staticRenderFns$5 = [];
-  _sfc_render$5._withStripped = true;
-  var __component__$5 = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$5,
-    _sfc_render$5,
-    _sfc_staticRenderFns$5
+  var _sfc_staticRenderFns$8 = [];
+  _sfc_render$8._withStripped = true;
+  var __component__$8 = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$8,
+    _sfc_render$8,
+    _sfc_staticRenderFns$8
   );
-  __component__$5.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/table/MetaKitTable.vue";
-  const MetaKitTable = __component__$5.exports;
-  const _sfc_main$4 = {
+  __component__$8.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/table/MetaKitTable.vue";
+  const MetaKitTable = __component__$8.exports;
+  const _sfc_main$7 = {
     props: {
       selectedCount: {
         type: Number,
@@ -1321,7 +1321,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       }
     }
   };
-  var _sfc_render$4 = function render() {
+  var _sfc_render$7 = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("k-dialog", { ref: "dialog", attrs: { "size": "medium" }, scopedSlots: _vm._u([{ key: "footer", fn: function() {
       return [_c("k-button-group", { staticClass: "k-meta-kit-bulk-buttons" }, [_c("k-button", { on: { "click": function($event) {
@@ -1377,16 +1377,16 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       }
     } } }), _c("div", { staticClass: "k-meta-kit-bulk-option-content" }, [_c("strong", [_vm._v("OG Description")]), _c("span", [_vm._v("Generate social media descriptions (pages without one)")])])])])], 1);
   };
-  var _sfc_staticRenderFns$4 = [];
-  _sfc_render$4._withStripped = true;
-  var __component__$4 = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$4,
-    _sfc_render$4,
-    _sfc_staticRenderFns$4
+  var _sfc_staticRenderFns$7 = [];
+  _sfc_render$7._withStripped = true;
+  var __component__$7 = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$7,
+    _sfc_render$7,
+    _sfc_staticRenderFns$7
   );
-  __component__$4.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/edit/MetaKitBulkGenerateDialog.vue";
-  const MetaKitBulkGenerateDialog = __component__$4.exports;
-  const _sfc_main$3 = {
+  __component__$7.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/edit/MetaKitBulkGenerateDialog.vue";
+  const MetaKitBulkGenerateDialog = __component__$7.exports;
+  const _sfc_main$6 = {
     components: {
       MetaKitTitleField,
       MetaKitDescriptionField
@@ -1519,7 +1519,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       }
     }
   };
-  var _sfc_render$3 = function render() {
+  var _sfc_render$6 = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("k-dialog", { ref: "dialog", attrs: { "size": "large", "cancelButton": "Close", "submitButton": "" } }, [_vm.page ? _c("k-headline", [_vm._v("Edit: " + _vm._s(_vm.page.title))]) : _vm._e(), _vm.isLoading ? _c("div", { staticClass: "k-meta-kit-loading" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Loading page...")])], 1) : _vm.page ? _c("div", { staticClass: "k-meta-kit-single-edit" }, [_c("div", { staticClass: "k-meta-kit-single-field" }, [_c("label", { staticClass: "k-meta-kit-single-field-label" }, [_vm._v("Meta Title")]), _c("meta-kit-title-field", { attrs: { "value": _vm.editedFields.metaTitle, "page-id": _vm.page.id, "page-title": _vm.page.title, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating.metaTitle, "placeholder": _vm.page.metaTitle || _vm.page.title || "No meta title set", "button-size": "sm", "field-class": "k-meta-kit-single-field-content" }, on: { "input": function($event) {
       _vm.editedFields.metaTitle = $event;
@@ -1539,16 +1539,16 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       return _vm.generate("ogDescription");
     } } })], 1), _c("div", { staticClass: "k-meta-kit-single-field" }, [_c("label", { staticClass: "k-meta-kit-single-field-label" }, [_vm._v("OG Image")]), _c("div", { staticClass: "k-meta-kit-single-field-content" }, [_vm.page.ogImage ? _c("div", { staticClass: "k-meta-kit-og-image-current" }, [_c("img", { attrs: { "src": _vm.page.ogImage.url, "alt": _vm.page.ogImage.filename } }), _c("span", { staticClass: "k-meta-kit-og-image-filename" }, [_vm._v(_vm._s(_vm.page.ogImage.filename))])]) : _c("div", { staticClass: "k-meta-kit-og-image-empty" }, [_vm._v(" No OG image set ")])])]), _c("div", { staticClass: "k-meta-kit-single-actions" }, [_c("k-button", { attrs: { "icon": "open" }, on: { "click": _vm.editInPanel } }, [_vm._v("Edit in Panel")]), _vm.hasChanges ? _c("k-button", { attrs: { "icon": "check", "theme": "positive" }, on: { "click": _vm.save } }, [_vm._v("Apply Changes")]) : _vm._e()], 1)]) : _vm._e()], 1);
   };
-  var _sfc_staticRenderFns$3 = [];
-  _sfc_render$3._withStripped = true;
-  var __component__$3 = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$3,
-    _sfc_render$3,
-    _sfc_staticRenderFns$3
+  var _sfc_staticRenderFns$6 = [];
+  _sfc_render$6._withStripped = true;
+  var __component__$6 = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$6,
+    _sfc_render$6,
+    _sfc_staticRenderFns$6
   );
-  __component__$3.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/edit/MetaKitSinglePageDialog.vue";
-  const MetaKitSinglePageDialog = __component__$3.exports;
-  const _sfc_main$2 = {
+  __component__$6.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/edit/MetaKitSinglePageDialog.vue";
+  const MetaKitSinglePageDialog = __component__$6.exports;
+  const _sfc_main$5 = {
     components: {
       MetaKitTitleField,
       MetaKitDescriptionField
@@ -1677,7 +1677,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       }
     }
   };
-  var _sfc_render$2 = function render() {
+  var _sfc_render$5 = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("k-dialog", { ref: "dialog", attrs: { "size": "huge", "cancelButton": "Close", "submitButton": "" } }, [_c("k-headline", [_vm._v("Edit Selected Pages (" + _vm._s(_vm.pages.length) + ")")]), _vm.isLoading ? _c("div", { staticClass: "k-meta-kit-loading" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Loading pages...")])], 1) : _vm.pages.length > 0 ? _c("div", [_c("div", { staticClass: "k-meta-kit-tabs" }, [_c("k-button", { attrs: { "theme": _vm.activeTab === "meta" ? "positive" : "", "size": "sm" }, on: { "click": function($event) {
       _vm.activeTab = "meta";
@@ -1705,16 +1705,16 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       } } })], 1);
     }), 0) : _vm._e(), _vm.hasAnyChanges ? _c("div", { staticClass: "k-meta-kit-single-actions" }, [_c("k-button", { attrs: { "icon": "check", "theme": "positive" }, on: { "click": _vm.saveAll } }, [_vm._v("Apply All Changes")])], 1) : _vm._e()]) : _c("div", { staticClass: "k-meta-kit-empty" }, [_c("k-icon", { attrs: { "type": "check" } }), _c("p", [_vm._v("No pages selected!")])], 1)], 1);
   };
-  var _sfc_staticRenderFns$2 = [];
-  _sfc_render$2._withStripped = true;
-  var __component__$2 = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$2,
-    _sfc_render$2,
-    _sfc_staticRenderFns$2
+  var _sfc_staticRenderFns$5 = [];
+  _sfc_render$5._withStripped = true;
+  var __component__$5 = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$5,
+    _sfc_render$5,
+    _sfc_staticRenderFns$5
   );
-  __component__$2.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/edit/MetaKitBulkEditDialog.vue";
-  const MetaKitBulkEditDialog = __component__$2.exports;
-  const _sfc_main$1 = {
+  __component__$5.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/edit/MetaKitBulkEditDialog.vue";
+  const MetaKitBulkEditDialog = __component__$5.exports;
+  const _sfc_main$4 = {
     props: {
       summary: {
         type: Object,
@@ -1739,7 +1739,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       }
     }
   };
-  var _sfc_render$1 = function render() {
+  var _sfc_render$4 = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("k-dialog", { ref: "dialog", attrs: { "size": "medium", "cancelButton": "Close", "submitButton": "" } }, [_c("k-headline", [_vm._v("Legacy SEO Migration")]), _vm.isLoading ? _c("div", { staticClass: "k-meta-kit-loading" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Scanning all languages for legacy metadata...")])], 1) : _c("div", [_c("div", { staticClass: "k-meta-kit-legacy-list" }, [_c("p", [_vm._v("Summary of legacy fields by language:")]), _c("ul", _vm._l(_vm.summary.byLanguage, function(item) {
       return _c("li", { key: item.code }, [_c("strong", [_vm._v(_vm._s(item.code.toUpperCase()))]), _vm._v(": " + _vm._s(item.count) + " item(s) ")]);
@@ -1747,16 +1747,16 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       return _vm.$emit("migrate");
     } } }, [_vm._v(" Migrate All Languages ")])], 1)])], 1);
   };
-  var _sfc_staticRenderFns$1 = [];
-  _sfc_render$1._withStripped = true;
-  var __component__$1 = /* @__PURE__ */ normalizeComponent(
-    _sfc_main$1,
-    _sfc_render$1,
-    _sfc_staticRenderFns$1
+  var _sfc_staticRenderFns$4 = [];
+  _sfc_render$4._withStripped = true;
+  var __component__$4 = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$4,
+    _sfc_render$4,
+    _sfc_staticRenderFns$4
   );
-  __component__$1.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/edit/MetaKitLegacyDialog.vue";
-  const MetaKitLegacyDialog = __component__$1.exports;
-  const _sfc_main = {
+  __component__$4.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/edit/MetaKitLegacyDialog.vue";
+  const MetaKitLegacyDialog = __component__$4.exports;
+  const _sfc_main$3 = {
     components: {
       MetaKitTitleField,
       MetaKitDescriptionField,
@@ -2307,7 +2307,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       }
     }
   };
-  var _sfc_render = function render() {
+  var _sfc_render$3 = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("k-panel-inside", { staticClass: "k-meta-kit-view" }, [!_vm.hasValidLicense ? _c("div", { staticClass: "k-meta-kit-warning" }, [_c("k-box", { attrs: { "theme": "negative" } }, [_c("k-icon", { attrs: { "type": "alert" } }), _c("span", [_c("strong", [_vm._v("No valid license:")]), _vm._v(" AI generation and saving changes are disabled. Meta tags are limited to 20 characters. Please activate your license to use all features.")])], 1)], 1) : _vm._e(), _vm.languages && _vm.languages.length > 1 ? _c("div", { staticClass: "k-meta-kit-language-bar" }, [_c("k-button-group", _vm._l(_vm.languages, function(lang) {
       return _c("k-button", { key: lang.code, attrs: { "theme": lang.code === _vm.language ? "positive" : "", "size": "xs" }, on: { "click": function($event) {
@@ -2333,6 +2333,328 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       }, "change-page-size": _vm.changePageSize } })];
     }, proxy: true }]) }), _c("meta-kit-table", { attrs: { "pages": _vm.paginatedPages, "start-index": (_vm.currentPage - 1) * _vm.pageSize, "selected-pages": _vm.selectedPages, "is-all-selected": _vm.isAllCurrentPageSelected, "show-preview": _vm.showPreviewInTable, "preview-mode": _vm.previewMode, "ai-enabled": _vm.aiEnabled, "validation-settings": _vm.validationSettingsData }, on: { "toggle-select-all": _vm.toggleSelectAllCurrentPage, "toggle-page": _vm.togglePageSelection, "edit-page": _vm.editSinglePageMetadata, "generate-description": _vm.generateDescription } }), _vm.totalPages > 1 ? _c("div", { staticClass: "k-meta-kit-pagination" }, [_c("k-button", { attrs: { "icon": "angle-left", "disabled": _vm.currentPage === 1 }, on: { "click": _vm.previousPage } }), _c("span", { staticClass: "k-meta-kit-pagination-info" }, [_vm._v(" Page " + _vm._s(_vm.currentPage) + " of " + _vm._s(_vm.totalPages) + " "), _vm.searchQuery ? [_vm._v("(" + _vm._s(_vm.filteredPages.length) + " of " + _vm._s(_vm.pagesData.length) + ")")] : [_vm._v("(" + _vm._s(_vm.pagesData.length) + " total)")]], 2), _c("k-button", { attrs: { "icon": "angle-right", "disabled": _vm.currentPage === _vm.totalPages }, on: { "click": _vm.nextPage } })], 1) : _vm._e(), _c("meta-kit-legacy-dialog", { ref: "legacyDialog", attrs: { "summary": _vm.legacySummary, "is-loading": _vm.isLoadingLegacy, "is-migrating": _vm.isMigratingAll }, on: { "load-summary": _vm.loadLegacySummary, "migrate": _vm.migrateAllLanguages } }), _c("meta-kit-bulk-edit-dialog", { ref: "allPagesDialog", attrs: { "api": _vm.$api, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled }, on: { "saved": _vm.refreshPages } }), _c("meta-kit-single-page-dialog", { ref: "singlePageDialog", attrs: { "api": _vm.$api, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled }, on: { "saved": _vm.refreshPages } }), _c("meta-kit-bulk-generate-dialog", { ref: "bulkGenerateDialog", attrs: { "selected-count": _vm.selectedPages.length }, on: { "generate": _vm.performBulkGeneration } }), _vm.isGeneratingAll || _vm.isLoadingPages || _vm.isMigratingAll ? _c("div", { staticClass: "k-meta-kit-loading-overlay" }, [_c("div", { staticClass: "k-meta-kit-loading-content" }, [_c("div", { staticClass: "k-meta-kit-loading-spinner" }, [_c("k-icon", { attrs: { "type": "loader" } })], 1), _c("div", { staticClass: "k-meta-kit-loading-text" }, [_vm.isGeneratingAll ? [_vm._v("Generating metadata with AI...")] : _vm.isLoadingPages ? [_vm._v("Refreshing pages...")] : _vm.isMigratingAll ? [_vm._v("Migrating legacy fields...")] : _vm._e()], 2), _vm.loadingProgress ? _c("div", { staticClass: "k-meta-kit-loading-progress" }, [_vm._v(" " + _vm._s(_vm.loadingProgress) + " ")]) : _vm._e()])]) : _vm._e()], 1);
   };
+  var _sfc_staticRenderFns$3 = [];
+  _sfc_render$3._withStripped = true;
+  var __component__$3 = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$3,
+    _sfc_render$3,
+    _sfc_staticRenderFns$3
+  );
+  __component__$3.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/MetaKitView.vue";
+  const MetaKitView = __component__$3.exports;
+  const _sfc_main$2 = {
+    inheritAttrs: false,
+    props: {
+      value: String,
+      fieldType: {
+        type: String,
+        default: "meta"
+      },
+      pageId: String,
+      disabled: Boolean,
+      label: String,
+      help: String,
+      placeholder: String,
+      validationSettings: {
+        type: Object,
+        default: () => ({})
+      }
+    },
+    computed: {
+      charCount() {
+        if (!this.value) return 0;
+        const baseLength = this.value.length;
+        if (this.shouldAppendSiteName && this.validationSettings.siteMetaTitle) {
+          const separator = this.validationSettings.titleSeparator || "|";
+          const siteName = this.validationSettings.siteMetaTitle;
+          return `${this.value} ${separator} ${siteName}`.length;
+        }
+        return baseLength;
+      },
+      shouldAppendSiteName() {
+        if (this.validationSettings.pageId === "site") {
+          return false;
+        }
+        return this.validationSettings.appendSiteName;
+      },
+      validation() {
+        if (!this.value) {
+          return {
+            status: "",
+            theme: "",
+            message: ""
+          };
+        }
+        const length = this.charCount;
+        const ranges = this.validationSettings.ranges || {};
+        const optimal = ranges.optimal || { min: 20, max: 60 };
+        const warning = ranges.warning || { min: 15, max: 75 };
+        if (length >= optimal.min && length <= optimal.max) {
+          return {
+            status: "optimal",
+            theme: "positive",
+            message: `Optimal length (${optimal.min}-${optimal.max} characters recommended)`
+          };
+        }
+        if (length >= warning.min && length <= warning.max) {
+          if (length < optimal.min) {
+            return {
+              status: "warning",
+              theme: "notice",
+              message: `Too short. Add ${optimal.min - length} more characters for optimal length (${optimal.min}-${optimal.max} recommended)`
+            };
+          } else {
+            return {
+              status: "warning",
+              theme: "notice",
+              message: `Slightly too long. Remove ${length - optimal.max} characters for optimal length (${optimal.min}-${optimal.max} recommended)`
+            };
+          }
+        }
+        if (length < warning.min) {
+          return {
+            status: "error",
+            theme: "negative",
+            message: `Much too short! Add at least ${warning.min - length} more characters (${optimal.min}-${optimal.max} recommended)`
+          };
+        }
+        return {
+          status: "error",
+          theme: "negative",
+          message: `Too long! Reduce by ${length - warning.max} characters (${optimal.min}-${optimal.max} recommended)`
+        };
+      }
+    },
+    methods: {
+      onInput(value) {
+        this.$emit("input", value);
+      }
+    }
+  };
+  var _sfc_render$2 = function render() {
+    var _vm = this, _c = _vm._self._c;
+    return _c("k-field", _vm._b({ staticClass: "k-mk-title-field", scopedSlots: _vm._u([{ key: "default", fn: function() {
+      return [_c("k-input", { attrs: { "value": _vm.value, "type": "text", "placeholder": _vm.placeholder, "disabled": _vm.disabled }, on: { "input": _vm.onInput } }), _vm.validation.message ? _c("k-text", { staticClass: "k-mk-validation-message", attrs: { "theme": _vm.validation.theme } }, [_c("span", { class: "k-mk-validation-status-" + _vm.validation.status }, [_vm._v(_vm._s(_vm.charCount))]), _vm._v(" - " + _vm._s(_vm.validation.message) + " ")]) : _vm._e()];
+    }, proxy: true }]) }, "k-field", _vm.$props, false));
+  };
+  var _sfc_staticRenderFns$2 = [];
+  _sfc_render$2._withStripped = true;
+  var __component__$2 = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$2,
+    _sfc_render$2,
+    _sfc_staticRenderFns$2
+  );
+  __component__$2.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/fields/mk-title/index.vue";
+  const MkTitle = __component__$2.exports;
+  const _sfc_main$1 = {
+    inheritAttrs: false,
+    props: {
+      value: String,
+      fieldType: {
+        type: String,
+        default: "meta"
+      },
+      maxlength: Number,
+      disabled: Boolean,
+      label: String,
+      help: String,
+      placeholder: String,
+      validationSettings: {
+        type: Object,
+        default: () => ({})
+      }
+    },
+    computed: {
+      charCount() {
+        return this.value ? this.value.length : 0;
+      },
+      validation() {
+        if (!this.value) {
+          return {
+            status: "",
+            theme: "",
+            message: ""
+          };
+        }
+        const length = this.charCount;
+        const ranges = this.validationSettings.ranges || {};
+        const optimal = ranges.optimal || { min: 140, max: 160 };
+        const warning = ranges.warning || { min: 126, max: 176 };
+        if (length >= optimal.min && length <= optimal.max) {
+          return {
+            status: "optimal",
+            theme: "positive",
+            message: `Optimal length (${optimal.min}-${optimal.max} characters recommended)`
+          };
+        }
+        if (length >= warning.min && length <= warning.max) {
+          if (length < optimal.min) {
+            return {
+              status: "warning",
+              theme: "notice",
+              message: `Too short. Add ${optimal.min - length} more characters for optimal length (${optimal.min}-${optimal.max} recommended)`
+            };
+          } else {
+            return {
+              status: "warning",
+              theme: "notice",
+              message: `Slightly too long. Remove ${length - optimal.max} characters for optimal length (${optimal.min}-${optimal.max} recommended)`
+            };
+          }
+        }
+        if (length < warning.min) {
+          return {
+            status: "error",
+            theme: "negative",
+            message: `Much too short! Add at least ${warning.min - length} more characters (${optimal.min}-${optimal.max} recommended)`
+          };
+        }
+        return {
+          status: "error",
+          theme: "negative",
+          message: `Too long! Reduce by ${length - warning.max} characters (${optimal.min}-${optimal.max} recommended)`
+        };
+      }
+    },
+    methods: {
+      onInput(value) {
+        this.$emit("input", value);
+      }
+    }
+  };
+  var _sfc_render$1 = function render() {
+    var _vm = this, _c = _vm._self._c;
+    return _c("k-field", _vm._b({ staticClass: "k-mk-description-field", scopedSlots: _vm._u([{ key: "default", fn: function() {
+      return [_c("k-input", { staticClass: "k-mk-description-textarea", attrs: { "type": "textarea", "value": _vm.value, "placeholder": _vm.placeholder, "disabled": _vm.disabled, "buttons": false, "maxlength": _vm.maxlength, "counter": false }, on: { "input": _vm.onInput } }), _vm.validation.message ? _c("k-text", { staticClass: "k-mk-validation-message", attrs: { "theme": _vm.validation.theme } }, [_c("span", { class: "k-mk-validation-status-" + _vm.validation.status }, [_vm._v(_vm._s(_vm.charCount))]), _vm._v(" - " + _vm._s(_vm.validation.message) + " ")]) : _vm._e()];
+    }, proxy: true }]) }, "k-field", _vm.$props, false));
+  };
+  var _sfc_staticRenderFns$1 = [];
+  _sfc_render$1._withStripped = true;
+  var __component__$1 = /* @__PURE__ */ normalizeComponent(
+    _sfc_main$1,
+    _sfc_render$1,
+    _sfc_staticRenderFns$1
+  );
+  __component__$1.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/fields/mk-description/index.vue";
+  const MkDescription = __component__$1.exports;
+  const _sfc_main = {
+    inheritAttrs: false,
+    props: {
+      currentSlug: String,
+      disabled: Boolean,
+      label: String,
+      help: String,
+      validationSettings: {
+        type: Object,
+        default: () => ({})
+      }
+    },
+    computed: {
+      displaySlug() {
+        return this.currentSlug || "—";
+      },
+      wordCount() {
+        if (!this.currentSlug) return 0;
+        const lastPart = this.getLastSlugPart();
+        return lastPart.split(/[-_]/).filter((word) => word.length > 0).length;
+      },
+      slugLength() {
+        if (!this.currentSlug) return 0;
+        return this.getLastSlugPart().length;
+      },
+      depth() {
+        if (!this.currentSlug) return 0;
+        return (this.currentSlug.match(/\//g) || []).length;
+      },
+      validation() {
+        if (!this.currentSlug) {
+          return {
+            status: "",
+            theme: "info",
+            message: "No slug available yet"
+          };
+        }
+        const settings = this.validationSettings;
+        const depth = this.depth;
+        const words = this.wordCount;
+        const length = this.slugLength;
+        let messages = [];
+        let overallStatus = "optimal";
+        let theme = "positive";
+        const depthStatus = this.getStatus(depth, settings.depth);
+        if (depthStatus === "warning") {
+          messages.push(`Consider reducing nesting depth (currently ${depth} levels)`);
+          overallStatus = "warning";
+          theme = "notice";
+        } else if (depthStatus === "error") {
+          messages.push(`Too deeply nested! Reduce to ${settings.depth.optimal.max} levels or less`);
+          overallStatus = "error";
+          theme = "negative";
+        }
+        const wordsStatus = this.getStatus(words, settings.words);
+        if (wordsStatus === "warning") {
+          if (words < settings.words.optimal.min) {
+            messages.push(`Consider adding more descriptive words`);
+          } else {
+            messages.push(`Consider shortening the slug (${words} words)`);
+          }
+          if (overallStatus === "optimal") {
+            overallStatus = "warning";
+            theme = "notice";
+          }
+        } else if (wordsStatus === "error") {
+          messages.push(`Slug too long! Reduce to ${settings.words.optimal.max} words or less`);
+          overallStatus = "error";
+          theme = "negative";
+        }
+        const lengthStatus = this.getStatus(length, settings.length);
+        if (lengthStatus === "warning") {
+          messages.push(`Slug is ${length} characters (${settings.length.optimal.max} recommended)`);
+          if (overallStatus === "optimal") {
+            overallStatus = "warning";
+            theme = "notice";
+          }
+        } else if (lengthStatus === "error") {
+          messages.push(`Slug too long! Reduce to ${settings.length.optimal.max} characters or less`);
+          overallStatus = "error";
+          theme = "negative";
+        }
+        return {
+          status: overallStatus,
+          theme,
+          message: messages.length > 0 ? messages.join(". ") : "Slug fulfills the validation rules",
+          depthStatus,
+          wordsStatus,
+          lengthStatus
+        };
+      }
+    },
+    methods: {
+      getLastSlugPart() {
+        if (!this.currentSlug) return "";
+        const parts = this.currentSlug.split("/");
+        return parts[parts.length - 1];
+      },
+      getStatus(value, ranges) {
+        if (!ranges) return "optimal";
+        const optimal = ranges.optimal || {};
+        const warning = ranges.warning || {};
+        if (value >= optimal.min && value <= optimal.max) {
+          return "optimal";
+        }
+        if (value >= warning.min && value <= warning.max) {
+          return "warning";
+        }
+        return "error";
+      }
+    }
+  };
+  var _sfc_render = function render() {
+    var _vm = this, _c = _vm._self._c;
+    return _c("k-field", _vm._b({ staticClass: "k-mk-slug-info-field", scopedSlots: _vm._u([{ key: "default", fn: function() {
+      return [_c("k-box", { staticClass: "k-mk-slug-validation-box", attrs: { "theme": _vm.validation.theme } }, [_c("div", { staticClass: "k-mk-slug-stats" }, [_c("div", { staticClass: "k-mk-slug-stat k-mk-slug-stat-slug" }, [_c("span", { staticClass: "k-mk-slug-stat-label" }, [_vm._v("Slug:")]), _c("span", { class: "k-mk-slug-stat-value k-mk-validation-status-" + _vm.validation.status }, [_vm._v(_vm._s(_vm.displaySlug))])]), _c("div", { staticClass: "k-mk-slug-stat" }, [_c("span", { staticClass: "k-mk-slug-stat-label" }, [_vm._v("Words:")]), _c("span", { class: "k-mk-slug-stat-value k-mk-validation-status-" + _vm.validation.wordsStatus }, [_vm._v(_vm._s(_vm.wordCount))])]), _c("div", { staticClass: "k-mk-slug-stat" }, [_c("span", { staticClass: "k-mk-slug-stat-label" }, [_vm._v("Length:")]), _c("span", { class: "k-mk-slug-stat-value k-mk-validation-status-" + _vm.validation.lengthStatus }, [_vm._v(_vm._s(_vm.slugLength) + " chars")])]), _c("div", { staticClass: "k-mk-slug-stat" }, [_c("span", { staticClass: "k-mk-slug-stat-label" }, [_vm._v("Depth:")]), _c("span", { class: "k-mk-slug-stat-value k-mk-validation-status-" + _vm.validation.depthStatus }, [_vm._v(_vm._s(_vm.depth) + " levels")])])]), _vm.validation.message ? _c("div", { staticClass: "k-mk-slug-info" }, [_vm.validation.message ? _c("div", { staticClass: "k-mk-slug-message" }, [_vm._v(" " + _vm._s(_vm.validation.message) + " ")]) : _vm._e(), _c("details", { staticClass: "k-mk-slug-guidelines" }, [_c("summary", [_vm._v("SEO Guidelines")]), _c("ul", [_c("li", [_c("strong", [_vm._v("Core pages:")]), _vm._v(" 1 word, ≤ 15 characters (e.g., /about, /services)")]), _c("li", [_c("strong", [_vm._v("Articles:")]), _vm._v(" 4-8 words, ≤ 60 characters")]), _c("li", [_c("strong", [_vm._v("Nesting:")]), _vm._v(" ≤ 2 levels deep for best crawling")]), _c("li", [_c("strong", [_vm._v("Best practices:")]), _vm._v(" Use hyphens, lowercase, descriptive keywords")])])])]) : _vm._e()])];
+    }, proxy: true }]) }, "k-field", _vm.$props, false));
+  };
   var _sfc_staticRenderFns = [];
   _sfc_render._withStripped = true;
   var __component__ = /* @__PURE__ */ normalizeComponent(
@@ -2340,8 +2662,8 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
     _sfc_render,
     _sfc_staticRenderFns
   );
-  __component__.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/MetaKitView.vue";
-  const MetaKitView = __component__.exports;
+  __component__.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/fields/mk-slug-info/index.vue";
+  const MkSlugInfo = __component__.exports;
   panel.plugin("tearoom1/meta-kit", {
     components: {
       "meta-kit-view": MetaKitView
@@ -2350,6 +2672,9 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       "seo-preview": SeoPreview
     },
     fields: {
+      "mk-title": MkTitle,
+      "mk-description": MkDescription,
+      "mk-slug-info": MkSlugInfo,
       "meta-kit-generator": {
         props: {
           label: String,

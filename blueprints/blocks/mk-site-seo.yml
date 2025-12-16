@@ -57,9 +57,10 @@ fields:
 
   metaDescription:
     label: Default Meta Description
-    type: textarea
-    buttons: false
-    help: Default description for search engines. Should be around 140 - 160 characters. Include primary keyword and a call-to-action.
+    type: mk-description
+    fieldType: meta
+    maxlength: 180
+    help: Default description for search engines. Include primary keyword and a call-to-action.
 
   metaAuthor:
     label: Default Author

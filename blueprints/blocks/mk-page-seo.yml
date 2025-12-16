@@ -2,18 +2,22 @@ name: SEO Metadata
 preview: fields
 wysiwyg: true
 fields:
+  slugInfo:
+    label: Slug Validation
+    type: mk-slug-info
+
   metaTitle:
     label: Meta Title
-    type: text
-    help: Title for search engines. Defaults to the page title. See also the site settings for additional options. <br>Around 50–60 characters. Include the main keyword once. Make it compelling for users.
+    type: mk-title
+    fieldType: meta
+    help: Title for search engines. Defaults to the page title. See also the site settings for additional options.
 
   metaDescription:
     label: Meta Description
-    type: textarea
-    buttons: false
-    maxlength: 160
-    counter: true
-    help: Description for search engines. Around 140 - 160 characters. Include primary keyword and a call-to-action.
+    type: mk-description
+    fieldType: meta
+    maxlength: 180
+    help: Description for search engines. Include primary keyword and a call-to-action.
 
   metaAuthor:
     label: Author
@@ -46,15 +50,15 @@ fields:
 
   ogTitle:
     label: Social Media Title
-    type: text
+    type: mk-title
+    fieldType: og
     help: Title for social media shares. Uses the meta title if empty.
 
   ogDescription:
     label: Social Media Description
-    type: textarea
-    buttons: false
-    maxlength: 185
-    counter: true
+    type: mk-description
+    fieldType: og
+    maxlength: 310
     help: Description for social media. Uses the meta description if empty.
 
   ogImage:

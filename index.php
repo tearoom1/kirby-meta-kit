@@ -97,6 +97,9 @@ App::plugin(
         ],
         'fields' => [
             'meta-kit-generator' => [],
+            'mk-title' => __DIR__ . '/fields/mk-title/index.php',
+            'mk-description' => __DIR__ . '/fields/mk-description/index.php',
+            'mk-slug-info' => __DIR__ . '/fields/mk-slug-info/index.php',
         ],
         'snippets' => [
             'meta-kit/seo' => __DIR__ . '/snippets/seo.php',
