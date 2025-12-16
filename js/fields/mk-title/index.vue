@@ -25,7 +25,7 @@
             class="k-mk-ai-button"
             size="xs"
             icon="ai"
-            :text="isGenerating ? 'Generating…' : 'Generate with AI'"
+            :text="isGenerating ? 'Generating…' : 'Generate'"
             :disabled="disabled || isGenerating"
             @click="generateWithAi"
           />

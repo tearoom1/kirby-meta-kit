@@ -24,7 +24,7 @@
             class="k-mk-ai-button"
             size="xs"
             icon="ai"
-            :text="isGenerating ? 'Generating…' : 'Generate with AI'"
+            :text="isGenerating ? 'Generating…' : 'Generate'"
             :disabled="disabled || isGenerating"
             @click="generateWithAi"
           />
@@ -166,7 +166,7 @@ export default {
     display: block;
   }
 
-  .k-mk-description-field .k-mk-validation-message {
+  .k-mk-validation-message {
     display: block;
     padding: 0 1rem;
     font-size: 0.875rem;
