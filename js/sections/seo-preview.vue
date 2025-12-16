@@ -46,6 +46,31 @@ export default {
     parent: String,
     name: String
   },
+  computed: {
+    currentLanguage() {
+      return (
+        this.$language?.code ||
+        window.panel?.view?.props?.language ||
+        window.panel?.language?.code ||
+        null
+      );
+    }
+  },
+  watch: {
+    parent() {
+      this.handleContextChange();
+    },
+    name() {
+      this.handleContextChange();
+    },
+    '$route.fullPath'() {
+      this.handleContextChange();
+    },
+    currentLanguage(newLang, oldLang) {
+      if (!newLang || newLang === oldLang) return;
+      this.handleContextChange();
+    }
+  },
   data() {
     return {
       meta: null,
@@ -56,7 +81,8 @@ export default {
       updateTimeout: null,
       fieldCheckInterval: null,
       lastFieldValues: {},
-      filesObserver: null
+      filesObserver: null,
+      contextChangeTimeout: null
     }
   },
   async mounted() {
@@ -100,6 +126,29 @@ export default {
     }
   },
   methods: {
+    async handleContextChange() {
+      clearTimeout(this.contextChangeTimeout);
+      this.contextChangeTimeout = setTimeout(async () => {
+      // Language switching in the Panel typically triggers a route change.
+      // The section component can stay mounted, so we explicitly refetch.
+      this.meta = null;
+      this.siteName = null;
+      this.separator = '|';
+      this.siteOgImage = null;
+      this.siteOgImageDetermined = false;
+      this.lastFieldValues = {};
+
+      await this.load();
+
+      // Refresh based on current inputs (important if there are unsaved changes)
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.updatePreviewFromDOM();
+          this.determineSiteDefaultImage();
+        }, 800);
+      });
+      }, 50);
+    },
     setupFieldObserver() {
       // Watch for when field values change programmatically (like when discarding)
       const checkFieldValues = () => {
@@ -119,13 +168,26 @@ export default {
           return '';
         };
 
+        const getFieldOrNull = (name) => {
+          const input = document.querySelector(`[name="${name}"], [name="${name.toLowerCase()}"]`);
+          if (!input) return null;
+          return input.value ?? '';
+        };
+
         const currentValues = {
-          metatitle: document.querySelector('[name="metatitle"]')?.value || '',
-          metadescription: document.querySelector('[name="metadescription"]')?.value || '',
-          ogtitle: document.querySelector('[name="ogtitle"]')?.value || '',
-          ogdescription: document.querySelector('[name="ogdescription"]')?.value || '',
+          metatitle: getFieldOrNull('metatitle'),
+          metadescription: getFieldOrNull('metadescription'),
+          ogtitle: getFieldOrNull('ogtitle'),
+          ogdescription: getFieldOrNull('ogdescription'),
           ogimage: getImageSrc()
         };
+
+        // If fields are not mounted yet (common during language switches),
+        // do not overwrite the already loaded preview.
+        const anyMissing = Object.values(currentValues).some(v => v === null);
+        if (anyMissing) {
+          return;
+        }
 
         const valuesChanged = Object.keys(currentValues).some(
           key => this.lastFieldValues[key] !== currentValues[key]
@@ -175,6 +237,11 @@ export default {
       const target = event.target;
       const fieldName = target.name || target.getAttribute('name');
 
+      // Ignore events from hidden / detached elements (can happen during language switches)
+      if (!target || target.offsetParent === null) {
+        return;
+      }
+
       // Check if this is an SEO field we care about
       const seoFields = ['metatitle', 'metadescription', 'ogtitle', 'ogdescription', 'ogimage'];
       if (fieldName && seoFields.includes(fieldName.toLowerCase())) {
@@ -203,7 +270,9 @@ export default {
       // Extract values directly from DOM inputs
       const getFieldValue = (name) => {
         const input = document.querySelector(`[name="${name}"], [name="${name.toLowerCase()}"]`);
-        return input ? input.value : '';
+        // During language switches inputs may not exist yet
+        if (!input) return null;
+        return input.value ?? '';
       };
 
       // Extract OG image from files field
@@ -232,8 +301,27 @@ export default {
         ogimage: getOgImage()
       };
 
+      // If fields are not mounted yet, do not overwrite loaded meta with placeholders
+      const values = Object.values(seoData);
+      if (values.some(v => v === null)) {
+        return;
+      }
+
       // Get page title (might be in a different field)
-      const pageTitle = getFieldValue('title') || 'Page Title';
+      const pageTitleValue = getFieldValue('title');
+      const pageTitle = pageTitleValue || 'Page Title';
+
+      // Avoid replacing real preview with placeholder content when everything is empty
+      const allEmpty = [
+        seoData.metatitle,
+        seoData.metadescription,
+        seoData.ogtitle,
+        seoData.ogdescription
+      ].every(v => !v || !String(v).trim());
+      const isPlaceholderTitle = !pageTitleValue;
+      if (allEmpty && isPlaceholderTitle && this.meta) {
+        return;
+      }
 
       this.updatePreviewFromData(seoData, pageTitle);
     },
@@ -278,7 +366,10 @@ export default {
     },
     async load() {
       try {
-        const response = await this.$api.get(this.parent + '/sections/' + this.name);
+        const baseUrl = this.parent + '/sections/' + this.name;
+        const lang = this.currentLanguage;
+        const url = lang ? `${baseUrl}?language=${encodeURIComponent(lang)}` : baseUrl;
+        const response = await this.$api.get(url);
 
         // Get meta from response
         let newMeta = null;
