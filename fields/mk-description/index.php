@@ -3,6 +3,7 @@
 use Kirby\Cms\App;
 
 return [
+    'extends' => 'textarea',
     'props' => [
         'value' => function ($value = null) {
             return $value;
@@ -17,8 +18,20 @@ return [
     'computed' => [
         'validationRanges' => function () {
             $fieldType = $this->fieldType();
-            $ranges = option('tearoom1.meta-kit.validation.ranges', []);
+            $validation = option('tearoom1.meta-kit.validation', []);
+            $ranges = $validation['ranges'] ?? [];
+            $templates = $validation['templates'] ?? [];
 
+            // Get template-specific ranges if available
+            $template = $this->model()->intendedTemplate()->name();
+            $fieldKey = $fieldType === 'og' ? 'ogDescription' : 'description';
+
+            // Check for template-specific ranges
+            if (isset($templates[$template]) && isset($templates[$template][$fieldKey])) {
+                return $templates[$template][$fieldKey];
+            }
+
+            // Fall back to default ranges
             if ($fieldType === 'og' && isset($ranges['ogDescription'])) {
                 return $ranges['ogDescription'];
             }
@@ -31,7 +44,8 @@ return [
         'validationSettings' => function () {
             return [
                 'ranges' => $this->validationRanges(),
-                'fieldType' => $this->fieldType()
+                'fieldType' => $this->fieldType(),
+                'template' => $this->model()->intendedTemplate()->name()
             ];
         }
     ]

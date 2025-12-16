@@ -18,6 +18,27 @@
       parent: String,
       name: String
     },
+    computed: {
+      currentLanguage() {
+        var _a, _b, _c, _d, _e, _f;
+        return ((_a = this.$language) == null ? void 0 : _a.code) || ((_d = (_c = (_b = window.panel) == null ? void 0 : _b.view) == null ? void 0 : _c.props) == null ? void 0 : _d.language) || ((_f = (_e = window.panel) == null ? void 0 : _e.language) == null ? void 0 : _f.code) || null;
+      }
+    },
+    watch: {
+      parent() {
+        this.handleContextChange();
+      },
+      name() {
+        this.handleContextChange();
+      },
+      "$route.fullPath"() {
+        this.handleContextChange();
+      },
+      currentLanguage(newLang, oldLang) {
+        if (!newLang || newLang === oldLang) return;
+        this.handleContextChange();
+      }
+    },
     data() {
       return {
         meta: null,
@@ -28,7 +49,8 @@
         updateTimeout: null,
         fieldCheckInterval: null,
         lastFieldValues: {},
-        filesObserver: null
+        filesObserver: null,
+        contextChangeTimeout: null
       };
     },
     async mounted() {
@@ -56,9 +78,26 @@
       }
     },
     methods: {
+      async handleContextChange() {
+        clearTimeout(this.contextChangeTimeout);
+        this.contextChangeTimeout = setTimeout(async () => {
+          this.meta = null;
+          this.siteName = null;
+          this.separator = "|";
+          this.siteOgImage = null;
+          this.siteOgImageDetermined = false;
+          this.lastFieldValues = {};
+          await this.load();
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.updatePreviewFromDOM();
+              this.determineSiteDefaultImage();
+            }, 800);
+          });
+        }, 50);
+      },
       setupFieldObserver() {
         const checkFieldValues = () => {
-          var _a, _b, _c, _d;
           const getImageSrc = () => {
             const ogImageField = document.querySelector(".k-field-name-ogimage");
             if (ogImageField) {
@@ -72,13 +111,22 @@
             }
             return "";
           };
+          const getFieldOrNull = (name) => {
+            const input = document.querySelector(`[name="${name}"], [name="${name.toLowerCase()}"]`);
+            if (!input) return null;
+            return input.value ?? "";
+          };
           const currentValues = {
-            metatitle: ((_a = document.querySelector('[name="metatitle"]')) == null ? void 0 : _a.value) || "",
-            metadescription: ((_b = document.querySelector('[name="metadescription"]')) == null ? void 0 : _b.value) || "",
-            ogtitle: ((_c = document.querySelector('[name="ogtitle"]')) == null ? void 0 : _c.value) || "",
-            ogdescription: ((_d = document.querySelector('[name="ogdescription"]')) == null ? void 0 : _d.value) || "",
+            metatitle: getFieldOrNull("metatitle"),
+            metadescription: getFieldOrNull("metadescription"),
+            ogtitle: getFieldOrNull("ogtitle"),
+            ogdescription: getFieldOrNull("ogdescription"),
             ogimage: getImageSrc()
           };
+          const anyMissing = Object.values(currentValues).some((v) => v === null);
+          if (anyMissing) {
+            return;
+          }
           const valuesChanged = Object.keys(currentValues).some(
             (key) => this.lastFieldValues[key] !== currentValues[key]
           );
@@ -115,6 +163,9 @@
       handleDOMInput(event) {
         const target = event.target;
         const fieldName = target.name || target.getAttribute("name");
+        if (!target || target.offsetParent === null) {
+          return;
+        }
         const seoFields = ["metatitle", "metadescription", "ogtitle", "ogdescription", "ogimage"];
         if (fieldName && seoFields.includes(fieldName.toLowerCase())) {
           clearTimeout(this.updateTimeout);
@@ -137,7 +188,8 @@
       updatePreviewFromDOM() {
         const getFieldValue = (name) => {
           const input = document.querySelector(`[name="${name}"], [name="${name.toLowerCase()}"]`);
-          return input ? input.value : "";
+          if (!input) return null;
+          return input.value ?? "";
         };
         const getOgImage = () => {
           const ogImageField = document.querySelector(".k-field-name-ogimage");
@@ -159,7 +211,22 @@
           ogdescription: getFieldValue("ogdescription"),
           ogimage: getOgImage()
         };
-        const pageTitle = getFieldValue("title") || "Page Title";
+        const values = Object.values(seoData);
+        if (values.some((v) => v === null)) {
+          return;
+        }
+        const pageTitleValue = getFieldValue("title");
+        const pageTitle = pageTitleValue || "Page Title";
+        const allEmpty = [
+          seoData.metatitle,
+          seoData.metadescription,
+          seoData.ogtitle,
+          seoData.ogdescription
+        ].every((v) => !v || !String(v).trim());
+        const isPlaceholderTitle = !pageTitleValue;
+        if (allEmpty && isPlaceholderTitle && this.meta) {
+          return;
+        }
         this.updatePreviewFromData(seoData, pageTitle);
       },
       updatePreviewFromData(seoData, pageTitle) {
@@ -187,7 +254,10 @@
       },
       async load() {
         try {
-          const response = await this.$api.get(this.parent + "/sections/" + this.name);
+          const baseUrl = this.parent + "/sections/" + this.name;
+          const lang = this.currentLanguage;
+          const url = lang ? `${baseUrl}?language=${encodeURIComponent(lang)}` : baseUrl;
+          const response = await this.$api.get(url);
           let newMeta = null;
           if (response.meta) {
             newMeta = response.meta;
@@ -2375,7 +2445,24 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         if (this.validationSettings.pageId === "site") {
           return false;
         }
-        return this.validationSettings.appendSiteName;
+        if (!this.validationSettings.appendSiteName) {
+          return false;
+        }
+        const appendTo = this.validationSettings.appendSiteNameTo;
+        if (!appendTo) {
+          return true;
+        }
+        const types = appendTo.split(",").map((s) => s.trim());
+        return types.includes(this.fieldType);
+      },
+      titlePreview() {
+        if (!this.value) return "";
+        if (this.shouldAppendSiteName && this.validationSettings.siteMetaTitle) {
+          const separator = this.validationSettings.titleSeparator || "|";
+          const siteName = this.validationSettings.siteMetaTitle;
+          return `${this.value} ${separator} ${siteName}`;
+        }
+        return this.value;
       },
       validation() {
         if (!this.value) {
@@ -2434,7 +2521,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
   var _sfc_render$2 = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("k-field", _vm._b({ staticClass: "k-mk-title-field", scopedSlots: _vm._u([{ key: "default", fn: function() {
-      return [_c("k-input", { attrs: { "value": _vm.value, "type": "text", "placeholder": _vm.placeholder, "disabled": _vm.disabled }, on: { "input": _vm.onInput } }), _vm.validation.message ? _c("k-text", { staticClass: "k-mk-validation-message", attrs: { "theme": _vm.validation.theme } }, [_c("span", { class: "k-mk-validation-status-" + _vm.validation.status }, [_vm._v(_vm._s(_vm.charCount))]), _vm._v(" - " + _vm._s(_vm.validation.message) + " ")]) : _vm._e()];
+      return [_c("k-input", { attrs: { "value": _vm.value, "type": "text", "placeholder": _vm.placeholder, "disabled": _vm.disabled }, on: { "input": _vm.onInput } }), _vm.titlePreview && _vm.shouldAppendSiteName ? _c("div", { staticClass: "k-mk-title-preview" }, [_vm._v(" Preview: " + _vm._s(_vm.titlePreview) + " ")]) : _vm._e(), _vm.validation.message ? _c("k-text", { staticClass: "k-mk-validation-message", attrs: { "theme": _vm.validation.theme } }, [_c("span", { class: "k-mk-validation-status-" + _vm.validation.status }, [_vm._v(_vm._s(_vm.charCount))]), _vm._v(" - " + _vm._s(_vm.validation.message) + " ")]) : _vm._e()];
     }, proxy: true }]) }, "k-field", _vm.$props, false));
   };
   var _sfc_staticRenderFns$2 = [];
@@ -2566,6 +2653,29 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         if (!this.currentSlug) return 0;
         return (this.currentSlug.match(/\//g) || []).length;
       },
+      templateInfo() {
+        const template = this.validationSettings.template;
+        return template ? ` (${template})` : "";
+      },
+      wordsGuideline() {
+        const ranges = this.validationSettings.words;
+        if (!ranges) return "1-8";
+        const min = ranges.optimal.min;
+        const max = ranges.optimal.max;
+        return min === max ? `${min}` : `${min}-${max}`;
+      },
+      lengthGuideline() {
+        const ranges = this.validationSettings.length;
+        if (!ranges) return "1-60";
+        const min = ranges.optimal.min;
+        const max = ranges.optimal.max;
+        return min === max ? `${min}` : `${min}-${max}`;
+      },
+      depthGuideline() {
+        const ranges = this.validationSettings.depth;
+        if (!ranges) return "2";
+        return ranges.optimal.max;
+      },
       validation() {
         if (!this.currentSlug) {
           return {
@@ -2652,7 +2762,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
   var _sfc_render = function render() {
     var _vm = this, _c = _vm._self._c;
     return _c("k-field", _vm._b({ staticClass: "k-mk-slug-info-field", scopedSlots: _vm._u([{ key: "default", fn: function() {
-      return [_c("k-box", { staticClass: "k-mk-slug-validation-box", attrs: { "theme": _vm.validation.theme } }, [_c("div", { staticClass: "k-mk-slug-stats" }, [_c("div", { staticClass: "k-mk-slug-stat k-mk-slug-stat-slug" }, [_c("span", { staticClass: "k-mk-slug-stat-label" }, [_vm._v("Slug:")]), _c("span", { class: "k-mk-slug-stat-value k-mk-validation-status-" + _vm.validation.status }, [_vm._v(_vm._s(_vm.displaySlug))])]), _c("div", { staticClass: "k-mk-slug-stat" }, [_c("span", { staticClass: "k-mk-slug-stat-label" }, [_vm._v("Words:")]), _c("span", { class: "k-mk-slug-stat-value k-mk-validation-status-" + _vm.validation.wordsStatus }, [_vm._v(_vm._s(_vm.wordCount))])]), _c("div", { staticClass: "k-mk-slug-stat" }, [_c("span", { staticClass: "k-mk-slug-stat-label" }, [_vm._v("Length:")]), _c("span", { class: "k-mk-slug-stat-value k-mk-validation-status-" + _vm.validation.lengthStatus }, [_vm._v(_vm._s(_vm.slugLength) + " chars")])]), _c("div", { staticClass: "k-mk-slug-stat" }, [_c("span", { staticClass: "k-mk-slug-stat-label" }, [_vm._v("Depth:")]), _c("span", { class: "k-mk-slug-stat-value k-mk-validation-status-" + _vm.validation.depthStatus }, [_vm._v(_vm._s(_vm.depth) + " levels")])])]), _vm.validation.message ? _c("div", { staticClass: "k-mk-slug-info" }, [_vm.validation.message ? _c("div", { staticClass: "k-mk-slug-message" }, [_vm._v(" " + _vm._s(_vm.validation.message) + " ")]) : _vm._e(), _c("details", { staticClass: "k-mk-slug-guidelines" }, [_c("summary", [_vm._v("SEO Guidelines")]), _c("ul", [_c("li", [_c("strong", [_vm._v("Core pages:")]), _vm._v(" 1 word, ≤ 15 characters (e.g., /about, /services)")]), _c("li", [_c("strong", [_vm._v("Articles:")]), _vm._v(" 4-8 words, ≤ 60 characters")]), _c("li", [_c("strong", [_vm._v("Nesting:")]), _vm._v(" ≤ 2 levels deep for best crawling")]), _c("li", [_c("strong", [_vm._v("Best practices:")]), _vm._v(" Use hyphens, lowercase, descriptive keywords")])])])]) : _vm._e()])];
+      return [_c("k-box", { staticClass: "k-mk-slug-validation-box", attrs: { "theme": _vm.validation.theme } }, [_c("div", { staticClass: "k-mk-slug-stats" }, [_c("div", { staticClass: "k-mk-slug-stat k-mk-slug-stat-slug" }, [_c("span", { staticClass: "k-mk-slug-stat-label" }, [_vm._v("Slug:")]), _c("span", { class: "k-mk-slug-stat-value k-mk-validation-status-" + _vm.validation.status }, [_vm._v(_vm._s(_vm.displaySlug))])]), _c("div", { staticClass: "k-mk-slug-stat" }, [_c("span", { staticClass: "k-mk-slug-stat-label" }, [_vm._v("Words:")]), _c("span", { class: "k-mk-slug-stat-value k-mk-validation-status-" + _vm.validation.wordsStatus }, [_vm._v(_vm._s(_vm.wordCount))])]), _c("div", { staticClass: "k-mk-slug-stat" }, [_c("span", { staticClass: "k-mk-slug-stat-label" }, [_vm._v("Length:")]), _c("span", { class: "k-mk-slug-stat-value k-mk-validation-status-" + _vm.validation.lengthStatus }, [_vm._v(_vm._s(_vm.slugLength) + " chars")])]), _c("div", { staticClass: "k-mk-slug-stat" }, [_c("span", { staticClass: "k-mk-slug-stat-label" }, [_vm._v("Depth:")]), _c("span", { class: "k-mk-slug-stat-value k-mk-validation-status-" + _vm.validation.depthStatus }, [_vm._v(_vm._s(_vm.depth) + " levels")])])]), _vm.validation.message ? _c("div", { staticClass: "k-mk-slug-info" }, [_vm.validation.message ? _c("div", { staticClass: "k-mk-slug-message" }, [_vm._v(" " + _vm._s(_vm.validation.message) + " ")]) : _vm._e(), _c("details", { staticClass: "k-mk-slug-guidelines" }, [_c("summary", [_vm._v("SEO Guidelines" + _vm._s(_vm.templateInfo))]), _c("ul", [_c("li", [_c("strong", [_vm._v("Words:")]), _vm._v(" " + _vm._s(_vm.wordsGuideline))]), _c("li", [_c("strong", [_vm._v("Length:")]), _vm._v(" " + _vm._s(_vm.lengthGuideline) + " characters")]), _c("li", [_c("strong", [_vm._v("Nesting:")]), _vm._v(" ≤ " + _vm._s(_vm.depthGuideline) + " levels deep for best crawling")]), _c("li", [_c("strong", [_vm._v("Best practices:")]), _vm._v(" Use hyphens, lowercase, descriptive keywords")])])])]) : _vm._e()])];
     }, proxy: true }]) }, "k-field", _vm.$props, false));
   };
   var _sfc_staticRenderFns = [];

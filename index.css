@@ -1711,8 +1711,19 @@
 
 .k-mk-title-field .k-mk-validation-message {
   display: block;
+  padding: 0 1rem;
   margin-top: 0.5rem;
   font-size: 0.875rem;
+}
+.k-mk-title-preview {
+  display: none;
+  margin-top: 0.5rem;
+  padding: 0.2rem 1rem 0;
+  background: var(--color-background);
+  border-radius: var(--rounded-xs);
+  font-size: 0.875rem;
+  color: var(--color-text-dimmed);
+  font-style: italic;
 }
 .k-mk-validation-status-optimal {
   font-weight: 600;
@@ -1725,6 +1736,9 @@
 .k-mk-validation-status-error {
   font-weight: 600;
   color: var(--color-red-600);
+}
+.k-panel[data-color-scheme="dark"] .k-mk-title-preview {
+  background: var(--color-black);
 }
 .k-panel[data-color-scheme="dark"] .k-mk-validation-status-optimal {
   color: var(--color-green-400);
@@ -1742,6 +1756,7 @@
 .k-mk-description-field .k-mk-validation-message {
   display: block;
   margin-top: 0.5rem;
+  padding: 0 1rem;
   font-size: 0.875rem;
 }
 .k-mk-validation-status-optimal {

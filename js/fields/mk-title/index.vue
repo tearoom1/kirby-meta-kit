@@ -8,6 +8,9 @@
         :placeholder="placeholder"
         :disabled="disabled"
       />
+      <div v-if="titlePreview && shouldAppendSiteName" class="k-mk-title-preview">
+        Preview: {{ titlePreview }}
+      </div>
       <k-text v-if="validation.message" class="k-mk-validation-message" :theme="validation.theme">
         <span :class="'k-mk-validation-status-' + validation.status">{{ charCount }}</span> - {{ validation.message }}
       </k-text>
@@ -54,7 +57,33 @@ export default {
       if (this.validationSettings.pageId === 'site') {
         return false;
       }
-      return this.validationSettings.appendSiteName;
+
+      // Check if appendSiteName is enabled
+      if (!this.validationSettings.appendSiteName) {
+        return false;
+      }
+
+      // Check appendSiteNameTo setting (comma-separated string like "meta,og" or "meta" or "og")
+      const appendTo = this.validationSettings.appendSiteNameTo;
+      if (!appendTo) {
+        // If not set, fallback to old behavior (append to all)
+        return true;
+      }
+
+      // Check if current field type is in the list
+      const types = appendTo.split(',').map(s => s.trim());
+      return types.includes(this.fieldType);
+    },
+    titlePreview() {
+      if (!this.value) return '';
+
+      if (this.shouldAppendSiteName && this.validationSettings.siteMetaTitle) {
+        const separator = this.validationSettings.titleSeparator || '|';
+        const siteName = this.validationSettings.siteMetaTitle;
+        return `${this.value} ${separator} ${siteName}`;
+      }
+
+      return this.value;
     },
     validation() {
       if (!this.value) {
@@ -120,8 +149,20 @@ export default {
 <style>
 .k-mk-title-field .k-mk-validation-message {
   display: block;
+  padding: 0 1rem;
   margin-top: 0.5rem;
   font-size: 0.875rem;
+}
+
+.k-mk-title-preview {
+  display: none;
+  margin-top: 0.5rem;
+  padding: 0.2rem 1rem 0;
+  background: var(--color-background);
+  border-radius: var(--rounded-xs);
+  font-size: 0.875rem;
+  color: var(--color-text-dimmed);
+  font-style: italic;
 }
 
 .k-mk-validation-status-optimal {
@@ -137,6 +178,10 @@ export default {
 .k-mk-validation-status-error {
   font-weight: 600;
   color: var(--color-red-600);
+}
+
+.k-panel[data-color-scheme="dark"] .k-mk-title-preview {
+  background: var(--color-black);
 }
 
 .k-panel[data-color-scheme="dark"] .k-mk-validation-status-optimal {

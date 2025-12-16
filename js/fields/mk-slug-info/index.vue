@@ -27,11 +27,11 @@
       </div>
 
       <details class="k-mk-slug-guidelines">
-        <summary>SEO Guidelines</summary>
+        <summary>SEO Guidelines{{ templateInfo }}</summary>
         <ul>
-          <li><strong>Core pages:</strong> 1 word, ≤ 15 characters (e.g., /about, /services)</li>
-          <li><strong>Articles:</strong> 4-8 words, ≤ 60 characters</li>
-          <li><strong>Nesting:</strong> ≤ 2 levels deep for best crawling</li>
+          <li><strong>Words:</strong> {{ wordsGuideline }}</li>
+          <li><strong>Length:</strong> {{ lengthGuideline }} characters</li>
+          <li><strong>Nesting:</strong> ≤ {{ depthGuideline }} levels deep for best crawling</li>
           <li><strong>Best practices:</strong> Use hyphens, lowercase, descriptive keywords</li>
         </ul>
       </details>
@@ -70,6 +70,29 @@ export default {
     depth() {
       if (!this.currentSlug) return 0;
       return (this.currentSlug.match(/\//g) || []).length;
+    },
+    templateInfo() {
+      const template = this.validationSettings.template;
+      return template ? ` (${template})` : '';
+    },
+    wordsGuideline() {
+      const ranges = this.validationSettings.words;
+      if (!ranges) return '1-8';
+      const min = ranges.optimal.min;
+      const max = ranges.optimal.max;
+      return min === max ? `${min}` : `${min}-${max}`;
+    },
+    lengthGuideline() {
+      const ranges = this.validationSettings.length;
+      if (!ranges) return '1-60';
+      const min = ranges.optimal.min;
+      const max = ranges.optimal.max;
+      return min === max ? `${min}` : `${min}-${max}`;
+    },
+    depthGuideline() {
+      const ranges = this.validationSettings.depth;
+      if (!ranges) return '2';
+      return ranges.optimal.max;
     },
     validation() {
       if (!this.currentSlug) {

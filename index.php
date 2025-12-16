@@ -65,8 +65,8 @@ App::plugin(
                         'warning' => ['min' => 1, 'max' => 10],
                     ],
                     'length' => [
-                        'optimal' => ['min' => 1, 'max' => 60],
-                        'warning' => ['min' => 1, 'max' => 70],
+                        'optimal' => ['min' => 4, 'max' => 60],
+                        'warning' => ['min' => 3, 'max' => 70],
                     ],
                     'wordLength' => [
                         'optimal' => ['min' => 1, 'max' => 15],

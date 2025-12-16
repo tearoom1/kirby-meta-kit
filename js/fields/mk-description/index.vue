@@ -109,6 +109,7 @@ export default {
 .k-mk-description-field .k-mk-validation-message {
   display: block;
   margin-top: 0.5rem;
+  padding: 0 1rem;
   font-size: 0.875rem;
 }
 
