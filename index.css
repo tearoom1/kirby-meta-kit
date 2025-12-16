@@ -1774,7 +1774,7 @@
 .k-mk-description-textarea {
     display: block;
 }
-.k-mk-description-field .k-mk-validation-message {
+.k-mk-validation-message {
     display: block;
     padding: 0 1rem;
     font-size: 0.875rem;
