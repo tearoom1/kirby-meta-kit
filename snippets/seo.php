@@ -19,7 +19,7 @@ $seoData = $page->metaKitSeo()->toBlocks()->first()?->content();
 $siteSeo = $site->metaKitSeo()->toBlocks()->first()?->content();
 
 // Check license status
-$hasValidLicense = MetaKit::hasValidLicense();
+$hasValidLicense = true; // no limit for demo //MetaKit::hasValidLicense();
 $charLimit = $hasValidLicense ? null : 20;
 
 // ==============================================================
