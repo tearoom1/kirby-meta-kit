@@ -1,589 +1,828 @@
 # Kirby Meta Kit
 
-AI-powered SEO plugin for Kirby 4 with automatic meta descriptions, live previews, sitemap generation, and Schema.org support.
+The complete SEO solution for Kirby CMS with AI-powered content generation, real-time validation, and comprehensive metadata management.
 
-[![Screenshot](screenshot.jpg)](https://github.com/tearoom1/kirby-content-watch)
+[![Screenshot](screenshot.jpg)](https://github.com/tearoom1/kirby-meta-kit)
+
+## Why Meta Kit?
+
+### For Content Editors
+- **Single Point of Overview**: Meta Kit provides a unified interface for managing metadata, making it easier to keep track of your SEO efforts
+- **Clear Guidelines**: Visual validation shows exactly what's optimal (green), acceptable (orange), or needs fixing (red)
+- **AI Assistant**: Generate SEO-optimized content with one click, automatically matching your configured character limits
+- **Live Previews**: See exactly how your content appears on Google, Twitter, and Facebook before publishing
+- **Bulk Operations**: Edit metadata for multiple pages simultaneously with an efficient table interface
+- **Template-Specific Rules**: Different page types can have different SEO requirements (blog posts vs. product pages)
+
+### For Developers & Agencies
+- **Enforce Standards**: Set validation ranges globally or per template to ensure consistent SEO quality
+- **Client-Friendly**: Editors get immediate feedback without needing SEO expertise
+- **AI Integration**: Uses OpenRouter (free tier available) for cost-effective AI generation
+- **Time-Saving**: Bulk edit hundreds of pages
+- **Complete Solution**: Meta tags, Schema.org, sitemap, robots.txt - everything in one plugin
+
+### Key Advantages
+
+1. **Smart Validation System**
+   - Set character length rules for titles and descriptions
+   - Configure different rules per page template (e.g., articles vs. products)
+   - Visual feedback: green (optimal), orange (acceptable), red (fix needed)
+   - Accounts for site name appending in title length calculations
+
+2. **AI That Follows Your Rules**
+   - AI-generated content automatically matches your validation ranges
+   - Template-specific: AI knows that articles need longer titles than product pages
+   - Site name aware: Automatically adjusts title length when site name will be appended
+   - Multilingual: Generates content in the current language with appropriate formality
+
+3. **Professional Panel Interface**
+   - Dedicated Meta Kit area in main menu with dashboard and statistics
+   - Bulk editor: Edit multiple pages in a table view with inline AI generation
+   - Real-time character counters with validation feedback
+   - Slug validation: Check URL structure, depth, and keyword usage
+
+4. **Complete SEO Coverage**
+   - Meta tags (title, description, robots, canonical)
+   - OpenGraph & Twitter Cards with optimized images
+   - Schema.org JSON-LD structured data
+   - XML sitemap with visual configuration
+   - Dynamic robots.txt with bot blocking
+
+---
 
 ## Features
 
-- 🎛️ Dedicated Panel area for metadata management
-- 🤖 AI-powered meta titles & descriptions via OpenRouter
-- 👁️ Live panel previews (Google, Twitter, Facebook)
-- ⚡ Bulk operations & legacy field migration
-- 🗺️ Styled XML sitemap with multilanguage support
-- 🤖 Dynamic robots.txt with user agent rules
-- 🏗️ Schema.org JSON-LD structured data
-- 📱 OpenGraph & Twitter Cards (1200×630px)
-- 🌍 Full multilanguage support with hreflang
-- 🎯 Configurable title format & separators
-- ⚡ Kirby 4 & 5 compatible
+- 🎯 **Smart Validation** - Template-specific character limits with visual feedback
+- 🤖 **AI Generation** - Auto-generates SEO content matching your validation rules
+- 🎛️ **Panel Dashboard** - Dedicated area for metadata management
+- 👁️ **Live Previews** - See Google, Twitter, Facebook appearance in real-time
+- ⚡ **Bulk Operations** - Edit multiple pages simultaneously
+- 📊 **Slug Validation** - Checks URL depth, word count, and length
+- 🗺️ **Sitemap** - Styled XML with multilanguage & priority support
+- 🤖 **Robots.txt** - Dynamic generation with bad bot blocking
+- 🏗️ **Schema.org** - JSON-LD structured data
+- 📱 **Social Media** - OpenGraph & Twitter Cards (1200×630px)
+- 🌍 **Multilanguage** - Full support with hreflang tags
+- 🔄 **Legacy Migration** - Convert old SEO fields to Meta Kit format
+- ⚡ **Kirby 5** - Fully compatible with latest version
+
+---
 
 ## Installation
 
-### Via Composer
+### Via Composer (Recommended)
 
 ```bash
 composer require tearoom1/kirby-meta-kit
 ```
 
-### Manual
+### Manual Installation
 
-1. Copy to `site/plugins/meta-kit`
-2. Run `composer install` inside plugin directory
-3. Get free API key from [OpenRouter.ai](https://openrouter.ai/)
+1. Download and extract to `site/plugins/meta-kit`
+2. Run `composer install` inside the plugin directory
+3. Get a free API key from [OpenRouter.ai](https://openrouter.ai/) (optional, for AI features)
 
-## Configuration
-
-The plugin uses two configuration layers that work together:
-
-### 1. Config File (`site/config/config.php`)
-
-Core plugin settings, API credentials, and feature toggles:
-
-```php
-'tearoom1.meta-kit' => [
-    // AI Integration
-    'ai.enabled' => true,                      // Enable/disable AI features (auto-disabled if no key/model)
-
-    // AI Generation (Required for AI features)
-    'api.key' => 'sk-or-v1-YOUR-KEY',         // Your OpenRouter API key (leave empty to disable AI)
-    'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',  // AI model (leave empty to disable AI)
-    'api.temperature' => 0.7,                  // Creativity: 0.1 (focused) to 1.0 (creative)
-    'ai.tone' => 'formal',                     // Language tone: 'formal' (Sie/vous) or 'informal' (du/tu)
-
-    // SEO Settings
-    'maxDescriptionLength' => 160,             // Max meta description length
-
-    // AI Prompts (optional - customize AI generation behavior)
-    'ai.prompt.title' => "Write a clear, direct meta title {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be specific and factual. Focus on what the page is actually about. {tone} Write ONLY the title, nothing else.\n\nTitle:",
-    'ai.prompt.description' => "Write a clear, informative meta description {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be direct and specific. Describe what the page actually contains. {tone} Write ONLY the description, nothing else.\n\nDescription:",
-
-    // Feature Toggles
-    'sitemap.enabled' => true,                 // Enable/disable sitemap generation
-    'sitemap.exclude' => ['error', 'drafts'],  // Page IDs to exclude from sitemap
-    'schema.enabled' => true,                  // Enable/disable Schema.org JSON-LD
-    'autoGenerate' => false,                   // Auto-generate descriptions on page save
-    'excludeTemplates' => [],                  // Page templates to exclude from table (e.g. ['error', 'assets'])
-    'excludeStatus' => [],                     // Page status to exclude from table (e.g. ['draft', 'unlisted'])
-]
-```
-
-**Key Options Explained:**
-
-- **`ai.enabled`**: Explicitly enable/disable AI features. When `false`, AI buttons are hidden from the panel and all AI-related routes are disabled.
-- **Auto-Disable**: AI features are automatically disabled if both `api.key` and `api.model` are empty, even if `ai.enabled` is `true`.
-- **`api.temperature`** (0.1-1.0): Controls AI creativity. Lower values (0.3) = consistent, factual. Higher values (0.9) = varied, creative. Default 0.7 is balanced.
-- **`ai.tone`**: Controls language formality in AI-generated content. Options:
-  - `'formal'` (default): Uses formal address forms (Sie in German, vous in French, usted in Spanish)
-  - `'informal'`: Uses informal address forms (du in German, tu in French, tú in Spanish)
-- **`ai.prompt.title`** / **`ai.prompt.description`**: Customize the AI prompts. Available placeholders:
-  - `{optimal_length}`: Uses the values set in `validation.ranges` or `validation.templates.template.ranges`
-  - `{language}`: Language name (e.g., "German", "English")
-  - `{content}`: Page content for context
-  - `{tone}`: Automatically replaced with tone instruction based on `ai.tone` setting
-- **`autoGenerate`**: When `true`, automatically generates descriptions when saving pages. Recommended: `false` (use panel button instead for control).
-- **`sitemap.exclude`**: Array of page IDs or regex patterns. Pages matching these won't appear in sitemap.
-
-**Disabling AI Features:**
-
-To completely disable AI integration:
-
-```php
-'tearoom1.meta-kit' => [
-    'ai.enabled' => false,  // Explicitly disable
-]
-```
-
-Or simply leave API credentials empty:
-
-```php
-'tearoom1.meta-kit' => [
-    'api.key' => '',     // Empty key auto-disables AI
-    'api.model' => '',   // Empty model auto-disables AI
-]
-```
-
-When AI is disabled:
-- AI generation buttons are hidden in the panel
-- `meta-kit-generator` field shows an info message instead of the generate button
-- AI-related API routes are not registered
-- Page methods (`generateSeoDescription()`) return `null`
-- The plugin still provides manual SEO field management and sitemap generation
-
-**Example Custom Prompt:**
-
-```php
-'ai.prompt.description' => "Create a professional meta description (max 160 chars) in {language} for:\n\n{content}\n\nUse a formal tone. Focus on benefits and value. Include a call-to-action. Write ONLY the description:\n\n",
-```
-
-### Validation ranges (Panel table)
-
-The Meta Kit table validates the character lengths for title/description fields. You can configure the ranges globally and override them per template.
-
-The template key must match `page.template` as shown in the Meta Kit table (e.g. `default`, `home`, `article`, ...).
-
-Slug validation uses the page `id` (path) and validates depth (slashes), word count (split by `-` and `_`), total length and average word length.
-
-**Example: base page like `/products` (template: `default`) + news article (template: `article`)**
-
-```php
-'tearoom1.meta-kit' => [
-  'validation' => [
-    'ranges' => [
-      'title' => ['optimal' => ['min' => 20, 'max' => 60], 'warning' => ['min' => 15, 'max' => 75]],
-      'ogTitle' => ['optimal' => ['min' => 20, 'max' => 60], 'warning' => ['min' => 15, 'max' => 75]],
-      'description' => ['optimal' => ['min' => 140, 'max' => 160], 'warning' => ['min' => 126, 'max' => 176]],
-      'ogDescription' => ['optimal' => ['min' => 150, 'max' => 250], 'warning' => ['min' => 135, 'max' => 300]],
-    ],
-    'slug' => [
-      'depth' => [
-        'optimal' => ['min' => 0, 'max' => 2],
-        'warning' => ['min' => 0, 'max' => 3],
-      ],
-      'words' => [
-        'optimal' => ['min' => 1, 'max' => 8],
-        'warning' => ['min' => 1, 'max' => 10],
-      ],
-      'length' => [
-        'optimal' => ['min' => 1, 'max' => 60],
-        'warning' => ['min' => 1, 'max' => 70],
-      ],
-      'wordLength' => [
-        'optimal' => ['min' => 1, 'max' => 15],
-        'warning' => ['min' => 1, 'max' => 20],
-      ],
-    ],
-    'templates' => [
-      'default' => [
-        'ranges' => [
-          'title' => ['optimal' => ['min' => 40, 'max' => 60], 'warning' => ['min' => 30, 'max' => 75]],
-        ],
-      ],
-      'article' => [
-        'ranges' => [
-          'title' => ['optimal' => ['min' => 40, 'max' => 65], 'warning' => ['min' => 30, 'max' => 75]],
-        ],
-        'slug' => [
-          'words' => [
-            'optimal' => ['min' => 5, 'max' => 8],
-            'warning' => ['min' => 3, 'max' => 10],
-          ],
-          'length' => [
-            'optimal' => ['min' => 20, 'max' => 60],
-            'warning' => ['min' => 15, 'max' => 75],
-          ],
-        ],
-      ],
-    ],
-  ],
-]
-```
-
-### 2. Site Settings (Panel)
-
-Content-focused settings managed in **Site → SEO & Social Media**:
-
-**SEO Tab:**
-- Title separator (|, -, •, etc.)
-- Auto-append site name toggle
-- Default meta title, description, keywords
-- Default social media image
-
-**Social Media Tab:**
-- Social profile URLs (Facebook, Twitter, LinkedIn, etc.)
-- Added to Schema.org for `sameAs` property
-
-**Sitemap Tab:**
-- Visual page selector to exclude from sitemap
-- Homepage priority (0.1-1.0)
-- Default page priority (0.1-1.0)
-
-### How Settings Merge
-
-**API & Sitemap Settings:** Plugin defaults → Site panel → `config.php` (highest priority)
-
-**Page Metadata:** Site defaults → Page fields (highest priority)
-
-Examples:
-- AI model: Set in panel, but `config.php` overrides it
-- Meta description: Page field overrides site default
-- Sitemap exclusions: Visual panel selector + `config.php` regex patterns work together
+---
 
 ## Quick Start
 
-### 1. Add Snippet to Template
+### 1. Add SEO Snippet
+
+Add this single line to your template's `<head>` section:
 
 ```php
 <head>
     <?php snippet('meta-kit/seo') ?>
+    <!-- Your other head content -->
 </head>
 ```
 
-This single snippet includes:
-- Meta tags (title, description, canonical, keywords)
-- OpenGraph & Twitter Cards
+This snippet automatically includes:
+- All meta tags (title, description, robots, canonical, keywords)
+- OpenGraph and Twitter Card tags
 - Schema.org JSON-LD structured data
-
-**Control what's included:**
-```php
-// In site/config/config.php
-'tearoom1.meta-kit' => [
-    'meta.enabled' => true,       // Meta tags
-    'opengraph.enabled' => true,  // OG & Twitter
-    'schema.enabled' => true,     // Schema.org
-]
-```
+- Hreflang tags for multilingual sites
 
 ### 2. Extend Blueprints
 
-**Site settings:**
+**Site Settings** (`site/blueprints/site.yml`):
 ```yaml
-# site/blueprints/site.yml
 tabs:
   seo:
     extends: meta-kit/site
 ```
 
-**Page SEO:**
+**Page SEO** (`site/blueprints/pages/default.yml`):
 ```yaml
-# site/blueprints/pages/default.yml
 tabs:
   seo:
     extends: meta-kit/page
 ```
 
-### 3. Use Panel Features
+### 3. Configure Basic Settings
 
-#### Meta Kit Area
-
-The plugin adds a **Meta Kit** section to the Kirby Panel main menu with powerful metadata management tools:
-
-**Features:**
-- **Overview Dashboard:** Statistics showing metadata coverage across all pages (including site)
-- **Bulk Operations:** Edit multiple pages at once with a table-based interface
-  - Column-based layout for efficient editing
-  - Edit meta title and description inline
-  - AI generation buttons for each field
-  - Character counters with validation (green/orange)
-  - Apply changes with a single click
-- **Legacy Migration:** Detect and convert old SEO fields to the new structure
-- **Quick Edit:** Single-page metadata editor accessible from the main table
-- **AI Generation:** Generate optimized meta and OG titles and descriptions
-  - **Title and Description Length:** Automatically adjusts title length according to validation values
-
-**Access:** Click **"Meta Kit"** (wand icon) in the Panel sidebar
-
-**Page Editor:**
-* **Live Preview:** See real-time Google/Twitter/Facebook appearance
-* **AI Generator:** Click "Generate with AI" button for optimized content
-* **Manual Override:** Edit metadata directly in each page's SEO tab
-* **Languages:** Auto-detects language (de, en, fr, es, it)
-
-## What's Included
-
-* **Panel Area:** Dedicated metadata management interface with dashboard and bulk operations
-* **Unified Snippet:** Single `meta-kit/seo` snippet for all SEO needs
-* **Meta Tags:** Title, description, keywords, canonical, noindex, hreflang
-* **Social Media:** OpenGraph & Twitter Cards with optimized images (1200×630px)
-* **Schema.org:** Organization, WebSite, WebPage, BreadcrumbList (JSON-LD)
-* **Sitemap:** `/sitemap.xml` with styled view, exclusions, priorities
-* **Robots.txt:** `/robots.txt` with user agent rules, bad bot blocking, and Panel configuration
-* **AI Generation:** Smart meta titles (auto-adjusted for site name) & descriptions (max 160 chars)
-* **Multilanguage:** Full support with hreflang tags and og:locale
-* **Configurable:** Toggle meta/opengraph/schema individually
-
-## Programmatic Usage
+Add to `site/config/config.php`:
 
 ```php
-// Generate meta title (auto-adjusts for site name)
-$title = $page->generateSeoTitle();
-$title = $page->generateSeoTitle($content, 'de');
-$title = $page->text()->toSeoTitle();
-
-// Generate meta description
-$desc = $page->generateSeoDescription();
-$desc = $page->generateSeoDescription($content, 'de');
-$desc = $page->text()->toSeoDescription();
+return [
+    'tearoom1.meta-kit' => [
+        // Optional: Add AI features
+        'api.key' => 'sk-or-v1-YOUR-KEY',
+        'api.model' => 'google/gemini-2.0-flash-exp:free',
+    ]
+];
 ```
 
-## API Endpoint
+That's it! You now have:
+- ✅ SEO metadata fields in your pages
+- ✅ Site-wide SEO settings
+- ✅ Automatic sitemap at `/sitemap.xml`
+- ✅ Dynamic robots.txt at `/robots.txt`
+- ✅ (Optional) AI-powered content generation
 
-```bash
-POST /api/seo-ai/generate
-{"text": "content", "language": "de"}
-# Returns: {"status": "success", "description": "..."}
-```
+---
 
-## Best Practices
+## Configuration
 
-* **Meta Titles:**
-  - Target 50-60 characters total (including site name)
-  - AI generation automatically accounts for site name length
-  - Place primary keywords near the beginning
-  - Make titles compelling and clickable
-  - Avoid ALL CAPS unless brand requires it
-* **Meta Descriptions:** <160 chars, unique per page, include keywords
-* **OG Images:** 1200×630px, PNG/JPG, avoid text-heavy images
-* **Auto-Generate:** Use panel button instead of auto-save for better control
+Meta Kit uses a two-layer configuration system for maximum flexibility:
 
-## Robots.txt Management
+### Layer 1: Config File (Technical Settings)
 
-Meta Kit provides a powerful, fully configurable robots.txt generator that's managed through the Kirby Panel or config file.
+**Location**: `site/config/config.php`
 
-### Features
-
-- **Panel Interface**: Configure robots.txt rules visually in Site settings
-- **User Agent Rules**: Create specific rules for different crawlers (Googlebot, Bingbot, etc.)
-- **Bad Bot Blocking**: Automatically block known scrapers and spam bots
-- **Sitemap Integration**: Automatically includes sitemap reference
-- **Config Override**: Override or extend panel settings via config.php
-- **Custom Directives**: Add advanced directives like Host, Crawl-delay, etc.
-
-### Access Robots.txt
-
-Your robots.txt file is automatically available at:
-```
-https://yoursite.com/robots.txt
-```
-
-### Panel Configuration
-
-1. Go to **Site → Robots.txt** in the Panel
-2. Enable "Custom Robots.txt"
-3. Add user agent rules as needed
-4. Configure options:
-   - Include default rules (Allow: /)
-   - Include sitemap reference
-   - Block known bad bots
-
-### Adding Custom Rules
-
-**In the Panel:**
-
-1. Click "Add" under User Agent Rules
-2. Select a user agent (or choose "Custom")
-3. Add allowed/disallowed paths
-4. Set optional crawl delay
-5. Save
-
-**Example Panel Configuration:**
-
-- **User Agent**: Googlebot
-- **Allowed Paths**: /images/, /assets/
-- **Disallowed Paths**: /panel/, /api/
-- **Crawl Delay**: 0 (no delay)
-
-### Config File Configuration
-
-Override or extend panel settings in `site/config/config.php`:
+This is where developers set technical defaults, validation rules, and AI integration.
 
 ```php
 'tearoom1.meta-kit' => [
+    // ====================================
+    // AI INTEGRATION
+    // ====================================
+
+    'ai.enabled' => true,  // Master toggle for AI features
+
+    // OpenRouter API Configuration
+    'api.key' => 'sk-or-v1-YOUR-KEY',  // Get free key at openrouter.ai
+    'api.model' => 'google/gemini-2.0-flash-exp:free',  // See available models below
+    'api.temperature' => 0.7,  // 0.1 (focused) to 1.0 (creative)
+
+    // AI Behavior
+    'ai.tone' => 'formal',  // 'formal' (Sie/vous) or 'informal' (du/tu)
+
+    // ====================================
+    // VALIDATION RULES
+    // ====================================
+
+    'validation' => [], // see below
+
+    // ====================================
+    // FEATURES
+    // ====================================
+
+    'sitemap.enabled' => true,
+    'sitemap.exclude' => ['error', 'drafts'],  // Page IDs or patterns
+    'schema.enabled' => true,
+    'autoGenerate' => false,  // Auto-generate on save (not recommended)
+    'excludeTemplates' => [],  // Hide from panel table
+    'excludeStatus' => [],  // Hide draft/unlisted pages
+
+    // Robots.txt configuration
     'robots' => [
-        // Enable/disable custom robots.txt
         'enabled' => true,
-
-        // Include default "User-agent: * / Allow: /" rules
+        'blockBadBots' => true,  // Block AhrefsBot, SemrushBot, etc.
         'defaultRules' => true,
-
-        // Include sitemap reference
         'includeSitemap' => true,
-
-        // Block known bad bots
-        'blockBadBots' => true,
-
-        // Custom rules (extends panel rules)
-        'rules' => [
-            [
-                'userAgent' => 'Googlebot',
-                'allow' => ['/images/', '/assets/'],
-                'disallow' => ['/panel/', '/api/'],
-                'crawlDelay' => 0,
-            ],
-            [
-                'userAgent' => 'AhrefsBot',
-                'disallow' => ['/'], // Block completely
-            ],
-        ],
-
-        // Custom directives (advanced)
-        'customDirectives' => 'Host: www.example.com',
     ],
-]
+
+    // Legacy migration (old SEO fields)
+    'legacyMigration' => false,
+];
 ```
 
-### Common Use Cases
+### Layer 2: Panel Settings (Content Settings)
 
-**1. Block Specific Directories**
+**Location**: Site → SEO & Social Media in Kirby Panel
 
-```php
-'rules' => [
-    [
-        'userAgent' => '*',
-        'disallow' => ['/panel/', '/api/', '/admin/'],
-    ],
-]
-```
+This is where editors configure site-wide content defaults and behavior:
 
-**2. Allow Only Search Engines**
+**SEO Tab:**
+- Default meta title and description
+- Title separator (`|`, `-`, `•`, etc.)
+- Auto-append site name toggle
+- Choose which field types get site name (meta only, OG only, or both)
+- Default robots directive
 
-```php
-'rules' => [
-    [
-        'userAgent' => 'Googlebot',
-        'allow' => ['/'],
-    ],
-    [
-        'userAgent' => 'Bingbot',
-        'allow' => ['/'],
-    ],
-    [
-        'userAgent' => '*',
-        'disallow' => ['/'], // Block all others
-    ],
-]
-```
+**OpenRouter Tab (AI Settings):**
+- API key and model selection
+- Creativity level (temperature slider)
+- Can override config.php settings if needed
 
-**3. Rate Limiting for Aggressive Crawlers**
+**Social Media Tab:**
+- Social profile URLs (Facebook, Twitter, LinkedIn, etc.)
+- Used in Schema.org `sameAs` property
 
-```php
-'rules' => [
-    [
-        'userAgent' => 'Bingbot',
-        'allow' => ['/'],
-        'crawlDelay' => 10, // 10 seconds between requests
-    ],
-]
-```
+**Sitemap Tab:**
+- Visual page selector for exclusions
+- Homepage priority (0.1-1.0)
+- Default page priority
 
-**4. Block Bad Bots**
-
-Enable in Panel or config:
-
-```php
-'robots' => [
-    'blockBadBots' => true, // Blocks AhrefsBot, SemrushBot, MJ12bot, etc.
-]
-```
-
-### Blocked Bad Bots
-
-When "Block Bad Bots" is enabled, these user agents are automatically blocked:
-
-- AhrefsBot
-- SemrushBot
-- MJ12bot
-- DotBot
-- BLEXBot
-- PetalBot
-- DataForSeoBot
-- Pinterestbot/1.0
-- MegaIndex.ru
-- SeekportBot
-- serpstatbot
-- AspiegelBot
+**Robots.txt Tab:**
+- Enable/disable custom robots.txt
+- User agent rules (per-bot configuration)
+- Allowed and disallowed paths
+- Crawl delay settings
 
 ### Settings Priority
 
 Settings merge in this order (lowest to highest priority):
 
-1. **Plugin Defaults** - Basic allow all rules
-2. **Panel Settings** - Configured in Site → Robots.txt
-3. **Config File** - `tearoom1.meta-kit.robots` settings
+1. **Plugin Defaults** - Built-in fallback values
+2. **Panel Settings** - Configured by editors
+3. **Config File** - Developer overrides (highest priority)
 
-Rules from config **extend** (not replace) panel rules.
-
-### Generated Robots.txt Example
-
-```
-# Robots.txt for https://example.com
-# Generated by Meta Kit for Kirby
-
-User-agent: Googlebot
-Allow: /images/
-Allow: /assets/
-Disallow: /panel/
-Disallow: /api/
-
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 5
-
-# Block known scrapers and spam bots
-User-agent: AhrefsBot
-Disallow: /
-
-User-agent: SemrushBot
-Disallow: /
-
-User-agent: *
-Allow: /
-
-Sitemap: https://example.com/sitemap.xml
-```
-
-### Testing Your Robots.txt
-
-1. Visit `https://yoursite.com/robots.txt` to see generated content
-2. Use [Google's Robots Testing Tool](https://www.google.com/webmasters/tools/robots-testing-tool)
-3. Verify syntax with [robots.txt validators](https://www.google.com/webmasters/tools/home)
-
-### Troubleshooting
-
-**Robots.txt not showing:**
-- Check route is registered in routes.php (line 19-21)
-- Clear Kirby cache
-- Verify no .htaccess rules block /robots.txt
-
-**Rules not applying:**
-- Check Panel settings are saved
-- Verify config syntax is correct
-- Review generated output at /robots.txt
-- Ensure "Enable Custom Robots.txt" toggle is ON
-
-**Bad bots still crawling:**
-- Some bots ignore robots.txt (add server-level blocks)
-- Check server logs for actual user agent names
-- Use .htaccess or firewall rules for persistent offenders
+**Examples:**
+- AI model set in Panel can be overridden in config.php
+- Validation ranges in config.php apply unless template-specific rules exist
+- Sitemap exclusions from Panel and config.php work together (combined)
 
 ---
 
-## Legacy Migration (old SEO fields → Meta Kit)
+## Validation System
 
-- Runs across all languages.
-- Cleans up old legacy fields.
+The validation system is Meta Kit's secret weapon for maintaining SEO quality across your entire site.
 
-Enable migration routes in your config:
+### How It Works
+
+1. **Visual Feedback**
+   - 🟢 **Green**: Optimal length (recommended for best SEO performance)
+   - 🟠 **Orange**: Acceptable length (will work, but not ideal)
+   - 🔴 **Red**: Too short or too long (should be fixed)
+
+2. **Real-Time Validation**
+   - Character counters update as you type
+   - Validation messages guide editors
+   - Accounts for site name in title length
+
+3. **Template-Specific Rules**
+   - Different page types can have different requirements
+   - Example: Blog posts need longer, keyword-rich titles
+   - Example: Product pages need concise, action-oriented descriptions
+
+### Setting Validation Ranges
+
+#### Global Defaults
+
+Set baseline rules for all pages in `site/config/config.php`:
 
 ```php
-'tearoom1.meta-kit' => [
-  'legacyMigration' => true,
+'validation' => [
+    'ranges' => [
+        'title' => [
+            'optimal' => ['min' => 20, 'max' => 60],  // Green zone
+            'warning' => ['min' => 15, 'max' => 75],  // Orange zone (outside = red)
+        ],
+        'description' => [
+            'optimal' => ['min' => 140, 'max' => 160],
+            'warning' => ['min' => 126, 'max' => 176],
+        ],
+    ],
 ]
 ```
 
-Run it from the Panel:
+#### Template-Specific Overrides
 
-- Open the Meta Kit area
-- Click “Legacy Migration” next to the language switcher
-- Review the summary and click “Migrate All Languages”
+Customize rules for specific page templates:
 
-> Warning: This will remove the old SEO fields from your pages. Make sure to backup your data before running this.
+```php
+'validation' => [
+    'templates' => [
+        'article' => [  // For blog posts
+            'title' => [
+                'optimal' => ['min' => 40, 'max' => 70],  // Longer titles for articles
+            ],
+            'description' => [
+                'optimal' => ['min' => 150, 'max' => 160],  // Detailed descriptions
+            ],
+        ],
+        'product' => [  // For products
+            'title' => [
+                'optimal' => ['min' => 25, 'max' => 45],  // Shorter, punchier titles
+            ],
+            'ogDescription' => [
+                'optimal' => ['min' => 120, 'max' => 160],  // Social sharing focus
+            ],
+        ],
+    ],
+]
+```
 
+### Slug Validation
+
+Meta Kit also validates URL structure:
+
+```php
+'validation' => [
+    'slug' => [
+        'depth' => [
+            'optimal' => ['min' => 0, 'max' => 2],  // Prefer /category/page
+            'warning' => ['min' => 0, 'max' => 3],  // Allow /a/b/c/page
+        ],
+        'words' => [
+            'optimal' => ['min' => 1, 'max' => 8],  // Keywords in URL
+        ],
+        'length' => [
+            'optimal' => ['min' => 1, 'max' => 60],  // Total characters
+        ],
+    ],
+]
+```
+
+Slug validation shows:
+- **Depth**: How many `/` slashes (URL nesting level)
+- **Words**: Number of hyphen-separated words
+- **Length**: Total character count
+- **Status**: Visual indicator for each metric
+
+### Why This Matters for Editors
+
+**Without validation:**
+- Editors guess at ideal lengths
+- Inconsistent quality across pages
+- Some titles too short, others too long
+- No feedback until after publish
+
+**With Meta Kit validation:**
+- Clear visual guidance (green/orange/red)
+- Learn SEO best practices while editing
+- Consistent quality across all pages
+- Catch issues before publishing
+- Template-aware: Different rules for different content types
+
+---
+
+## AI Generation
+
+Meta Kit's AI features are designed to save time while maintaining quality and consistency.
+
+### How AI Works With Validation
+
+**The Smart Part:** AI automatically generates content that matches your validation ranges.
+
+When you click "Generate," Meta Kit:
+1. Looks up the validation rules for this field type and template
+2. Adjusts for site name appending (if applicable)
+3. Tells the AI exactly what character range to target
+4. Generates content that's already in the green zone
+
+**Example:**
+- **Template**: Article
+- **Field**: Meta Title
+- **Validation Range**: 40-70 characters
+- **Site Name**: "My Blog" (7 chars + separator)
+- **AI Target**: 30-60 characters (reserves space for site name)
+- **Result**: AI generates a 45-character title that becomes 54 characters with site name appended ✅
+
+### Configuring AI
+
+#### Required Settings
+
+Get a free API key from [OpenRouter.ai](https://openrouter.ai/):
+
+```php
+'api.key' => 'sk-or-v1-YOUR-KEY',
+'api.model' => 'google/gemini-2.0-flash-exp:free',
+```
+
+#### Available Models
+
+**Free Tier (No cost):**
+- `google/gemini-2.0-flash-exp:free` (Recommended - fast & good quality)
+- `google/gemma-2-9b-it:free`
+- `deepseek/deepseek-chat:free`
+- `mistralai/mistral-7b-instruct:free`
+- `meta-llama/llama-3.2-3b-instruct:free`
+- `meta-llama/llama-3.1-8b-instruct:free`
+- `microsoft/phi-3-medium-128k-instruct:free`
+- `qwen/qwen-2.5-7b-instruct:free`
+
+**Paid Models (Higher quality):**
+- `openai/gpt-5` or `gpt-5-mini`
+- `anthropic/claude-sonnet-4.5`
+- `google/gemini-pro-1.5`
+- `meta-llama/llama-3.3-70b-instruct`
+- Many more available
+
+#### AI Behavior Settings
+
+**Temperature** (0.1 - 1.0):
+Controls creativity and variation in generated content.
+
+```php
+'api.temperature' => 0.7,  // Default: balanced
+
+// Examples:
+0.3  // Very focused, consistent, factual (good for product descriptions)
+0.7  // Balanced (recommended for most use cases)
+0.9  // Creative, varied (good for blog posts, social media)
+```
+
+**Tone** (formal vs informal):
+Controls language formality in multilingual content.
+
+```php
+'ai.tone' => 'formal',  // Use Sie (German), vous (French), usted (Spanish)
+'ai.tone' => 'informal',  // Use du (German), tu (French), tú (Spanish)
+```
+
+### Custom AI Prompts
+
+Tailor AI generation to your specific needs:
+
+```php
+'ai.prompt.title' => "Write a compelling meta title ({optimal_length} characters) in {language} for:\n\n{content}\n\n{tone} Focus on benefits and include power words. Write ONLY the title.",
+
+'ai.prompt.description' => "Write an engaging meta description ({optimal_length} characters) in {language} for:\n\n{content}\n\n{tone} Include a call-to-action and primary keyword. Write ONLY the description.",
+```
+
+**Available Placeholders:**
+- `{optimal_length}` - Automatically filled with validation ranges (e.g., "40-60 characters")
+- `{language}` - Current language name (e.g., "German", "English")
+- `{content}` - Page content for AI context
+- `{tone}` - Automatically replaced with tone instruction
+
+### AI Features in Panel
+
+**Individual Field Generation:**
+- Click "Generate" button next to any title or description field
+- AI analyzes page content and current language
+- Generates content matching validation rules for that template
+- Instant feedback with character count and validation status
+
+**Bulk Generation:**
+- Select multiple pages in Meta Kit area
+- Choose which fields to generate (meta title, OG description, etc.)
+- AI processes all pages using appropriate template rules
+- Review and apply changes
+
+**Smart Behavior:**
+- Skips pages that already have content (unless you force regenerate)
+- Uses page content for context (title, text fields, structured content)
+- Respects language settings (de, en, fr, es, it)
+- Accounts for site name appending in title length
+
+### Disabling AI
+
+AI features are automatically disabled if:
+- No API key is configured
+- No model is selected
+- `ai.enabled` is set to `false`
+
+When disabled:
+- Generate buttons are hidden
+- AI routes are not registered
+- Plugin still works for manual metadata management
+
+---
+
+## Panel Interface
+
+### Meta Kit Area
+
+Access via the main menu (wand icon):
+
+#### Dashboard
+- **Statistics**: Coverage percentage for meta titles, descriptions, OG data
+- **Page Overview**: List all pages with metadata status
+- **Quick Actions**: Bulk generate, bulk edit, legacy migration
+
+#### Bulk Editor
+- **Table View**: See multiple pages at once
+- **Inline Editing**: Edit titles and descriptions directly
+- **AI Generation**: Generate button for each field
+- **Character Counters**: Real-time validation with color indicators
+- **Filter & Search**: Find pages quickly
+- **Batch Operations**: Apply changes to selected pages
+
+#### Features
+- **Live Validation**: Green/orange/red indicators as you type
+- **Template Awareness**: Different validation for different page types
+- **Language Support**: Works with multilingual sites
+- **Inheritance Display**: See which pages inherit from site defaults
+- **Quick Navigation**: Jump to page editor from table
+
+### Page Editor
+
+When you add the `meta-kit/page` tab to a page blueprint:
+
+**SEO Tab:**
+- **Slug Validation**: Check URL structure, depth, word count
+- **Meta Title**: With AI generation button and character counter
+- **Meta Description**: With AI generation and validation
+- **Meta Author**: Optional author name
+- **Canonical URL**: Custom canonical if needed
+- **Robots**: Set indexing behavior per page
+
+**Social Media Section:**
+- **OG Title**: Separate title for social sharing
+- **OG Description**: Separate description for social sharing
+- **OG Image**: Upload social media image (1200×630px recommended)
+
+**Real-time Feedback:**
+- Character counters update as you type
+- Validation messages show what's optimal
+- Title preview shows final appearance (with site name if applicable)
+- Color-coded indicators: green (optimal), orange (acceptable), red (fix needed)
+
+---
+
+## Advanced Features
+
+### Sitemap Generation
+
+**Automatic Creation:**
+XML sitemap available at `/sitemap.xml` with:
+- All published pages (filtered by template and status)
+- Multilingual support with hreflang
+- Configurable priorities
+- Last modified dates
+- Styled XML view for human readability
+
+**Configuration:**
+
+```php
+'sitemap.enabled' => true,
+'sitemap.exclude' => ['error', 'drafts', 'admin'],  // Page IDs to exclude
+```
+
+**Panel Settings:**
+- Visual page selector for exclusions
+- Homepage priority (0.1 - 1.0)
+- Default page priority
+
+### Robots.txt Management
+
+**Dynamic Generation:**
+robots.txt available at `/robots.txt` with:
+- User agent specific rules
+- Bad bot blocking (AhrefsBot, SemrushBot, etc.)
+- Sitemap reference
+- Crawl delay configuration
+- Custom directives
+
+**Panel Configuration:**
+1. Go to Site → Robots.txt
+2. Enable "Custom Robots.txt"
+3. Add user agent rules
+4. Configure allowed/disallowed paths
+
+**Config Override:**
+
+```php
+'robots' => [
+    'enabled' => true,
+    'blockBadBots' => true,
+    'defaultRules' => true,
+    'includeSitemap' => true,
+    'rules' => [
+        [
+            'userAgent' => 'Googlebot',
+            'allow' => ['/images/', '/assets/'],
+            'disallow' => ['/panel/', '/api/'],
+        ],
+        [
+            'userAgent' => 'AhrefsBot',
+            'disallow' => ['/'],  // Block completely
+        ],
+    ],
+]
+```
+
+### Schema.org Structured Data
+
+**Automatic JSON-LD:**
+- Organization data (site-wide)
+- WebSite with site search
+- WebPage with breadcrumbs
+- Article markup for blog posts
+- Product markup (if configured)
+
+**Enable/Disable:**
+
+```php
+'schema.enabled' => true,
+```
+
+### Legacy Field Migration
+
+**Purpose:**
+Convert old SEO plugin fields to Meta Kit format across all languages.
+
+**Supported Fields:**
+- `metatitle`, `customtitle`, `seotitle` → `metaTitle`
+- `metadescription`, `seodescription` → `metaDescription`
+- Multiple field naming conventions
+
+**How to Use:**
+
+1. Enable in config:
+```php
+'legacyMigration' => true,
+```
+
+2. Go to Meta Kit area in Panel
+3. Click "Legacy Migration"
+4. Review summary of found fields
+5. Click "Migrate All Languages"
+
+**Important:** Backup your content before running migration. Old fields will be removed.
+
+---
+
+## Best Practices
+
+### For Editors
+
+**Meta Titles:**
+- Aim for 50-60 characters total (including site name)
+- Put primary keywords near the beginning
+- Make it compelling and clickable
+- Be specific about page content
+- Avoid ALL CAPS unless it's your brand
+
+**Meta Descriptions:**
+- Target 150-160 characters
+- Include primary keyword naturally
+- Add a call-to-action
+- Describe what readers will find
+- Make it unique for each page
+
+**OG Titles:**
+- Can be slightly longer than meta titles (up to 70 chars)
+- More conversational tone for social sharing
+- Focus on curiosity and click-worthiness
+
+**OG Descriptions:**
+- Can be longer than meta descriptions (up to 200 chars)
+- More promotional tone
+- Emphasize benefits and value
+
+**Images:**
+- Use 1200×630px for best results
+- Works for Facebook, Twitter, WhatsApp
+- Avoid text-heavy images
+- High contrast for small sizes
+- Include brand elements
+
+**URLs (Slugs):**
+- Keep depth to 2-3 levels maximum
+- Use 3-8 descriptive words
+- Include primary keyword
+- Use hyphens, not underscores
+- Keep total length under 60 characters
+
+### For Developers
+
+**Validation Ranges:**
+- Set realistic optimal ranges based on your content type
+- Use warning ranges to allow flexibility
+- Create template-specific rules for different content types
+- Account for site name length in title calculations
+
+**AI Configuration:**
+- Start with free models (Gemini 2.0 Flash may be sufficient)
+- Use temperature 0.3-0.5 for consistency
+- Use temperature 0.7-0.9 for variety
+- Set formal tone for professional sites
+- Customize prompts to match brand voice
+
+**Panel Setup:**
+- Add meta-kit tabs to all main page blueprints
+- Hide SEO tab from admin/system pages if needed
+- Use excludeTemplates to hide utility pages from table
+- Enable legacy migration only when needed (for security)
+
+---
+
+## Programmatic Usage
+
+### Page Methods
+
+```php
+// Generate AI content
+$title = $page->generateSeoTitle();
+$title = $page->generateSeoTitle($content, 'de');  // Custom content & language
+$desc = $page->generateSeoDescription();
+$desc = $page->generateSeoDescription($content, 'fr');
+
+// Field to SEO conversion
+$title = $page->text()->toSeoTitle();
+$desc = $page->text()->toSeoDescription();
+```
+
+### API Endpoints
+
+Generate descriptions via API:
+
+```bash
+POST /api/meta-kit/generate
+Content-Type: application/json
+
+{
+  "text": "Your page content here",
+  "language": "de",
+  "pageId": "page-id-here",
+  "fieldType": "description"
+}
+```
+
+Response:
+```json
+{
+  "status": "success",
+  "description": "AI-generated description matching validation rules..."
+}
+```
+
+### Custom Templates
+
+Access metadata in your templates:
+
+```php
+<?php
+$seo = $page->metaKitSeo()->toBlocks()->first();
+if ($seo) {
+    $metaTitle = $seo->metaTitle();
+    $metaDesc = $seo->metaDescription();
+    $ogImage = $seo->ogImage()->toFile();
+}
+?>
+```
+
+---
 
 ## Requirements
 
-- PHP 8.0+
-- Kirby 4.0+ (Kirby 5 compatible)
-- Composer
-- OpenRouter API key (free tier available)
+- **PHP**: 8.0 or higher
+- **Kirby**: 5.0+
+- **Composer**: For dependency management
+- **OpenRouter API Key**: Optional, only needed for AI features (free tier available)
+
+---
+
+## Troubleshooting
+
+### AI Generation Not Working
+
+1. Check API key is set correctly
+2. Verify model is selected
+3. Check `ai.enabled` is not set to `false`
+4. Look for errors in Kirby debug mode
+5. Check OpenRouter account has free tier or credits
+
+### Validation Not Showing
+
+1. Check config file syntax
+2. Verify template name matches exactly
+3. Clear Kirby cache
+4. Check browser console for JS errors
+
+### Sitemap Not Appearing
+
+1. Verify `sitemap.enabled => true`
+2. Check route is registered
+3. Clear Kirby cache
+4. Check .htaccess for conflicting rules
+
+### Panel Table Empty
+
+1. Check `excludeTemplates` and `excludeStatus` settings
+2. Verify pages exist and are not drafts (unless drafts allowed)
+3. Check user permissions
+4. Look for PHP errors in logs
+
+---
 
 ## License
 
-This plugin is licensed under the [MIT License](LICENSE)
+This plugin is licensed under a commercial [LICENSE](LICENSE).
+
+---
 
 ## Credits
 
-- Developed by Mathis Koblin
-- Assisted by AI Claude 4.5 Sonnet
+**Developed by:** Mathis Koblin
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://coff.ee/tearoom1)
+**Special Thanks:**
+- The Kirby CMS team for an excellent platform
+- OpenRouter for affordable AI API access
+- The Kirby community for feedback and support
+
+---
+
+## Support & Feedback
+
+- **Issues**: [GitHub Issues](https://github.com/tearoom1/kirby-meta-kit/issues)
+- **Documentation**: This README and inline code comments
+- **Kirby Forum**: [forum.getkirby.com](https://forum.getkirby.com)
+
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://coff.ee/tearoom1)
+
