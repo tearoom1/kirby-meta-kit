@@ -55,8 +55,8 @@ Core plugin settings, API credentials, and feature toggles:
     'maxDescriptionLength' => 160,             // Max meta description length
 
     // AI Prompts (optional - customize AI generation behavior)
-    'ai.prompt.title' => "Write a clear, direct meta title (30-65 characters) in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be specific and factual. Focus on what the page is actually about. {tone} Write ONLY the title, nothing else.\n\nTitle:",
-    'ai.prompt.description' => "Write a clear, informative meta description (max 160 characters) in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be direct and specific. Describe what the page actually contains. {tone} Write ONLY the description, nothing else.\n\nDescription:",
+    'ai.prompt.title' => "Write a clear, direct meta title {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be specific and factual. Focus on what the page is actually about. {tone} Write ONLY the title, nothing else.\n\nTitle:",
+    'ai.prompt.description' => "Write a clear, informative meta description {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be direct and specific. Describe what the page actually contains. {tone} Write ONLY the description, nothing else.\n\nDescription:",
 
     // Feature Toggles
     'sitemap.enabled' => true,                 // Enable/disable sitemap generation
@@ -77,6 +77,7 @@ Core plugin settings, API credentials, and feature toggles:
   - `'formal'` (default): Uses formal address forms (Sie in German, vous in French, usted in Spanish)
   - `'informal'`: Uses informal address forms (du in German, tu in French, tú in Spanish)
 - **`ai.prompt.title`** / **`ai.prompt.description`**: Customize the AI prompts. Available placeholders:
+  - `{optimal_length}`: Uses the values set in `validation.ranges` or `validation.templates.template.ranges`
   - `{language}`: Language name (e.g., "German", "English")
   - `{content}`: Page content for context
   - `{tone}`: Automatically replaced with tone instruction based on `ai.tone` setting
@@ -267,9 +268,8 @@ The plugin adds a **Meta Kit** section to the Kirby Panel main menu with powerfu
   - Apply changes with a single click
 - **Legacy Migration:** Detect and convert old SEO fields to the new structure
 - **Quick Edit:** Single-page metadata editor accessible from the main table
-- **AI Generation:** Generate optimized meta titles and descriptions
-  - **Smart Title Length:** Automatically adjusts title length (50-60 chars total) accounting for site name appending
-  - **Description Length:** Max 160 characters optimized for search engines
+- **AI Generation:** Generate optimized meta and OG titles and descriptions
+  - **Title and Description Length:** Automatically adjusts title length according to validation values
 
 **Access:** Click **"Meta Kit"** (wand icon) in the Panel sidebar
 

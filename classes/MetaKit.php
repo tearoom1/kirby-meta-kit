@@ -67,8 +67,8 @@ class MetaKit
             'api.temperature' => 0.7,
             'ai.tone' => 'formal',
             'maxDescriptionLength' => 160,
-            'ai.prompt.title' => "Write a clear, direct meta title (30-65 characters) in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be specific and factual. Focus on what the page is actually about. {tone} Write ONLY the title, nothing else.\n\nTitle:",
-            'ai.prompt.description' => "Write a clear, informative meta description (max 160 characters) in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be direct and specific. Describe what the page actually contains. {tone} Write ONLY the description, nothing else.\n\nDescription:",
+            'ai.prompt.title' => "Write a clear, direct meta title {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be specific and factual. Focus on what the page is actually about. {tone} Write ONLY the title, nothing else.\n\nTitle:",
+            'ai.prompt.description' => "Write a clear, informative meta description {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be direct and specific. Describe what the page actually contains. {tone} Write ONLY the description, nothing else.\n\nDescription:",
         ];
 
         // Site settings from panel (middle priority)
@@ -315,7 +315,7 @@ class MetaKit
         $promptTemplate = $this->options['ai.prompt.description'];
 
         // Update prompt to include target length
-        $promptTemplate = str_replace('max 160 characters', $targetLength . ' characters', $promptTemplate);
+        $promptTemplate = str_replace('{optimal_length}', $targetLength . ' characters', $promptTemplate);
 
         $prompt = str_replace(
             ['{language}', '{content}', '{tone}'],
