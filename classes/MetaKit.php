@@ -112,11 +112,45 @@ class MetaKit
     }
 
     /**
-     * Calculate target title length accounting for site name appending
-     * Target: 50-60 chars total including site name
+     * Get validation ranges for a specific field type and template
      */
-    protected function calculateTargetTitleLength(): string
+    protected function getValidationRanges(string $fieldType, ?string $template = null): array
     {
+        $validation = $this->options['validation'] ?? [];
+        $ranges = $validation['ranges'] ?? [];
+        $templates = $validation['templates'] ?? [];
+
+        // Map field types to config keys
+        $fieldKey = match ($fieldType) {
+            'title' => 'title',
+            'ogTitle' => 'ogTitle',
+            'description' => 'description',
+            'ogDescription' => 'ogDescription',
+            default => 'title'
+        };
+
+        // Check for template-specific ranges
+        if ($template && isset($templates[$template][$fieldKey])) {
+            return $templates[$template][$fieldKey];
+        }
+
+        // Fall back to default ranges
+        return $ranges[$fieldKey] ?? [
+            'optimal' => ['min' => 20, 'max' => 60],
+            'warning' => ['min' => 15, 'max' => 75]
+        ];
+    }
+
+    /**
+     * Calculate target title length accounting for site name appending
+     */
+    protected function calculateTargetTitleLength(string $fieldType = 'title', ?string $template = null, ?Page $page = null): string
+    {
+        // Get validation ranges
+        $ranges = $this->getValidationRanges($fieldType, $template);
+        $optimalMin = $ranges['optimal']['min'] ?? 20;
+        $optimalMax = $ranges['optimal']['max'] ?? 60;
+
         $site = $this->kirby->site();
         $siteSeo = \TearoomOne\MetaHelper::getSeoData($site->metaKitSeo());
 
@@ -125,9 +159,23 @@ class MetaKit
             ? $siteSeo->appendSiteName()->toBool()
             : true;
 
-        if (!$appendSiteName) {
-            // No site name appending, use full range
-            return '50-60';
+        // Check which field types should have site name appended
+        $appendSiteNameTo = $siteSeo && $siteSeo->appendSiteNameTo()->isNotEmpty()
+            ? $siteSeo->appendSiteNameTo()->value()
+            : 'meta,og';
+        $appendToTypes = array_map('trim', explode(',', $appendSiteNameTo));
+
+        // Determine if this field type should have site name appended
+        $shouldAppend = $appendSiteName;
+        if ($fieldType === 'title' && !in_array('meta', $appendToTypes)) {
+            $shouldAppend = false;
+        } elseif ($fieldType === 'ogTitle' && !in_array('og', $appendToTypes)) {
+            $shouldAppend = false;
+        }
+
+        if (!$shouldAppend) {
+            // No site name appending, use full optimal range
+            return $optimalMin . '-' . $optimalMax;
         }
 
         // Get site name and separator
@@ -142,10 +190,9 @@ class MetaKit
         // Calculate space taken by site name (including spaces around separator)
         $siteNameLength = mb_strlen($siteMetaTitle) + mb_strlen($separator) + 2; // +2 for spaces
 
-        // Target total: 50-60 chars
         // Reserve space for site name
-        $minTarget = max(25, 50 - $siteNameLength); // Minimum 25 chars for page title
-        $maxTarget = max(30, 60 - $siteNameLength); // Minimum 30 chars for page title
+        $minTarget = max(25, $optimalMin - $siteNameLength); // Minimum 25 chars for page title
+        $maxTarget = max(30, $optimalMax - $siteNameLength); // Minimum 30 chars for page title
 
         return $minTarget . '-' . $maxTarget;
     }
@@ -158,8 +205,12 @@ class MetaKit
             throw new Exception('OpenRouter API key is not configured');
         }
 
-        // Get language from context
+        // Get context parameters
         $language = $context['language'] ?? 'en';
+        $fieldType = $context['fieldType'] ?? 'title'; // 'title' or 'ogTitle'
+        $template = $context['template'] ?? null;
+        $page = $context['page'] ?? null;
+
         $languageNames = [
             'de' => 'German',
             'en' => 'English',
@@ -169,8 +220,8 @@ class MetaKit
         ];
         $languageName = $languageNames[$language] ?? 'English';
 
-        // Calculate target title length accounting for site name
-        $targetLength = $this->calculateTargetTitleLength();
+        // Calculate target title length based on field type and template
+        $targetLength = $this->calculateTargetTitleLength($fieldType, $template, $page);
 
         // Limit content length to avoid token limits
         $contentPreview = mb_substr(strip_tags($content), 0, 1000);
@@ -238,9 +289,12 @@ class MetaKit
             throw new Exception('OpenRouter API key is not configured');
         }
 
-        // Get language from context
+        // Get context parameters
         $languageCode = $context['language'] ?? 'en';
-        // get the language names from kirby
+        $fieldType = $context['fieldType'] ?? 'description'; // 'description' or 'ogDescription'
+        $template = $context['template'] ?? null;
+
+        // Get the language names from kirby
         $languages = $this->kirby->languages();
         $languageNames = [];
         foreach ($languages as $language) {
@@ -248,11 +302,21 @@ class MetaKit
         }
         $languageName = $languageNames[$languageCode] ?? 'English';
 
+        // Get target description length based on field type and template
+        $ranges = $this->getValidationRanges($fieldType, $template);
+        $optimalMin = $ranges['optimal']['min'] ?? 140;
+        $optimalMax = $ranges['optimal']['max'] ?? 160;
+        $targetLength = $optimalMin . '-' . $optimalMax;
+
         // Limit content length to avoid token limits
         $contentPreview = mb_substr(strip_tags($content), 0, 1000);
 
         // Get prompt template and replace placeholders
         $promptTemplate = $this->options['ai.prompt.description'];
+
+        // Update prompt to include target length
+        $promptTemplate = str_replace('max 160 characters', $targetLength . ' characters', $promptTemplate);
+
         $prompt = str_replace(
             ['{language}', '{content}', '{tone}'],
             [$languageName, $contentPreview, $this->getToneInstruction()],
@@ -291,7 +355,7 @@ class MetaKit
             $description = $data['choices'][0]['message']['content'];
 
             if ($description) {
-                return $this->sanitizeDescription($description);
+                return $this->sanitizeDescription($description, $fieldType, $template);
             }
 
             return null;
@@ -302,13 +366,15 @@ class MetaKit
         }
     }
 
-    protected function sanitizeDescription(string $description): string
+    protected function sanitizeDescription(string $description, string $fieldType = 'description', ?string $template = null): string
     {
         $description = strip_tags($description);
         $description = preg_replace('/\s+/', ' ', $description);
         $description = trim($description, " \t\n\r\0\x0B\"'`");
 
-        $maxLength = $this->options['maxDescriptionLength'];
+        // Get validation ranges for this field type and template
+        $ranges = $this->getValidationRanges($fieldType, $template);
+        $maxLength = $ranges['optimal']['max'] ?? 160;
         $flexibleLength = $maxLength + 20; // Allow up to 20 extra chars
 
         if (mb_strlen($description) > $flexibleLength) {
@@ -338,14 +404,14 @@ class MetaKit
         return $description;
     }
 
-    protected function sanitizeTitle(string $title): string
+    protected function sanitizeTitle(string $title, string $fieldType = 'title', ?string $template = null, ?Page $page = null): string
     {
         $title = strip_tags($title);
         $title = preg_replace('/\s+/', ' ', $title);
         $title = trim($title, " \t\n\r\0\x0B\"'`");
 
         // Get target length range
-        $targetRange = $this->calculateTargetTitleLength();
+        $targetRange = $this->calculateTargetTitleLength($fieldType, $template, $page);
         list($minLength, $maxLength) = array_map('intval', explode('-', $targetRange));
 
         // Allow some flexibility (+5 chars) before truncating

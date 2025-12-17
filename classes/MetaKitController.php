@@ -943,10 +943,40 @@ class MetaKitController
             // Get content for generation
             $content = self::getContentForGeneration($page, $isSite);
 
+            // Map fieldName to fieldType
+            $fieldTypeMap = [
+                'metaTitle' => 'title',
+                'ogTitle' => 'ogTitle',
+                'metaDescription' => 'description',
+                'ogDescription' => 'ogDescription'
+            ];
+
+            if (!isset($fieldTypeMap[$fieldName])) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Unsupported field name'
+                ];
+            }
+
+            $fieldType = $fieldTypeMap[$fieldName];
+
+            // Build context for generation
+            $context = [
+                'language' => $languageCode,
+                'fieldType' => $fieldType
+            ];
+
+            // Add template for pages (not site)
+            if (!$isSite) {
+                $context['template'] = $page->intendedTemplate()->name();
+            }
+
             if ($fieldName === 'metaTitle' || $fieldName === 'ogTitle') {
-                $result = $metaKit->generateTitle($content, ['language' => $languageCode]);
+                // Add page reference for title generation (used in calculateTargetTitleLength)
+                $context['page'] = $page;
+                $result = $metaKit->generateTitle($content, $context);
             } elseif ($fieldName === 'metaDescription' || $fieldName === 'ogDescription') {
-                $result = $metaKit->generateDescription($content, ['language' => $languageCode]);
+                $result = $metaKit->generateDescription($content, $context);
             } else {
                 return [
                     'status' => 'error',

@@ -7,6 +7,8 @@ return function () {
     $data = $kirby->request()->body()->toArray();
     $text = $data['text'] ?? '';
     $language = $data['language'] ?? ($kirby->language()?->code() ?? 'en');
+    $pageId = $data['pageId'] ?? null;
+    $fieldType = $data['fieldType'] ?? 'description'; // 'description' or 'ogDescription'
 
     if (empty($text)) {
         return [
@@ -17,7 +19,21 @@ return function () {
 
     try {
         $metaKit = new MetaKit($kirby);
-        $description = $metaKit->generateDescription($text, ['language' => $language]);
+
+        // Build context for generation
+        $context = ['language' => $language, 'fieldType' => $fieldType];
+
+        // Add template context if page ID is provided
+        if ($pageId) {
+            $isSite = ($pageId === 'site');
+            $page = $isSite ? $kirby->site() : $kirby->page($pageId);
+
+            if ($page && !$isSite) {
+                $context['template'] = $page->intendedTemplate()->name();
+            }
+        }
+
+        $description = $metaKit->generateDescription($text, $context);
 
         if (empty($description)) {
             return [

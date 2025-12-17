@@ -1,5 +1,8 @@
 <template>
   <k-field v-bind="$props" class="k-mk-title-field">
+    <template #options>
+      <k-field-options />
+    </template>
     <template #default>
       <k-input
         :value="value"
