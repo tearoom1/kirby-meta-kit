@@ -27,7 +27,7 @@ return [
             $fieldKey = $fieldType === 'og' ? 'ogTitle' : 'title';
 
             // Check for template-specific ranges
-            if (isset($templates[$template]) && isset($templates[$template][$fieldKey])) {
+            if (isset($templates[$template][$fieldKey])) {
                 return $templates[$template][$fieldKey];
             }
 

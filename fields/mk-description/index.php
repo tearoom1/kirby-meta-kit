@@ -30,7 +30,7 @@ return [
             $fieldKey = $fieldType === 'og' ? 'ogDescription' : 'description';
 
             // Check for template-specific ranges
-            if (isset($templates[$template]) && isset($templates[$template][$fieldKey])) {
+            if (isset($templates[$template][$fieldKey])) {
                 return $templates[$template][$fieldKey];
             }
 

@@ -36,7 +36,7 @@ return [
             ];
 
             // Check for template-specific slug validation
-            if (isset($templates[$template]) && isset($templates[$template]['slug'])) {
+            if (isset($templates[$template]['slug'])) {
                 $templateSlug = $templates[$template]['slug'];
 
                 return [
