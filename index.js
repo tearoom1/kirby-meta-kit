@@ -2552,9 +2552,11 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
   };
   var _sfc_render$2 = function render() {
     var _vm = this, _c = _vm._self._c;
-    return _c("k-text-field", _vm._b({ staticClass: "k-mk-title-field", attrs: { "name": _vm.fieldType === "og" ? "ogTitle" : "metaTitle" }, on: { "input": _vm.onInput }, scopedSlots: _vm._u([{ key: "after", fn: function() {
+    return _c("k-field", _vm._b({ staticClass: "k-mk-title-field", scopedSlots: _vm._u([{ key: "options", fn: function() {
+      return [_c("k-field-options")];
+    }, proxy: true }, { key: "footer", fn: function() {
       return [_vm.titlePreview && _vm.shouldAppendSiteName ? _c("div", { staticClass: "k-mk-title-preview" }, [_vm._v(" Preview: " + _vm._s(_vm.titlePreview) + " ")]) : _vm._e(), _c("k-text", { attrs: { "theme": _vm.validation.theme } }, [_c("span", { staticClass: "k-mk-validation-row" }, [_c("span", [_vm.validation.message ? _c("span", { staticClass: "k-mk-validation-message k-mk-validation-left", attrs: { "theme": _vm.validation.theme } }, [_c("span", { class: "k-mk-validation-status-" + _vm.validation.status }, [_vm._v(_vm._s(_vm.charCount))]), _vm._v(" - " + _vm._s(_vm.validation.message) + " ")]) : _vm._e()]), _c("k-button", { staticClass: "k-mk-ai-button", attrs: { "size": "xs", "icon": "ai", "text": _vm.isGenerating ? "Generating…" : "Generate", "disabled": _vm.disabled || _vm.isGenerating }, on: { "click": _vm.generateWithAi } })], 1), _vm.aiError ? _c("span", { staticClass: "k-mk-ai-error" }, [_vm._v(_vm._s(_vm.aiError))]) : _vm._e()])];
-    }, proxy: true }]) }, "k-text-field", _vm.$props, false));
+    }, proxy: true }]) }, "k-field", _vm.$props, false), [_c("k-input", { attrs: { "value": _vm.value, "type": "text", "placeholder": _vm.placeholder, "disabled": _vm.disabled, "name": _vm.fieldType === "og" ? "ogTitle" : "metaTitle" }, on: { "input": _vm.onInput } })], 1);
   };
   var _sfc_staticRenderFns$2 = [];
   _sfc_render$2._withStripped = true;
@@ -2676,9 +2678,11 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
   };
   var _sfc_render$1 = function render() {
     var _vm = this, _c = _vm._self._c;
-    return _c("k-textarea-field", _vm._b({ staticClass: "k-mk-description-field", attrs: { "name": _vm.fieldType === "og" ? "ogDescription" : "metaDescription" }, on: { "input": _vm.onInput }, scopedSlots: _vm._u([{ key: "after", fn: function() {
+    return _c("k-field", _vm._b({ staticClass: "k-mk-description-field", scopedSlots: _vm._u([{ key: "options", fn: function() {
+      return [_c("k-field-options")];
+    }, proxy: true }, { key: "footer", fn: function() {
       return [_c("k-text", [_c("span", { staticClass: "k-mk-validation-row" }, [_c("span", [_vm.validation.message ? _c("span", { staticClass: "k-mk-validation-message k-mk-validation-left", attrs: { "theme": _vm.validation.theme } }, [_c("span", { class: "k-mk-validation-status-" + _vm.validation.status }, [_vm._v(_vm._s(_vm.charCount))]), _vm._v(" - " + _vm._s(_vm.validation.message) + " ")]) : _vm._e()]), _c("k-button", { staticClass: "k-mk-ai-button", attrs: { "size": "xs", "icon": "ai", "text": _vm.isGenerating ? "Generating…" : "Generate", "disabled": _vm.disabled || _vm.isGenerating }, on: { "click": _vm.generateWithAi } })], 1), _vm.aiError ? _c("span", { staticClass: "k-mk-ai-error" }, [_vm._v(_vm._s(_vm.aiError))]) : _vm._e()])];
-    }, proxy: true }]) }, "k-textarea-field", _vm.$props, false));
+    }, proxy: true }]) }, "k-field", _vm.$props, false), [_c("k-input", { staticClass: "k-mk-description-textarea", attrs: { "type": "textarea", "value": _vm.value, "placeholder": _vm.placeholder, "disabled": _vm.disabled, "buttons": false, "maxlength": _vm.maxlength, "counter": false }, on: { "input": _vm.onInput } })], 1);
   };
   var _sfc_staticRenderFns$1 = [];
   _sfc_render$1._withStripped = true;
