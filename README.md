@@ -4,6 +4,8 @@ The complete SEO solution for Kirby CMS with AI-powered content generation, real
 
 [![Screenshot](screenshot.jpg)](https://github.com/tearoom1/kirby-meta-kit)
 
+Get a license: [www.tearoom.one/kirby-plugins/meta-kit](https://www.tearoom.one/kirby-plugins/meta-kit)
+
 ## Why Meta Kit?
 
 ### For Content Editors
