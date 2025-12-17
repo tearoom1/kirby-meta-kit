@@ -1,3 +1,10 @@
+## [1.2.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.1.1...v1.2.0) (2025-12-17)
+
+
+### Features
+
+* release with new validation rules ([f41c3ac](https://github.com/tearoom1/kirby-meta-kit/commit/f41c3ac5700eb74051742bf3cc57c0eb9bf0fc2f))
+
 ## [1.1.1](https://github.com/tearoom1/kirby-meta-kit/compare/v1.1.0...v1.1.1) (2025-12-13)
 
 
