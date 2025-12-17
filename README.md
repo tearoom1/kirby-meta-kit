@@ -81,8 +81,7 @@ composer require tearoom1/kirby-meta-kit
 ### Manual Installation
 
 1. Download and extract to `site/plugins/meta-kit`
-2. Run `composer install` inside the plugin directory
-3. Get a free API key from [OpenRouter.ai](https://openrouter.ai/) (optional, for AI features)
+2. Get a free API key from [OpenRouter.ai](https://openrouter.ai/) (optional, for AI features)
 
 ---
 
