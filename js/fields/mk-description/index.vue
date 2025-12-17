@@ -1,18 +1,7 @@
 <template>
-  <k-field v-bind="$props" class="k-mk-description-field">
-    <template #options>
-      <k-field-options />
-    </template>
-    <template #default>
-      <k-input type="textarea" class="k-mk-description-textarea"
-               :value="value"
-               @input="onInput"
-               :placeholder="placeholder"
-               :disabled="disabled"
-               :buttons="false"
-               :maxlength="maxlength"
-               :counter="false"
-      />
+  <k-textarea-field v-bind="$props" class="k-mk-description-field" :name="fieldType === 'og' ? 'ogDescription' : 'metaDescription'"
+                    @input="onInput">
+    <template #after>
       <k-text>
         <span class="k-mk-validation-row">
           <span>
@@ -35,7 +24,7 @@
         <span v-if="aiError" class="k-mk-ai-error">{{ aiError }}</span>
       </k-text>
     </template>
-  </k-field>
+  </k-textarea-field>
 </template>
 
 <script>

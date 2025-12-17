@@ -1,16 +1,8 @@
 <template>
-  <k-field v-bind="$props" class="k-mk-title-field">
-    <template #options>
-      <k-field-options />
-    </template>
-    <template #default>
-      <k-input
-        :value="value"
-        type="text"
-        @input="onInput"
-        :placeholder="placeholder"
-        :disabled="disabled"
-      />
+  <k-text-field v-bind="$props" class="k-mk-title-field"
+                :name="fieldType === 'og' ? 'ogTitle' : 'metaTitle'"
+                @input="onInput">
+    <template #after>
       <div v-if="titlePreview && shouldAppendSiteName" class="k-mk-title-preview">
         Preview: {{ titlePreview }}
       </div>
@@ -36,7 +28,7 @@
         <span v-if="aiError" class="k-mk-ai-error">{{ aiError }}</span>
       </k-text>
     </template>
-  </k-field>
+  </k-text-field>
 </template>
 
 <script>

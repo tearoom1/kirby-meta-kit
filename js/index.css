@@ -21,8 +21,9 @@
 .k-seo-preview__title {
   font-size: 0.875rem;
   font-weight: 600;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem 0.75rem 1rem;
   background: var(--color-border);
+  /*background: var(--color-blue-600);*/
   border-bottom: 1px solid var(--color-border);
   margin: 0;
 }
