@@ -97,10 +97,9 @@ class Sitemap
             return false;
         }
 
-        // Check page's robots directive
-        $seoData = $page->metaKitSeo()->toObject();
-        if ($seoData && $seoData->robots()->isNotEmpty()) {
-            $robots = $seoData->robots()->value();
+        // Check page's robots directive (flat field)
+        if ($page->robots()->isNotEmpty()) {
+            $robots = $page->robots()->value();
             if (str_contains($robots, 'noindex')) {
                 return false;
             }

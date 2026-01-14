@@ -164,11 +164,11 @@ class LegacyMigration
         $pages = $kirby->site()->index();
         $found = [];
 
-        // Check Site
+        // Check Site (site uses blocks)
         $site = $kirby->site();
         $siteLegacy = [];
         $siteCurrent = [];
-        $siteSeo = MetaKitController::getSeoData($site->metaKitSeo());
+        $siteSeo = MetaKitController::getSiteSeoData($site);
         if ($site->metatitle()->isNotEmpty()) {
             $siteLegacy['metaTitle'] = $site->metatitle()->value();
             $siteCurrent['metaTitle'] = $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
@@ -199,35 +199,35 @@ class LegacyMigration
             ];
         }
 
+        // Pages use flat fields
         foreach ($pages as $page) {
             $legacy = [];
-            $seoData = MetaKitController::getSeoData($page->metaKitSeo());
             $current = [];
 
             // Check for common legacy SEO field names
             // Meta Title variations
             if ($page->metatitle()->isNotEmpty()) {
                 $legacy['metaTitle'] = $page->metatitle()->value();
-                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty()
-                    ? $seoData->metaTitle()->value()
+                $current['metaTitle'] = $page->metaTitle()->isNotEmpty()
+                    ? $page->metaTitle()->value()
                     : null;
             } elseif ($page->meta_title()->isNotEmpty()) {
                 $legacy['metaTitle'] = $page->meta_title()->value();
-                $current['metaTitle'] = $seoData && $seoData->metaTitle()->isNotEmpty()
-                    ? $seoData->metaTitle()->value()
+                $current['metaTitle'] = $page->metaTitle()->isNotEmpty()
+                    ? $page->metaTitle()->value()
                     : null;
             }
 
             // Meta Description variations
             if ($page->metadescription()->isNotEmpty()) {
                 $legacy['metaDescription'] = $page->metadescription()->value();
-                $current['metaDescription'] = $seoData && $seoData->metaDescription()->isNotEmpty()
-                    ? $seoData->metaDescription()->value()
+                $current['metaDescription'] = $page->metaDescription()->isNotEmpty()
+                    ? $page->metaDescription()->value()
                     : null;
             } elseif ($page->meta_description()->isNotEmpty()) {
                 $legacy['metaDescription'] = $page->meta_description()->value();
-                $current['metaDescription'] = $seoData && $seoData->metaDescription()->isNotEmpty()
-                    ? $seoData->metaDescription()->value()
+                $current['metaDescription'] = $page->metaDescription()->isNotEmpty()
+                    ? $page->metaDescription()->value()
                     : null;
             }
 
@@ -236,8 +236,8 @@ class LegacyMigration
                 $files = $page->ogimage()->toFiles();
                 if ($files->count() > 0) {
                     $legacy['ogImage'] = $files->first()->filename();
-                    $current['ogImage'] = $seoData && $seoData->ogImage()->isNotEmpty()
-                        ? $seoData->ogImage()->toFiles()->first()?->filename()
+                    $current['ogImage'] = $page->ogImage()->isNotEmpty()
+                        ? $page->ogImage()->toFiles()->first()?->filename()
                         : null;
                 }
             }
@@ -273,52 +273,101 @@ class LegacyMigration
         }
 
         try {
-            $seoData = MetaKitController::getSeoData($page->metaKitSeo());
-            $seoArray = MetaKitController::seoDataToArray($seoData);
             $converted = [];
-
-            // Migrate legacy fields - Meta Title variations
-            if ($page->metatitle()->isNotEmpty() && empty($seoArray['metaTitle'])) {
-                $seoArray['metaTitle'] = $page->metatitle()->value();
-                $converted[] = 'metaTitle (from metatitle)';
-            } elseif ($page->meta_title()->isNotEmpty() && empty($seoArray['metaTitle'])) {
-                $seoArray['metaTitle'] = $page->meta_title()->value();
-                $converted[] = 'metaTitle (from Meta-title)';
-            }
-
-            // Migrate legacy fields - Meta Description variations
-            if ($page->metadescription()->isNotEmpty() && empty($seoArray['metaDescription'])) {
-                $seoArray['metaDescription'] = $page->metadescription()->value();
-                $converted[] = 'metaDescription (from metadescription)';
-            } elseif ($page->meta_description()->isNotEmpty() && empty($seoArray['metaDescription'])) {
-                $seoArray['metaDescription'] = $page->meta_description()->value();
-                $converted[] = 'metaDescription (from Meta-description)';
-            }
-
-            // Migrate legacy fields - OG Image (needs to be array of UUID strings)
-            if ($page->ogimage()->isNotEmpty() && empty($seoArray['ogImage'])) {
-                $files = $page->ogimage()->toFiles();
-                if ($files && $files->count() > 0) {
-                    $seoArray = self::convertUUIDObjectsToStrings($files, $seoArray);
-                    $converted[] = 'ogImage (from ogimage)';
-                }
-            } elseif ($page->og_image()->isNotEmpty() && empty($seoArray['ogImage'])) {
-                $files = $page->og_image()->toFiles();
-                if ($files && $files->count() > 0) {
-                    // Convert UUID objects to strings
-                    $seoArray = self::convertUUIDObjectsToStrings($files, $seoArray);
-                    $converted[] = 'ogImage (from og_image)';
-                }
-            } elseif ($page->meta_image()->isNotEmpty() && empty($seoArray['ogImage'])) {
-                $files = $page->meta_image()->toFiles();
-                if ($files && $files->count() > 0) {
-                    // Convert UUID objects to strings
-                    $seoArray = self::convertUUIDObjectsToStrings($files, $seoArray);
-                    $converted[] = 'ogImage (from meta_image)';
-                }
-            }
-
+            $updateData = [];
             $languageCode = $kirby->language()?->code();
+
+            if ($isSite) {
+                // Site uses blocks
+                $seoData = MetaKitController::getSiteSeoData($page);
+                $seoArray = MetaKitController::seoDataToArray($seoData);
+
+                // Migrate legacy fields - Meta Title variations
+                if ($page->metatitle()->isNotEmpty() && empty($seoArray['metaTitle'])) {
+                    $seoArray['metaTitle'] = $page->metatitle()->value();
+                    $converted[] = 'metaTitle (from metatitle)';
+                } elseif ($page->meta_title()->isNotEmpty() && empty($seoArray['metaTitle'])) {
+                    $seoArray['metaTitle'] = $page->meta_title()->value();
+                    $converted[] = 'metaTitle (from Meta-title)';
+                }
+
+                // Migrate legacy fields - Meta Description variations
+                if ($page->metadescription()->isNotEmpty() && empty($seoArray['metaDescription'])) {
+                    $seoArray['metaDescription'] = $page->metadescription()->value();
+                    $converted[] = 'metaDescription (from metadescription)';
+                } elseif ($page->meta_description()->isNotEmpty() && empty($seoArray['metaDescription'])) {
+                    $seoArray['metaDescription'] = $page->meta_description()->value();
+                    $converted[] = 'metaDescription (from Meta-description)';
+                }
+
+                // Migrate legacy fields - OG Image
+                if ($page->ogimage()->isNotEmpty() && empty($seoArray['ogImage'])) {
+                    $files = $page->ogimage()->toFiles();
+                    if ($files && $files->count() > 0) {
+                        $seoArray = self::convertUUIDObjectsToStrings($files, $seoArray);
+                        $converted[] = 'ogImage (from ogimage)';
+                    }
+                }
+
+                // Build update array for site (uses blocks)
+                if (count($converted) > 0) {
+                    $seoBlock = [
+                        [
+                            'content' => $seoArray,
+                            'id' => 'site-seo-settings',
+                            'isHidden' => false,
+                            'type' => 'mk-site-seo'
+                        ]
+                    ];
+                    $updateData['metaKitSeo'] = $seoBlock;
+                }
+            } else {
+                // Pages use flat fields
+                // Migrate legacy fields - Meta Title variations
+                if ($page->metatitle()->isNotEmpty() && $page->metaTitle()->isEmpty()) {
+                    $updateData['metaTitle'] = $page->metatitle()->value();
+                    $converted[] = 'metaTitle (from metatitle)';
+                } elseif ($page->meta_title()->isNotEmpty() && $page->metaTitle()->isEmpty()) {
+                    $updateData['metaTitle'] = $page->meta_title()->value();
+                    $converted[] = 'metaTitle (from meta_title)';
+                }
+
+                // Migrate legacy fields - Meta Description variations
+                if ($page->metadescription()->isNotEmpty() && $page->metaDescription()->isEmpty()) {
+                    $updateData['metaDescription'] = $page->metadescription()->value();
+                    $converted[] = 'metaDescription (from metadescription)';
+                } elseif ($page->meta_description()->isNotEmpty() && $page->metaDescription()->isEmpty()) {
+                    $updateData['metaDescription'] = $page->meta_description()->value();
+                    $converted[] = 'metaDescription (from meta_description)';
+                }
+
+                // Migrate legacy fields - OG Image
+                if ($page->ogimage()->isNotEmpty() && $page->ogImage()->isEmpty()) {
+                    $files = $page->ogimage()->toFiles();
+                    if ($files && $files->count() > 0) {
+                        $uuids = [];
+                        foreach ($files as $file) {
+                            if ($uuid = $file->uuid()) {
+                                $uuids[] = $uuid->toString();
+                            }
+                        }
+                        $updateData['ogImage'] = $uuids;
+                        $converted[] = 'ogImage (from ogimage)';
+                    }
+                } elseif ($page->og_image()->isNotEmpty() && $page->ogImage()->isEmpty()) {
+                    $files = $page->og_image()->toFiles();
+                    if ($files && $files->count() > 0) {
+                        $uuids = [];
+                        foreach ($files as $file) {
+                            if ($uuid = $file->uuid()) {
+                                $uuids[] = $uuid->toString();
+                            }
+                        }
+                        $updateData['ogImage'] = $uuids;
+                        $converted[] = 'ogImage (from og_image)';
+                    }
+                }
+            }
 
             // Check if translation file exists for this language (skip for site)
             $content = $page->content($languageCode);
@@ -328,21 +377,6 @@ class LegacyMigration
                     'message' => 'Translation file does not exist for language: ' . $languageCode
                 ];
             }
-
-            // Build update array - only update metaKitSeo if it already exists AND we have conversions
-            $updateData = [];
-            if (count($converted) > 0) {
-                $seoBlock = [
-                    [
-                        'content' => $seoArray,
-                        'id' => $isSite ? 'site-seo-settings' : 'seo-metadata',
-                        'isHidden' => false,
-                        'type' => $isSite ? 'mk-site-seo' : 'mk-page-seo'
-                    ]
-                ];
-                $updateData['metaKitSeo'] = $seoBlock;
-            }
-
 
             // List of all legacy SEO fields to remove
             $fieldsToDelete = [
@@ -361,7 +395,8 @@ class LegacyMigration
                 'twitter_title', 'twitter_description', 'twitter_image',
                 'twitter_card_type', 'twitter_site', 'twitter_creator',
                 'robots_noindex', 'robots_nofollow', 'robots_noarchive',
-                'robots_noimageindex', 'robots_nosnippet'
+                'robots_noimageindex', 'robots_nosnippet',
+                'metakitseo' // Also remove old blocks field from pages
             ];
 
 

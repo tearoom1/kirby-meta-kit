@@ -6,13 +6,9 @@ columns:
     label: SEO
     icon: seo
     fields:
-      metaKitSeo:
-        label: SEO Settings
-        type: blocks
-        fieldsets:
-          - mk-site-seo
-        max: 1
-        pretty: true
+      seoSettings:
+        extends: fields/site-seo-group
+
   social:
     width: 1/1
     type: fields
@@ -101,4 +97,3 @@ columns:
         empty: false
         pretty: true
         help: Configure robots.txt rules for search engine crawlers. Available at /robots.txt
-

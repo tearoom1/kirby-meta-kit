@@ -19,30 +19,26 @@ return [
                     $page = $page->clone(['content' => $changesVersion->content()->toArray()]);
                 }
 
-                // Get SEO data from blocks or object field
-                $seoData = MetaHelper::getSeoData($page->metaKitSeo());
+                // Build title and descriptions using helper (reads from flat page fields)
+                $title = MetaHelper::buildTitle($page, site(), null, 'meta');
+                $description = MetaHelper::buildDescription($page, site(), null);
 
-                // Build title and descriptions using helper
-                $title = MetaHelper::buildTitle($page, site(), $seoData, 'meta');
-                $description = MetaHelper::buildDescription($page, site(), $seoData);
+                $ogTitle = MetaHelper::buildTitle($page, site(), null, 'og');
+                $ogDescription = MetaHelper::buildOgDescription($page, site(), null, $description);
 
-                $ogTitle = MetaHelper::buildTitle($page, site(), $seoData, 'og');
-                $ogDescription = MetaHelper::buildOgDescription($page, site(), $seoData, $description);
-
+                // Get OG image from flat page field
                 $ogImage = null;
-                if ($seoData && $seoData->ogImage()->isNotEmpty()) {
-                    // Get the first file from the files field
-                    $files = $seoData->ogImage()->toFiles();
+                if ($page->ogImage()->isNotEmpty()) {
+                    $files = $page->ogImage()->toFiles();
                     if ($files && $files->count() > 0) {
                         $image = $files->first();
-                        // Resize to OG dimensions (1200x630)
                         $ogImage = $image ? $image->crop(1200, 630)->url() : null;
                     }
                 }
 
                 // Fallback to site default OG image
                 if (!$ogImage) {
-                    $siteSeo = MetaHelper::getSeoData(site()->metaKitSeo());
+                    $siteSeo = MetaHelper::getSiteSeoData(site());
                     if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
                         $siteFiles = $siteSeo->ogImage()->toFiles();
                         if ($siteFiles && $siteFiles->count() > 0) {

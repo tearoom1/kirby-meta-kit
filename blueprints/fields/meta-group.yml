@@ -1,6 +1,5 @@
-name: SEO Metadata
-preview: fields
-wysiwyg: true
+type: group
+label: SEO
 fields:
   slugInfo:
     label: Slug Validation
@@ -42,7 +41,7 @@ fields:
     width: 1/2
     translate: false
 
-  separator1:
+  seoSocialSeparator:
     label:
     type: info
     text: Social Media Settings

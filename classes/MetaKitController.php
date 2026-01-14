@@ -10,26 +10,7 @@ class MetaKitController
     const int MIN_TEXT_LENGTH = 25;
 
     /**
-     * Get SEO data from blocks or object field
-     */
-    public static function getSeoData($field)
-    {
-        if (!$field || $field->isEmpty()) {
-            return null;
-        }
-
-        // Try blocks format first
-        $blocks = $field->toBlocks();
-        if ($blocks && $blocks->count() > 0) {
-            return $blocks->first()->content();
-        }
-
-        // Fallback to object format (legacy)
-        return $field->toObject();
-    }
-
-    /**
-     * Convert SEO data to array for saving
+     * Convert SEO data to array for saving (legacy support)
      */
     public static function seoDataToArray($seoData)
     {
@@ -69,9 +50,8 @@ class MetaKitController
         $language = $kirby->language();
         $languageCode = $language ? $language->code() : null;
 
-        // Add Site as first row
+        // Add Site as first row (site uses flat fields)
         $site = $kirby->site();
-        $siteSeo = self::getSeoData($site->metaKitSeo());
         $siteLegacy = [];
         if ($site->metatitle()->isNotEmpty()) {
             $siteLegacy['metaTitle'] = $site->metatitle()->value();
@@ -86,40 +66,33 @@ class MetaKitController
             'panelUrl' => $site->panel()->url(),
             'template' => 'site',
             'status' => 'published',
-            'hasMetaTitle' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty(),
-            'hasMetaDescription' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty(),
-            'hasOgTitle' => $siteSeo && $siteSeo->ogTitle()->isNotEmpty(),
-            'hasOgDescription' => $siteSeo && $siteSeo->ogDescription()->isNotEmpty(),
-            'hasOgImage' => $siteSeo && $siteSeo->ogImage()->isNotEmpty(),
-            'robots' => $siteSeo && $siteSeo->robots()->isNotEmpty() ? $siteSeo->robots()->value() : 'index, follow',
-            'metaTitle' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
-                ? $siteSeo->metaTitle()->value()
+            'hasMetaTitle' => $site->metaTitle()->isNotEmpty(),
+            'hasMetaDescription' => $site->metaDescription()->isNotEmpty(),
+            'hasOgTitle' => false, // Site doesn't have ogTitle
+            'hasOgDescription' => false, // Site doesn't have ogDescription
+            'hasOgImage' => $site->ogImage()->isNotEmpty(),
+            'robots' => $site->robots()->isNotEmpty() ? $site->robots()->value() : 'index, follow',
+            'metaTitle' => $site->metaTitle()->isNotEmpty()
+                ? $site->metaTitle()->value()
                 : null,
-            'metaTitleLength' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
-                ? mb_strlen($siteSeo->metaTitle()->value())
+            'metaTitleLength' => $site->metaTitle()->isNotEmpty()
+                ? mb_strlen($site->metaTitle()->value())
                 : 0,
-            'metaDescription' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
-                ? $siteSeo->metaDescription()->value()
+            'metaDescription' => $site->metaDescription()->isNotEmpty()
+                ? $site->metaDescription()->value()
                 : null,
-            'metaDescriptionLength' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
-                ? mb_strlen($siteSeo->metaDescription()->value())
+            'metaDescriptionLength' => $site->metaDescription()->isNotEmpty()
+                ? mb_strlen($site->metaDescription()->value())
                 : 0,
-            'ogTitle' => $siteSeo && $siteSeo->ogTitle()->isNotEmpty()
-                ? $siteSeo->ogTitle()->value()
-                : null,
-            'ogTitleLength' => $siteSeo && $siteSeo->ogTitle()->isNotEmpty()
-                ? mb_strlen($siteSeo->ogTitle()->value())
-                : 0,
-            'ogDescription' => $siteSeo && $siteSeo->ogDescription()->isNotEmpty()
-                ? $siteSeo->ogDescription()->value()
-                : null,
-            'ogDescriptionLength' => $siteSeo && $siteSeo->ogDescription()->isNotEmpty()
-                ? mb_strlen($siteSeo->ogDescription()->value())
-                : 0,
+            'ogTitle' => null,
+            'ogTitleLength' => 0,
+            'ogDescription' => null,
+            'ogDescriptionLength' => 0,
             'language' => $languageCode,
             'legacy' => !empty($siteLegacy) ? $siteLegacy : null,
         ];
 
+        // Pages use flat fields
         foreach ($pages as $page) {
             $template = $page->intendedTemplate()->name();
             $status = $page->status();
@@ -127,7 +100,6 @@ class MetaKitController
                 continue;
             }
 
-            $seoData = self::getSeoData($page->metaKitSeo());
             $legacy = [];
             if ($page->metatitle()->isNotEmpty()) {
                 $legacy['metaTitle'] = $page->metatitle()->value();
@@ -155,58 +127,57 @@ class MetaKitController
                 'panelUrl' => $page->panel()->url(),
                 'template' => $template,
                 'status' => $status,
-                'hasMetaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty(),
-                'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
-                'hasOgTitle' => $seoData && $seoData->ogTitle()->isNotEmpty(),
-                'hasOgDescription' => $seoData && $seoData->ogDescription()->isNotEmpty(),
-                'hasOgImage' => $seoData && $seoData->ogImage()->isNotEmpty(),
-                'robots' => $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots()->value() : 'index, follow',
-                'metaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty()
-                    ? $seoData->metaTitle()->value()
+                'hasMetaTitle' => $page->metaTitle()->isNotEmpty(),
+                'hasMetaDescription' => $page->metaDescription()->isNotEmpty(),
+                'hasOgTitle' => $page->ogTitle()->isNotEmpty(),
+                'hasOgDescription' => $page->ogDescription()->isNotEmpty(),
+                'hasOgImage' => $page->ogImage()->isNotEmpty(),
+                'robots' => $page->robots()->isNotEmpty() ? $page->robots()->value() : 'index, follow',
+                'metaTitle' => $page->metaTitle()->isNotEmpty()
+                    ? $page->metaTitle()->value()
                     : null,
-                'metaTitleLength' => $seoData && $seoData->metaTitle()->isNotEmpty()
-                    ? mb_strlen($seoData->metaTitle()->value())
+                'metaTitleLength' => $page->metaTitle()->isNotEmpty()
+                    ? mb_strlen($page->metaTitle()->value())
                     : 0,
-                'metaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty()
-                    ? $seoData->metaDescription()->value()
+                'metaDescription' => $page->metaDescription()->isNotEmpty()
+                    ? $page->metaDescription()->value()
                     : null,
-                'metaDescriptionLength' => $seoData && $seoData->metaDescription()->isNotEmpty()
-                    ? mb_strlen($seoData->metaDescription()->value())
+                'metaDescriptionLength' => $page->metaDescription()->isNotEmpty()
+                    ? mb_strlen($page->metaDescription()->value())
                     : 0,
-                'ogTitle' => $seoData && $seoData->ogTitle()->isNotEmpty()
-                    ? $seoData->ogTitle()->value()
+                'ogTitle' => $page->ogTitle()->isNotEmpty()
+                    ? $page->ogTitle()->value()
                     : null,
-                'ogTitleLength' => $seoData && $seoData->ogTitle()->isNotEmpty()
-                    ? mb_strlen($seoData->ogTitle()->value())
+                'ogTitleLength' => $page->ogTitle()->isNotEmpty()
+                    ? mb_strlen($page->ogTitle()->value())
                     : 0,
-                'ogDescription' => $seoData && $seoData->ogDescription()->isNotEmpty()
-                    ? $seoData->ogDescription()->value()
+                'ogDescription' => $page->ogDescription()->isNotEmpty()
+                    ? $page->ogDescription()->value()
                     : null,
-                'ogDescriptionLength' => $seoData && $seoData->ogDescription()->isNotEmpty()
-                    ? mb_strlen($seoData->ogDescription()->value())
+                'ogDescriptionLength' => $page->ogDescription()->isNotEmpty()
+                    ? mb_strlen($page->ogDescription()->value())
                     : 0,
                 'language' => $languageCode,
                 'legacy' => !empty($legacy) ? $legacy : null,
             ];
         }
 
-        // Get site SEO settings for title preview
-        $siteSeo = self::getSeoData($site->metaKitSeo());
-        $appendSiteName = $siteSeo && $siteSeo->appendSiteName()->isNotEmpty()
-            ? $siteSeo->appendSiteName()->toBool()
+        // Get site SEO settings for title preview (flat fields)
+        $appendSiteName = $site->appendSiteName()->isNotEmpty()
+            ? $site->appendSiteName()->toBool()
             : true;
-        $appendSiteNameTo = $siteSeo && $siteSeo->appendSiteNameTo()->isNotEmpty()
-            ? $siteSeo->appendSiteNameTo()->value()
+        $appendSiteNameTo = $site->appendSiteNameTo()->isNotEmpty()
+            ? $site->appendSiteNameTo()->value()
             : null;
-        $siteMetaTitle = $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
-            ? $siteSeo->metaTitle()->value()
+        $siteMetaTitle = $site->metaTitle()->isNotEmpty()
+            ? $site->metaTitle()->value()
             : $site->title()->value();
-        $siteMetaDescription = $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
-            ? $siteSeo->metaDescription()->value()
+        $siteMetaDescription = $site->metaDescription()->isNotEmpty()
+            ? $site->metaDescription()->value()
             : null;
-        $siteHasOgImage = $siteSeo && $siteSeo->ogImage()->isNotEmpty();
-        $titleSeparator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
-            ? $siteSeo->titleSeparator()->value()
+        $siteHasOgImage = $site->ogImage()->isNotEmpty();
+        $titleSeparator = $site->titleSeparator()->isNotEmpty()
+            ? $site->titleSeparator()->value()
             : '|';
 
         $validationSettings = option('tearoom1.meta-kit.validation', []);
@@ -271,10 +242,8 @@ class MetaKitController
         $skipped = 0;
 
         foreach ($pages as $page) {
-            $seoData = self::getSeoData($page->metaKitSeo());
-
-            // Skip if already has description
-            if ($seoData && $seoData->metaDescription()->isNotEmpty()) {
+            // Skip if already has description (flat field)
+            if ($page->metaDescription()->isNotEmpty()) {
                 $skipped++;
                 continue;
             }
@@ -332,14 +301,16 @@ class MetaKitController
         $skipped = 0;
 
         foreach ($pages as $page) {
-            $seoData = self::getSeoData($page->metaKitSeo());
+            $isSite = ($page instanceof \Kirby\Cms\Site);
             $pageSkipped = true;
 
-            // Generate title if requested
+            // Generate title if requested (both site and pages use flat fields)
             if ($generateTitle) {
-                // Skip if already has title
-                if (!$seoData || $seoData->metaTitle()->isEmpty()) {
-                    $result = self::generateField($page->id(), 'metaTitle', null, true);
+                $hasTitle = $page->metaTitle()->isNotEmpty();
+
+                if (!$hasTitle) {
+                    $pageId = $isSite ? 'site' : $page->id();
+                    $result = self::generateField($pageId, 'metaTitle', null, true);
 
                     if ($result['status'] === 'success') {
                         $generated++;
@@ -353,9 +324,11 @@ class MetaKitController
 
             // Generate description if requested
             if ($generateDescription) {
-                // Skip if already has description
-                if (!$seoData || $seoData->metaDescription()->isEmpty()) {
-                    $result = self::generateField($page->id(), 'metaDescription', null, true);
+                $hasDescription = $page->metaDescription()->isNotEmpty();
+
+                if (!$hasDescription) {
+                    $pageId = $isSite ? 'site' : $page->id();
+                    $result = self::generateField($pageId, 'metaDescription', null, true);
 
                     if ($result['status'] === 'success') {
                         $generated++;
@@ -367,10 +340,11 @@ class MetaKitController
                 }
             }
 
-            // Generate OG title if requested
-            if ($generateOgTitle) {
-                // Skip if already has OG title
-                if (!$seoData || $seoData->ogTitle()->isEmpty()) {
+            // Generate OG title if requested (pages only, site doesn't have OG title)
+            if ($generateOgTitle && !$isSite) {
+                $hasOgTitle = $page->ogTitle()->isNotEmpty();
+
+                if (!$hasOgTitle) {
                     $result = self::generateField($page->id(), 'ogTitle', null, true);
 
                     if ($result['status'] === 'success') {
@@ -383,10 +357,11 @@ class MetaKitController
                 }
             }
 
-            // Generate OG description if requested
-            if ($generateOgDescription) {
-                // Skip if already has OG description
-                if (!$seoData || $seoData->ogDescription()->isEmpty()) {
+            // Generate OG description if requested (pages only)
+            if ($generateOgDescription && !$isSite) {
+                $hasOgDescription = $page->ogDescription()->isNotEmpty();
+
+                if (!$hasOgDescription) {
                     $result = self::generateField($page->id(), 'ogDescription', null, true);
 
                     if ($result['status'] === 'success') {
@@ -436,27 +411,22 @@ class MetaKitController
         }
 
         try {
-            $seoData = self::getSeoData($page->metaKitSeo());
-            $seoArray = self::seoDataToArray($seoData);
+            $languageCode = $kirby->language()?->code();
 
-            // Handle ogImage specially - it needs to be an array of UUIDs
+            // Both site and pages use flat fields now
             if ($fieldName === 'ogImage') {
                 if (empty($value)) {
-                    $seoArray[$fieldName] = [];
+                    $page->update([$fieldName => []], $languageCode);
                 } else {
-                    // Value can be a UUID string or filename
-                    // Try to find the file
                     $file = null;
                     if (strpos($value, 'file://') === 0) {
-                        // Already a UUID
                         $file = $kirby->file(str_replace('file://', '', $value));
                     } else {
-                        // Try as filename from the page
                         $file = $page->file($value);
                     }
 
                     if ($file) {
-                        $seoArray[$fieldName] = [$file->uuid()->toString()];
+                        $page->update([$fieldName => [$file->uuid()->toString()]], $languageCode);
                     } else {
                         return [
                             'status' => 'error',
@@ -465,20 +435,8 @@ class MetaKitController
                     }
                 }
             } else {
-                // Update the specific field normally
-                $seoArray[$fieldName] = $value;
+                $page->update([$fieldName => $value], $languageCode);
             }
-
-            $languageCode = $kirby->language()?->code();
-            $seoBlock = [
-                [
-                    'content' => $seoArray,
-                    'id' => $isSite ? 'site-seo-settings' : 'seo-metadata',
-                    'isHidden' => false,
-                    'type' => $isSite ? 'mk-site-seo' : 'mk-page-seo'
-                ]
-            ];
-            $page->update(['metaKitSeo' => $seoBlock], $languageCode);
 
             return [
                 'status' => 'success',
@@ -525,9 +483,8 @@ class MetaKitController
 
         $result = [];
 
-        // Add site as first entry if needed
+        // Add site as first entry if needed (site uses flat fields)
         if ($includeSite) {
-            $siteSeo = self::getSeoData($site->metaKitSeo());
             $siteLegacy = [];
 
             if ($site->metatitle()->isNotEmpty()) {
@@ -538,8 +495,8 @@ class MetaKitController
             }
 
             $ogImageData = null;
-            if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
-                $ogFiles = $siteSeo->ogImage()->toFiles();
+            if ($site->ogImage()->isNotEmpty()) {
+                $ogFiles = $site->ogImage()->toFiles();
                 if ($ogFiles->count() > 0) {
                     $ogFile = $ogFiles->first();
                     $ogImageData = [
@@ -557,41 +514,34 @@ class MetaKitController
                 'panelUrl' => $site->panel()->url(),
                 'template' => 'site',
                 'status' => 'published',
-                'hasMetaTitle' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty(),
-                'hasMetaDescription' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty(),
-                'hasOgTitle' => $siteSeo && $siteSeo->ogTitle()->isNotEmpty(),
-                'hasOgDescription' => $siteSeo && $siteSeo->ogDescription()->isNotEmpty(),
-                'hasOgImage' => $siteSeo && $siteSeo->ogImage()->isNotEmpty(),
-                'robots' => $siteSeo && $siteSeo->robots()->isNotEmpty() ? $siteSeo->robots()->value() : 'index, follow',
-                'metaTitle' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
-                    ? $siteSeo->metaTitle()->value()
+                'hasMetaTitle' => $site->metaTitle()->isNotEmpty(),
+                'hasMetaDescription' => $site->metaDescription()->isNotEmpty(),
+                'hasOgTitle' => false,
+                'hasOgDescription' => false,
+                'hasOgImage' => $site->ogImage()->isNotEmpty(),
+                'robots' => $site->robots()->isNotEmpty() ? $site->robots()->value() : 'index, follow',
+                'metaTitle' => $site->metaTitle()->isNotEmpty()
+                    ? $site->metaTitle()->value()
                     : null,
-                'metaDescription' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
-                    ? $siteSeo->metaDescription()->value()
+                'metaDescription' => $site->metaDescription()->isNotEmpty()
+                    ? $site->metaDescription()->value()
                     : null,
-                'ogTitle' => $siteSeo && $siteSeo->ogTitle()->isNotEmpty()
-                    ? $siteSeo->ogTitle()->value()
-                    : null,
-                'ogDescription' => $siteSeo && $siteSeo->ogDescription()->isNotEmpty()
-                    ? $siteSeo->ogDescription()->value()
-                    : null,
+                'ogTitle' => null,
+                'ogDescription' => null,
                 'ogImage' => $ogImageData,
-                'metaTitleLength' => $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
-                    ? mb_strlen($siteSeo->metaTitle()->value())
+                'metaTitleLength' => $site->metaTitle()->isNotEmpty()
+                    ? mb_strlen($site->metaTitle()->value())
                     : 0,
-                'metaDescriptionLength' => $siteSeo && $siteSeo->metaDescription()->isNotEmpty()
-                    ? mb_strlen($siteSeo->metaDescription()->value())
+                'metaDescriptionLength' => $site->metaDescription()->isNotEmpty()
+                    ? mb_strlen($site->metaDescription()->value())
                     : 0,
-                'ogTitleLength' => $siteSeo && $siteSeo->ogTitle()->isNotEmpty()
-                    ? mb_strlen($siteSeo->ogTitle()->value())
-                    : 0,
-                'ogDescriptionLength' => $siteSeo && $siteSeo->ogDescription()->isNotEmpty()
-                    ? mb_strlen($siteSeo->ogDescription()->value())
-                    : 0,
+                'ogTitleLength' => 0,
+                'ogDescriptionLength' => 0,
                 'legacy' => !empty($siteLegacy) ? $siteLegacy : null,
             ];
         }
 
+        // Pages use flat fields
         foreach ($pages as $page) {
             $template = $page->intendedTemplate()->name();
             $status = $page->status();
@@ -599,7 +549,6 @@ class MetaKitController
                 continue;
             }
 
-            $seoData = self::getSeoData($page->metaKitSeo());
             $legacy = [];
 
             // Check for legacy fields
@@ -624,8 +573,8 @@ class MetaKitController
             }
 
             $ogImageData = null;
-            if ($seoData && $seoData->ogImage()->isNotEmpty()) {
-                $ogFiles = $seoData->ogImage()->toFiles();
+            if ($page->ogImage()->isNotEmpty()) {
+                $ogFiles = $page->ogImage()->toFiles();
                 if ($ogFiles->count() > 0) {
                     $ogFile = $ogFiles->first();
                     $ogImageData = [
@@ -643,36 +592,36 @@ class MetaKitController
                 'panelUrl' => $page->panel()->url(),
                 'template' => $template,
                 'status' => $status,
-                'hasMetaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty(),
-                'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
-                'hasOgTitle' => $seoData && $seoData->ogTitle()->isNotEmpty(),
-                'hasOgDescription' => $seoData && $seoData->ogDescription()->isNotEmpty(),
-                'hasOgImage' => $seoData && $seoData->ogImage()->isNotEmpty(),
-                'robots' => $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots()->value() : 'index, follow',
-                'metaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty()
-                    ? $seoData->metaTitle()->value()
+                'hasMetaTitle' => $page->metaTitle()->isNotEmpty(),
+                'hasMetaDescription' => $page->metaDescription()->isNotEmpty(),
+                'hasOgTitle' => $page->ogTitle()->isNotEmpty(),
+                'hasOgDescription' => $page->ogDescription()->isNotEmpty(),
+                'hasOgImage' => $page->ogImage()->isNotEmpty(),
+                'robots' => $page->robots()->isNotEmpty() ? $page->robots()->value() : 'index, follow',
+                'metaTitle' => $page->metaTitle()->isNotEmpty()
+                    ? $page->metaTitle()->value()
                     : null,
-                'metaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty()
-                    ? $seoData->metaDescription()->value()
+                'metaDescription' => $page->metaDescription()->isNotEmpty()
+                    ? $page->metaDescription()->value()
                     : null,
-                'ogTitle' => $seoData && $seoData->ogTitle()->isNotEmpty()
-                    ? $seoData->ogTitle()->value()
+                'ogTitle' => $page->ogTitle()->isNotEmpty()
+                    ? $page->ogTitle()->value()
                     : null,
-                'ogDescription' => $seoData && $seoData->ogDescription()->isNotEmpty()
-                    ? $seoData->ogDescription()->value()
+                'ogDescription' => $page->ogDescription()->isNotEmpty()
+                    ? $page->ogDescription()->value()
                     : null,
                 'ogImage' => $ogImageData,
-                'metaTitleLength' => $seoData && $seoData->metaTitle()->isNotEmpty()
-                    ? mb_strlen($seoData->metaTitle()->value())
+                'metaTitleLength' => $page->metaTitle()->isNotEmpty()
+                    ? mb_strlen($page->metaTitle()->value())
                     : 0,
-                'metaDescriptionLength' => $seoData && $seoData->metaDescription()->isNotEmpty()
-                    ? mb_strlen($seoData->metaDescription()->value())
+                'metaDescriptionLength' => $page->metaDescription()->isNotEmpty()
+                    ? mb_strlen($page->metaDescription()->value())
                     : 0,
-                'ogTitleLength' => $seoData && $seoData->ogTitle()->isNotEmpty()
-                    ? mb_strlen($seoData->ogTitle()->value())
+                'ogTitleLength' => $page->ogTitle()->isNotEmpty()
+                    ? mb_strlen($page->ogTitle()->value())
                     : 0,
-                'ogDescriptionLength' => $seoData && $seoData->ogDescription()->isNotEmpty()
-                    ? mb_strlen($seoData->ogDescription()->value())
+                'ogDescriptionLength' => $page->ogDescription()->isNotEmpty()
+                    ? mb_strlen($page->ogDescription()->value())
                     : 0,
                 'legacy' => !empty($legacy) ? $legacy : null,
             ];
@@ -697,7 +646,6 @@ class MetaKitController
             ];
         }
 
-        $seoData = self::getSeoData($page->metaKitSeo());
         $legacy = [];
 
         // Check for legacy fields
@@ -722,8 +670,8 @@ class MetaKitController
         }
 
         $ogImageData = null;
-        if ($seoData && $seoData->ogImage()->isNotEmpty()) {
-            $ogFiles = $seoData->ogImage()->toFiles();
+        if ($page->ogImage()->isNotEmpty()) {
+            $ogFiles = $page->ogImage()->toFiles();
             if ($ogFiles->count() > 0) {
                 $ogFile = $ogFiles->first();
                 $ogImageData = [
@@ -734,46 +682,83 @@ class MetaKitController
             }
         }
 
-        $result = [
-            'id' => $isSite ? 'site' : $page->id(),
-            'title' => $page->title()->value(),
-            'url' => $page->url(),
-            'panelUrl' => $page->panel()->url(),
-            'template' => $isSite ? 'site' : $page->intendedTemplate()->name(),
-            'status' => $isSite ? 'published' : $page->status(),
-            'hasMetaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty(),
-            'hasMetaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty(),
-            'hasOgTitle' => $seoData && $seoData->ogTitle()->isNotEmpty(),
-            'hasOgDescription' => $seoData && $seoData->ogDescription()->isNotEmpty(),
-            'hasOgImage' => $seoData && $seoData->ogImage()->isNotEmpty(),
-            'robots' => $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots()->value() : 'index, follow',
-            'metaTitle' => $seoData && $seoData->metaTitle()->isNotEmpty()
-                ? $seoData->metaTitle()->value()
-                : null,
-            'metaDescription' => $seoData && $seoData->metaDescription()->isNotEmpty()
-                ? $seoData->metaDescription()->value()
-                : null,
-            'ogTitle' => $seoData && $seoData->ogTitle()->isNotEmpty()
-                ? $seoData->ogTitle()->value()
-                : null,
-            'ogDescription' => $seoData && $seoData->ogDescription()->isNotEmpty()
-                ? $seoData->ogDescription()->value()
-                : null,
-            'ogImage' => $ogImageData,
-            'metaTitleLength' => $seoData && $seoData->metaTitle()->isNotEmpty()
-                ? mb_strlen($seoData->metaTitle()->value())
-                : 0,
-            'metaDescriptionLength' => $seoData && $seoData->metaDescription()->isNotEmpty()
-                ? mb_strlen($seoData->metaDescription()->value())
-                : 0,
-            'ogTitleLength' => $seoData && $seoData->ogTitle()->isNotEmpty()
-                ? mb_strlen($seoData->ogTitle()->value())
-                : 0,
-            'ogDescriptionLength' => $seoData && $seoData->ogDescription()->isNotEmpty()
-                ? mb_strlen($seoData->ogDescription()->value())
-                : 0,
-            'legacy' => !empty($legacy) ? $legacy : null,
-        ];
+        if ($isSite) {
+            // Site uses flat fields (no ogTitle/ogDescription)
+            $result = [
+                'id' => 'site',
+                'title' => $page->title()->value(),
+                'url' => $page->url(),
+                'panelUrl' => $page->panel()->url(),
+                'template' => 'site',
+                'status' => 'published',
+                'hasMetaTitle' => $page->metaTitle()->isNotEmpty(),
+                'hasMetaDescription' => $page->metaDescription()->isNotEmpty(),
+                'hasOgTitle' => false,
+                'hasOgDescription' => false,
+                'hasOgImage' => $page->ogImage()->isNotEmpty(),
+                'robots' => $page->robots()->isNotEmpty() ? $page->robots()->value() : 'index, follow',
+                'metaTitle' => $page->metaTitle()->isNotEmpty()
+                    ? $page->metaTitle()->value()
+                    : null,
+                'metaDescription' => $page->metaDescription()->isNotEmpty()
+                    ? $page->metaDescription()->value()
+                    : null,
+                'ogTitle' => null,
+                'ogDescription' => null,
+                'ogImage' => $ogImageData,
+                'metaTitleLength' => $page->metaTitle()->isNotEmpty()
+                    ? mb_strlen($page->metaTitle()->value())
+                    : 0,
+                'metaDescriptionLength' => $page->metaDescription()->isNotEmpty()
+                    ? mb_strlen($page->metaDescription()->value())
+                    : 0,
+                'ogTitleLength' => 0,
+                'ogDescriptionLength' => 0,
+                'legacy' => !empty($legacy) ? $legacy : null,
+            ];
+        } else {
+            // Pages use flat fields
+            $result = [
+                'id' => $page->id(),
+                'title' => $page->title()->value(),
+                'url' => $page->url(),
+                'panelUrl' => $page->panel()->url(),
+                'template' => $page->intendedTemplate()->name(),
+                'status' => $page->status(),
+                'hasMetaTitle' => $page->metaTitle()->isNotEmpty(),
+                'hasMetaDescription' => $page->metaDescription()->isNotEmpty(),
+                'hasOgTitle' => $page->ogTitle()->isNotEmpty(),
+                'hasOgDescription' => $page->ogDescription()->isNotEmpty(),
+                'hasOgImage' => $page->ogImage()->isNotEmpty(),
+                'robots' => $page->robots()->isNotEmpty() ? $page->robots()->value() : 'index, follow',
+                'metaTitle' => $page->metaTitle()->isNotEmpty()
+                    ? $page->metaTitle()->value()
+                    : null,
+                'metaDescription' => $page->metaDescription()->isNotEmpty()
+                    ? $page->metaDescription()->value()
+                    : null,
+                'ogTitle' => $page->ogTitle()->isNotEmpty()
+                    ? $page->ogTitle()->value()
+                    : null,
+                'ogDescription' => $page->ogDescription()->isNotEmpty()
+                    ? $page->ogDescription()->value()
+                    : null,
+                'ogImage' => $ogImageData,
+                'metaTitleLength' => $page->metaTitle()->isNotEmpty()
+                    ? mb_strlen($page->metaTitle()->value())
+                    : 0,
+                'metaDescriptionLength' => $page->metaDescription()->isNotEmpty()
+                    ? mb_strlen($page->metaDescription()->value())
+                    : 0,
+                'ogTitleLength' => $page->ogTitle()->isNotEmpty()
+                    ? mb_strlen($page->ogTitle()->value())
+                    : 0,
+                'ogDescriptionLength' => $page->ogDescription()->isNotEmpty()
+                    ? mb_strlen($page->ogDescription()->value())
+                    : 0,
+                'legacy' => !empty($legacy) ? $legacy : null,
+            ];
+        }
 
         return [
             'status' => 'success',
@@ -844,7 +829,7 @@ class MetaKitController
 
         // Extract from all fields
         foreach ($page->content()->fields() as $key => $field) {
-            if (in_array($key, ['title', 'slug', 'template', 'seo', 'ogimage'])) {
+            if (in_array($key, ['title', 'slug', 'template', 'seo', 'ogimage', 'metatitle', 'metadescription', 'ogtitle', 'ogdescription', 'robots', 'canonicalurl', 'metaauthor'])) {
                 continue;
             }
 
@@ -991,21 +976,9 @@ class MetaKitController
                 ];
             }
 
-            // Save if requested
+            // Save if requested - both site and pages use flat fields
             if ($save) {
-                $seoData = self::getSeoData($page->metaKitSeo());
-                $seoArray = self::seoDataToArray($seoData);
-                $seoArray[$fieldName] = $result;
-
-                $seoBlock = [
-                    [
-                        'content' => $seoArray,
-                        'id' => $isSite ? 'site-seo-settings' : 'seo-metadata',
-                        'isHidden' => false,
-                        'type' => $isSite ? 'mk-site-seo' : 'mk-page-seo'
-                    ]
-                ];
-                $page->update(['metaKitSeo' => $seoBlock], $languageCode);
+                $page->update([$fieldName => $result], $languageCode);
 
                 return [
                     'status' => 'success',

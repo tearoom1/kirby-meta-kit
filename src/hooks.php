@@ -109,9 +109,8 @@ return [
         }
 
         try {
-            // Check if SEO object exists and if metadescription is empty
-            $seoData = $newPage->metaKitSeo()->toObject();
-            if (!$seoData || $seoData->metadescription()->isNotEmpty()) {
+            // Check if metaDescription is empty (flat field)
+            if ($newPage->metaDescription()->isNotEmpty()) {
                 return;
             }
 
@@ -124,13 +123,10 @@ return [
                 ]);
 
                 if ($description) {
-                    // Get existing SEO data and update metadescription
-                    $existingSeo = $newPage->metaKitSeo()->yaml();
-                    $existingSeo["metadescription"] = $description;
-
+                    // Update flat field directly
                     $newPage->update(
                         [
-                            "metaKitSeo" => $existingSeo,
+                            "metaDescription" => $description,
                         ],
                         kirby()->language()?->code(),
                     );

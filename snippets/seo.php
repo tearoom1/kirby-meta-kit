@@ -1,6 +1,7 @@
 <?php
 /**
  * Unified SEO snippet - Meta tags, OpenGraph, and Schema.org
+ * Pages use flat fields, site uses blocks field for settings
  */
 
 use TearoomOne\MetaHelper;
@@ -14,9 +15,8 @@ $enableMeta = option('tearoom1.meta-kit.meta.enabled', true);
 $enableOpengraph = option('tearoom1.meta-kit.opengraph.enabled', true);
 $enableSchema = option('tearoom1.meta-kit.schema.enabled', true);
 
-// Get SEO data from object field
-$seoData = $page->metaKitSeo()->toBlocks()->first()?->content();
-$siteSeo = $site->metaKitSeo()->toBlocks()->first()?->content();
+// Get site SEO data from blocks (for site-wide settings)
+$siteSeo = MetaHelper::getSiteSeoData($site);
 
 // Check license status
 $hasValidLicense = true; // no limit for demo //MetaKit::hasValidLicense();
@@ -26,9 +26,9 @@ $charLimit = $hasValidLicense ? null : 20;
 // Build Common Data
 // ==============================================================
 
-// Build meta title and description using helper
-$metaTitle = MetaHelper::buildTitle($page, $site, $seoData, 'meta');
-$metaDescription = MetaHelper::buildDescription($page, $site, $seoData);
+// Build meta title and description using helper (reads from flat page fields)
+$metaTitle = MetaHelper::buildTitle($page, $site, null, 'meta');
+$metaDescription = MetaHelper::buildDescription($page, $site, null);
 
 // Limit output if unlicensed
 if ($charLimit && mb_strlen($metaTitle) > $charLimit) {
@@ -38,23 +38,23 @@ if ($charLimit && mb_strlen($metaDescription) > $charLimit) {
     $metaDescription = mb_substr($metaDescription, 0, $charLimit) . '...';
 }
 
-// Get canonical URL
-if ($seoData && $seoData->canonicalUrl()->isNotEmpty()) {
-    $canonical = $seoData->canonicalUrl()->value();
+// Get canonical URL (flat field on page)
+if ($page->canonicalUrl()->isNotEmpty()) {
+    $canonical = $page->canonicalUrl()->value();
 } else {
     $canonical = $page->url();
 }
 
-// Get robots directive
-$robots = $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots() : $siteSeo?->robots() ;
-$keywords = $seoData && $seoData->metaKeywords()->isNotEmpty() ? $seoData->metaKeywords() : $siteSeo?->metaKeywords() ;
-$author = $seoData && $seoData->metaAuthor()->isNotEmpty() ? $seoData->metaAuthor() : $siteSeo?->metaAuthor() ;
+// Get robots directive (flat field on page, fallback to site)
+$robots = $page->robots()->isNotEmpty() ? $page->robots() : $siteSeo?->robots();
+$keywords = $page->metaKeywords()->isNotEmpty() ? $page->metaKeywords() : $siteSeo?->metaKeywords();
+$author = $page->metaAuthor()->isNotEmpty() ? $page->metaAuthor() : $siteSeo?->metaAuthor();
 
 // Get OG title (use custom OG title or fall back to meta title)
-$ogTitle = MetaHelper::buildTitle($page, $site, $seoData, 'og');
+$ogTitle = MetaHelper::buildTitle($page, $site, null, 'og');
 
 // Get OG description using helper
-$ogDescription = MetaHelper::buildOgDescription($page, $site, $seoData, $metaDescription);
+$ogDescription = MetaHelper::buildOgDescription($page, $site, null, $metaDescription);
 
 // Limit OG content if unlicensed
 if ($charLimit && mb_strlen($ogTitle) > $charLimit) {
@@ -64,10 +64,10 @@ if ($charLimit && mb_strlen($ogDescription) > $charLimit) {
     $ogDescription = mb_substr($ogDescription, 0, $charLimit) . '...';
 }
 
-// Get OG image
+// Get OG image (flat field on page, fallback to site)
 $ogImage = null;
-if ($seoData && $seoData->ogImage()->isNotEmpty()) {
-    $ogImageFile = $seoData->ogImage()->toFile();
+if ($page->ogImage()->isNotEmpty()) {
+    $ogImageFile = $page->ogImage()->toFile();
     if ($ogImageFile) {
         $ogImage = $ogImageFile->resize(1200, 630);
     }
