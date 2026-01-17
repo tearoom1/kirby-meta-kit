@@ -20,11 +20,11 @@ return [
                 }
 
                 // Build title and descriptions using helper (reads from flat page fields)
-                $title = MetaHelper::buildTitle($page, site(), null, 'meta');
-                $description = MetaHelper::buildDescription($page, site(), null);
+                $title = MetaHelper::buildTitle($page, site(), 'meta');
+                $description = MetaHelper::buildDescription($page, site());
 
-                $ogTitle = MetaHelper::buildTitle($page, site(), null, 'og');
-                $ogDescription = MetaHelper::buildOgDescription($page, site(), null, $description);
+                $ogTitle = MetaHelper::buildTitle($page, site(), 'og');
+                $ogDescription = MetaHelper::buildOgDescription($page, site() , $description);
 
                 // Get OG image from flat page field
                 $ogImage = null;

@@ -229,7 +229,7 @@ class MetaKit
         $promptTemplate = $this->options['ai.prompt.title'];
 
         // Update prompt to include target length
-        $promptTemplate = str_replace('30-65 characters', $targetLength . ' characters', $promptTemplate);
+        $promptTemplate = str_replace('{optimal_length}', $targetLength . ' characters', $promptTemplate);
 
         $prompt = str_replace(
             ['{language}', '{content}', '{tone}'],

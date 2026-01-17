@@ -100,7 +100,7 @@ export default {
 
     // Set up MutationObserver for file field changes
     this.setupFilesObserver();
-    
+
     // After a short delay, check if there's a page-specific image
     // If not, store the loaded image as the site default
     this.$nextTick(() => {
@@ -175,10 +175,10 @@ export default {
         };
 
         const currentValues = {
-          metatitle: getFieldOrNull('metatitle'),
-          metadescription: getFieldOrNull('metadescription'),
-          ogtitle: getFieldOrNull('ogtitle'),
-          ogdescription: getFieldOrNull('ogdescription'),
+          metatitle: getFieldOrNull('metaTitle'),
+          metadescription: getFieldOrNull('metaDescription'),
+          ogtitle: getFieldOrNull('ogTitle'),
+          ogdescription: getFieldOrNull('ogDescription'),
           ogimage: getImageSrc()
         };
 
@@ -294,10 +294,10 @@ export default {
       };
 
       const seoData = {
-        metatitle: getFieldValue('metatitle'),
-        metadescription: getFieldValue('metadescription'),
-        ogtitle: getFieldValue('ogtitle'),
-        ogdescription: getFieldValue('ogdescription'),
+        metatitle: getFieldValue('metaTitle'),
+        metadescription: getFieldValue('metaDescription'),
+        ogtitle: getFieldValue('ogTitle'),
+        ogdescription: getFieldValue('ogDescription'),
         ogimage: getOgImage()
       };
 
@@ -381,7 +381,7 @@ export default {
 
         if (newMeta) {
           this.meta = newMeta;
-          
+
           // Extract and store site name from the title on first load
           if (!this.siteName) {
             this.extractSiteInfo();
@@ -396,7 +396,7 @@ export default {
       const ogImageField = document.querySelector('.k-field-name-ogimage');
       const pageImage = ogImageField?.querySelector('img');
       const hasPageImage = pageImage && pageImage.srcset;
-      
+
       if (!hasPageImage && this.meta?.ogImage) {
         // No page-specific image, so the loaded image is the site default
         this.siteOgImage = this.meta.ogImage;
@@ -405,7 +405,7 @@ export default {
         // For now, set to null (no fallback available)
         this.siteOgImage = null;
       }
-      
+
       // Mark as determined so polling can start updating
       this.siteOgImageDetermined = true;
     },

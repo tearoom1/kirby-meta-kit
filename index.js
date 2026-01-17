@@ -117,10 +117,10 @@
             return input.value ?? "";
           };
           const currentValues = {
-            metatitle: getFieldOrNull("metatitle"),
-            metadescription: getFieldOrNull("metadescription"),
-            ogtitle: getFieldOrNull("ogtitle"),
-            ogdescription: getFieldOrNull("ogdescription"),
+            metatitle: getFieldOrNull("metaTitle"),
+            metadescription: getFieldOrNull("metaDescription"),
+            ogtitle: getFieldOrNull("ogTitle"),
+            ogdescription: getFieldOrNull("ogDescription"),
             ogimage: getImageSrc()
           };
           const anyMissing = Object.values(currentValues).some((v) => v === null);
@@ -205,10 +205,10 @@
           return "";
         };
         const seoData = {
-          metatitle: getFieldValue("metatitle"),
-          metadescription: getFieldValue("metadescription"),
-          ogtitle: getFieldValue("ogtitle"),
-          ogdescription: getFieldValue("ogdescription"),
+          metatitle: getFieldValue("metaTitle"),
+          metadescription: getFieldValue("metaDescription"),
+          ogtitle: getFieldValue("ogTitle"),
+          ogdescription: getFieldValue("ogDescription"),
           ogimage: getOgImage()
         };
         const values = Object.values(seoData);

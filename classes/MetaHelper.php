@@ -26,7 +26,7 @@ class MetaHelper
         return $field->toObject();
     }
 
-    public static function buildTitle(Page $page, Site $site, $seoData, $type): string
+    public static function buildTitle(Page $page, Site $site, $type): string
     {
         $title = $page->title()->value();
 
@@ -73,7 +73,7 @@ class MetaHelper
         return $title;
     }
 
-    public static function buildDescription(Page $page, Site $site, $seoData = null, int $maxLength = 160): string
+    public static function buildDescription(Page $page, Site $site, int $maxLength = 160): string
     {
         // Check page SEO field directly (flat field)
         if ($page->metaDescription()->isNotEmpty()) {
@@ -88,7 +88,7 @@ class MetaHelper
         return '';
     }
 
-    public static function buildOgDescription(Page $page, Site $site, $seoData = null, ?string $metaDescription = null, int $maxLength = 160): string
+    public static function buildOgDescription(Page $page, Site $site, ?string $metaDescription = null, int $maxLength = 160): string
     {
         // Check OG-specific description first (flat field)
         if ($page->ogDescription()->isNotEmpty()) {
