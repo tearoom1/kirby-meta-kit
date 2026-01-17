@@ -22,8 +22,9 @@ return [
             $ranges = $validation['ranges'] ?? [];
             $templates = $validation['templates'] ?? [];
 
-            // Get template-specific ranges if available
-            $template = $this->model()->intendedTemplate()->name();
+            // Get template-specific ranges if available (only for pages, not site)
+            $model = $this->model();
+            $template = method_exists($model, 'intendedTemplate') ? $model->intendedTemplate()->name() : 'site';
             $fieldKey = $fieldType === 'og' ? 'ogTitle' : 'title';
 
             // Check for template-specific ranges
@@ -43,20 +44,22 @@ return [
         },
         'validationSettings' => function () {
             $site = kirby()->site();
-            $siteSeo = $site->content()->get('metakitseo')->toBlocks()->first();
+            $model = $this->model();
+            $template = method_exists($model, 'intendedTemplate') ? $model->intendedTemplate()->name() : 'site';
 
-            // Get site settings
-            $appendSiteName = false;
-            $appendSiteNameTo = '';
-            $siteMetaTitle = '';
-            $titleSeparator = '|';
-
-            if ($siteSeo) {
-                $appendSiteName = $siteSeo->appendSiteName()->toBool();
-                $appendSiteNameTo = $siteSeo->appendSiteNameTo()->value();
-                $siteMetaTitle = $siteSeo->metaTitle()->value();
-                $titleSeparator = $siteSeo->titleSeparator()->or('|')->value();
-            }
+            // Get site settings from flat fields
+            $appendSiteName = $site->appendSiteName()->isNotEmpty()
+                ? $site->appendSiteName()->toBool()
+                : false;
+            $appendSiteNameTo = $site->appendSiteNameTo()->isNotEmpty()
+                ? $site->appendSiteNameTo()->value()
+                : '';
+            $siteMetaTitle = $site->metaTitle()->isNotEmpty()
+                ? $site->metaTitle()->value()
+                : '';
+            $titleSeparator = $site->titleSeparator()->isNotEmpty()
+                ? $site->titleSeparator()->value()
+                : '|';
 
             return [
                 'ranges' => $this->validationRanges(),
@@ -65,8 +68,8 @@ return [
                 'siteMetaTitle' => $siteMetaTitle,
                 'titleSeparator' => $titleSeparator,
                 'fieldType' => $this->fieldType(),
-                'pageId' => $this->pageId() ?? $this->model()->id(),
-                'template' => $this->model()->intendedTemplate()->name()
+                'pageId' => $this->pageId() ?? $model->id(),
+                'template' => $template
             ];
         }
     ]

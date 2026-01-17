@@ -152,16 +152,15 @@ class MetaKit
         $optimalMax = $ranges['optimal']['max'] ?? 60;
 
         $site = $this->kirby->site();
-        $siteSeo = \TearoomOne\MetaHelper::getSeoData($site->metaKitSeo());
 
-        // Check if site name should be appended
-        $appendSiteName = $siteSeo && $siteSeo->appendSiteName()->isNotEmpty()
-            ? $siteSeo->appendSiteName()->toBool()
+        // Check if site name should be appended (flat field)
+        $appendSiteName = $site->appendSiteName()->isNotEmpty()
+            ? $site->appendSiteName()->toBool()
             : true;
 
-        // Check which field types should have site name appended
-        $appendSiteNameTo = $siteSeo && $siteSeo->appendSiteNameTo()->isNotEmpty()
-            ? $siteSeo->appendSiteNameTo()->value()
+        // Check which field types should have site name appended (flat field, checkboxes stored as array)
+        $appendSiteNameTo = $site->appendSiteNameTo()->isNotEmpty()
+            ? $site->appendSiteNameTo()->value()
             : 'meta,og';
         $appendToTypes = array_map('trim', explode(',', $appendSiteNameTo));
 
@@ -178,13 +177,13 @@ class MetaKit
             return $optimalMin . '-' . $optimalMax;
         }
 
-        // Get site name and separator
-        $siteMetaTitle = $siteSeo && $siteSeo->metaTitle()->isNotEmpty()
-            ? $siteSeo->metaTitle()->value()
+        // Get site name and separator (flat fields)
+        $siteMetaTitle = $site->metaTitle()->isNotEmpty()
+            ? $site->metaTitle()->value()
             : $site->title()->value();
 
-        $separator = $siteSeo && $siteSeo->titleSeparator()->isNotEmpty()
-            ? $siteSeo->titleSeparator()->value()
+        $separator = $site->titleSeparator()->isNotEmpty()
+            ? $site->titleSeparator()->value()
             : '|';
 
         // Calculate space taken by site name (including spaces around separator)

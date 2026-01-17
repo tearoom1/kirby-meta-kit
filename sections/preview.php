@@ -36,15 +36,12 @@ return [
                     }
                 }
 
-                // Fallback to site default OG image
-                if (!$ogImage) {
-                    $siteSeo = MetaHelper::getSiteSeoData(site());
-                    if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
-                        $siteFiles = $siteSeo->ogImage()->toFiles();
-                        if ($siteFiles && $siteFiles->count() > 0) {
-                            $siteImage = $siteFiles->first();
-                            $ogImage = $siteImage ? $siteImage->crop(1200, 630)->url() : null;
-                        }
+                // Fallback to site default OG image (flat field)
+                if (!$ogImage && site()->ogImage()->isNotEmpty()) {
+                    $siteFiles = site()->ogImage()->toFiles();
+                    if ($siteFiles && $siteFiles->count() > 0) {
+                        $siteImage = $siteFiles->first();
+                        $ogImage = $siteImage ? $siteImage->crop(1200, 630)->url() : null;
                     }
                 }
 

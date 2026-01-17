@@ -1,5 +1,5 @@
-type: group
 label: SEO Settings
+type: group
 fields:
   appendSiteName:
     label: Append Site Name to Titles
@@ -56,13 +56,14 @@ fields:
     type: mk-description
     fieldType: meta
     maxlength: 180
+    width: 1/2
     help: Default description for search engines. Include primary keyword and a call-to-action.
 
   metaAuthor:
     label: Default Author
     type: text
     help: The default author name. This field has no influence on SEO.
-    width: 1/3
+    width: 1/4
 
   robots:
     label: Default robots directive
@@ -72,7 +73,7 @@ fields:
       - { value: 'noindex, follow', text: 'No Index, Follow' }
       - { value: 'index, nofollow', text: 'Index, No Follow' }
       - { value: 'noindex, nofollow', text: 'No Index, No Follow' }
-    width: 1/3
+    width: 1/4
     translate: false
 
   ogImage:
@@ -83,6 +84,6 @@ fields:
     image:
       ratio: 120/63
       cover: true
-    size: medium
+    size: large
     query: site.images
     help: Default image for social media sharing (1200×630px recommended)

@@ -25,8 +25,9 @@ return [
             $ranges = $validation['ranges'] ?? [];
             $templates = $validation['templates'] ?? [];
 
-            // Get template-specific ranges if available
-            $template = $this->model()->intendedTemplate()->name();
+            // Get template-specific ranges if available (only for pages, not site)
+            $model = $this->model();
+            $template = method_exists($model, 'intendedTemplate') ? $model->intendedTemplate()->name() : 'site';
             $fieldKey = $fieldType === 'og' ? 'ogDescription' : 'description';
 
             // Check for template-specific ranges
@@ -45,11 +46,13 @@ return [
             ];
         },
         'validationSettings' => function () {
+            $model = $this->model();
+            $template = method_exists($model, 'intendedTemplate') ? $model->intendedTemplate()->name() : 'site';
             return [
                 'ranges' => $this->validationRanges(),
                 'fieldType' => $this->fieldType(),
-                'pageId' => $this->pageId() ?? $this->model()->id(),
-                'template' => $this->model()->intendedTemplate()->name()
+                'pageId' => $this->pageId() ?? $model->id(),
+                'template' => $template
             ];
         }
     ]

@@ -13,25 +13,7 @@ return [
         $needsUpdate = false;
         $updates = [];
 
-        // Check if objects need initialization
-        if ($site->metaKitSeo()->isEmpty()) {
-            $updates["metaKitSeo"] = [
-                [
-                    "content" => [
-                        "appendSiteName" => true,
-                        "titleSeparator" => "|",
-                        "metaTitle" => "",
-                        "metaDescription" => "",
-                        "metaKeywords" => "",
-                        "ogImage" => [],
-                    ],
-                    "id" => "site-seo-settings",
-                    "isHidden" => false,
-                    "type" => "mk-site-seo",
-                ],
-            ];
-            $needsUpdate = true;
-        }
+        // Site SEO settings are now flat fields, no initialization needed
 
         if ($site->metaKitOpenrouter()->isEmpty()) {
             $updates["metaKitOpenrouter"] = [

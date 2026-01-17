@@ -1,7 +1,7 @@
 <?php
 /**
  * Unified SEO snippet - Meta tags, OpenGraph, and Schema.org
- * Pages use flat fields, site uses blocks field for settings
+ * All fields are now flat fields on both pages and site
  */
 
 use TearoomOne\MetaHelper;
@@ -14,9 +14,6 @@ $page = $page ?? page();
 $enableMeta = option('tearoom1.meta-kit.meta.enabled', true);
 $enableOpengraph = option('tearoom1.meta-kit.opengraph.enabled', true);
 $enableSchema = option('tearoom1.meta-kit.schema.enabled', true);
-
-// Get site SEO data from blocks (for site-wide settings)
-$siteSeo = MetaHelper::getSiteSeoData($site);
 
 // Check license status
 $hasValidLicense = true; // no limit for demo //MetaKit::hasValidLicense();
@@ -45,10 +42,10 @@ if ($page->canonicalUrl()->isNotEmpty()) {
     $canonical = $page->url();
 }
 
-// Get robots directive (flat field on page, fallback to site)
-$robots = $page->robots()->isNotEmpty() ? $page->robots() : $siteSeo?->robots();
-$keywords = $page->metaKeywords()->isNotEmpty() ? $page->metaKeywords() : $siteSeo?->metaKeywords();
-$author = $page->metaAuthor()->isNotEmpty() ? $page->metaAuthor() : $siteSeo?->metaAuthor();
+// Get robots directive (flat field on page, fallback to site flat field)
+$robots = $page->robots()->isNotEmpty() ? $page->robots()->value() : $site->robots()->value();
+$keywords = $page->metaKeywords()->isNotEmpty() ? $page->metaKeywords() : null;
+$author = $page->metaAuthor()->isNotEmpty() ? $page->metaAuthor() : ($site->metaAuthor()->isNotEmpty() ? $site->metaAuthor() : null);
 
 // Get OG title (use custom OG title or fall back to meta title)
 $ogTitle = MetaHelper::buildTitle($page, $site, null, 'og');
@@ -64,19 +61,17 @@ if ($charLimit && mb_strlen($ogDescription) > $charLimit) {
     $ogDescription = mb_substr($ogDescription, 0, $charLimit) . '...';
 }
 
-// Get OG image (flat field on page, fallback to site)
+// Get OG image (flat field on page, fallback to site flat field)
 $ogImage = null;
 if ($page->ogImage()->isNotEmpty()) {
     $ogImageFile = $page->ogImage()->toFile();
     if ($ogImageFile) {
         $ogImage = $ogImageFile->resize(1200, 630);
     }
-} else {
-    if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
-        $ogImageFile = $siteSeo->ogImage()->toFile();
-        if ($ogImageFile) {
-            $ogImage = $ogImageFile->resize(1200, 630);
-        }
+} elseif ($site->ogImage()->isNotEmpty()) {
+    $ogImageFile = $site->ogImage()->toFile();
+    if ($ogImageFile) {
+        $ogImage = $ogImageFile->resize(1200, 630);
     }
 }
 ?>

@@ -85,9 +85,12 @@ App::plugin(
         'blueprints' => [
             'meta-kit/site' => __DIR__ . '/blueprints/site.yml',
             'meta-kit/page' => __DIR__ . '/blueprints/page.yml',
+            // Flat field groups for SEO
+            'fields/meta-group' => __DIR__ . '/blueprints/fields/meta-group.yml',
+            'fields/seo-group' => __DIR__ . '/blueprints/fields/seo-group.yml',
+            'fields/site-seo-group' => __DIR__ . '/blueprints/fields/site-seo-group.yml',
             'meta-kit/fields/og-image' => __DIR__ . '/blueprints/fields/og-image.php',
-            'blocks/mk-page-seo' => __DIR__ . '/blueprints/blocks/mk-page-seo.yml',
-            'blocks/mk-site-seo' => __DIR__ . '/blueprints/blocks/mk-site-seo.yml',
+            // Blocks for other settings (OpenRouter, Sitemap, Robots)
             'blocks/mk-openrouter' => __DIR__ . '/blueprints/blocks/mk-openrouter.yml',
             'blocks/mk-sitemap' => __DIR__ . '/blueprints/blocks/mk-sitemap.yml',
             'blocks/mk-robots' => __DIR__ . '/blueprints/blocks/mk-robots.yml',
