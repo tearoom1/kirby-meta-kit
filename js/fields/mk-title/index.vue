@@ -169,6 +169,12 @@ export default {
   methods: {
     onInput(value) {
       this.$emit('input', value);
+      // Dispatch custom event for preview to catch
+      this.$nextTick(() => {
+        document.dispatchEvent(new CustomEvent('meta-kit-field-change', {
+          detail: { field: this.fieldType === 'og' ? 'ogTitle' : 'metaTitle', value }
+        }));
+      });
     },
     getLanguageCode() {
       return (

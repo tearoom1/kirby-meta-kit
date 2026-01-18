@@ -91,6 +91,9 @@ export default {
     // Listen for custom SEO field updates from AI generator
     document.addEventListener('seo-field-updated', this.handleSeoFieldUpdate, true);
 
+    // Listen for custom field change events from mk-title and mk-description
+    document.addEventListener('meta-kit-field-change', this.handleMetaKitFieldChange, true);
+
     // Listen for input changes in the document
     document.addEventListener('input', this.handleDOMInput, true);
     document.addEventListener('change', this.handleDOMInput, true);
@@ -112,6 +115,7 @@ export default {
   beforeDestroy() {
     // Clean up event listeners
     document.removeEventListener('seo-field-updated', this.handleSeoFieldUpdate, true);
+    document.removeEventListener('meta-kit-field-change', this.handleMetaKitFieldChange, true);
     document.removeEventListener('input', this.handleDOMInput, true);
     document.removeEventListener('change', this.handleDOMInput, true);
 
@@ -169,7 +173,7 @@ export default {
         };
 
         const getFieldOrNull = (name) => {
-          const input = document.querySelector(`[name="${name}"], [name="${name.toLowerCase()}"]`);
+          const input = document.querySelector(`[name="${name}"]`);
           if (!input) return null;
           return input.value ?? '';
         };
@@ -235,25 +239,22 @@ export default {
     },
     handleDOMInput(event) {
       const target = event.target;
+      if (!target) return;
+
+      // Check if this is an SEO field by name attribute
       const fieldName = target.name || target.getAttribute('name');
+      const seoFields = ['metaTitle', 'metaDescription', 'ogTitle', 'ogDescription'];
 
-      // Ignore events from hidden / detached elements (can happen during language switches)
-      if (!target || target.offsetParent === null) {
-        return;
-      }
-
-      // Check if this is an SEO field we care about
-      const seoFields = ['metatitle', 'metadescription', 'ogtitle', 'ogdescription', 'ogimage'];
-      if (fieldName && seoFields.includes(fieldName.toLowerCase())) {
-        // Debounce updates
+      if (fieldName && seoFields.includes(fieldName)) {
         clearTimeout(this.updateTimeout);
         this.updateTimeout = setTimeout(() => {
           this.updatePreviewFromDOM();
-        }, 500);
+        }, 300);
+        return;
       }
 
-      // Also check if this is a file field change (Kirby files field)
-      if (target.closest('.k-files-field') || target.closest('.k-upload')) {
+      // Check if this is a file field change
+      if (target.closest('.k-field-name-ogimage')) {
         clearTimeout(this.updateTimeout);
         this.updateTimeout = setTimeout(() => {
           this.updatePreviewFromDOM();
@@ -266,11 +267,19 @@ export default {
         this.updatePreviewFromData(event.detail.seoData, event.detail.pageTitle || 'Page Title');
       }
     },
+    handleMetaKitFieldChange(event) {
+      // Custom field (mk-title or mk-description) changed
+      if (event.detail) {
+        clearTimeout(this.updateTimeout);
+        this.updateTimeout = setTimeout(() => {
+          this.updatePreviewFromDOM();
+        }, 200);
+      }
+    },
     updatePreviewFromDOM() {
-      // Extract values directly from DOM inputs
+      // Extract field value by name attribute
       const getFieldValue = (name) => {
-        const input = document.querySelector(`[name="${name}"], [name="${name.toLowerCase()}"]`);
-        // During language switches inputs may not exist yet
+        const input = document.querySelector(`[name="${name}"]`);
         if (!input) return null;
         return input.value ?? '';
       };

@@ -11,6 +11,7 @@
                :buttons="false"
                :maxlength="maxlength"
                :counter="false"
+               :name="fieldType === 'og' ? 'ogDescription' : 'metaDescription'"
       />
     <template #footer>
       <k-text>
@@ -124,6 +125,12 @@ export default {
   methods: {
     onInput(value) {
       this.$emit('input', value);
+      // Dispatch custom event for preview to catch
+      this.$nextTick(() => {
+        document.dispatchEvent(new CustomEvent('meta-kit-field-change', {
+          detail: { field: this.fieldType === 'og' ? 'ogDescription' : 'metaDescription', value }
+        }));
+      });
     },
     getLanguageCode() {
       return (

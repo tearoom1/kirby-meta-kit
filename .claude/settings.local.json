@@ -4,7 +4,9 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(git checkout:*)",
       "Bash(git -C /Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit status)",
-      "Bash(git -C /Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit diff --stat)"
+      "Bash(git -C /Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit diff --stat)",
+      "Bash(php vendor/bin/phpunit:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }

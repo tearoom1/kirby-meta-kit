@@ -749,12 +749,14 @@ Access metadata in your templates:
 
 ```php
 <?php
-$seo = $page->metaKitSeo()->toBlocks()->first();
-if ($seo) {
-    $metaTitle = $seo->metaTitle();
-    $metaDesc = $seo->metaDescription();
-    $ogImage = $seo->ogImage()->toFile();
-}
+// Access SEO flat fields directly
+$metaTitle = $page->metaTitle()->value();
+$metaDesc = $page->metaDescription()->value();
+$ogTitle = $page->ogTitle()->value();
+$ogDesc = $page->ogDescription()->value();
+
+// Get OG image file
+$ogImage = $page->ogImage()->toFile();
 ?>
 ```
 
