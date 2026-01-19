@@ -41,6 +41,18 @@
 </template>
 
 <script>
+import {
+  getFieldName,
+  getLanguageCode,
+  generateAiContent
+} from '../../composables/useAiGeneration.js';
+import {
+  getTitleValidation,
+  shouldAppendSiteName,
+  getCharCountWithSiteName,
+  getTitlePreview
+} from '../../composables/useFieldValidation.js';
+
 export default {
   inheritAttrs: false,
   props: {
@@ -67,148 +79,43 @@ export default {
   },
   computed: {
     charCount() {
-      if (!this.value) return 0;
-
-      const baseLength = this.value.length;
-
-      // Add site name if applicable
-      if (this.shouldAppendSiteName && this.validationSettings.siteMetaTitle) {
-        const separator = this.validationSettings.titleSeparator || '|';
-        const siteName = this.validationSettings.siteMetaTitle;
-        return `${this.value} ${separator} ${siteName}`.length;
-      }
-
-      return baseLength;
+      return getCharCountWithSiteName(this.value, this.validationSettings, this.fieldType);
     },
     shouldAppendSiteName() {
-      // Don't append for site page itself
-      if (this.validationSettings.pageId === 'site') {
-        return false;
-      }
-
-      // Check if appendSiteName is enabled
-      if (!this.validationSettings.appendSiteName) {
-        return false;
-      }
-
-      // Check appendSiteNameTo setting (comma-separated string like "meta,og" or "meta" or "og")
-      const appendTo = this.validationSettings.appendSiteNameTo;
-      if (!appendTo) {
-        // If not set, fallback to old behavior (append to all)
-        return true;
-      }
-
-      // Check if current field type is in the list
-      const types = appendTo.split(',').map(s => s.trim());
-      return types.includes(this.fieldType);
+      return shouldAppendSiteName(this.validationSettings, this.fieldType);
     },
     titlePreview() {
-      if (!this.value) return '';
-
-      if (this.shouldAppendSiteName && this.validationSettings.siteMetaTitle) {
-        const separator = this.validationSettings.titleSeparator || '|';
-        const siteName = this.validationSettings.siteMetaTitle;
-        return `${this.value} ${separator} ${siteName}`;
-      }
-
-      return this.value;
+      return getTitlePreview(this.value, this.validationSettings, this.fieldType);
     },
     validation() {
-      if (!this.value) {
-        return {
-          status: '',
-          theme: '',
-          message: ''
-        };
-      }
-
-      const length = this.charCount;
-      const ranges = this.validationSettings.ranges || {};
-      const optimal = ranges.optimal || {min: 20, max: 60};
-      const warning = ranges.warning || {min: 15, max: 75};
-
-      if (length >= optimal.min && length <= optimal.max) {
-        return {
-          status: 'optimal',
-          theme: 'positive',
-          message: `Optimal length. ${optimal.min}-${optimal.max} characters recommended. ${this.shouldAppendSiteName ? '(Includes length of site name)' : ''}`
-        };
-      }
-
-      if (length >= warning.min && length <= warning.max) {
-        if (length < optimal.min) {
-          return {
-            status: 'warning',
-            theme: 'notice',
-            message: `Too short. ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? '(Includes length of site name)' : ''}`
-          };
-        } else {
-          return {
-            status: 'warning',
-            theme: 'notice',
-            message: `Slightly too long. ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? '(Includes length of site name)' : ''}`
-          };
-        }
-      }
-
-      if (length < warning.min) {
-        return {
-          status: 'error',
-          theme: 'negative',
-          message: `Much too short! ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? '(Includes length of site name)' : ''}`
-        };
-      }
-
-      return {
-        status: 'error',
-        theme: 'negative',
-        message: `Too long! ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? '(Includes length of site name)' : ''}`
-      };
+      return getTitleValidation(this.charCount, this.validationSettings, this.shouldAppendSiteName);
     }
   },
   methods: {
     onInput(value) {
       this.$emit('input', value);
-      // Dispatch custom event for preview to catch
       this.$nextTick(() => {
         document.dispatchEvent(new CustomEvent('meta-kit-field-change', {
-          detail: { field: this.fieldType === 'og' ? 'ogTitle' : 'metaTitle', value }
+          detail: { field: getFieldName(this.fieldType, 'title'), value }
         }));
       });
-    },
-    getLanguageCode() {
-      return (
-        this.$language?.code ||
-        window.panel?.view?.props?.language ||
-        window.panel?.language?.code ||
-        'en'
-      );
     },
     async generateWithAi() {
       this.isGenerating = true;
       this.aiError = null;
 
-      try {
-        const pageId = this.pageId || this.validationSettings.pageId;
-        const fieldName = this.fieldType === 'og' ? 'ogTitle' : 'metaTitle';
-        const language = this.getLanguageCode();
+      const pageId = this.pageId || this.validationSettings.pageId;
+      const fieldName = getFieldName(this.fieldType, 'title');
 
-        const response = await this.$api.post('meta-kit/generate-field', {
-          pageId,
-          fieldName,
-          language
-        });
+      const result = await generateAiContent(this.$api, pageId, fieldName);
 
-        if (response.status !== 'success' || !response.content) {
-          throw new Error(response.message || 'Failed to generate');
-        }
-
-        this.$emit('input', response.content);
-      } catch (e) {
-        this.aiError = e.message || 'AI generation failed';
-      } finally {
-        this.isGenerating = false;
+      if (result.success) {
+        this.$emit('input', result.content);
+      } else {
+        this.aiError = result.error;
       }
+
+      this.isGenerating = false;
     }
   }
 };

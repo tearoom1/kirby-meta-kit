@@ -142,28 +142,17 @@ class MetaKitController
         $skipped = 0;
 
         foreach ($pages as $page) {
-            // Skip if already has description in current language (not fallback)
             if (self::hasFieldInCurrentLanguage($page, 'metaDescription')) {
                 $skipped++;
                 continue;
             }
 
             $result = self::generateDescription($page->id());
-
-            if ($result['status'] === 'success') {
-                $generated++;
-            } else {
-                $failed++;
-            }
+            $result['status'] === 'success' ? $generated++ : $failed++;
         }
 
-        return [
-            'status' => 'success',
-            'message' => "Generated {$generated} descriptions, skipped {$skipped}, failed {$failed}",
-            'generated' => $generated,
-            'skipped' => $skipped,
-            'failed' => $failed
-        ];
+        return ApiResponse::batch($generated, $skipped, $failed,
+            "Generated {$generated} descriptions, skipped {$skipped}, failed {$failed}");
     }
 
     /**
@@ -291,66 +280,43 @@ class MetaKitController
         if ($generateOgDescription) $fields[] = 'OG descriptions';
         $fieldText = implode(', ', $fields);
 
-        return [
-            'status' => 'success',
-            'message' => "Generated {$generated} field(s) ({$fieldText}), skipped {$skipped}, failed {$failed}",
-            'generated' => $generated,
-            'skipped' => $skipped,
-            'failed' => $failed
-        ];
+        return ApiResponse::batch($generated, $skipped, $failed,
+            "Generated {$generated} field(s) ({$fieldText}), skipped {$skipped}, failed {$failed}");
     }
 
 
     public static function applySingleField(string $pageId, string $fieldName, $value): array
     {
         $kirby = kirby();
-        $isSite = ($pageId === 'site');
-        $page = $isSite ? $kirby->site() : $kirby->page($pageId);
+        $page = self::getPageOrSite($pageId);
 
         if (!$page) {
-            return [
-                'status' => 'error',
-                'message' => 'Page not found'
-            ];
+            return ApiResponse::notFound();
         }
 
         try {
             $languageCode = $kirby->language()?->code();
 
-            // Both site and pages use flat fields now
             if ($fieldName === 'ogImage') {
                 if (empty($value)) {
                     $page->update([$fieldName => []], $languageCode);
                 } else {
-                    $file = null;
-                    if (strpos($value, 'file://') === 0) {
-                        $file = $kirby->file(str_replace('file://', '', $value));
-                    } else {
-                        $file = $page->file($value);
-                    }
+                    $file = strpos($value, 'file://') === 0
+                        ? $kirby->file(str_replace('file://', '', $value))
+                        : $page->file($value);
 
-                    if ($file) {
-                        $page->update([$fieldName => [$file->uuid()->toString()]], $languageCode);
-                    } else {
-                        return [
-                            'status' => 'error',
-                            'message' => 'Image file not found'
-                        ];
+                    if (!$file) {
+                        return ApiResponse::error('Image file not found');
                     }
+                    $page->update([$fieldName => [$file->uuid()->toString()]], $languageCode);
                 }
             } else {
                 $page->update([$fieldName => $value], $languageCode);
             }
 
-            return [
-                'status' => 'success',
-                'message' => 'Field updated successfully'
-            ];
+            return ApiResponse::fieldUpdated();
         } catch (\Exception $e) {
-            return [
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ];
+            return ApiResponse::error($e->getMessage());
         }
     }
 
@@ -399,10 +365,7 @@ class MetaKitController
             $result[] = PageDataBuilder::fromModel($page, $builderOptions);
         }
 
-        return [
-            'status' => 'success',
-            'data' => $result
-        ];
+        return ApiResponse::success($result);
     }
 
     public static function getSinglePage(string $pageId): array
@@ -410,16 +373,10 @@ class MetaKitController
         $data = PageDataBuilder::fromPageId($pageId, ['includeOgImage' => true]);
 
         if ($data === null) {
-            return [
-                'status' => 'error',
-                'message' => 'Page not found'
-            ];
+            return ApiResponse::notFound();
         }
 
-        return [
-            'status' => 'success',
-            'data' => $data
-        ];
+        return ApiResponse::success($data);
     }
 
     /**
@@ -564,27 +521,19 @@ class MetaKitController
         $page = self::getPageOrSite($pageId);
 
         if (!$page) {
-            return [
-                'status' => 'error',
-                'message' => 'Page not found'
-            ];
+            return ApiResponse::notFound();
         }
 
         try {
             $metaKit = new MetaKit($kirby);
-
-            // Use provided language or fall back to current language
             $languageCode = $language ?: $kirby->language()?->code();
 
-            // Set the language context if provided
             if ($language && $kirby->multilang()) {
                 $kirby->setCurrentLanguage($language);
             }
 
-            // Get content for generation
             $content = self::getContentForGeneration($page, $isSite);
 
-            // Map fieldName to fieldType
             $fieldTypeMap = [
                 'metaTitle' => 'title',
                 'ogTitle' => 'ogTitle',
@@ -593,66 +542,39 @@ class MetaKitController
             ];
 
             if (!isset($fieldTypeMap[$fieldName])) {
-                return [
-                    'status' => 'error',
-                    'message' => 'Unsupported field name'
-                ];
+                return ApiResponse::error('Unsupported field name');
             }
 
-            $fieldType = $fieldTypeMap[$fieldName];
-
-            // Build context for generation
             $context = [
                 'language' => $languageCode,
-                'fieldType' => $fieldType
+                'fieldType' => $fieldTypeMap[$fieldName]
             ];
 
-            // Add template for pages (not site)
             if (!$isSite) {
                 $context['template'] = $page->intendedTemplate()->name();
             }
 
-            if ($fieldName === 'metaTitle' || $fieldName === 'ogTitle') {
-                // Add page reference for title generation (used in calculateTargetTitleLength)
+            if (in_array($fieldName, ['metaTitle', 'ogTitle'])) {
                 $context['page'] = $page;
                 $result = $metaKit->generateTitle($content, $context);
-            } elseif ($fieldName === 'metaDescription' || $fieldName === 'ogDescription') {
-                $result = $metaKit->generateDescription($content, $context);
             } else {
-                return [
-                    'status' => 'error',
-                    'message' => 'Unsupported field name'
-                ];
+                $result = $metaKit->generateDescription($content, $context);
             }
 
             if (!$result) {
-                return [
-                    'status' => 'error',
-                    'message' => 'Failed to generate content'
-                ];
+                return ApiResponse::error('Failed to generate content');
             }
 
-            // Save if requested - both site and pages use flat fields
             if ($save) {
                 $page->update([$fieldName => $result], $languageCode);
-
-                return [
-                    'status' => 'success',
-                    'message' => ucfirst(str_replace('meta', 'Meta ', $fieldName)) . ' generated successfully',
-                    'content' => $result
-                ];
+                $fieldLabel = ucfirst(str_replace('meta', 'Meta ', $fieldName));
+                return ApiResponse::generated($result, "{$fieldLabel} generated successfully");
             }
 
-            return [
-                'status' => 'success',
-                'content' => $result
-            ];
+            return ApiResponse::generated($result);
 
         } catch (\Exception $e) {
-            return [
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ];
+            return ApiResponse::error($e->getMessage());
         }
     }
 

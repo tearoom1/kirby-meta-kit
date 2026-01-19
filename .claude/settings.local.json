@@ -8,7 +8,9 @@
       "Bash(php vendor/bin/phpunit:*)",
       "Bash(npm run build:*)",
       "Bash(php -l:*)",
-      "Bash(vendor/bin/phpunit:*)"
+      "Bash(vendor/bin/phpunit:*)",
+      "Bash(grep:*)",
+      "Bash(wc:*)"
     ]
   }
 }

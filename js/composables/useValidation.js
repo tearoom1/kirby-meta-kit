@@ -147,7 +147,7 @@ export function getStatusValue(statusClass) {
  * @param {string} type - Field type
  * @param {number} length - Character length
  * @param {Object} validationSettings - Validation settings
- * @returns {string} Reason text
+ * @returns {string} Reason text (without leading newlines - caller should add if needed)
  */
 export function getLengthValidationReason(page, type, length, validationSettings = {}) {
   const ranges = getRangesForPageAndType(page, type, validationSettings);
@@ -161,10 +161,10 @@ export function getLengthValidationReason(page, type, length, validationSettings
   const warning = `${ranges.warning.min}-${ranges.warning.max}`;
 
   if (statusClass === STATUS_CLASSES.warning) {
-    return `\n\nWhy warning:\nLength ${length} is outside optimal (${optimal}), but within warning (${warning}).`;
+    return `Why warning:\nLength ${length} is outside optimal (${optimal}), but within warning (${warning}).`;
   }
 
-  return `\n\nWhy error:\nLength ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
+  return `Why error:\nLength ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
 }
 
 /**

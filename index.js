@@ -913,14 +913,10 @@
     const optimal = `${ranges.optimal.min}-${ranges.optimal.max}`;
     const warning = `${ranges.warning.min}-${ranges.warning.max}`;
     if (statusClass === STATUS_CLASSES.warning) {
-      return `
-
-Why warning:
+      return `Why warning:
 Length ${length} is outside optimal (${optimal}), but within warning (${warning}).`;
     }
-    return `
-
-Why error:
+    return `Why error:
 Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
   }
   function getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg }) {
@@ -1164,6 +1160,15 @@ Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
       tooltipText(content, inheritanceSource, showContent) {
         return buildTooltipText(content, inheritanceSource, showContent);
       },
+      // Join tooltip parts with newlines only when both have content
+      joinTooltipParts(base, reason) {
+        if (!base && !reason) return "";
+        if (!base) return reason;
+        if (!reason) return base;
+        return `${base}
+
+${reason}`;
+      },
       getTitleTooltip(page, showContent = true) {
         if (!page.title && !page.metaTitle) return "No title";
         if (page.id === "site") {
@@ -1176,14 +1181,16 @@ Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
           tooltip = `${tooltip} ${separator} ${this.siteSettings.siteMetaTitle}`;
         }
         const base = this.tooltipText(tooltip, source, showContent);
-        return `${base}${this.getLengthValidationReason(page, "title", this.getTitleLength(page, "meta"))}`;
+        const reason = this.getLengthValidationReason(page, "title", this.getTitleLength(page, "meta"));
+        return this.joinTooltipParts(base, reason);
       },
       getDescriptionTooltip(page, showContent = true) {
         const text = getEffectiveDescription(page, "meta", this.siteSettings);
         if (!text) return "No meta description";
         const source = getInheritanceSource(page, "metaDescription", this.siteSettings);
         const base = this.tooltipText(text, source, showContent);
-        return `${base}${this.getLengthValidationReason(page, "description", text.length)}`;
+        const reason = this.getLengthValidationReason(page, "description", text.length);
+        return this.joinTooltipParts(base, reason);
       },
       getOgTitleTooltip(page, showContent = true) {
         if (!page.title && !page.ogTitle && !page.metaTitle) return "No OG title";
@@ -1197,14 +1204,16 @@ Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
           tooltip = `${tooltip} ${separator} ${this.siteSettings.siteMetaTitle}`;
         }
         const base = this.tooltipText(tooltip, source, showContent);
-        return `${base}${this.getLengthValidationReason(page, "ogTitle", this.getTitleLength(page, "og"))}`;
+        const reason = this.getLengthValidationReason(page, "ogTitle", this.getTitleLength(page, "og"));
+        return this.joinTooltipParts(base, reason);
       },
       getOgDescriptionTooltip(page, showContent = true) {
         const text = getEffectiveDescription(page, "og", this.siteSettings);
         if (!text) return "No OG description";
         const source = getInheritanceSource(page, "ogDescription", this.siteSettings);
         const base = this.tooltipText(text, source, showContent);
-        return `${base}${this.getLengthValidationReason(page, "ogDescription", text.length)}`;
+        const reason = this.getLengthValidationReason(page, "ogDescription", text.length);
+        return this.joinTooltipParts(base, reason);
       },
       // Display methods
       getTitleDisplay(page) {
@@ -2403,6 +2412,128 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
   );
   __component__$3.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/MetaKitView.vue";
   const MetaKitView = __component__$3.exports;
+  function getLanguageCode() {
+    var _a, _b, _c, _d, _e;
+    if (typeof window === "undefined") return "en";
+    return ((_c = (_b = (_a = window.panel) == null ? void 0 : _a.view) == null ? void 0 : _b.props) == null ? void 0 : _c.language) || ((_e = (_d = window.panel) == null ? void 0 : _d.language) == null ? void 0 : _e.code) || "en";
+  }
+  function getFieldName(fieldType, contentType) {
+    var _a;
+    const fieldMap = {
+      meta: { title: "metaTitle", description: "metaDescription" },
+      og: { title: "ogTitle", description: "ogDescription" }
+    };
+    return ((_a = fieldMap[fieldType]) == null ? void 0 : _a[contentType]) || fieldMap.meta[contentType];
+  }
+  async function generateAiContent(api, pageId, fieldName, language = null) {
+    try {
+      const response = await api.post("meta-kit/generate-field", {
+        pageId,
+        fieldName,
+        language: language || getLanguageCode()
+      });
+      if (response.status !== "success" || !response.content) {
+        return {
+          success: false,
+          error: response.message || "Failed to generate"
+        };
+      }
+      return {
+        success: true,
+        content: response.content
+      };
+    } catch (e) {
+      return {
+        success: false,
+        error: e.message || "AI generation failed"
+      };
+    }
+  }
+  const DEFAULT_RANGES = {
+    title: { optimal: { min: 20, max: 60 }, warning: { min: 15, max: 75 } },
+    description: { optimal: { min: 140, max: 160 }, warning: { min: 126, max: 176 } }
+  };
+  function getFieldValidation(length, ranges = {}, suffix = "") {
+    if (!length) {
+      return { status: "", theme: "", message: "" };
+    }
+    const optimal = ranges.optimal || DEFAULT_RANGES.title.optimal;
+    const warning = ranges.warning || DEFAULT_RANGES.title.warning;
+    const rangeText = `${optimal.min}-${optimal.max}`;
+    const suffixText = suffix ? ` ${suffix}` : "";
+    if (length >= optimal.min && length <= optimal.max) {
+      return {
+        status: "optimal",
+        theme: "positive",
+        message: `Optimal length. ${rangeText} characters recommended.${suffixText}`
+      };
+    }
+    if (length >= warning.min && length < optimal.min) {
+      return {
+        status: "warning",
+        theme: "notice",
+        message: `Too short. ${rangeText} recommended.${suffixText}`
+      };
+    }
+    if (length > optimal.max && length <= warning.max) {
+      return {
+        status: "warning",
+        theme: "notice",
+        message: `Slightly too long. ${rangeText} recommended.${suffixText}`
+      };
+    }
+    if (length < warning.min) {
+      return {
+        status: "error",
+        theme: "negative",
+        message: `Much too short! ${rangeText} recommended.${suffixText}`
+      };
+    }
+    return {
+      status: "error",
+      theme: "negative",
+      message: `Too long! ${rangeText} recommended.${suffixText}`
+    };
+  }
+  function getTitleValidation(length, settings = {}, includesSiteName = false) {
+    const ranges = settings.ranges || DEFAULT_RANGES.title;
+    const suffix = includesSiteName ? "(Includes length of site name)" : "";
+    return getFieldValidation(length, ranges, suffix);
+  }
+  function getDescriptionValidation(length, settings = {}) {
+    const ranges = settings.ranges || DEFAULT_RANGES.description;
+    return getFieldValidation(length, ranges);
+  }
+  function shouldAppendSiteName(settings = {}, fieldType = "meta") {
+    if (settings.pageId === "site") {
+      return false;
+    }
+    if (!settings.appendSiteName) {
+      return false;
+    }
+    const appendTo = settings.appendSiteNameTo;
+    if (!appendTo) {
+      return true;
+    }
+    return appendTo.split(",").map((s) => s.trim()).includes(fieldType);
+  }
+  function getCharCountWithSiteName(value, settings = {}, fieldType = "meta") {
+    if (!value) return 0;
+    const baseLength = value.length;
+    if (shouldAppendSiteName(settings, fieldType) && settings.siteMetaTitle) {
+      const separator = settings.titleSeparator || "|";
+      return `${value} ${separator} ${settings.siteMetaTitle}`.length;
+    }
+    return baseLength;
+  }
+  function getTitlePreview(value, settings = {}, fieldType = "meta") {
+    if (!value) return "";
+    if (shouldAppendSiteName(settings, fieldType) && settings.siteMetaTitle) {
+      const separator = settings.titleSeparator || "|";
+      return `${value} ${separator} ${settings.siteMetaTitle}`;
+    }
+    return value;
+  }
   const _sfc_main$2 = {
     inheritAttrs: false,
     props: {
@@ -2429,84 +2560,16 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
     },
     computed: {
       charCount() {
-        if (!this.value) return 0;
-        const baseLength = this.value.length;
-        if (this.shouldAppendSiteName && this.validationSettings.siteMetaTitle) {
-          const separator = this.validationSettings.titleSeparator || "|";
-          const siteName = this.validationSettings.siteMetaTitle;
-          return `${this.value} ${separator} ${siteName}`.length;
-        }
-        return baseLength;
+        return getCharCountWithSiteName(this.value, this.validationSettings, this.fieldType);
       },
       shouldAppendSiteName() {
-        if (this.validationSettings.pageId === "site") {
-          return false;
-        }
-        if (!this.validationSettings.appendSiteName) {
-          return false;
-        }
-        const appendTo = this.validationSettings.appendSiteNameTo;
-        if (!appendTo) {
-          return true;
-        }
-        const types = appendTo.split(",").map((s) => s.trim());
-        return types.includes(this.fieldType);
+        return shouldAppendSiteName(this.validationSettings, this.fieldType);
       },
       titlePreview() {
-        if (!this.value) return "";
-        if (this.shouldAppendSiteName && this.validationSettings.siteMetaTitle) {
-          const separator = this.validationSettings.titleSeparator || "|";
-          const siteName = this.validationSettings.siteMetaTitle;
-          return `${this.value} ${separator} ${siteName}`;
-        }
-        return this.value;
+        return getTitlePreview(this.value, this.validationSettings, this.fieldType);
       },
       validation() {
-        if (!this.value) {
-          return {
-            status: "",
-            theme: "",
-            message: ""
-          };
-        }
-        const length = this.charCount;
-        const ranges = this.validationSettings.ranges || {};
-        const optimal = ranges.optimal || { min: 20, max: 60 };
-        const warning = ranges.warning || { min: 15, max: 75 };
-        if (length >= optimal.min && length <= optimal.max) {
-          return {
-            status: "optimal",
-            theme: "positive",
-            message: `Optimal length. ${optimal.min}-${optimal.max} characters recommended. ${this.shouldAppendSiteName ? "(Includes length of site name)" : ""}`
-          };
-        }
-        if (length >= warning.min && length <= warning.max) {
-          if (length < optimal.min) {
-            return {
-              status: "warning",
-              theme: "notice",
-              message: `Too short. ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? "(Includes length of site name)" : ""}`
-            };
-          } else {
-            return {
-              status: "warning",
-              theme: "notice",
-              message: `Slightly too long. ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? "(Includes length of site name)" : ""}`
-            };
-          }
-        }
-        if (length < warning.min) {
-          return {
-            status: "error",
-            theme: "negative",
-            message: `Much too short! ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? "(Includes length of site name)" : ""}`
-          };
-        }
-        return {
-          status: "error",
-          theme: "negative",
-          message: `Too long! ${optimal.min}-${optimal.max} recommended. ${this.shouldAppendSiteName ? "(Includes length of site name)" : ""}`
-        };
+        return getTitleValidation(this.charCount, this.validationSettings, this.shouldAppendSiteName);
       }
     },
     methods: {
@@ -2514,35 +2577,22 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         this.$emit("input", value);
         this.$nextTick(() => {
           document.dispatchEvent(new CustomEvent("meta-kit-field-change", {
-            detail: { field: this.fieldType === "og" ? "ogTitle" : "metaTitle", value }
+            detail: { field: getFieldName(this.fieldType, "title"), value }
           }));
         });
-      },
-      getLanguageCode() {
-        var _a, _b, _c, _d, _e, _f;
-        return ((_a = this.$language) == null ? void 0 : _a.code) || ((_d = (_c = (_b = window.panel) == null ? void 0 : _b.view) == null ? void 0 : _c.props) == null ? void 0 : _d.language) || ((_f = (_e = window.panel) == null ? void 0 : _e.language) == null ? void 0 : _f.code) || "en";
       },
       async generateWithAi() {
         this.isGenerating = true;
         this.aiError = null;
-        try {
-          const pageId = this.pageId || this.validationSettings.pageId;
-          const fieldName = this.fieldType === "og" ? "ogTitle" : "metaTitle";
-          const language = this.getLanguageCode();
-          const response = await this.$api.post("meta-kit/generate-field", {
-            pageId,
-            fieldName,
-            language
-          });
-          if (response.status !== "success" || !response.content) {
-            throw new Error(response.message || "Failed to generate");
-          }
-          this.$emit("input", response.content);
-        } catch (e) {
-          this.aiError = e.message || "AI generation failed";
-        } finally {
-          this.isGenerating = false;
+        const pageId = this.pageId || this.validationSettings.pageId;
+        const fieldName = getFieldName(this.fieldType, "title");
+        const result = await generateAiContent(this.$api, pageId, fieldName);
+        if (result.success) {
+          this.$emit("input", result.content);
+        } else {
+          this.aiError = result.error;
         }
+        this.isGenerating = false;
       }
     }
   };
@@ -2593,51 +2643,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         return this.value ? this.value.length : 0;
       },
       validation() {
-        if (!this.value) {
-          return {
-            status: "",
-            theme: "",
-            message: ""
-          };
-        }
-        const length = this.charCount;
-        const ranges = this.validationSettings.ranges || {};
-        const optimal = ranges.optimal || { min: 140, max: 160 };
-        const warning = ranges.warning || { min: 126, max: 176 };
-        if (length >= optimal.min && length <= optimal.max) {
-          return {
-            status: "optimal",
-            theme: "positive",
-            message: `Optimal length (${optimal.min}-${optimal.max} characters recommended)`
-          };
-        }
-        if (length >= warning.min && length <= warning.max) {
-          if (length < optimal.min) {
-            return {
-              status: "warning",
-              theme: "notice",
-              message: `Too short. Add ${optimal.min - length} more characters for optimal length (${optimal.min}-${optimal.max} recommended)`
-            };
-          } else {
-            return {
-              status: "warning",
-              theme: "notice",
-              message: `Slightly too long. Remove ${length - optimal.max} characters for optimal length (${optimal.min}-${optimal.max} recommended)`
-            };
-          }
-        }
-        if (length < warning.min) {
-          return {
-            status: "error",
-            theme: "negative",
-            message: `Much too short! Add at least ${warning.min - length} more characters (${optimal.min}-${optimal.max} recommended)`
-          };
-        }
-        return {
-          status: "error",
-          theme: "negative",
-          message: `Too long! Reduce by ${length - warning.max} characters (${optimal.min}-${optimal.max} recommended)`
-        };
+        return getDescriptionValidation(this.charCount, this.validationSettings);
       }
     },
     methods: {
@@ -2645,35 +2651,22 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         this.$emit("input", value);
         this.$nextTick(() => {
           document.dispatchEvent(new CustomEvent("meta-kit-field-change", {
-            detail: { field: this.fieldType === "og" ? "ogDescription" : "metaDescription", value }
+            detail: { field: getFieldName(this.fieldType, "description"), value }
           }));
         });
-      },
-      getLanguageCode() {
-        var _a, _b, _c, _d, _e, _f;
-        return ((_a = this.$language) == null ? void 0 : _a.code) || ((_d = (_c = (_b = window.panel) == null ? void 0 : _b.view) == null ? void 0 : _c.props) == null ? void 0 : _d.language) || ((_f = (_e = window.panel) == null ? void 0 : _e.language) == null ? void 0 : _f.code) || "en";
       },
       async generateWithAi() {
         this.isGenerating = true;
         this.aiError = null;
-        try {
-          const pageId = this.pageId || this.validationSettings.pageId;
-          const fieldName = this.fieldType === "og" ? "ogDescription" : "metaDescription";
-          const language = this.getLanguageCode();
-          const response = await this.$api.post("meta-kit/generate-field", {
-            pageId,
-            fieldName,
-            language
-          });
-          if (response.status !== "success" || !response.content) {
-            throw new Error(response.message || "Failed to generate");
-          }
-          this.$emit("input", response.content);
-        } catch (e) {
-          this.aiError = e.message || "AI generation failed";
-        } finally {
-          this.isGenerating = false;
+        const pageId = this.pageId || this.validationSettings.pageId;
+        const fieldName = getFieldName(this.fieldType, "description");
+        const result = await generateAiContent(this.$api, pageId, fieldName);
+        if (result.success) {
+          this.$emit("input", result.content);
+        } else {
+          this.aiError = result.error;
         }
+        this.isGenerating = false;
       }
     }
   };

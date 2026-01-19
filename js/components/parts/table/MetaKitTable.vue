@@ -398,6 +398,14 @@ export default {
       return buildTooltipText(content, inheritanceSource, showContent);
     },
 
+    // Join tooltip parts with newlines only when both have content
+    joinTooltipParts(base, reason) {
+      if (!base && !reason) return '';
+      if (!base) return reason;
+      if (!reason) return base;
+      return `${base}\n\n${reason}`;
+    },
+
     getTitleTooltip(page, showContent = true) {
       if (!page.title && !page.metaTitle) return 'No title';
       if (page.id === 'site') {
@@ -413,7 +421,8 @@ export default {
       }
 
       const base = this.tooltipText(tooltip, source, showContent);
-      return `${base}${this.getLengthValidationReason(page, 'title', this.getTitleLength(page, 'meta'))}`;
+      const reason = this.getLengthValidationReason(page, 'title', this.getTitleLength(page, 'meta'));
+      return this.joinTooltipParts(base, reason);
     },
 
     getDescriptionTooltip(page, showContent = true) {
@@ -422,7 +431,8 @@ export default {
 
       const source = getInheritanceSource(page, 'metaDescription', this.siteSettings);
       const base = this.tooltipText(text, source, showContent);
-      return `${base}${this.getLengthValidationReason(page, 'description', text.length)}`;
+      const reason = this.getLengthValidationReason(page, 'description', text.length);
+      return this.joinTooltipParts(base, reason);
     },
 
     getOgTitleTooltip(page, showContent = true) {
@@ -440,7 +450,8 @@ export default {
       }
 
       const base = this.tooltipText(tooltip, source, showContent);
-      return `${base}${this.getLengthValidationReason(page, 'ogTitle', this.getTitleLength(page, 'og'))}`;
+      const reason = this.getLengthValidationReason(page, 'ogTitle', this.getTitleLength(page, 'og'));
+      return this.joinTooltipParts(base, reason);
     },
 
     getOgDescriptionTooltip(page, showContent = true) {
@@ -449,7 +460,8 @@ export default {
 
       const source = getInheritanceSource(page, 'ogDescription', this.siteSettings);
       const base = this.tooltipText(text, source, showContent);
-      return `${base}${this.getLengthValidationReason(page, 'ogDescription', text.length)}`;
+      const reason = this.getLengthValidationReason(page, 'ogDescription', text.length);
+      return this.joinTooltipParts(base, reason);
     },
 
     // Display methods
