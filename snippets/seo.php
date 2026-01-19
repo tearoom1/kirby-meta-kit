@@ -25,7 +25,7 @@ $charLimit = $hasValidLicense ? null : 20;
 
 // Build meta title and description using helper (reads from flat page fields)
 $metaTitle = MetaHelper::buildTitle($page, $site, null, 'meta');
-$metaDescription = MetaHelper::buildDescription($page, $site, null);
+$metaDescription = MetaHelper::buildDescription($page, $site);
 
 // Limit output if unlicensed
 if ($charLimit && mb_strlen($metaTitle) > $charLimit) {
@@ -51,7 +51,7 @@ $author = $page->metaAuthor()->isNotEmpty() ? $page->metaAuthor() : ($site->meta
 $ogTitle = MetaHelper::buildTitle($page, $site, null, 'og');
 
 // Get OG description using helper
-$ogDescription = MetaHelper::buildOgDescription($page, $site, null, $metaDescription);
+$ogDescription = MetaHelper::buildOgDescription($page, $site, $metaDescription);
 
 // Limit OG content if unlicensed
 if ($charLimit && mb_strlen($ogTitle) > $charLimit) {
