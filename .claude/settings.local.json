@@ -7,7 +7,8 @@
       "Bash(git -C /Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit diff --stat)",
       "Bash(php vendor/bin/phpunit:*)",
       "Bash(npm run build:*)",
-      "Bash(php -l:*)"
+      "Bash(php -l:*)",
+      "Bash(vendor/bin/phpunit:*)"
     ]
   }
 }

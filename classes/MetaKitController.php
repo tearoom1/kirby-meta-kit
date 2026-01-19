@@ -46,61 +46,12 @@ class MetaKitController
             $excludeStatus = [$excludeStatus];
         }
 
-        // Get current language
-        $language = $kirby->language();
-        $languageCode = $language ? $language->code() : null;
+        $languageCode = $kirby->language()?->code();
 
-        // Add Site as first row (site uses flat fields)
-        $site = $kirby->site();
-        $siteLegacy = [];
-        if ($site->metatitle()->isNotEmpty()) {
-            $siteLegacy['metaTitle'] = $site->metatitle()->value();
-        }
-        if ($site->metadescription()->isNotEmpty()) {
-            $siteLegacy['metaDescription'] = $site->metadescription()->value();
-        }
-        // Get inheritance info for site fields
-        $siteMetaTitleInheritance = self::getFieldInheritance($site, 'metaTitle');
-        $siteMetaDescInheritance = self::getFieldInheritance($site, 'metaDescription');
+        // Add Site as first row
+        $result[] = PageDataBuilder::fromModel($kirby->site());
 
-        $result[] = [
-            'id' => 'site',
-            'title' => $site->title()->value(),
-            'url' => $site->url(),
-            'panelUrl' => $site->panel()->url(),
-            'template' => 'site',
-            'status' => 'published',
-            'hasMetaTitle' => self::hasFieldInCurrentLanguage($site, 'metaTitle'),
-            'hasMetaDescription' => self::hasFieldInCurrentLanguage($site, 'metaDescription'),
-            'hasOgTitle' => false, // Site doesn't have ogTitle
-            'hasOgDescription' => false, // Site doesn't have ogDescription
-            'hasOgImage' => self::hasFieldInCurrentLanguage($site, 'ogImage'),
-            'robots' => $site->robots()->isNotEmpty() ? $site->robots()->value() : 'index, follow',
-            'metaTitle' => $site->metaTitle()->isNotEmpty()
-                ? $site->metaTitle()->value()
-                : null,
-            'metaTitleLength' => $site->metaTitle()->isNotEmpty()
-                ? mb_strlen($site->metaTitle()->value())
-                : 0,
-            'metaTitleInheritance' => $siteMetaTitleInheritance,
-            'metaDescription' => $site->metaDescription()->isNotEmpty()
-                ? $site->metaDescription()->value()
-                : null,
-            'metaDescriptionLength' => $site->metaDescription()->isNotEmpty()
-                ? mb_strlen($site->metaDescription()->value())
-                : 0,
-            'metaDescriptionInheritance' => $siteMetaDescInheritance,
-            'ogTitle' => null,
-            'ogTitleLength' => 0,
-            'ogTitleInheritance' => ['inherited' => false, 'inheritedFrom' => null, 'inheritedValue' => null],
-            'ogDescription' => null,
-            'ogDescriptionLength' => 0,
-            'ogDescriptionInheritance' => ['inherited' => false, 'inheritedFrom' => null, 'inheritedValue' => null],
-            'language' => $languageCode,
-            'legacy' => !empty($siteLegacy) ? $siteLegacy : null,
-        ];
-
-        // Pages use flat fields
+        // Add pages
         foreach ($pages as $page) {
             $template = $page->intendedTemplate()->name();
             $status = $page->status();
@@ -108,97 +59,8 @@ class MetaKitController
                 continue;
             }
 
-            $legacy = [];
-            if ($page->metatitle()->isNotEmpty()) {
-                $legacy['metaTitle'] = $page->metatitle()->value();
-            }
-            if ($page->Metatitle()->isNotEmpty() && empty($legacy['metaTitle'])) {
-                $legacy['metaTitle'] = $page->Metatitle()->value();
-            }
-            if ($page->customtitle()->isNotEmpty() && empty($legacy['metaTitle'])) {
-                $legacy['metaTitle'] = $page->customtitle()->value();
-            }
-            if ($page->seotitle()->isNotEmpty() && empty($legacy['metaTitle'])) {
-                $legacy['metaTitle'] = $page->seotitle()->value();
-            }
-            if ($page->metadescription()->isNotEmpty()) {
-                $legacy['metaDescription'] = $page->metadescription()->value();
-            }
-            if ($page->seodescription()->isNotEmpty() && empty($legacy['metaDescription'])) {
-                $legacy['metaDescription'] = $page->seodescription()->value();
-            }
-
-            // Get inheritance info for page fields
-            $metaTitleInheritance = self::getFieldInheritance($page, 'metaTitle');
-            $metaDescInheritance = self::getFieldInheritance($page, 'metaDescription');
-            $ogTitleInheritance = self::getFieldInheritance($page, 'ogTitle');
-            $ogDescInheritance = self::getFieldInheritance($page, 'ogDescription');
-
-            $result[] = [
-                'id' => $page->id(),
-                'title' => $page->title()->value(),
-                'url' => $page->url(),
-                'panelUrl' => $page->panel()->url(),
-                'template' => $template,
-                'status' => $status,
-                'hasMetaTitle' => self::hasFieldInCurrentLanguage($page, 'metaTitle'),
-                'hasMetaDescription' => self::hasFieldInCurrentLanguage($page, 'metaDescription'),
-                'hasOgTitle' => self::hasFieldInCurrentLanguage($page, 'ogTitle'),
-                'hasOgDescription' => self::hasFieldInCurrentLanguage($page, 'ogDescription'),
-                'hasOgImage' => self::hasFieldInCurrentLanguage($page, 'ogImage'),
-                'robots' => $page->robots()->isNotEmpty() ? $page->robots()->value() : 'index, follow',
-                'metaTitle' => $page->metaTitle()->isNotEmpty()
-                    ? $page->metaTitle()->value()
-                    : null,
-                'metaTitleLength' => $page->metaTitle()->isNotEmpty()
-                    ? mb_strlen($page->metaTitle()->value())
-                    : 0,
-                'metaTitleInheritance' => $metaTitleInheritance,
-                'metaDescription' => $page->metaDescription()->isNotEmpty()
-                    ? $page->metaDescription()->value()
-                    : null,
-                'metaDescriptionLength' => $page->metaDescription()->isNotEmpty()
-                    ? mb_strlen($page->metaDescription()->value())
-                    : 0,
-                'metaDescriptionInheritance' => $metaDescInheritance,
-                'ogTitle' => $page->ogTitle()->isNotEmpty()
-                    ? $page->ogTitle()->value()
-                    : null,
-                'ogTitleLength' => $page->ogTitle()->isNotEmpty()
-                    ? mb_strlen($page->ogTitle()->value())
-                    : 0,
-                'ogTitleInheritance' => $ogTitleInheritance,
-                'ogDescription' => $page->ogDescription()->isNotEmpty()
-                    ? $page->ogDescription()->value()
-                    : null,
-                'ogDescriptionLength' => $page->ogDescription()->isNotEmpty()
-                    ? mb_strlen($page->ogDescription()->value())
-                    : 0,
-                'ogDescriptionInheritance' => $ogDescInheritance,
-                'language' => $languageCode,
-                'legacy' => !empty($legacy) ? $legacy : null,
-            ];
+            $result[] = PageDataBuilder::fromModel($page);
         }
-
-        // Get site SEO settings for title preview (flat fields)
-        $appendSiteName = $site->appendSiteName()->isNotEmpty()
-            ? $site->appendSiteName()->toBool()
-            : true;
-        $appendSiteNameTo = $site->appendSiteNameTo()->isNotEmpty()
-            ? $site->appendSiteNameTo()->value()
-            : null;
-        $siteMetaTitle = $site->metaTitle()->isNotEmpty()
-            ? $site->metaTitle()->value()
-            : $site->title()->value();
-        $siteMetaDescription = $site->metaDescription()->isNotEmpty()
-            ? $site->metaDescription()->value()
-            : null;
-        $siteHasOgImage = $site->ogImage()->isNotEmpty();
-        $titleSeparator = $site->titleSeparator()->isNotEmpty()
-            ? $site->titleSeparator()->value()
-            : '|';
-
-        $validationSettings = option('tearoom1.meta-kit.validation', []);
 
         return [
             'language' => $languageCode,
@@ -207,15 +69,35 @@ class MetaKitController
             'legacyMigration' => option('tearoom1.meta-kit.legacyMigration', false),
             'aiEnabled' => \TearoomOne\MetaKit::isAiEnabled(),
             'hasValidLicense' => \TearoomOne\MetaKit::hasValidLicense(),
-            'validationSettings' => $validationSettings,
-            'siteSettings' => [
-                'appendSiteName' => $appendSiteName,
-                'appendSiteNameTo' => $appendSiteNameTo,
-                'siteMetaTitle' => $siteMetaTitle,
-                'siteMetaDescription' => $siteMetaDescription,
-                'siteHasOgImage' => $siteHasOgImage,
-                'titleSeparator' => $titleSeparator,
-            ]
+            'validationSettings' => option('tearoom1.meta-kit.validation', []),
+            'siteSettings' => self::getSiteSettings()
+        ];
+    }
+
+    /**
+     * Get site SEO settings for title preview
+     */
+    private static function getSiteSettings(): array
+    {
+        $site = kirby()->site();
+
+        return [
+            'appendSiteName' => $site->appendSiteName()->isNotEmpty()
+                ? $site->appendSiteName()->toBool()
+                : true,
+            'appendSiteNameTo' => $site->appendSiteNameTo()->isNotEmpty()
+                ? $site->appendSiteNameTo()->value()
+                : null,
+            'siteMetaTitle' => $site->metaTitle()->isNotEmpty()
+                ? $site->metaTitle()->value()
+                : $site->title()->value(),
+            'siteMetaDescription' => $site->metaDescription()->isNotEmpty()
+                ? $site->metaDescription()->value()
+                : null,
+            'siteHasOgImage' => $site->ogImage()->isNotEmpty(),
+            'titleSeparator' => $site->titleSeparator()->isNotEmpty()
+                ? $site->titleSeparator()->value()
+                : '|',
         ];
     }
 
@@ -492,86 +374,21 @@ class MetaKitController
         $includeSite = false;
 
         if ($pageIds && is_array($pageIds)) {
-            // Check if 'site' is in the pageIds
             $includeSite = in_array('site', $pageIds);
-
-            $pages = $pages->filter(function ($page) use ($pageIds) {
-                return in_array($page->id(), $pageIds);
-            });
+            $pages = $pages->filter(fn($page) => in_array($page->id(), $pageIds));
         } else {
-            // Include site by default when no filter is applied
             $includeSite = true;
         }
 
         $result = [];
+        $builderOptions = ['includeOgImage' => true];
 
-        // Add site as first entry if needed (site uses flat fields)
+        // Add site as first entry if needed
         if ($includeSite) {
-            $siteLegacy = [];
-
-            if ($site->metatitle()->isNotEmpty()) {
-                $siteLegacy['metaTitle'] = $site->metatitle()->value();
-            }
-            if ($site->metadescription()->isNotEmpty()) {
-                $siteLegacy['metaDescription'] = $site->metadescription()->value();
-            }
-
-            $ogImageData = null;
-            if ($site->ogImage()->isNotEmpty()) {
-                $ogFiles = $site->ogImage()->toFiles();
-                if ($ogFiles->count() > 0) {
-                    $ogFile = $ogFiles->first();
-                    $ogImageData = [
-                        'filename' => $ogFile->filename(),
-                        'url' => $ogFile->url(),
-                        'uuid' => $ogFile->uuid()?->toString()
-                    ];
-                }
-            }
-
-            // Get inheritance info for site fields
-            $siteMetaTitleInheritance = self::getFieldInheritance($site, 'metaTitle');
-            $siteMetaDescInheritance = self::getFieldInheritance($site, 'metaDescription');
-
-            $result[] = [
-                'id' => 'site',
-                'title' => $site->title()->value(),
-                'url' => $site->url(),
-                'panelUrl' => $site->panel()->url(),
-                'template' => 'site',
-                'status' => 'published',
-                'hasMetaTitle' => self::hasFieldInCurrentLanguage($site, 'metaTitle'),
-                'hasMetaDescription' => self::hasFieldInCurrentLanguage($site, 'metaDescription'),
-                'hasOgTitle' => false,
-                'hasOgDescription' => false,
-                'hasOgImage' => self::hasFieldInCurrentLanguage($site, 'ogImage'),
-                'robots' => $site->robots()->isNotEmpty() ? $site->robots()->value() : 'index, follow',
-                'metaTitle' => $site->metaTitle()->isNotEmpty()
-                    ? $site->metaTitle()->value()
-                    : null,
-                'metaTitleInheritance' => $siteMetaTitleInheritance,
-                'metaDescription' => $site->metaDescription()->isNotEmpty()
-                    ? $site->metaDescription()->value()
-                    : null,
-                'metaDescriptionInheritance' => $siteMetaDescInheritance,
-                'ogTitle' => null,
-                'ogTitleInheritance' => ['inherited' => false, 'inheritedFrom' => null, 'inheritedValue' => null],
-                'ogDescription' => null,
-                'ogDescriptionInheritance' => ['inherited' => false, 'inheritedFrom' => null, 'inheritedValue' => null],
-                'ogImage' => $ogImageData,
-                'metaTitleLength' => $site->metaTitle()->isNotEmpty()
-                    ? mb_strlen($site->metaTitle()->value())
-                    : 0,
-                'metaDescriptionLength' => $site->metaDescription()->isNotEmpty()
-                    ? mb_strlen($site->metaDescription()->value())
-                    : 0,
-                'ogTitleLength' => 0,
-                'ogDescriptionLength' => 0,
-                'legacy' => !empty($siteLegacy) ? $siteLegacy : null,
-            ];
+            $result[] = PageDataBuilder::fromModel($site, $builderOptions);
         }
 
-        // Pages use flat fields
+        // Add pages
         foreach ($pages as $page) {
             $template = $page->intendedTemplate()->name();
             $status = $page->status();
@@ -579,92 +396,7 @@ class MetaKitController
                 continue;
             }
 
-            $legacy = [];
-
-            // Check for legacy fields
-            if ($page->metatitle()->isNotEmpty()) {
-                $legacy['metaTitle'] = $page->metatitle()->value();
-            }
-            if ($page->Metatitle()->isNotEmpty()) {
-                $legacy['metaTitle'] = $page->Metatitle()->value();
-            }
-            if ($page->customtitle()->isNotEmpty() && empty($legacy['metaTitle'])) {
-                $legacy['metaTitle'] = $page->customtitle()->value();
-            }
-            if ($page->seotitle()->isNotEmpty() && empty($legacy['metaTitle'])) {
-                $legacy['metaTitle'] = $page->seotitle()->value();
-            }
-
-            if ($page->metadescription()->isNotEmpty()) {
-                $legacy['metaDescription'] = $page->metadescription()->value();
-            }
-            if ($page->seodescription()->isNotEmpty() && empty($legacy['metaDescription'])) {
-                $legacy['metaDescription'] = $page->seodescription()->value();
-            }
-
-            $ogImageData = null;
-            if ($page->ogImage()->isNotEmpty()) {
-                $ogFiles = $page->ogImage()->toFiles();
-                if ($ogFiles->count() > 0) {
-                    $ogFile = $ogFiles->first();
-                    $ogImageData = [
-                        'filename' => $ogFile->filename(),
-                        'url' => $ogFile->url(),
-                        'uuid' => $ogFile->uuid()?->toString()
-                    ];
-                }
-            }
-
-            // Get inheritance info for page fields
-            $metaTitleInheritance = self::getFieldInheritance($page, 'metaTitle');
-            $metaDescInheritance = self::getFieldInheritance($page, 'metaDescription');
-            $ogTitleInheritance = self::getFieldInheritance($page, 'ogTitle');
-            $ogDescInheritance = self::getFieldInheritance($page, 'ogDescription');
-
-            $result[] = [
-                'id' => $page->id(),
-                'title' => $page->title()->value(),
-                'url' => $page->url(),
-                'panelUrl' => $page->panel()->url(),
-                'template' => $template,
-                'status' => $status,
-                'hasMetaTitle' => self::hasFieldInCurrentLanguage($page, 'metaTitle'),
-                'hasMetaDescription' => self::hasFieldInCurrentLanguage($page, 'metaDescription'),
-                'hasOgTitle' => self::hasFieldInCurrentLanguage($page, 'ogTitle'),
-                'hasOgDescription' => self::hasFieldInCurrentLanguage($page, 'ogDescription'),
-                'hasOgImage' => self::hasFieldInCurrentLanguage($page, 'ogImage'),
-                'robots' => $page->robots()->isNotEmpty() ? $page->robots()->value() : 'index, follow',
-                'metaTitle' => $page->metaTitle()->isNotEmpty()
-                    ? $page->metaTitle()->value()
-                    : null,
-                'metaTitleInheritance' => $metaTitleInheritance,
-                'metaDescription' => $page->metaDescription()->isNotEmpty()
-                    ? $page->metaDescription()->value()
-                    : null,
-                'metaDescriptionInheritance' => $metaDescInheritance,
-                'ogTitle' => $page->ogTitle()->isNotEmpty()
-                    ? $page->ogTitle()->value()
-                    : null,
-                'ogTitleInheritance' => $ogTitleInheritance,
-                'ogDescription' => $page->ogDescription()->isNotEmpty()
-                    ? $page->ogDescription()->value()
-                    : null,
-                'ogDescriptionInheritance' => $ogDescInheritance,
-                'ogImage' => $ogImageData,
-                'metaTitleLength' => $page->metaTitle()->isNotEmpty()
-                    ? mb_strlen($page->metaTitle()->value())
-                    : 0,
-                'metaDescriptionLength' => $page->metaDescription()->isNotEmpty()
-                    ? mb_strlen($page->metaDescription()->value())
-                    : 0,
-                'ogTitleLength' => $page->ogTitle()->isNotEmpty()
-                    ? mb_strlen($page->ogTitle()->value())
-                    : 0,
-                'ogDescriptionLength' => $page->ogDescription()->isNotEmpty()
-                    ? mb_strlen($page->ogDescription()->value())
-                    : 0,
-                'legacy' => !empty($legacy) ? $legacy : null,
-            ];
+            $result[] = PageDataBuilder::fromModel($page, $builderOptions);
         }
 
         return [
@@ -675,148 +407,18 @@ class MetaKitController
 
     public static function getSinglePage(string $pageId): array
     {
-        $kirby = kirby();
-        $isSite = ($pageId === 'site');
-        $page = $isSite ? $kirby->site() : $kirby->page($pageId);
+        $data = PageDataBuilder::fromPageId($pageId, ['includeOgImage' => true]);
 
-        if (!$page) {
+        if ($data === null) {
             return [
                 'status' => 'error',
                 'message' => 'Page not found'
             ];
         }
 
-        $legacy = [];
-
-        // Check for legacy fields
-        if ($page->metatitle()->isNotEmpty()) {
-            $legacy['metaTitle'] = $page->metatitle()->value();
-        }
-        if ($page->Metatitle()->isNotEmpty()) {
-            $legacy['metaTitle'] = $page->Metatitle()->value();
-        }
-        if ($page->customtitle()->isNotEmpty() && empty($legacy['metaTitle'])) {
-            $legacy['metaTitle'] = $page->customtitle()->value();
-        }
-        if ($page->seotitle()->isNotEmpty() && empty($legacy['metaTitle'])) {
-            $legacy['metaTitle'] = $page->seotitle()->value();
-        }
-
-        if ($page->metadescription()->isNotEmpty()) {
-            $legacy['metaDescription'] = $page->metadescription()->value();
-        }
-        if ($page->seodescription()->isNotEmpty() && empty($legacy['metaDescription'])) {
-            $legacy['metaDescription'] = $page->seodescription()->value();
-        }
-
-        $ogImageData = null;
-        if ($page->ogImage()->isNotEmpty()) {
-            $ogFiles = $page->ogImage()->toFiles();
-            if ($ogFiles->count() > 0) {
-                $ogFile = $ogFiles->first();
-                $ogImageData = [
-                    'filename' => $ogFile->filename(),
-                    'url' => $ogFile->url(),
-                    'uuid' => $ogFile->uuid()?->toString()
-                ];
-            }
-        }
-
-        // Get inheritance info
-        $metaTitleInheritance = self::getFieldInheritance($page, 'metaTitle');
-        $metaDescInheritance = self::getFieldInheritance($page, 'metaDescription');
-        $ogTitleInheritance = $isSite ? ['inherited' => false, 'inheritedFrom' => null, 'inheritedValue' => null] : self::getFieldInheritance($page, 'ogTitle');
-        $ogDescInheritance = $isSite ? ['inherited' => false, 'inheritedFrom' => null, 'inheritedValue' => null] : self::getFieldInheritance($page, 'ogDescription');
-
-        if ($isSite) {
-            // Site uses flat fields (no ogTitle/ogDescription)
-            $result = [
-                'id' => 'site',
-                'title' => $page->title()->value(),
-                'url' => $page->url(),
-                'panelUrl' => $page->panel()->url(),
-                'template' => 'site',
-                'status' => 'published',
-                'hasMetaTitle' => self::hasFieldInCurrentLanguage($page, 'metaTitle'),
-                'hasMetaDescription' => self::hasFieldInCurrentLanguage($page, 'metaDescription'),
-                'hasOgTitle' => false,
-                'hasOgDescription' => false,
-                'hasOgImage' => self::hasFieldInCurrentLanguage($page, 'ogImage'),
-                'robots' => $page->robots()->isNotEmpty() ? $page->robots()->value() : 'index, follow',
-                'metaTitle' => $page->metaTitle()->isNotEmpty()
-                    ? $page->metaTitle()->value()
-                    : null,
-                'metaTitleInheritance' => $metaTitleInheritance,
-                'metaDescription' => $page->metaDescription()->isNotEmpty()
-                    ? $page->metaDescription()->value()
-                    : null,
-                'metaDescriptionInheritance' => $metaDescInheritance,
-                'ogTitle' => null,
-                'ogTitleInheritance' => $ogTitleInheritance,
-                'ogDescription' => null,
-                'ogDescriptionInheritance' => $ogDescInheritance,
-                'ogImage' => $ogImageData,
-                'metaTitleLength' => $page->metaTitle()->isNotEmpty()
-                    ? mb_strlen($page->metaTitle()->value())
-                    : 0,
-                'metaDescriptionLength' => $page->metaDescription()->isNotEmpty()
-                    ? mb_strlen($page->metaDescription()->value())
-                    : 0,
-                'ogTitleLength' => 0,
-                'ogDescriptionLength' => 0,
-                'legacy' => !empty($legacy) ? $legacy : null,
-            ];
-        } else {
-            // Pages use flat fields
-            $result = [
-                'id' => $page->id(),
-                'title' => $page->title()->value(),
-                'url' => $page->url(),
-                'panelUrl' => $page->panel()->url(),
-                'template' => $page->intendedTemplate()->name(),
-                'status' => $page->status(),
-                'hasMetaTitle' => self::hasFieldInCurrentLanguage($page, 'metaTitle'),
-                'hasMetaDescription' => self::hasFieldInCurrentLanguage($page, 'metaDescription'),
-                'hasOgTitle' => self::hasFieldInCurrentLanguage($page, 'ogTitle'),
-                'hasOgDescription' => self::hasFieldInCurrentLanguage($page, 'ogDescription'),
-                'hasOgImage' => self::hasFieldInCurrentLanguage($page, 'ogImage'),
-                'robots' => $page->robots()->isNotEmpty() ? $page->robots()->value() : 'index, follow',
-                'metaTitle' => $page->metaTitle()->isNotEmpty()
-                    ? $page->metaTitle()->value()
-                    : null,
-                'metaTitleInheritance' => $metaTitleInheritance,
-                'metaDescription' => $page->metaDescription()->isNotEmpty()
-                    ? $page->metaDescription()->value()
-                    : null,
-                'metaDescriptionInheritance' => $metaDescInheritance,
-                'ogTitle' => $page->ogTitle()->isNotEmpty()
-                    ? $page->ogTitle()->value()
-                    : null,
-                'ogTitleInheritance' => $ogTitleInheritance,
-                'ogDescription' => $page->ogDescription()->isNotEmpty()
-                    ? $page->ogDescription()->value()
-                    : null,
-                'ogDescriptionInheritance' => $ogDescInheritance,
-                'ogImage' => $ogImageData,
-                'metaTitleLength' => $page->metaTitle()->isNotEmpty()
-                    ? mb_strlen($page->metaTitle()->value())
-                    : 0,
-                'metaDescriptionLength' => $page->metaDescription()->isNotEmpty()
-                    ? mb_strlen($page->metaDescription()->value())
-                    : 0,
-                'ogTitleLength' => $page->ogTitle()->isNotEmpty()
-                    ? mb_strlen($page->ogTitle()->value())
-                    : 0,
-                'ogDescriptionLength' => $page->ogDescription()->isNotEmpty()
-                    ? mb_strlen($page->ogDescription()->value())
-                    : 0,
-                'legacy' => !empty($legacy) ? $legacy : null,
-            ];
-        }
-
         return [
             'status' => 'success',
-            'data' => $result
+            'data' => $data
         ];
     }
 
