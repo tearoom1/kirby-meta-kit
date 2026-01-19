@@ -347,14 +347,27 @@ export default {
       const isOg = type === 'og';
 
       if (page.id === 'site') {
+        // Check for language inheritance first
+        if (!isOg && page.metaTitleInheritance?.inherited) {
+          const inheritedValue = page.metaTitleInheritance.inheritedValue;
+          if (inheritedValue) return inheritedValue.length;
+        }
         if (isOg && page.hasOgTitle) return page.ogTitleLength;
         if (!isOg && page.hasMetaTitle) return page.metaTitleLength;
         return page.title ? page.title.length : 0;
       }
 
-      const titleToUse = isOg
-        ? (page.hasOgTitle ? page.ogTitle : (page.hasMetaTitle ? page.metaTitle : page.title))
-        : (page.hasMetaTitle ? page.metaTitle : page.title);
+      // Check for language inheritance first
+      const inheritance = isOg ? page.ogTitleInheritance : page.metaTitleInheritance;
+      let titleToUse;
+
+      if (inheritance?.inherited && inheritance.inheritedValue) {
+        titleToUse = inheritance.inheritedValue;
+      } else {
+        titleToUse = isOg
+          ? (page.hasOgTitle ? page.ogTitle : (page.hasMetaTitle ? page.metaTitle : page.title))
+          : (page.hasMetaTitle ? page.metaTitle : page.title);
+      }
 
       if (!titleToUse) return 0;
 
@@ -369,13 +382,26 @@ export default {
 
     getFullTitlePreview(page, type) {
       if (page.id === 'site') {
+        // Check for language inheritance
+        if (page.metaTitleInheritance?.inherited && page.metaTitleInheritance.inheritedValue) {
+          return page.metaTitleInheritance.inheritedValue;
+        }
         return page.hasMetaTitle ? page.metaTitle : page.title;
       }
 
-      var titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
-      if (type === 'og' && page.hasOgTitle) {
-        titleToUse = page.ogTitle;
+      // Check for language inheritance first
+      const inheritance = type === 'og' ? page.ogTitleInheritance : page.metaTitleInheritance;
+      let titleToUse;
+
+      if (inheritance?.inherited && inheritance.inheritedValue) {
+        titleToUse = inheritance.inheritedValue;
+      } else {
+        titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
+        if (type === 'og' && page.hasOgTitle) {
+          titleToUse = page.ogTitle;
+        }
       }
+
       if (!titleToUse) return '—';
 
       if (this.shouldAppendSiteName(type) && this.siteSettings.siteMetaTitle) {
@@ -440,7 +466,8 @@ export default {
       if (!ranges || !length) return '';
 
       const statusClass = this.getStatusClass(page, length, type);
-      if (!statusClass) return '';
+      // No validation reason needed for optimal or empty status
+      if (!statusClass || statusClass === 'k-meta-kit-status-optimal') return '';
 
       const optimal = `${ranges.optimal.min}-${ranges.optimal.max}`;
       const warning = `${ranges.warning.min}-${ranges.warning.max}`;
@@ -472,7 +499,11 @@ export default {
       let tooltip = '';
       let prefix = '';
 
-      if (page.hasMetaTitle && page.metaTitle) {
+      // Check for language-level inheritance first
+      if (page.metaTitleInheritance?.inherited) {
+        prefix = page.metaTitleInheritance.inheritedFrom;
+        tooltip = page.metaTitleInheritance.inheritedValue || page.metaTitle || page.title;
+      } else if (page.hasMetaTitle && page.metaTitle) {
         tooltip = page.metaTitle;
       } else {
         prefix = 'page title';
@@ -493,7 +524,12 @@ export default {
     getDescriptionTooltip(page, showContent = true) {
       let text = null;
       let inheritance = false;
-      if (page.hasMetaDescription && page.metaDescription) {
+
+      // Check for language-level inheritance first
+      if (page.metaDescriptionInheritance?.inherited) {
+        text = page.metaDescriptionInheritance.inheritedValue || page.metaDescription;
+        inheritance = page.metaDescriptionInheritance.inheritedFrom;
+      } else if (page.hasMetaDescription && page.metaDescription) {
         text = page.metaDescription;
       } else if (this.siteSettings.siteMetaDescription) {
         text = this.siteSettings.siteMetaDescription;
@@ -527,7 +563,11 @@ export default {
       let tooltip = '';
       let prefix = '';
 
-      if (page.hasOgTitle && page.ogTitle) {
+      // Check for language-level inheritance first
+      if (page.ogTitleInheritance?.inherited) {
+        prefix = page.ogTitleInheritance.inheritedFrom;
+        tooltip = page.ogTitleInheritance.inheritedValue || page.ogTitle || page.metaTitle || page.title;
+      } else if (page.hasOgTitle && page.ogTitle) {
         tooltip = page.ogTitle;
       } else if (page.hasMetaTitle && page.metaTitle) {
         prefix = 'meta title';
@@ -551,7 +591,12 @@ export default {
     getOgDescriptionTooltip(page, showContent = true) {
       let text = null;
       let inheritance = false;
-      if (page.hasOgDescription && page.ogDescription) {
+
+      // Check for language-level inheritance first
+      if (page.ogDescriptionInheritance?.inherited) {
+        text = page.ogDescriptionInheritance.inheritedValue || page.ogDescription;
+        inheritance = page.ogDescriptionInheritance.inheritedFrom;
+      } else if (page.hasOgDescription && page.ogDescription) {
         text = page.ogDescription;
       } else if (page.hasMetaDescription && page.metaDescription) {
         text = page.metaDescription;
@@ -754,11 +799,16 @@ export default {
 
     isTitleInherited(page) {
       if (page.id === 'site') return false;
-      return !page.hasMetaTitle;
+      // Check for language-level inheritance or field-level inheritance
+      return page.metaTitleInheritance?.inherited || !page.hasMetaTitle;
     },
 
     // Description display and inheritance
     getDescriptionDisplay(page) {
+      // Check for language inheritance first
+      if (page.metaDescriptionInheritance?.inherited && page.metaDescriptionInheritance.inheritedValue) {
+        return page.metaDescriptionInheritance.inheritedValue.length;
+      }
       if (page.hasMetaDescription) {
         return page.metaDescriptionLength;
       }
@@ -770,10 +820,15 @@ export default {
     },
 
     isDescriptionInherited(page) {
-      return !page.hasMetaDescription && this.siteSettings.siteMetaDescription;
+      // Check for language-level inheritance or site-level inheritance
+      return page.metaDescriptionInheritance?.inherited || (!page.hasMetaDescription && this.siteSettings.siteMetaDescription);
     },
 
     getDescriptionStatusClass(page) {
+      // Check for language inheritance first
+      if (page.metaDescriptionInheritance?.inherited && page.metaDescriptionInheritance.inheritedValue) {
+        return this.getStatusClass(page, page.metaDescriptionInheritance.inheritedValue.length, 'description');
+      }
       const length = page.hasMetaDescription
         ? page.metaDescriptionLength
         : (this.siteSettings.siteMetaDescription ? this.siteSettings.siteMetaDescription.length : 0);
@@ -789,11 +844,16 @@ export default {
 
     isOgTitleInherited(page) {
       if (page.id === 'site') return false;
-      return !page.hasOgTitle;
+      // Check for language-level inheritance or field-level inheritance
+      return page.ogTitleInheritance?.inherited || !page.hasOgTitle;
     },
 
     // OG Description display and inheritance
     getOgDescriptionDisplay(page) {
+      // Check for language inheritance first
+      if (page.ogDescriptionInheritance?.inherited && page.ogDescriptionInheritance.inheritedValue) {
+        return page.ogDescriptionInheritance.inheritedValue.length;
+      }
       if (page.hasOgDescription) {
         return page.ogDescriptionLength;
       }
@@ -808,13 +868,18 @@ export default {
     },
 
     isOgDescriptionInherited(page) {
+      // Check for language-level inheritance first
+      if (page.ogDescriptionInheritance?.inherited) return true;
       if (page.hasOgDescription) return false;
       return page.hasMetaDescription || this.siteSettings.siteMetaDescription;
     },
 
     getOgDescriptionStatusClass(page) {
       let length = 0;
-      if (page.hasOgDescription) {
+      // Check for language inheritance first
+      if (page.ogDescriptionInheritance?.inherited && page.ogDescriptionInheritance.inheritedValue) {
+        length = page.ogDescriptionInheritance.inheritedValue.length;
+      } else if (page.hasOgDescription) {
         length = page.ogDescriptionLength;
       } else if (page.hasMetaDescription) {
         length = page.metaDescriptionLength;
