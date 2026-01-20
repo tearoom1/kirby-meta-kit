@@ -10,7 +10,8 @@
       "Bash(php -l:*)",
       "Bash(vendor/bin/phpunit:*)",
       "Bash(grep:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(tree:*)"
     ]
   }
 }

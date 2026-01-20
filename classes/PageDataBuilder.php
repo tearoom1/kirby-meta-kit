@@ -78,19 +78,18 @@ class PageDataBuilder
      */
     private function buildMetaFields(): array
     {
-        $metaTitle = $this->model->metaTitle();
-        $metaDescription = $this->model->metaDescription();
-        $robots = $this->model->robots();
+        $metaTitle = ConfigHelper::getString($this->model->metaTitle());
+        $metaDescription = ConfigHelper::getString($this->model->metaDescription());
 
         return [
             'hasMetaTitle' => MetaKitController::hasFieldInCurrentLanguage($this->model, 'metaTitle'),
             'hasMetaDescription' => MetaKitController::hasFieldInCurrentLanguage($this->model, 'metaDescription'),
-            'robots' => $robots->isNotEmpty() ? $robots->value() : 'index, follow',
-            'metaTitle' => $metaTitle->isNotEmpty() ? $metaTitle->value() : null,
-            'metaTitleLength' => $metaTitle->isNotEmpty() ? mb_strlen($metaTitle->value()) : 0,
+            'robots' => ConfigHelper::getString($this->model->robots(), 'index, follow'),
+            'metaTitle' => $metaTitle ?: null,
+            'metaTitleLength' => mb_strlen($metaTitle),
             'metaTitleInheritance' => MetaKitController::getFieldInheritance($this->model, 'metaTitle'),
-            'metaDescription' => $metaDescription->isNotEmpty() ? $metaDescription->value() : null,
-            'metaDescriptionLength' => $metaDescription->isNotEmpty() ? mb_strlen($metaDescription->value()) : 0,
+            'metaDescription' => $metaDescription ?: null,
+            'metaDescriptionLength' => mb_strlen($metaDescription),
             'metaDescriptionInheritance' => MetaKitController::getFieldInheritance($this->model, 'metaDescription'),
         ];
     }
@@ -100,9 +99,10 @@ class PageDataBuilder
      */
     private function buildOgFields(): array
     {
+        $noInheritance = ['inherited' => false, 'inheritedFrom' => null, 'inheritedValue' => null];
+
         // Site doesn't have OG title/description fields
         if ($this->isSite) {
-            $noInheritance = ['inherited' => false, 'inheritedFrom' => null, 'inheritedValue' => null];
             return [
                 'hasOgTitle' => false,
                 'hasOgDescription' => false,
@@ -116,18 +116,18 @@ class PageDataBuilder
             ];
         }
 
-        $ogTitle = $this->model->ogTitle();
-        $ogDescription = $this->model->ogDescription();
+        $ogTitle = ConfigHelper::getString($this->model->ogTitle());
+        $ogDescription = ConfigHelper::getString($this->model->ogDescription());
 
         return [
             'hasOgTitle' => MetaKitController::hasFieldInCurrentLanguage($this->model, 'ogTitle'),
             'hasOgDescription' => MetaKitController::hasFieldInCurrentLanguage($this->model, 'ogDescription'),
             'hasOgImage' => MetaKitController::hasFieldInCurrentLanguage($this->model, 'ogImage'),
-            'ogTitle' => $ogTitle->isNotEmpty() ? $ogTitle->value() : null,
-            'ogTitleLength' => $ogTitle->isNotEmpty() ? mb_strlen($ogTitle->value()) : 0,
+            'ogTitle' => $ogTitle ?: null,
+            'ogTitleLength' => mb_strlen($ogTitle),
             'ogTitleInheritance' => MetaKitController::getFieldInheritance($this->model, 'ogTitle'),
-            'ogDescription' => $ogDescription->isNotEmpty() ? $ogDescription->value() : null,
-            'ogDescriptionLength' => $ogDescription->isNotEmpty() ? mb_strlen($ogDescription->value()) : 0,
+            'ogDescription' => $ogDescription ?: null,
+            'ogDescriptionLength' => mb_strlen($ogDescription),
             'ogDescriptionInheritance' => MetaKitController::getFieldInheritance($this->model, 'ogDescription'),
         ];
     }

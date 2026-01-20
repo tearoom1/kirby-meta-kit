@@ -59,39 +59,7 @@ class MetaKit
     public function __construct(Kirby $kirby)
     {
         $this->kirby = $kirby;
-
-        // Default options (lowest priority)
-        $defaults = [
-            'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
-            'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
-            'api.temperature' => 0.7,
-            'ai.tone' => 'formal',
-            'maxDescriptionLength' => 160,
-            'ai.prompt.title' => "Write a clear, direct meta title {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be specific and factual. Focus on what the page is actually about. {tone} Write ONLY the title, nothing else.\n\nTitle:",
-            'ai.prompt.description' => "Write a clear, informative meta description {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be direct and specific. Describe what the page actually contains. {tone} Write ONLY the description, nothing else.\n\nDescription:",
-        ];
-
-        // Site settings from panel (middle priority)
-        $siteSettings = [];
-        $openrouter = \TearoomOne\MetaHelper::getSeoData($kirby->site()->metaKitOpenrouter());
-        if ($openrouter) {
-            if ($openrouter->apiKey()->isNotEmpty()) {
-                $siteSettings['api.key'] = $openrouter->apiKey()->value();
-            }
-            if ($openrouter->model()->isNotEmpty()) {
-                $siteSettings['api.model'] = $openrouter->model()->value();
-            }
-            if ($openrouter->temperature()->isNotEmpty()) {
-                $siteSettings['api.temperature'] = $openrouter->temperature()->toFloat();
-            }
-        }
-
-        // Config.php settings (highest priority)
-        $configSettings = $kirby->option('tearoom1.meta-kit', []);
-
-        // Merge: defaults < site settings < config
-        $this->options = array_merge($defaults, $siteSettings, $configSettings);
-
+        $this->options = ConfigHelper::getOpenRouterSettings();
         $this->httpClient = new Client([
             'timeout' => 30,
         ]);
@@ -116,29 +84,7 @@ class MetaKit
      */
     protected function getValidationRanges(string $fieldType, ?string $template = null): array
     {
-        $validation = $this->options['validation'] ?? [];
-        $ranges = $validation['ranges'] ?? [];
-        $templates = $validation['templates'] ?? [];
-
-        // Map field types to config keys
-        $fieldKey = match ($fieldType) {
-            'title' => 'title',
-            'ogTitle' => 'ogTitle',
-            'description' => 'description',
-            'ogDescription' => 'ogDescription',
-            default => 'title'
-        };
-
-        // Check for template-specific ranges
-        if ($template && isset($templates[$template][$fieldKey])) {
-            return $templates[$template][$fieldKey];
-        }
-
-        // Fall back to default ranges
-        return $ranges[$fieldKey] ?? [
-            'optimal' => ['min' => 20, 'max' => 60],
-            'warning' => ['min' => 15, 'max' => 75]
-        ];
+        return ConfigHelper::getValidationRanges($fieldType, $template);
     }
 
     /**
@@ -146,26 +92,15 @@ class MetaKit
      */
     protected function calculateTargetTitleLength(string $fieldType = 'title', ?string $template = null, ?Page $page = null): string
     {
-        // Get validation ranges
         $ranges = $this->getValidationRanges($fieldType, $template);
         $optimalMin = $ranges['optimal']['min'] ?? 20;
         $optimalMax = $ranges['optimal']['max'] ?? 60;
 
-        $site = $this->kirby->site();
-
-        // Check if site name should be appended (flat field)
-        $appendSiteName = $site->appendSiteName()->isNotEmpty()
-            ? $site->appendSiteName()->toBool()
-            : true;
-
-        // Check which field types should have site name appended (flat field, checkboxes stored as array)
-        $appendSiteNameTo = $site->appendSiteNameTo()->isNotEmpty()
-            ? $site->appendSiteNameTo()->value()
-            : 'meta,og';
-        $appendToTypes = array_map('trim', explode(',', $appendSiteNameTo));
+        $settings = ConfigHelper::getSiteSettings();
 
         // Determine if this field type should have site name appended
-        $shouldAppend = $appendSiteName;
+        $appendToTypes = array_map('trim', explode(',', $settings['appendSiteNameTo']));
+        $shouldAppend = $settings['appendSiteName'];
         if ($fieldType === 'title' && !in_array('meta', $appendToTypes)) {
             $shouldAppend = false;
         } elseif ($fieldType === 'ogTitle' && !in_array('og', $appendToTypes)) {
@@ -173,25 +108,15 @@ class MetaKit
         }
 
         if (!$shouldAppend) {
-            // No site name appending, use full optimal range
             return $optimalMin . '-' . $optimalMax;
         }
 
-        // Get site name and separator (flat fields)
-        $siteMetaTitle = $site->metaTitle()->isNotEmpty()
-            ? $site->metaTitle()->value()
-            : $site->title()->value();
-
-        $separator = $site->titleSeparator()->isNotEmpty()
-            ? $site->titleSeparator()->value()
-            : '|';
-
         // Calculate space taken by site name (including spaces around separator)
-        $siteNameLength = mb_strlen($siteMetaTitle) + mb_strlen($separator) + 2; // +2 for spaces
+        $siteNameLength = mb_strlen($settings['siteMetaTitle']) + mb_strlen($settings['titleSeparator']) + 2;
 
         // Reserve space for site name
-        $minTarget = max(25, $optimalMin - $siteNameLength); // Minimum 25 chars for page title
-        $maxTarget = max(30, $optimalMax - $siteNameLength); // Minimum 30 chars for page title
+        $minTarget = max(25, $optimalMin - $siteNameLength);
+        $maxTarget = max(30, $optimalMax - $siteNameLength);
 
         return $minTarget . '-' . $maxTarget;
     }

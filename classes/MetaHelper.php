@@ -37,37 +37,15 @@ class MetaHelper
             $title = $page->metaTitle()->value();
         }
 
-        // Get site SEO settings (flat fields)
-        $appendSiteName = $site->appendSiteName()->isNotEmpty() && $site->appendSiteName()->toBool();
+        $settings = ConfigHelper::getSiteSettings();
 
-        if (!$appendSiteName) {
+        if (!$settings['appendSiteName']) {
             return $title;
         }
 
-        // Get site meta title (with fallback to site title)
-        if ($site->metaTitle()->isNotEmpty()) {
-            $siteMetaTitle = $site->metaTitle()->value();
-        } else {
-            $siteMetaTitle = $site->title()->value();
-        }
-
-        // Get site settings (flat fields)
-        $separator = $site->titleSeparator()->isNotEmpty()
-            ? $site->titleSeparator()->value()
-            : '|';
-
-        $appendSiteNameTo = $site->appendSiteNameTo()->isNotEmpty()
-            ? $site->appendSiteNameTo()->value()
-            : null;
-
-        if ($appendSiteNameTo && !empty($siteMetaTitle)) {
-            $types = array_map('trim', explode(',', $appendSiteNameTo));
-            $shouldAppend = in_array($type, $types);
-
-            // Append site name if enabled
-            if ($shouldAppend) {
-                $title = $title . ' ' . $separator . ' ' . $siteMetaTitle;
-            }
+        $appendToTypes = array_map('trim', explode(',', $settings['appendSiteNameTo']));
+        if (in_array($type, $appendToTypes) && !empty($settings['siteMetaTitle'])) {
+            $title = $title . ' ' . $settings['titleSeparator'] . ' ' . $settings['siteMetaTitle'];
         }
 
         return $title;

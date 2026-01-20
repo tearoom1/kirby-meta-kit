@@ -12,12 +12,15 @@ if (!option('tearoom1.meta-kit.enabled', true)) {
 @include_once __DIR__ . '/vendor/autoload.php';
 
 $classes = [
+    'TearoomOne\ConfigHelper' => 'classes/ConfigHelper.php',
+    'TearoomOne\MetaHelper' => 'classes/MetaHelper.php',
     'TearoomOne\MetaKit' => 'classes/MetaKit.php',
     'TearoomOne\Sitemap' => 'classes/Sitemap.php',
     'TearoomOne\Robots' => 'classes/Robots.php',
-    'TearoomOne\MetaHelper' => 'classes/MetaHelper.php',
     'TearoomOne\MetaKitController' => 'classes/MetaKitController.php',
     'TearoomOne\MetaKitLicense' => 'classes/MetaKitLicense.php',
+    'TearoomOne\PageDataBuilder' => 'classes/PageDataBuilder.php',
+    'TearoomOne\ApiResponse' => 'classes/ApiResponse.php',
 ];
 
 // Only load LegacyMigration if enabled

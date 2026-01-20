@@ -13,34 +13,7 @@ class Sitemap
     public function __construct(Kirby $kirby)
     {
         $this->kirby = $kirby;
-
-        // Default options (lowest priority)
-        $defaults = [
-            'sitemap.include' => 'all',
-            'sitemap.exclude' => ['error'],
-        ];
-
-        // Site settings from panel (middle priority)
-        $siteSettings = [];
-        $siteSitemap = \TearoomOne\MetaHelper::getSeoData($kirby->site()->metaKitSitemap());
-        if ($siteSitemap) {
-            if ($siteSitemap->exclude()->isNotEmpty()) {
-                // Store page IDs for later checking
-                $siteSettings['sitemap.exclude.pages'] = $siteSitemap->exclude()->toPages();
-            }
-            if ($siteSitemap->priorityHome()->isNotEmpty()) {
-                $siteSettings['sitemap.priorityHome'] = $siteSitemap->priorityHome()->toFloat();
-            }
-            if ($siteSitemap->priorityDefault()->isNotEmpty()) {
-                $siteSettings['sitemap.priorityDefault'] = $siteSitemap->priorityDefault()->toFloat();
-            }
-        }
-
-        // Config.php settings (highest priority)
-        $configSettings = $kirby->option('tearoom1.meta-kit', []);
-
-        // Merge: defaults < site settings < config
-        $this->options = array_merge($defaults, $siteSettings, $configSettings);
+        $this->options = ConfigHelper::getSitemapSettings();
     }
 
     public function generate(): array

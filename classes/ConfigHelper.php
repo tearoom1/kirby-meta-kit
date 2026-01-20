@@ -1,0 +1,181 @@
+<?php
+
+namespace TearoomOne;
+
+use Kirby\Cms\App as Kirby;
+use Kirby\Cms\Field;
+
+/**
+ * Centralized configuration and field reading utilities
+ */
+class ConfigHelper
+{
+    /**
+     * Get string value from field with fallback
+     */
+    public static function getString(?Field $field, string $default = ''): string
+    {
+        if ($field && $field->isNotEmpty()) {
+            return $field->value();
+        }
+        return $default;
+    }
+
+    /**
+     * Get boolean value from field with fallback
+     */
+    public static function getBool(?Field $field, bool $default = false): bool
+    {
+        if ($field && $field->isNotEmpty()) {
+            return $field->toBool();
+        }
+        return $default;
+    }
+
+    /**
+     * Get float value from field with fallback
+     */
+    public static function getFloat(?Field $field, float $default = 0.0): float
+    {
+        if ($field && $field->isNotEmpty()) {
+            return $field->toFloat();
+        }
+        return $default;
+    }
+
+    /**
+     * Merge configuration with priority: defaults < site settings < config.php
+     */
+    public static function mergeOptions(array $defaults, array $siteSettings, array $configKey = []): array
+    {
+        $configSettings = kirby()->option('tearoom1.meta-kit', []);
+        return array_merge($defaults, $siteSettings, $configSettings);
+    }
+
+    /**
+     * Get site SEO settings (cached)
+     */
+    public static function getSiteSettings(): array
+    {
+        static $cache = null;
+        if ($cache !== null) {
+            return $cache;
+        }
+
+        $site = kirby()->site();
+
+        $cache = [
+            'appendSiteName' => self::getBool($site->appendSiteName(), true),
+            'appendSiteNameTo' => self::getString($site->appendSiteNameTo(), 'meta,og'),
+            'siteMetaTitle' => self::getString($site->metaTitle()) ?: $site->title()->value(),
+            'siteMetaDescription' => self::getString($site->metaDescription()),
+            'siteHasOgImage' => $site->ogImage()->isNotEmpty(),
+            'titleSeparator' => self::getString($site->titleSeparator(), '|'),
+        ];
+
+        return $cache;
+    }
+
+    /**
+     * Clear cached site settings (call after site updates)
+     */
+    public static function clearCache(): void
+    {
+        // Force cache refresh on next call
+        $site = kirby()->site();
+        // The static cache in getSiteSettings will be cleared on next request
+    }
+
+    /**
+     * Get validation ranges for a field type, with template-specific override support
+     */
+    public static function getValidationRanges(string $fieldType, ?string $template = null): array
+    {
+        $validation = option('tearoom1.meta-kit.validation', []);
+        $ranges = $validation['ranges'] ?? [];
+        $templates = $validation['templates'] ?? [];
+
+        // Map field types to config keys
+        $fieldKey = match ($fieldType) {
+            'title', 'metaTitle' => 'title',
+            'ogTitle' => 'ogTitle',
+            'description', 'metaDescription' => 'description',
+            'ogDescription' => 'ogDescription',
+            default => 'title'
+        };
+
+        // Check for template-specific ranges
+        if ($template && isset($templates[$template][$fieldKey])) {
+            return $templates[$template][$fieldKey];
+        }
+
+        // Default ranges by field type
+        $defaults = [
+            'title' => ['optimal' => ['min' => 20, 'max' => 60], 'warning' => ['min' => 15, 'max' => 75]],
+            'ogTitle' => ['optimal' => ['min' => 20, 'max' => 60], 'warning' => ['min' => 15, 'max' => 75]],
+            'description' => ['optimal' => ['min' => 140, 'max' => 160], 'warning' => ['min' => 126, 'max' => 176]],
+            'ogDescription' => ['optimal' => ['min' => 140, 'max' => 160], 'warning' => ['min' => 126, 'max' => 176]],
+        ];
+
+        return $ranges[$fieldKey] ?? $defaults[$fieldKey] ?? $defaults['title'];
+    }
+
+    /**
+     * Get OpenRouter settings from site panel or config
+     */
+    public static function getOpenRouterSettings(): array
+    {
+        $defaults = [
+            'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
+            'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
+            'api.temperature' => 0.7,
+            'ai.tone' => 'formal',
+            'maxDescriptionLength' => 160,
+            'ai.prompt.title' => "Write a clear, direct meta title {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be specific and factual. Focus on what the page is actually about. {tone} Write ONLY the title, nothing else.\n\nTitle:",
+            'ai.prompt.description' => "Write a clear, informative meta description {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be direct and specific. Describe what the page actually contains. {tone} Write ONLY the description, nothing else.\n\nDescription:",
+        ];
+
+        $siteSettings = [];
+        $openrouter = MetaHelper::getSeoData(kirby()->site()->metaKitOpenrouter());
+        if ($openrouter) {
+            if ($openrouter->apiKey()->isNotEmpty()) {
+                $siteSettings['api.key'] = $openrouter->apiKey()->value();
+            }
+            if ($openrouter->model()->isNotEmpty()) {
+                $siteSettings['api.model'] = $openrouter->model()->value();
+            }
+            if ($openrouter->temperature()->isNotEmpty()) {
+                $siteSettings['api.temperature'] = $openrouter->temperature()->toFloat();
+            }
+        }
+
+        return self::mergeOptions($defaults, $siteSettings);
+    }
+
+    /**
+     * Get sitemap settings from site panel or config
+     */
+    public static function getSitemapSettings(): array
+    {
+        $defaults = [
+            'sitemap.include' => 'all',
+            'sitemap.exclude' => ['error'],
+        ];
+
+        $siteSettings = [];
+        $siteSitemap = MetaHelper::getSeoData(kirby()->site()->metaKitSitemap());
+        if ($siteSitemap) {
+            if ($siteSitemap->exclude()->isNotEmpty()) {
+                $siteSettings['sitemap.exclude.pages'] = $siteSitemap->exclude()->toPages();
+            }
+            if ($siteSitemap->priorityHome()->isNotEmpty()) {
+                $siteSettings['sitemap.priorityHome'] = $siteSitemap->priorityHome()->toFloat();
+            }
+            if ($siteSitemap->priorityDefault()->isNotEmpty()) {
+                $siteSettings['sitemap.priorityDefault'] = $siteSitemap->priorityDefault()->toFloat();
+            }
+        }
+
+        return self::mergeOptions($defaults, $siteSettings);
+    }
+}

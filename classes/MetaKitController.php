@@ -79,26 +79,7 @@ class MetaKitController
      */
     private static function getSiteSettings(): array
     {
-        $site = kirby()->site();
-
-        return [
-            'appendSiteName' => $site->appendSiteName()->isNotEmpty()
-                ? $site->appendSiteName()->toBool()
-                : true,
-            'appendSiteNameTo' => $site->appendSiteNameTo()->isNotEmpty()
-                ? $site->appendSiteNameTo()->value()
-                : null,
-            'siteMetaTitle' => $site->metaTitle()->isNotEmpty()
-                ? $site->metaTitle()->value()
-                : $site->title()->value(),
-            'siteMetaDescription' => $site->metaDescription()->isNotEmpty()
-                ? $site->metaDescription()->value()
-                : null,
-            'siteHasOgImage' => $site->ogImage()->isNotEmpty(),
-            'titleSeparator' => $site->titleSeparator()->isNotEmpty()
-                ? $site->titleSeparator()->value()
-                : '|',
-        ];
+        return ConfigHelper::getSiteSettings();
     }
 
     private static function getLanguages(): array
