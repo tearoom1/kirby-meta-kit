@@ -3,7 +3,7 @@
 namespace TearoomOne;
 
 use Kirby\Cms\App as Kirby;
-use Kirby\Cms\Field;
+use Kirby\Content\Field;
 
 /**
  * Centralized configuration and field reading utilities
