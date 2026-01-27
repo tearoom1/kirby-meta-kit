@@ -65,8 +65,14 @@ class Sitemap
 
     protected function shouldInclude(Page $page): bool
     {
-        // Skip unlisted and draft pages
-        if ($page->isDraft() || $page->isUnlisted()) {
+        // Always skip draft pages
+        if ($page->isDraft()) {
+            return false;
+        }
+        
+        // Skip unlisted pages unless configured to include them
+        $includeUnlisted = $this->options['sitemap.includeUnlisted'] ?? false;
+        if ($page->isUnlisted() && !$includeUnlisted) {
             return false;
         }
 
@@ -102,12 +108,23 @@ class Sitemap
 
     protected function getChangeFrequency(Page $page): string
     {
-        // Default change frequency based on page depth
-        $depth = $page->depth();
-
-        if ($depth <= 1) return 'weekly';
-        if ($depth === 2) return 'monthly';
-        return 'yearly';
+        $template = $page->intendedTemplate()->name();
+        $slug = $page->slug();
+        
+        // Check slug-based rules first (most specific)
+        $slugRules = $this->options['sitemap.changefreq.slugs'] ?? [];
+        if (isset($slugRules[$slug])) {
+            return $slugRules[$slug];
+        }
+        
+        // Check template-based rules
+        $templateRules = $this->options['sitemap.changefreq.templates'] ?? [];
+        if (isset($templateRules[$template])) {
+            return $templateRules[$template];
+        }
+        
+        // Fall back to default
+        return $this->options['sitemap.changefreq.default'] ?? 'monthly';
     }
 
     protected function getPriority(Page $page): float

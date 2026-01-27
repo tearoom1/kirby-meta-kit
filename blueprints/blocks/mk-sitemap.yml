@@ -10,6 +10,13 @@ fields:
     help: Pages to exclude from the sitemap
     translate: false
 
+  includeUnlisted:
+    label: Include Unlisted Pages
+    type: toggle
+    default: false
+    help: Include unlisted pages in the sitemap
+    translate: false
+
   priorityHome:
     label: Homepage Priority
     type: range

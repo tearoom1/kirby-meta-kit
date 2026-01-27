@@ -160,6 +160,29 @@ class ConfigHelper
         $defaults = [
             'sitemap.include' => 'all',
             'sitemap.exclude' => ['error'],
+            'sitemap.includeUnlisted' => false,
+            'sitemap.changefreq.default' => 'monthly',
+            'sitemap.changefreq.templates' => [
+                'home' => 'daily',
+                'news' => 'weekly',
+                'article' => 'weekly',
+                'blog' => 'weekly',
+                'post' => 'weekly',
+                'imprint' => 'yearly',
+                'privacy' => 'yearly',
+                'terms' => 'yearly',
+                'legal' => 'yearly',
+            ],
+            'sitemap.changefreq.slugs' => [
+                'imprint' => 'yearly',
+                'privacy' => 'yearly',
+                'datenschutz' => 'yearly',
+                'impressum' => 'yearly',
+                'terms' => 'yearly',
+                'agb' => 'yearly',
+                'contact' => 'monthly',
+                'kontakt' => 'monthly',
+            ],
         ];
 
         $siteSettings = [];
@@ -167,6 +190,9 @@ class ConfigHelper
         if ($siteSitemap) {
             if ($siteSitemap->exclude()->isNotEmpty()) {
                 $siteSettings['sitemap.exclude.pages'] = $siteSitemap->exclude()->toPages();
+            }
+            if ($siteSitemap->includeUnlisted()->isNotEmpty()) {
+                $siteSettings['sitemap.includeUnlisted'] = $siteSitemap->includeUnlisted()->toBool();
             }
             if ($siteSitemap->priorityHome()->isNotEmpty()) {
                 $siteSettings['sitemap.priorityHome'] = $siteSitemap->priorityHome()->toFloat();

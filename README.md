@@ -552,7 +552,30 @@ XML sitemap available at `/sitemap.xml` with:
 ```php
 'sitemap.enabled' => true,
 'sitemap.exclude' => ['error', 'drafts', 'admin'],  // Page IDs to exclude
+'sitemap.includeUnlisted' => false,  // Include unlisted pages (default: false)
+
+// Change frequency configuration
+'sitemap.changefreq.default' => 'monthly',  // Default for all pages
+'sitemap.changefreq.templates' => [
+    'home' => 'daily',
+    'news' => 'weekly',
+    'article' => 'weekly',
+    'blog' => 'weekly',
+    'imprint' => 'yearly',
+    'privacy' => 'yearly',
+],
+'sitemap.changefreq.slugs' => [
+    'impressum' => 'yearly',
+    'datenschutz' => 'yearly',
+    'contact' => 'monthly',
+],
 ```
+
+**Change Frequency Logic:**
+- Checks slug first (most specific)
+- Falls back to template
+- Falls back to default
+- Override any setting in config.php
 
 **Panel Settings:**
 - Visual page selector for exclusions
