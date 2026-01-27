@@ -108,10 +108,15 @@ class Sitemap
 
     protected function getChangeFrequency(Page $page): string
     {
+        // Check page-level override first (most specific)
+        if ($page->sitemapChangefreq()->isNotEmpty()) {
+            return $page->sitemapChangefreq()->value();
+        }
+        
         $template = $page->intendedTemplate()->name();
         $slug = $page->slug();
         
-        // Check slug-based rules first (most specific)
+        // Check slug-based rules
         $slugRules = $this->options['sitemap.changefreq.slugs'] ?? [];
         if (isset($slugRules[$slug])) {
             return $slugRules[$slug];
@@ -129,6 +134,26 @@ class Sitemap
 
     protected function getPriority(Page $page): float
     {
+        // Check page-level override first (most specific)
+        if ($page->sitemapPriority()->isNotEmpty()) {
+            return $page->sitemapPriority()->toFloat();
+        }
+        
+        $template = $page->intendedTemplate()->name();
+        $slug = $page->slug();
+        
+        // Check slug-based rules
+        $slugRules = $this->options['sitemap.priority.slugs'] ?? [];
+        if (isset($slugRules[$slug])) {
+            return $slugRules[$slug];
+        }
+        
+        // Check template-based rules
+        $templateRules = $this->options['sitemap.priority.templates'] ?? [];
+        if (isset($templateRules[$template])) {
+            return $templateRules[$template];
+        }
+        
         // Homepage gets priority from settings
         if ($page->isHomePage()) {
             return $this->options['sitemap.priorityHome'] ?? 1.0;

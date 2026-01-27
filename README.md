@@ -569,18 +569,41 @@ XML sitemap available at `/sitemap.xml` with:
     'datenschutz' => 'yearly',
     'contact' => 'monthly',
 ],
+
+// Priority configuration
+'sitemap.priority.templates' => [
+    'home' => 1.0,
+    'news' => 0.9,
+    'article' => 0.8,
+    'blog' => 0.9,
+    'imprint' => 0.3,
+    'privacy' => 0.3,
+],
+'sitemap.priority.slugs' => [
+    'impressum' => 0.3,
+    'datenschutz' => 0.3,
+    'contact' => 0.5,
+],
 ```
 
-**Change Frequency Logic:**
-- Checks slug first (most specific)
-- Falls back to template
-- Falls back to default
-- Override any setting in config.php
+**Priority & Change Frequency Logic:**
+- **Page-level override** (most specific) - Set in page SEO tab
+- **Slug-based rules** - Matches page slug
+- **Template-based rules** - Matches page template
+- **Site defaults** - Set in panel or config
+- **Fallback** - Built-in defaults
 
-**Panel Settings:**
+**Panel Settings (Site):**
 - Visual page selector for exclusions
+- Include unlisted pages toggle
+- Default change frequency dropdown
 - Homepage priority (0.1 - 1.0)
-- Default page priority
+- Default page priority (0.0 - 1.0)
+
+**Panel Settings (Per Page):**
+- Sitemap Priority field - Override default for specific page
+- Sitemap Change Frequency field - Override default for specific page
+- Both fields optional - leave empty to use defaults
 
 ### Robots.txt Management
 

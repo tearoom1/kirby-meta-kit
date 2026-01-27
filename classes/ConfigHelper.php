@@ -183,6 +183,25 @@ class ConfigHelper
                 'contact' => 'monthly',
                 'kontakt' => 'monthly',
             ],
+            'sitemap.priority.templates' => [
+                'home' => 1.0,
+                'news' => 0.9,
+                'article' => 0.8,
+                'blog' => 0.9,
+                'post' => 0.8,
+                'imprint' => 0.3,
+                'privacy' => 0.3,
+                'terms' => 0.3,
+                'legal' => 0.3,
+            ],
+            'sitemap.priority.slugs' => [
+                'impressum' => 0.3,
+                'datenschutz' => 0.3,
+                'privacy' => 0.3,
+                'imprint' => 0.3,
+                'terms' => 0.3,
+                'agb' => 0.3,
+            ],
         ];
 
         $siteSettings = [];
@@ -193,6 +212,9 @@ class ConfigHelper
             }
             if ($siteSitemap->includeUnlisted()->isNotEmpty()) {
                 $siteSettings['sitemap.includeUnlisted'] = $siteSitemap->includeUnlisted()->toBool();
+            }
+            if ($siteSitemap->changefreqDefault()->isNotEmpty()) {
+                $siteSettings['sitemap.changefreq.default'] = $siteSitemap->changefreqDefault()->value();
             }
             if ($siteSitemap->priorityHome()->isNotEmpty()) {
                 $siteSettings['sitemap.priorityHome'] = $siteSitemap->priorityHome()->toFloat();
