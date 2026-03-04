@@ -39,7 +39,8 @@ class Robots
         $site = $this->kirby->site();
 
         // Get robots settings from panel
-        $robotsData = \TearoomOne\MetaHelper::getSeoData($site->metaKitRobots());
+        $robotsField = $site->metaKitRobots();
+        $robotsData = $robotsField->isNotEmpty() ? $robotsField->toObject() : null;
 
         // If no robots data exists yet, return basic
         if (!$robotsData) {

@@ -3,10 +3,8 @@
 namespace TearoomOne;
 
 use Kirby\Cms\App as Kirby;
-use Kirby\Cms\Page;
 use Kirby\Exception\Exception;
 use GuzzleHttp\Client;
-use Kirby\Http\Response;
 
 class MetaKit
 {
@@ -45,7 +43,8 @@ class MetaKit
         $configKey = option('tearoom1.meta-kit.api.key');
 
         // Get site settings
-        $openrouter = \TearoomOne\MetaHelper::getSeoData($kirby->site()->metaKitOpenrouter());
+        $openrouterField = $kirby->site()->metaKitOpenrouter();
+        $openrouter = $openrouterField->isNotEmpty() ? $openrouterField->toObject() : null;
         $siteModel = $openrouter ? $openrouter->model()->value() : null;
         $siteKey = $openrouter ? $openrouter->apiKey()->value() : null;
 
@@ -77,6 +76,21 @@ class MetaKit
         }
 
         return "Use formal language (e.g., 'Sie' in German, 'vous' in French).";
+    }
+
+    /**
+     * Resolve a language code to a human-readable name using Kirby's languages,
+     * falling back to a capitalised version of the code for unknown languages.
+     */
+    protected function resolveLanguageName(string $languageCode): string
+    {
+        foreach ($this->kirby->languages() as $language) {
+            if ($language->code() === $languageCode) {
+                return $language->name();
+            }
+        }
+
+        return ucfirst($languageCode);
     }
 
     /**
@@ -121,7 +135,14 @@ class MetaKit
         return $minTarget . '-' . $maxTarget;
     }
 
-    public function generateTitle(string $content, array $context = []): ?string
+    /**
+     * Send a prompt to the OpenRouter API and return the raw text response.
+     *
+     * Shared by generateTitle() and generateDescription() to avoid duplication.
+     *
+     * @throws Exception When the API key is missing or the API returns an error
+     */
+    private function callApi(string $prompt, int $maxTokens): string
     {
         $apiKey = $this->options['api.key'] ?? null;
 
@@ -129,33 +150,51 @@ class MetaKit
             throw new Exception('OpenRouter API key is not configured');
         }
 
-        // Get context parameters
+        $response = $this->httpClient->post($this->options['api.endpoint'], [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $apiKey,
+                'Content-Type' => 'application/json',
+                'HTTP-Referer' => $this->kirby->url(),
+            ],
+            'json' => [
+                'model' => $this->options['api.model'],
+                'messages' => [
+                    ['role' => 'user', 'content' => $prompt]
+                ],
+                'max_tokens' => $maxTokens,
+                'temperature' => $this->options['api.temperature'] ?? 0.7,
+            ]
+        ]);
+
+        $body = $response->getBody()->getContents();
+        $data = json_decode($body, true);
+
+        kirbylog('OpenRouter Response: ' . substr($body, 0, 500));
+
+        if (!isset($data['choices'][0]['message']['content'])) {
+            $errorMsg = $data['error']['message'] ?? 'Unknown API error';
+            kirbylog('OpenRouter API Error: ' . $errorMsg);
+            throw new Exception('OpenRouter API error: ' . $errorMsg);
+        }
+
+        return $data['choices'][0]['message']['content'];
+    }
+
+    public function generateTitle(string $content, array $context = []): ?string
+    {
         $language = $context['language'] ?? 'en';
         $fieldType = $context['fieldType'] ?? 'title'; // 'title' or 'ogTitle'
         $template = $context['template'] ?? null;
-        $page = $context['page'] ?? null;
 
-        $languageNames = [
-            'de' => 'German',
-            'en' => 'English',
-            'fr' => 'French',
-            'es' => 'Spanish',
-            'it' => 'Italian',
-        ];
-        $languageName = $languageNames[$language] ?? 'English';
-
-        // Calculate target title length based on field type and template
+        $languageName = $this->resolveLanguageName($language);
         $targetLength = $this->calculateTargetTitleLength($fieldType, $template);
-
-        // Limit content length to avoid token limits
         $contentPreview = mb_substr(strip_tags($content), 0, 1000);
 
-        // Get prompt template and replace placeholders
-        $promptTemplate = $this->options['ai.prompt.title'];
-
-        // Update prompt to include target length
-        $promptTemplate = str_replace('{optimal_length}', $targetLength . ' characters', $promptTemplate);
-
+        $promptTemplate = str_replace(
+            '{optimal_length}',
+            $targetLength . ' characters',
+            $this->options['ai.prompt.title']
+        );
         $prompt = str_replace(
             ['{language}', '{content}', '{tone}'],
             [$languageName, $contentPreview, $this->getToneInstruction()],
@@ -163,84 +202,30 @@ class MetaKit
         );
 
         try {
-            $response = $this->httpClient->post($this->options['api.endpoint'], [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'Content-Type' => 'application/json',
-                    'HTTP-Referer' => $this->kirby->url(),
-                ],
-                'json' => [
-                    'model' => $this->options['api.model'],
-                    'messages' => [
-                        ['role' => 'user', 'content' => $prompt]
-                    ],
-                    'max_tokens' => 50,
-                    'temperature' => $this->options['api.temperature'] ?? 0.7,
-                ]
-            ]);
-
-            $body = $response->getBody()->getContents();
-            $data = json_decode($body, true);
-
-            // Log the response for debugging
-            kirbylog('OpenRouter Response: ' . substr($body, 0, 500));
-
-            if (!isset($data['choices'][0]['message']['content'])) {
-                $errorMsg = $data['error']['message'] ?? 'Unknown API error';
-                kirbylog('OpenRouter API Error: ' . $errorMsg);
-                throw new Exception('OpenRouter API error: ' . $errorMsg);
-            }
-
-            $title = $data['choices'][0]['message']['content'];
-
-            if ($title) {
-                return $this->sanitizeTitle($title);
-            }
-
-            return null;
-
+            $title = $this->callApi($prompt, 50);
+            return $title ? $this->sanitizeTitle($title, $fieldType, $template) : null;
         } catch (\Exception $e) {
             kirbylog('Meta Kit Error: ' . $e->getMessage());
-            throw $e; // Re-throw to show error to user
+            throw $e;
         }
     }
 
     public function generateDescription(string $content, array $context = []): ?string
     {
-        $apiKey = $this->options['api.key'] ?? null;
-
-        if (empty($apiKey)) {
-            throw new Exception('OpenRouter API key is not configured');
-        }
-
-        // Get context parameters
         $languageCode = $context['language'] ?? 'en';
         $fieldType = $context['fieldType'] ?? 'description'; // 'description' or 'ogDescription'
         $template = $context['template'] ?? null;
 
-        // Get the language names from kirby
-        $languages = $this->kirby->languages();
-        $languageNames = [];
-        foreach ($languages as $language) {
-            $languageNames[$language->code()] = $language->name();
-        }
-        $languageName = $languageNames[$languageCode] ?? 'English';
-
-        // Get target description length based on field type and template
+        $languageName = $this->resolveLanguageName($languageCode);
         $ranges = $this->getValidationRanges($fieldType, $template);
-        $optimalMin = $ranges['optimal']['min'] ?? 140;
-        $optimalMax = $ranges['optimal']['max'] ?? 160;
-        $targetLength = $optimalMin . '-' . $optimalMax;
-
-        // Limit content length to avoid token limits
+        $targetLength = ($ranges['optimal']['min'] ?? 140) . '-' . ($ranges['optimal']['max'] ?? 160);
         $contentPreview = mb_substr(strip_tags($content), 0, 1000);
 
-        // Get prompt template and replace placeholders
-        $promptTemplate = $this->options['ai.prompt.description'];
-
-        // Update prompt to include target length
-        $promptTemplate = str_replace('{optimal_length}', $targetLength . ' characters', $promptTemplate);
-
+        $promptTemplate = str_replace(
+            '{optimal_length}',
+            $targetLength . ' characters',
+            $this->options['ai.prompt.description']
+        );
         $prompt = str_replace(
             ['{language}', '{content}', '{tone}'],
             [$languageName, $contentPreview, $this->getToneInstruction()],
@@ -248,45 +233,11 @@ class MetaKit
         );
 
         try {
-            $response = $this->httpClient->post($this->options['api.endpoint'], [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'Content-Type' => 'application/json',
-                    'HTTP-Referer' => $this->kirby->url(),
-                ],
-                'json' => [
-                    'model' => $this->options['api.model'],
-                    'messages' => [
-                        ['role' => 'user', 'content' => $prompt]
-                    ],
-                    'max_tokens' => 100,
-                    'temperature' => $this->options['api.temperature'] ?? 0.7,
-                ]
-            ]);
-
-            $body = $response->getBody()->getContents();
-            $data = json_decode($body, true);
-
-            // Log the response for debugging
-            kirbylog('OpenRouter Response: ' . substr($body, 0, 500));
-
-            if (!isset($data['choices'][0]['message']['content'])) {
-                $errorMsg = $data['error']['message'] ?? 'Unknown API error';
-                kirbylog('OpenRouter API Error: ' . $errorMsg);
-                throw new Exception('OpenRouter API error: ' . $errorMsg);
-            }
-
-            $description = $data['choices'][0]['message']['content'];
-
-            if ($description) {
-                return $this->sanitizeDescription($description, $fieldType, $template);
-            }
-
-            return null;
-
+            $description = $this->callApi($prompt, 100);
+            return $description ? $this->sanitizeDescription($description, $fieldType, $template) : null;
         } catch (\Exception $e) {
             kirbylog('Meta Kit Error: ' . $e->getMessage());
-            throw $e; // Re-throw to show error to user
+            throw $e;
         }
     }
 
@@ -328,14 +279,14 @@ class MetaKit
         return $description;
     }
 
-    protected function sanitizeTitle(string $title, string $fieldType = 'title', ?string $template = null, ?Page $page = null): string
+    protected function sanitizeTitle(string $title, string $fieldType = 'title', ?string $template = null): string
     {
         $title = strip_tags($title);
         $title = preg_replace('/\s+/', ' ', $title);
         $title = trim($title, " \t\n\r\0\x0B\"'`");
 
         // Get target length range
-        $targetRange = $this->calculateTargetTitleLength($fieldType, $template, $page);
+        $targetRange = $this->calculateTargetTitleLength($fieldType, $template);
         list($minLength, $maxLength) = array_map('intval', explode('-', $targetRange));
 
         // Allow some flexibility (+5 chars) before truncating

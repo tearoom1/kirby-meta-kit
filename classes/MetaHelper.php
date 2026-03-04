@@ -7,25 +7,6 @@ use Kirby\Cms\Site;
 
 class MetaHelper
 {
-    /**
-     * Get data from a blocks field (used for site settings like openrouter, sitemap, robots)
-     */
-    public static function getSeoData($field)
-    {
-        if (!$field || $field->isEmpty()) {
-            return null;
-        }
-
-        // Try blocks format first
-        $blocks = $field->toBlocks();
-        if ($blocks && $blocks->count() > 0) {
-            return $blocks->first()->content();
-        }
-
-        // Fallback to object format (legacy)
-        return $field->toObject();
-    }
-
     public static function buildTitle(Page $page, Site $site, $type): string
     {
         $title = $page->title()->value();

@@ -134,7 +134,8 @@ class ConfigHelper
         ];
 
         $siteSettings = [];
-        $openrouter = MetaHelper::getSeoData(kirby()->site()->metaKitOpenrouter());
+        $openrouterField = kirby()->site()->metaKitOpenrouter();
+        $openrouter = $openrouterField->isNotEmpty() ? $openrouterField->toObject() : null;
         if ($openrouter) {
             if ($openrouter->apiKey()->isNotEmpty()) {
                 $siteSettings['api.key'] = $openrouter->apiKey()->value();
@@ -203,7 +204,8 @@ class ConfigHelper
         ];
 
         $siteSettings = [];
-        $siteSitemap = MetaHelper::getSeoData(kirby()->site()->metaKitSitemap());
+        $sitemapField = kirby()->site()->metaKitSitemap();
+        $siteSitemap = $sitemapField->isNotEmpty() ? $sitemapField->toObject() : null;
         if ($siteSitemap) {
             if ($siteSitemap->exclude()->isNotEmpty()) {
                 $siteSettings['sitemap.exclude.pages'] = $siteSitemap->exclude()->toPages();

@@ -114,6 +114,9 @@ class MetaKitController
     }
 
 
+    /**
+     * @deprecated Use generateAllFields() instead, which supports all four SEO field types.
+     */
     public static function generateAllDescriptions(): array
     {
         $kirby = kirby();

@@ -24,7 +24,7 @@ $charLimit = $hasValidLicense ? null : 20;
 // ==============================================================
 
 // Build meta title and description using helper (reads from flat page fields)
-$metaTitle = MetaHelper::buildTitle($page, $site, null, 'meta');
+$metaTitle = MetaHelper::buildTitle($page, $site, 'meta');
 $metaDescription = MetaHelper::buildDescription($page, $site);
 
 // Limit output if unlicensed
@@ -48,7 +48,7 @@ $keywords = $page->metaKeywords()->isNotEmpty() ? $page->metaKeywords() : null;
 $author = $page->metaAuthor()->isNotEmpty() ? $page->metaAuthor() : ($site->metaAuthor()->isNotEmpty() ? $site->metaAuthor() : null);
 
 // Get OG title (use custom OG title or fall back to meta title)
-$ogTitle = MetaHelper::buildTitle($page, $site, null, 'og');
+$ogTitle = MetaHelper::buildTitle($page, $site, 'og');
 
 // Get OG description using helper
 $ogDescription = MetaHelper::buildOgDescription($page, $site, $metaDescription);
@@ -195,7 +195,7 @@ $websiteSchema['potentialAction'] = [
 // WebPage Schema
 $webPageSchema = [
     '@context' => 'https://schema.org',
-    '@type' => $page->isHomePage() ? 'WebPage' : 'WebPage',
+    '@type' => 'WebPage',
     'name' => $metaTitle,
     'description' => $metaDescription,
     'url' => $page->url(),
