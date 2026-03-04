@@ -36,6 +36,8 @@
 </template>
 
 <script>
+import { getFieldTitleDisplay, shouldAppendSiteName } from '../../../composables/panelDisplay.js';
+
 export default {
   props: {
     value: String,
@@ -96,56 +98,37 @@ export default {
     },
     // Check if site name should be appended based on type and settings
     shouldAppendSiteName() {
-      // Check if appendSiteNameTo exists (could be false, null, undefined, etc.)
-      if (this.siteSettings.appendSiteNameTo === undefined ||
-          this.siteSettings.appendSiteNameTo === null ||
-          this.siteSettings.appendSiteNameTo === '') {
-        // Fallback to old behavior if appendSiteNameTo is not set
-        return !!this.siteSettings.appendSiteName;
-      }
-
-      // appendSiteNameTo is a comma-separated string like "meta,og" or "meta" or "og"
-      const setting = this.siteSettings.appendSiteNameTo;
-
-      // Check if the type is in the comma-separated list
-      return setting.split(',').map(s => s.trim()).includes(this.type);
+      return shouldAppendSiteName(this.siteSettings, this.type);
     },
     showPreview() {
-      // Show preview for non-site pages when we have a title and site name should be appended
-      return !this.isSitePage &&
-             this.effectiveTitle &&
-             this.shouldAppendSiteName &&
-             this.siteSettings.siteMetaTitle;
+      return getFieldTitleDisplay({
+        value: this.value,
+        metaTitle: this.metaTitle,
+        pageTitle: this.pageTitle,
+        type: this.type,
+        pageId: this.pageId,
+        siteSettings: this.siteSettings
+      }).showPreview;
     },
     fullTitle() {
-      const titleToUse = this.effectiveTitle;
-
-      if (!titleToUse || !this.shouldAppendSiteName) {
-        return titleToUse;
-      }
-
-      const separator = this.siteSettings.titleSeparator || '|';
-      const siteName = this.siteSettings.siteMetaTitle || '';
-
-      if (!siteName) {
-        return titleToUse;
-      }
-
-      return `${titleToUse} ${separator} ${siteName}`;
+      return getFieldTitleDisplay({
+        value: this.value,
+        metaTitle: this.metaTitle,
+        pageTitle: this.pageTitle,
+        type: this.type,
+        pageId: this.pageId,
+        siteSettings: this.siteSettings
+      }).fullTitle;
     },
     charCount() {
-      const titleToUse = this.effectiveTitle;
-      if (!titleToUse) return 0;
-
-      if (this.isSitePage) {
-        return titleToUse.length;
-      }
-
-      if (this.shouldAppendSiteName && this.siteSettings.siteMetaTitle) {
-        return this.fullTitle.length;
-      }
-
-      return titleToUse.length;
+      return getFieldTitleDisplay({
+        value: this.value,
+        metaTitle: this.metaTitle,
+        pageTitle: this.pageTitle,
+        type: this.type,
+        pageId: this.pageId,
+        siteSettings: this.siteSettings
+      }).charCount;
     },
     statusClass() {
       const titleToUse = this.effectiveTitle;

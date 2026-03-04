@@ -170,6 +170,13 @@ import MetaKitBulkGenerateDialog from './parts/edit/MetaKitBulkGenerateDialog.vu
 import MetaKitSinglePageDialog from './parts/edit/MetaKitSinglePageDialog.vue';
 import MetaKitBulkEditDialog from './parts/edit/MetaKitBulkEditDialog.vue';
 import MetaKitLegacyDialog from './parts/edit/MetaKitLegacyDialog.vue';
+import {
+  filterPages,
+  paginatePages,
+  getTotalPages,
+  isAllCurrentPageSelected as isAllSelectedOnPage,
+  toggleSelectAllCurrentPage as toggleSelectAllOnPage
+} from '../composables/panelState.js';
 
 export default {
   components: {
@@ -252,89 +259,16 @@ export default {
   },
   computed: {
     filteredPages() {
-      let pages = this.pagesData;
-
-      // Apply active filters
-      if (this.activeFilters.length > 0) {
-        // Separate filters by type
-        const metadataFilters = this.activeFilters.filter(f =>
-          ['missing-title', 'missing-description', 'missing-og-title',
-           'missing-og-description', 'missing-og-image', 'complete'].includes(f)
-        );
-        const statusFilters = this.activeFilters.filter(f =>
-          ['listed', 'unlisted', 'drafts'].includes(f)
-        );
-
-        pages = pages.filter(page => {
-          // Metadata filters use AND logic (must match all)
-          const matchesMetadata = metadataFilters.length === 0 || metadataFilters.every(filter => {
-            switch (filter) {
-              case 'missing-title':
-                return !page.hasMetaTitle;
-              case 'missing-description':
-                return !page.hasMetaDescription;
-              case 'missing-og-title':
-                return !page.hasOgTitle;
-              case 'missing-og-description':
-                return !page.hasOgDescription;
-              case 'missing-og-image':
-                return !page.hasOgImage;
-              case 'complete':
-                return page.hasMetaTitle && page.hasMetaDescription && page.hasOgImage;
-              default:
-                return true;
-            }
-          });
-
-          // Status filters use OR logic (match any)
-          const matchesStatus = statusFilters.length === 0 || statusFilters.some(filter => {
-            switch (filter) {
-              case 'listed':
-                return page.status === 'listed' || page.status === 'published';
-              case 'unlisted':
-                return page.status === 'unlisted';
-              case 'drafts':
-                return page.status === 'draft';
-              default:
-                return false;
-            }
-          });
-
-          // Page must match both groups
-          return matchesMetadata && matchesStatus;
-        });
-      }
-
-      // Apply search query
-      if (this.searchQuery.trim()) {
-        const query = this.searchQuery.toLowerCase();
-        pages = pages.filter(page => {
-          return page.title.toLowerCase().includes(query) ||
-            page.id.toLowerCase().includes(query) ||
-            page.template.toLowerCase().includes(query) ||
-            (page.metaDescription && page.metaDescription.toLowerCase().includes(query));
-        });
-      }
-
-      return pages;
+      return filterPages(this.pagesData, this.activeFilters, this.searchQuery);
     },
     paginatedPages() {
-      if (this.pageSize >= 99999) {
-        return this.filteredPages;
-      }
-      const start = (this.currentPage - 1) * this.pageSize;
-      const end = start + this.pageSize;
-      return this.filteredPages.slice(start, end);
+      return paginatePages(this.filteredPages, this.currentPage, this.pageSize);
     },
     totalPages() {
-      if (this.pageSize >= 99999) {
-        return 1;
-      }
-      return Math.ceil(this.filteredPages.length / this.pageSize);
+      return getTotalPages(this.filteredPages, this.pageSize);
     },
     isAllCurrentPageSelected() {
-      if (this.paginatedPages.length === 0) return false;
-      return this.paginatedPages.every(page => this.selectedPages.includes(page.id));
+      return isAllSelectedOnPage(this.paginatedPages, this.selectedPages);
     },
     pagesWithDescription() {
       return this.pagesData.filter(p => p.hasMetaDescription).length;
@@ -780,21 +714,7 @@ export default {
       }
     },
     toggleSelectAllCurrentPage() {
-      const allSelected = this.isAllCurrentPageSelected;
-      this.paginatedPages.forEach(page => {
-        const index = this.selectedPages.indexOf(page.id);
-        if (allSelected) {
-          // Deselect all on current page
-          if (index > -1) {
-            this.selectedPages.splice(index, 1);
-          }
-        } else {
-          // Select all on current page
-          if (index === -1) {
-            this.selectedPages.push(page.id);
-          }
-        }
-      });
+      this.selectedPages = toggleSelectAllOnPage(this.paginatedPages, this.selectedPages);
     },
     async showSelectedPagesDialog() {
       if (this.selectedPages.length === 0) return;

@@ -257,11 +257,15 @@ import {
   isDescriptionInherited,
   isOgTitleInherited,
   isOgDescriptionInherited,
-  getEffectiveTitle,
   getEffectiveDescription,
   getInheritanceSource,
   buildTooltipText
 } from '../../../composables/useInheritance.js';
+import {
+  shouldAppendSiteName,
+  buildTitleWithSiteName,
+  getTableTitleDisplay
+} from '../../../composables/panelDisplay.js';
 
 export default {
   components: {
@@ -314,14 +318,8 @@ export default {
     };
   },
   methods: {
-    // Helper method to check if site name should be appended based on type and settings
     shouldAppendSiteName(type) {
-      if (this.siteSettings.appendSiteNameTo === undefined ||
-        this.siteSettings.appendSiteNameTo === null ||
-        this.siteSettings.appendSiteNameTo === '') {
-        return !!this.siteSettings.appendSiteName;
-      }
-      return this.siteSettings.appendSiteNameTo.split(',').map(s => s.trim()).includes(type);
+      return shouldAppendSiteName(this.siteSettings, type);
     },
 
     isPageSelected(pageId) {
@@ -360,27 +358,12 @@ export default {
 
     // Title length calculator with site name appending
     getTitleLength(page, type = 'meta') {
-      const titleToUse = getEffectiveTitle(page, type);
-      if (!titleToUse) return 0;
-
-      if (this.shouldAppendSiteName(type) && this.siteSettings.siteMetaTitle) {
-        const separator = this.siteSettings.titleSeparator || '|';
-        return `${titleToUse} ${separator} ${this.siteSettings.siteMetaTitle}`.length;
-      }
-
-      return titleToUse.length;
+      return getTableTitleDisplay(page, this.siteSettings, type).charCount;
     },
 
     getFullTitlePreview(page, type) {
-      const titleToUse = getEffectiveTitle(page, type);
-      if (!titleToUse) return '—';
-
-      if (this.shouldAppendSiteName(type) && this.siteSettings.siteMetaTitle) {
-        const separator = this.siteSettings.titleSeparator || '|';
-        return `${titleToUse} ${separator} ${this.siteSettings.siteMetaTitle}`;
-      }
-
-      return titleToUse;
+      const preview = getTableTitleDisplay(page, this.siteSettings, type).fullTitle;
+      return preview || '—';
     },
 
     getTableTitleStatusClass(page) {
@@ -413,12 +396,11 @@ export default {
       }
 
       const source = getInheritanceSource(page, 'metaTitle', this.siteSettings);
-      let tooltip = getEffectiveTitle(page, 'meta');
-
-      if (this.shouldAppendSiteName('meta') && this.siteSettings.siteMetaTitle) {
-        const separator = this.siteSettings.titleSeparator || '|';
-        tooltip = `${tooltip} ${separator} ${this.siteSettings.siteMetaTitle}`;
-      }
+      const tooltip = buildTitleWithSiteName(
+        getTableTitleDisplay(page, this.siteSettings, 'meta').effectiveTitle,
+        this.siteSettings,
+        'meta'
+      );
 
       const base = this.tooltipText(tooltip, source, showContent);
       const reason = this.getLengthValidationReason(page, 'title', this.getTitleLength(page, 'meta'));
@@ -442,12 +424,11 @@ export default {
       }
 
       const source = getInheritanceSource(page, 'ogTitle', this.siteSettings);
-      let tooltip = getEffectiveTitle(page, 'og');
-
-      if (this.shouldAppendSiteName('og') && this.siteSettings.siteMetaTitle) {
-        const separator = this.siteSettings.titleSeparator || '|';
-        tooltip = `${tooltip} ${separator} ${this.siteSettings.siteMetaTitle}`;
-      }
+      const tooltip = buildTitleWithSiteName(
+        getTableTitleDisplay(page, this.siteSettings, 'og').effectiveTitle,
+        this.siteSettings,
+        'og'
+      );
 
       const base = this.tooltipText(tooltip, source, showContent);
       const reason = this.getLengthValidationReason(page, 'ogTitle', this.getTitleLength(page, 'og'));

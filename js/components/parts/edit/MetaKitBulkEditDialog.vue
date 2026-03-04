@@ -112,6 +112,7 @@
 <script>
 import MetaKitTitleField from '../field/MetaKitTitleField.vue';
 import MetaKitDescriptionField from '../field/MetaKitDescriptionField.vue';
+import { hasAnyBulkChanges } from '../../../composables/panelState.js';
 
 export default {
   components: {
@@ -143,15 +144,7 @@ export default {
   },
   computed: {
     hasAnyChanges() {
-      return this.pages.some(page => {
-        const edited = this.editedFields[page.id];
-        if (!edited) return false;
-
-        return edited.metaTitle !== (page.metaTitle || '') ||
-          edited.metaDescription !== (page.metaDescription || '') ||
-          edited.ogTitle !== (page.ogTitle || '') ||
-          edited.ogDescription !== (page.ogDescription || '');
-      });
+      return hasAnyBulkChanges(this.pages, this.editedFields);
     }
   },
   methods: {
