@@ -4,9 +4,29 @@ namespace TearoomOne;
 
 use Kirby\Cms\Page;
 use Kirby\Cms\Site;
+use Kirby\Content\Field;
 
 class MetaHelper
 {
+    /**
+     * Extract the settings object from a blocks field, falling back to a plain object field.
+     * Returns null if the field is empty.
+     */
+    public static function getSeoData(Field $field): ?object
+    {
+        if ($field->isEmpty()) {
+            return null;
+        }
+
+        // Try blocks format first
+        $blocks = $field->toBlocks();
+        if ($blocks->count() > 0) {
+            return $blocks->first()->content();
+        }
+
+        return $field->toObject();
+    }
+
     public static function buildTitle(Page $page, Site $site, $type): string
     {
         $title = $page->title()->value();

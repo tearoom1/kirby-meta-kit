@@ -51,21 +51,12 @@ columns:
     label: AI Settings
     icon: ai
     fields:
-      aiDisabledInfo:
-        type: info
-        label: AI Integration Disabled
-        text: AI features are currently disabled. Enable them in config.php by setting 'tearoom1.meta-kit' => ['ai.enabled' => true] or configure an API key and model below.
-        theme: info
-        when:
-          metaKitOpenrouter: ""
       metaKitOpenrouter:
         label: OpenRouter Settings
         type: blocks
         fieldsets:
           - mk-openrouter
         max: 1
-        empty: false
-        pretty: true
 
   sitemap:
     width: 1/2
@@ -79,8 +70,6 @@ columns:
         fieldsets:
           - mk-sitemap
         max: 1
-        empty: false
-        pretty: true
 
   robots:
     width: 1/1
@@ -91,9 +80,7 @@ columns:
       metaKitRobots:
         label: Robots.txt Settings
         type: blocks
+        help: Configure robots.txt rules for search engine crawlers. Available at /robots.txt
         fieldsets:
           - mk-robots
         max: 1
-        empty: false
-        pretty: true
-        help: Configure robots.txt rules for search engine crawlers. Available at /robots.txt

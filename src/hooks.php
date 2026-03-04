@@ -8,7 +8,7 @@
 
 return [
     "system.loadPlugins:after" => function () {
-        // Initialize site SEO objects on first load if they don't exist
+        // Initialize site SEO block fields on first load if they don't exist
         $site = site();
         $needsUpdate = false;
         $updates = [];

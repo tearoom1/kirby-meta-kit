@@ -15,7 +15,6 @@ fields:
     help: Your OpenRouter API key for AI-generated descriptions. Leave empty to disable AI features.
     width: 1/2
     translate: false
-
   model:
     label: AI Model
     type: select
@@ -43,7 +42,6 @@ fields:
     default: "google/gemini-2.0-flash-exp:free"
     width: 1/2
     translate: false
-
   temperature:
     label: Creativity Level
     type: range

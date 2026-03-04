@@ -39,8 +39,7 @@ class Robots
         $site = $this->kirby->site();
 
         // Get robots settings from panel
-        $robotsField = $site->metaKitRobots();
-        $robotsData = $robotsField->isNotEmpty() ? $robotsField->toObject() : null;
+        $robotsData = MetaHelper::getSeoData($site->metaKitRobots());
 
         // If no robots data exists yet, return basic
         if (!$robotsData) {

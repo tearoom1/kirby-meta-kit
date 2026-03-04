@@ -8,12 +8,9 @@ tabs:
       info:
         type: info
         label: Robots.txt Configuration
-        text: |
-          Configure the robots.txt file for your site. This file tells search engine crawlers which pages they can access.
-          The robots.txt will be automatically available at `/robots.txt`
+        text: Configure the robots.txt file for your site. This file tells search engine crawlers which pages they can access. The robots.txt will be automatically available at /robots.txt
         theme: info
         translate: false
-
       enabled:
         label: Enable Custom Robots.txt
         type: toggle
@@ -21,7 +18,6 @@ tabs:
         help: When disabled, a basic robots.txt will be served
         width: 1/3
         translate: false
-
       defaultRules:
         label: Default Rules
         type: toggle
@@ -31,7 +27,6 @@ tabs:
           enabled: true
         width: 1/3
         translate: false
-
       includeSitemap:
         label: Include Sitemap
         type: toggle
@@ -41,13 +36,13 @@ tabs:
           enabled: true
         width: 1/3
         translate: false
-
       customRules:
         label: User Agent Rules
         type: structure
         help: Add custom rules for specific user agents
         when:
           enabled: true
+        translate: false
         fields:
           userAgent:
             label: User Agent
@@ -68,7 +63,6 @@ tabs:
               - { value: 'LinkedInBot', text: 'LinkedIn' }
               - { value: 'custom', text: 'Custom User Agent' }
             help: Select a user agent or choose 'Custom' to enter your own
-
           customUserAgent:
             label: Custom User Agent Name
             type: text
@@ -76,7 +70,6 @@ tabs:
             when:
               userAgent: custom
             help: Enter the exact user agent name
-
           allowPaths:
             label: Allowed Paths
             type: tags
@@ -85,7 +78,6 @@ tabs:
               Paths that this user agent is allowed to crawl.
               Enter paths one by one (press Enter after each).
               Leave empty if you want to allow everything except disallowed paths.
-
           disallowPaths:
             label: Disallowed Paths
             type: tags
@@ -94,7 +86,6 @@ tabs:
               Paths that this user agent should NOT crawl.
               Enter paths one by one (press Enter after each).
               Common examples: /panel/, /api/, /admin/
-
           crawlDelay:
             label: Crawl Delay (seconds)
             type: number
@@ -106,7 +97,6 @@ tabs:
               Optional delay between requests (in seconds).
               Use this to limit server load. 0 = no delay.
               Note: Not all bots respect this directive.
-        translate: false
 
   advanced:
     label: Advanced
@@ -121,7 +111,6 @@ tabs:
         when:
           enabled: true
         translate: false
-
       customDirectives:
         label: Custom Directives
         type: textarea

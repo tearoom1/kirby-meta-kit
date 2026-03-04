@@ -9,7 +9,6 @@ fields:
     multiple: true
     help: Pages to exclude from the sitemap
     translate: false
-
   includeUnlisted:
     label: Include Unlisted Pages
     type: toggle
@@ -17,7 +16,6 @@ fields:
     help: Include unlisted pages in the sitemap
     translate: false
     width: 1/2
-
   changefreqDefault:
     label: Default Change Frequency
     type: select
@@ -33,7 +31,6 @@ fields:
     width: 1/2
     help: Default change frequency for all pages
     translate: false
-
   priorityHome:
     label: Homepage Priority
     type: range
@@ -43,7 +40,6 @@ fields:
     default: 1.0
     width: 1/2
     translate: false
-
   priorityDefault:
     label: Default Page Priority
     type: range

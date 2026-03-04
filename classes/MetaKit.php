@@ -12,6 +12,8 @@ class MetaKit
     protected $options;
     protected $httpClient;
 
+    private static ?bool $aiEnabledCache = null;
+
     /**
      * Check if plugin has a valid license
      */
@@ -31,11 +33,15 @@ class MetaKit
      */
     public static function isAiEnabled(): bool
     {
+        if (self::$aiEnabledCache !== null) {
+            return self::$aiEnabledCache;
+        }
+
         $kirby = kirby();
 
         // Check explicit disable in config
         if (!option('tearoom1.meta-kit.ai.enabled', true)) {
-            return false;
+            return self::$aiEnabledCache = false;
         }
 
         // Check if model is configured (either in config or site settings)
@@ -43,8 +49,7 @@ class MetaKit
         $configKey = option('tearoom1.meta-kit.api.key');
 
         // Get site settings
-        $openrouterField = $kirby->site()->metaKitOpenrouter();
-        $openrouter = $openrouterField->isNotEmpty() ? $openrouterField->toObject() : null;
+        $openrouter = MetaHelper::getSeoData($kirby->site()->metaKitOpenrouter());
         $siteModel = $openrouter ? $openrouter->model()->value() : null;
         $siteKey = $openrouter ? $openrouter->apiKey()->value() : null;
 
@@ -52,7 +57,7 @@ class MetaKit
         $hasModel = !empty($configModel) || !empty($siteModel);
         $hasKey = !empty($configKey) || !empty($siteKey);
 
-        return $hasModel && $hasKey;
+        return self::$aiEnabledCache = $hasModel && $hasKey;
     }
 
     public function __construct(Kirby $kirby)
