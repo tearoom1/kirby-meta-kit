@@ -28,7 +28,7 @@ return [
                         'pages' => $data['pages'],
                         'language' => $data['language'],
                         'languages' => $data['languages'],
-                        'legacyMigration' => $data['legacyMigration'],
+                        'legacyCleanup' => $data['legacyCleanup'],
                         'aiEnabled' => $data['aiEnabled'],
                         'hasValidLicense' => $data['hasValidLicense'],
                         'siteSettings' => $data['siteSettings'],

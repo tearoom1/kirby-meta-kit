@@ -59,7 +59,7 @@ if ($count % 20 === 0) {
 Added migration flag to prevent `page.update:after` hook from running during migration:
 
 ```php
-if (\TearoomOne\LegacyMigration::isMigrating()) {
+if (\TearoomOne\LegacyCleanup::isMigrating()) {
     return; // Skip hook
 }
 ```

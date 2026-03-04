@@ -142,24 +142,24 @@ return function () {
         ];
     }
 
-    // Add legacy migration routes only if enabled
-    if (option("tearoom1.meta-kit.legacyMigration", false)) {
+    // Add legacy cleanup routes only if enabled
+    if (option("tearoom1.meta-kit.legacyCleanup", false)) {
         // Summary across all languages (default first)
         $routes[] = [
             "pattern" => "meta-kit/legacy-summary",
             "method" => "GET",
             "auth" => true,
             "action" => function () {
-                return TearoomOne\LegacyMigration::detectLegacySummaryAllLanguages();
+                return TearoomOne\LegacyCleanup::detectLegacySummaryAllLanguages();
             },
         ];
-        // Convert for all languages (default first)
+        // Cleanup for all languages (default first)
         $routes[] = [
-            "pattern" => "meta-kit/convert-legacy-all-languages",
+            "pattern" => "meta-kit/cleanup-legacy-all-languages",
             "method" => "POST",
             "auth" => true,
             "action" => function () {
-                return TearoomOne\LegacyMigration::convertAllLanguages();
+                return TearoomOne\LegacyCleanup::cleanupAllLanguages();
             },
         ];
     }

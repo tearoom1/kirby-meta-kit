@@ -1,6 +1,6 @@
 <template>
   <k-dialog ref="dialog" size="medium" cancelButton="Close" submitButton="">
-    <k-headline>Legacy SEO Migration</k-headline>
+    <k-headline>Legacy SEO Cleanup</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
       <k-icon class="k-meta-kit-spinner" type="loader"/>
@@ -17,16 +17,16 @@
         <p><strong>Total:</strong> {{ summary.total }} item(s) across all languages</p>
         <k-box theme="negative">
           <k-icon type="alert"/>
-          <span>Warning: Legacy metadata will be migrated to the new meta kit fields. The old fields will be removed.</span>
+          <span>Warning: This cleanup removes legacy SEO fields permanently.</span>
         </k-box>
         <k-button
           icon="download"
           :disabled="isMigrating || summary.total === 0"
           :progress="isMigrating"
-          @click="$emit('migrate')"
+          @click="$emit('cleanup')"
           theme="positive"
         >
-          Migrate All Languages
+          Clean Up All Languages
         </k-button>
       </div>
     </div>

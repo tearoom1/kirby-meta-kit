@@ -2,7 +2,7 @@
 <?php
 
 /**
- * CLI Script to migrate legacy SEO fields to Meta-Kit format
+ * CLI Script to clean up legacy SEO fields
  *
  * Usage: php bin/migrate-legacy-seo.php
  */
@@ -28,7 +28,7 @@ $kirby = new Kirby([
 $kirby->impersonate('kirby');
 
 // Import the LegacyMigration class
-use TearoomOne\LegacyMigration;
+use TearoomOne\LegacyCleanup;
 
 // Colors for CLI output
 $colors = [
@@ -45,9 +45,9 @@ function colored($text, $color, $colors) {
     return ($colors[$color] ?? '') . $text . $colors['reset'];
 }
 
-// Start migration
+// Start cleanup
 echo colored("\n========================================\n", 'bold', $colors);
-echo colored("Meta-Kit Legacy SEO Field Migration\n", 'bold', $colors);
+echo colored("Meta-Kit Legacy SEO Field Cleanup\n", 'bold', $colors);
 echo colored("========================================\n\n", 'bold', $colors);
 
 $pages = $kirby->site()->index();
@@ -60,9 +60,9 @@ echo colored("Found {$totalPages} pages to process\n", 'cyan', $colors);
 if ($languages) {
     echo colored("Languages: " . implode(', ', $languageCodes) . "\n", 'cyan', $colors);
 }
-echo colored("Starting migration...\n\n", 'cyan', $colors);
+echo colored("Starting cleanup...\n\n", 'cyan', $colors);
 
-$converted = 0;
+$cleaned = 0;
 $skipped = 0;
 $errors = 0;
 $current = 0;
@@ -88,14 +88,11 @@ foreach ($pages as $page) {
         }
 
         try {
-            $result = LegacyMigration::convertLegacyMetadata($pageId);
+            $result = LegacyCleanup::cleanupLegacyFields($pageId);
 
             if ($result['status'] === 'success') {
-                $converted++;
+                $cleaned++;
                 echo colored("    ✓ Success: ", 'green', $colors) . $result['message'] . "\n";
-                if (!empty($result['converted'])) {
-                    echo "    Migrated fields: " . colored(implode(', ', $result['converted']), 'green', $colors) . "\n";
-                }
             } elseif ($result['status'] === 'info') {
                 $skipped++;
                 echo colored("    ⓘ Skipped: ", 'yellow', $colors) . $result['message'] . "\n";
@@ -114,13 +111,13 @@ foreach ($pages as $page) {
 
 // Summary
 echo colored("========================================\n", 'bold', $colors);
-echo colored("Migration Complete!\n", 'bold', $colors);
+echo colored("Cleanup Complete!\n", 'bold', $colors);
 echo colored("========================================\n\n", 'bold', $colors);
 
 echo colored("Total pages: ", 'cyan', $colors) . $totalPages . "\n";
 echo colored("Total languages: ", 'cyan', $colors) . $totalLanguages . "\n";
 echo colored("Total operations: ", 'cyan', $colors) . $totalOperations . "\n\n";
-echo colored("✓ Successfully converted: ", 'green', $colors) . $converted . "\n";
+echo colored("✓ Successfully cleaned: ", 'green', $colors) . $cleaned . "\n";
 echo colored("ⓘ Skipped (no changes): ", 'yellow', $colors) . $skipped . "\n";
 echo colored("✗ Errors: ", 'red', $colors) . $errors . "\n\n";
 

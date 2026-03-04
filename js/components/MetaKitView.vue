@@ -21,15 +21,15 @@
           {{ lang.code.toUpperCase() }}
         </k-button>
       </k-button-group>
-      <k-button v-if="legacyMigration" icon="download" size="xs" @click="showLegacyDialog">Legacy Migration</k-button>
+      <k-button v-if="legacyCleanup" icon="download" size="xs" @click="showLegacyDialog">Legacy Cleanup</k-button>
     </div>
 
     <!-- Legacy Detection Warning -->
-    <div v-if="legacyMigration && legacyDetection.show && legacyDetection.found > 0" class="k-meta-kit-warning">
+    <div v-if="legacyCleanup && legacyDetection.show && legacyDetection.found > 0" class="k-meta-kit-warning">
       <k-box theme="info">
         <k-icon type="info"/>
-        <span>Found {{ legacyDetection.found }} pages with legacy SEO metadata</span>
-        <k-button icon="download" @click="showLegacyDialog">View & Convert</k-button>
+        <span>Found {{ legacyDetection.found }} pages with removable legacy SEO fields</span>
+        <k-button icon="download" @click="showLegacyDialog">View & Clean Up</k-button>
         <k-button icon="cancel" @click="dismissLegacyWarning">Dismiss</k-button>
       </k-box>
     </div>
@@ -104,14 +104,14 @@
       />
     </div>
 
-    <!-- Legacy Migration Dialog -->
+    <!-- Legacy Cleanup Dialog -->
     <meta-kit-legacy-dialog
       ref="legacyDialog"
       :summary="legacySummary"
       :is-loading="isLoadingLegacy"
       :is-migrating="isMigratingAll"
       @load-summary="loadLegacySummary"
-      @migrate="migrateAllLanguages"
+      @cleanup="cleanupAllLanguages"
     />
 
     <!-- Bulk Edit Dialog -->
@@ -148,7 +148,7 @@
         <div class="k-meta-kit-loading-text">
           <template v-if="isGeneratingAll">Generating metadata with AI...</template>
           <template v-else-if="isLoadingPages">Refreshing pages...</template>
-          <template v-else-if="isMigratingAll">Migrating legacy fields...</template>
+          <template v-else-if="isMigratingAll">Cleaning up legacy fields...</template>
         </div>
         <div v-if="loadingProgress" class="k-meta-kit-loading-progress">
           {{ loadingProgress }}
@@ -202,7 +202,7 @@ export default {
       type: Object,
       default: () => ({})
     },
-    legacyMigration: {
+    legacyCleanup: {
       type: Boolean,
       default: false
     },
@@ -475,23 +475,23 @@ export default {
       this.$refs.legacyDialog.open();
       await this.loadLegacySummary();
     },
-    async migrateAllLanguages() {
+    async cleanupAllLanguages() {
       if (this.legacySummary.total === 0) return;
-      if (!confirm('This will migrate legacy SEO fields across all languages (default first). Continue?')) {
+      if (!confirm('This will remove legacy SEO fields across all languages (default first). Continue?')) {
         return;
       }
       this.isMigratingAll = true;
       try {
-        const res = await this.$api.post('meta-kit/convert-legacy-all-languages');
+        const res = await this.$api.post('meta-kit/cleanup-legacy-all-languages');
         if (res && res.status === 'success') {
-          window.panel.notification.success(res.message || 'Migration completed');
+          window.panel.notification.success(res.message || 'Cleanup completed');
           await this.refreshPages();
           await this.loadLegacySummary();
         } else {
-          window.panel.notification.error(res.message || 'Migration failed');
+          window.panel.notification.error(res.message || 'Cleanup failed');
         }
       } catch (e) {
-        window.panel.notification.error('Migration failed');
+        window.panel.notification.error('Cleanup failed');
       } finally {
         this.isMigratingAll = false;
       }
