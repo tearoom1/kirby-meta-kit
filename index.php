@@ -23,11 +23,6 @@ $classes = [
     'TearoomOne\ApiResponse' => 'classes/ApiResponse.php',
 ];
 
-// Only load LegacyMigration/Cleanup utilities if enabled
-if (option('tearoom1.meta-kit.legacyCleanup', false)) {
-    $classes['TearoomOne\LegacyCleanup'] = 'classes/LegacyMigration.php';
-}
-
 load($classes, __DIR__);
 
 
@@ -83,7 +78,6 @@ App::plugin(
             'sitemap.include' => 'all',
             'sitemap.exclude' => ['error'],
             'autoGenerate' => false,
-            'legacyCleanup' => false,
         ],
         'blueprints' => [
             'meta-kit/site' => __DIR__ . '/blueprints/site.yml',

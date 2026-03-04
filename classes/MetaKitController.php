@@ -66,7 +66,6 @@ class MetaKitController
             'language' => $languageCode,
             'languages' => self::getLanguages(),
             'pages' => $result,
-            'legacyCleanup' => option('tearoom1.meta-kit.legacyCleanup', false),
             'aiEnabled' => \TearoomOne\MetaKit::isAiEnabled(),
             'hasValidLicense' => \TearoomOne\MetaKit::hasValidLicense(),
             'validationSettings' => option('tearoom1.meta-kit.validation', []),

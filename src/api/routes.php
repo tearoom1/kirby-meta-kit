@@ -142,27 +142,5 @@ return function () {
         ];
     }
 
-    // Add legacy cleanup routes only if enabled
-    if (option("tearoom1.meta-kit.legacyCleanup", false)) {
-        // Summary across all languages (default first)
-        $routes[] = [
-            "pattern" => "meta-kit/legacy-summary",
-            "method" => "GET",
-            "auth" => true,
-            "action" => function () {
-                return TearoomOne\LegacyCleanup::detectLegacySummaryAllLanguages();
-            },
-        ];
-        // Cleanup for all languages (default first)
-        $routes[] = [
-            "pattern" => "meta-kit/cleanup-legacy-all-languages",
-            "method" => "POST",
-            "auth" => true,
-            "action" => function () {
-                return TearoomOne\LegacyCleanup::cleanupAllLanguages();
-            },
-        ];
-    }
-
     return $routes;
 };

@@ -21,17 +21,6 @@
           {{ lang.code.toUpperCase() }}
         </k-button>
       </k-button-group>
-      <k-button v-if="legacyCleanup" icon="download" size="xs" @click="showLegacyDialog">Legacy Cleanup</k-button>
-    </div>
-
-    <!-- Legacy Detection Warning -->
-    <div v-if="legacyCleanup && legacyDetection.show && legacyDetection.found > 0" class="k-meta-kit-warning">
-      <k-box theme="info">
-        <k-icon type="info"/>
-        <span>Found {{ legacyDetection.found }} pages with removable legacy SEO fields</span>
-        <k-button icon="download" @click="showLegacyDialog">View & Clean Up</k-button>
-        <k-button icon="cancel" @click="dismissLegacyWarning">Dismiss</k-button>
-      </k-box>
     </div>
 
     <!-- Stats Cards -->
@@ -104,16 +93,6 @@
       />
     </div>
 
-    <!-- Legacy Cleanup Dialog -->
-    <meta-kit-legacy-dialog
-      ref="legacyDialog"
-      :summary="legacySummary"
-      :is-loading="isLoadingLegacy"
-      :is-migrating="isMigratingAll"
-      @load-summary="loadLegacySummary"
-      @cleanup="cleanupAllLanguages"
-    />
-
     <!-- Bulk Edit Dialog -->
     <meta-kit-bulk-edit-dialog
       ref="allPagesDialog"
@@ -140,7 +119,7 @@
     />
 
     <!-- Loading Overlay -->
-    <div v-if="isGeneratingAll || isLoadingPages || isMigratingAll" class="k-meta-kit-loading-overlay">
+    <div v-if="isGeneratingAll || isLoadingPages" class="k-meta-kit-loading-overlay">
       <div class="k-meta-kit-loading-content">
         <div class="k-meta-kit-loading-spinner">
           <k-icon type="loader" />
@@ -148,7 +127,6 @@
         <div class="k-meta-kit-loading-text">
           <template v-if="isGeneratingAll">Generating metadata with AI...</template>
           <template v-else-if="isLoadingPages">Refreshing pages...</template>
-          <template v-else-if="isMigratingAll">Cleaning up legacy fields...</template>
         </div>
         <div v-if="loadingProgress" class="k-meta-kit-loading-progress">
           {{ loadingProgress }}
@@ -169,7 +147,6 @@ import MetaKitTable from './parts/table/MetaKitTable.vue';
 import MetaKitBulkGenerateDialog from './parts/edit/MetaKitBulkGenerateDialog.vue';
 import MetaKitSinglePageDialog from './parts/edit/MetaKitSinglePageDialog.vue';
 import MetaKitBulkEditDialog from './parts/edit/MetaKitBulkEditDialog.vue';
-import MetaKitLegacyDialog from './parts/edit/MetaKitLegacyDialog.vue';
 import {
   filterPages,
   paginatePages,
@@ -186,8 +163,7 @@ export default {
     MetaKitBulkEditDialog,
     MetaKitStats,
     MetaKitFilters,
-    MetaKitActions,
-    MetaKitLegacyDialog
+    MetaKitActions
   },
   provide() {
     return {
@@ -201,10 +177,6 @@ export default {
     validationSettings: {
       type: Object,
       default: () => ({})
-    },
-    legacyCleanup: {
-      type: Boolean,
-      default: false
     },
     aiEnabled: {
       type: Boolean,
@@ -227,16 +199,8 @@ export default {
     return {
       isLoadingPages: false,
       isGeneratingAll: false,
-      isLoadingLegacy: false,
-      isMigratingAll: false,
       pagesData: this.pages || [],
       validationSettingsData: this.validationSettings || {},
-      legacyPages: [],
-      legacySummary: {total: 0, byLanguage: []},
-      legacyDetection: {
-        show: false,
-        found: 0
-      },
       fieldChoices: {}, // { pageId: { fieldName: 'legacy|current|manual|ai', manualValue: '...' } }
       generatingFields: {}, // { pageId: { fieldName: true } }
 
@@ -453,53 +417,6 @@ export default {
         this.isGeneratingAll = false;
         this.loadingProgress = '';
       }
-    },
-
-    async loadLegacySummary() {
-      this.isLoadingLegacy = true;
-      try {
-        const res = await this.$api.get('meta-kit/legacy-summary');
-        if (res && res.status === 'success') {
-          this.$set(this, 'legacySummary', res);
-        } else {
-          this.$set(this, 'legacySummary', {total: 0, byLanguage: []});
-        }
-      } catch (e) {
-        window.panel.notification.error('Failed to load legacy summary');
-        this.$set(this, 'legacySummary', {total: 0, byLanguage: []});
-      } finally {
-        this.isLoadingLegacy = false;
-      }
-    },
-    async showLegacyDialog() {
-      this.$refs.legacyDialog.open();
-      await this.loadLegacySummary();
-    },
-    async cleanupAllLanguages() {
-      if (this.legacySummary.total === 0) return;
-      if (!confirm('This will remove legacy SEO fields across all languages (default first). Continue?')) {
-        return;
-      }
-      this.isMigratingAll = true;
-      try {
-        const res = await this.$api.post('meta-kit/cleanup-legacy-all-languages');
-        if (res && res.status === 'success') {
-          window.panel.notification.success(res.message || 'Cleanup completed');
-          await this.refreshPages();
-          await this.loadLegacySummary();
-        } else {
-          window.panel.notification.error(res.message || 'Cleanup failed');
-        }
-      } catch (e) {
-        window.panel.notification.error('Cleanup failed');
-      } finally {
-        this.isMigratingAll = false;
-      }
-    },
-
-    dismissLegacyWarning() {
-      this.legacyDetection.show = false;
-      sessionStorage.setItem('metaKitLegacyDismissed', 'true');
     },
 
     getManualValue(pageId, fieldName) {

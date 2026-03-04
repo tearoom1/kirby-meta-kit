@@ -65,7 +65,6 @@ Get a license: [www.tearoom.one/kirby-plugins/meta-kit](https://www.tearoom.one/
 - 🏗️ **Schema.org** - JSON-LD structured data
 - 📱 **Social Media** - OpenGraph & Twitter Cards (1200×630px)
 - 🌍 **Multilanguage** - Full support with hreflang tags
-- 🧹 **Legacy Cleanup** - Remove obsolete legacy SEO fields safely
 - ⚡ **Kirby 5** - Fully compatible with latest version
 
 ---
@@ -194,8 +193,6 @@ This is where developers set technical defaults, validation rules, and AI integr
         'includeSitemap' => true,
     ],
 
-    // Legacy cleanup (remove obsolete SEO fields)
-    'legacyCleanup' => false,
 ];
 ```
 
@@ -493,7 +490,7 @@ Access via the main menu (wand icon):
 #### Dashboard
 - **Statistics**: Coverage percentage for meta titles, descriptions, OG data
 - **Page Overview**: List all pages with metadata status
-- **Quick Actions**: Bulk generate, bulk edit, legacy cleanup
+- **Quick Actions**: Bulk generate, bulk edit
 
 #### Bulk Editor
 - **Table View**: See multiple pages at once
@@ -658,29 +655,6 @@ robots.txt available at `/robots.txt` with:
 'schema.enabled' => true,
 ```
 
-### Legacy Field Cleanup
-
-**Purpose:**
-Remove old SEO plugin fields across all languages.
-
-**Supported Fields:**
-- Legacy SEO field names and old `metakitseo` blocks data.
-
-**How to Use:**
-
-1. Enable in config:
-```php
-'legacyCleanup' => true,
-```
-
-2. Go to Meta Kit area in Panel
-3. Click "Legacy Cleanup"
-4. Review summary of found fields
-5. Click "Clean Up All Languages"
-
-**Important:** Backup your content before running cleanup. Legacy fields are removed permanently.
-
----
 
 ## Best Practices
 
@@ -743,7 +717,6 @@ Remove old SEO plugin fields across all languages.
 - Add meta-kit tabs to all main page blueprints
 - Hide SEO tab from admin/system pages if needed
 - Use excludeTemplates to hide utility pages from table
-- Enable legacy cleanup only when needed (for security)
 
 ---
 
