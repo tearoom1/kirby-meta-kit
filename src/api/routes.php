@@ -7,6 +7,17 @@
  */
 
 return function () {
+    $licenseGuard = function () {
+        if (!TearoomOne\MetaKit::hasValidLicense()) {
+            return [
+                'status' => 'error',
+                'message' => 'A valid license is required to use AI generation. Please activate your license.'
+            ];
+        }
+
+        return null;
+    };
+
     $routes = [
         [
             "pattern" => "meta-kit/pages",
@@ -29,11 +40,9 @@ return function () {
             "method" => "POST",
             "auth" => true,
             "action" => function () {
-                if (!TearoomOne\MetaKit::hasValidLicense()) {
-                    return [
-                        'status' => 'error',
-                        'message' => 'A valid license is required to save changes. Please activate your license.'
-                    ];
+                if ($error = $licenseGuard()) {
+                    $error['message'] = 'A valid license is required to save changes. Please activate your license.';
+                    return $error;
                 }
 
                 $pageId = get("pageId");
@@ -78,11 +87,8 @@ return function () {
             "method" => "POST",
             "auth" => true,
             "action" => function () {
-                if (!TearoomOne\MetaKit::hasValidLicense()) {
-                    return [
-                        'status' => 'error',
-                        'message' => 'A valid license is required to use AI generation. Please activate your license.'
-                    ];
+                if ($error = $licenseGuard()) {
+                    return $error;
                 }
 
                 $pageId = get("pageId");
@@ -96,11 +102,8 @@ return function () {
             "method" => "POST",
             "auth" => true,
             "action" => function () {
-                if (!TearoomOne\MetaKit::hasValidLicense()) {
-                    return [
-                        'status' => 'error',
-                        'message' => 'A valid license is required to use AI generation. Please activate your license.'
-                    ];
+                if ($error = $licenseGuard()) {
+                    return $error;
                 }
 
                 $generateTitle = get("generateTitle", false);
@@ -123,11 +126,8 @@ return function () {
             "method" => "POST",
             "auth" => true,
             "action" => function () {
-                if (!TearoomOne\MetaKit::hasValidLicense()) {
-                    return [
-                        'status' => 'error',
-                        'message' => 'A valid license is required to use AI generation. Please activate your license.'
-                    ];
+                if ($error = $licenseGuard()) {
+                    return $error;
                 }
 
                 $pageId = get("pageId");

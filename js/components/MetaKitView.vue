@@ -159,10 +159,6 @@
 </template>
 
 <script>
-// Field components
-import MetaKitTitleField from './parts/field/MetaKitTitleField.vue';
-import MetaKitDescriptionField from './parts/field/MetaKitDescriptionField.vue';
-
 // Table component
 import MetaKitStats from './parts/table/MetaKitStats.vue';
 import MetaKitFilters from './parts/table/MetaKitFilters.vue';
@@ -177,8 +173,6 @@ import MetaKitLegacyDialog from './parts/edit/MetaKitLegacyDialog.vue';
 
 export default {
   components: {
-    MetaKitTitleField,
-    MetaKitDescriptionField,
     MetaKitTable,
     MetaKitBulkGenerateDialog,
     MetaKitSinglePageDialog,
@@ -366,8 +360,6 @@ export default {
       // Reset to first page when search changes
       this.currentPage = 1;
     }
-  },
-  created() {
   },
   methods: {
     getFullTitle(pageTitle) {
@@ -807,14 +799,6 @@ export default {
     async showSelectedPagesDialog() {
       if (this.selectedPages.length === 0) return;
       this.$refs.allPagesDialog.open(this.selectedPages);
-    },
-    refreshPages() {
-      // Reload the panel view to get fresh data
-      if (window.panel && window.panel.$reload) {
-        window.panel.$reload();
-      } else {
-        window.location.reload();
-      }
     }
   }
 };

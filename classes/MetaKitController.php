@@ -317,12 +317,13 @@ class MetaKitController
         }
 
         // Filter by specific page IDs if provided
-        $pageIds = explode(',', get('pageIds'));
+        $pageIdsParam = get('pageIds');
         $includeSite = false;
 
-        if ($pageIds && is_array($pageIds)) {
-            $includeSite = in_array('site', $pageIds);
-            $pages = $pages->filter(fn($page) => in_array($page->id(), $pageIds));
+        if (!empty($pageIdsParam)) {
+            $pageIds = array_values(array_filter(explode(',', $pageIdsParam)));
+            $includeSite = in_array('site', $pageIds, true);
+            $pages = $pages->filter(fn($page) => in_array($page->id(), $pageIds, true));
         } else {
             $includeSite = true;
         }
@@ -423,7 +424,8 @@ class MetaKitController
 
         // Extract from all fields
         foreach ($page->content()->fields() as $key => $field) {
-            if (in_array($key, ['title', 'slug', 'template', 'seo', 'ogimage', 'metatitle', 'metadescription', 'ogtitle', 'ogdescription', 'robots', 'canonicalurl', 'metaauthor'])) {
+            $keyLower = strtolower($key);
+            if (in_array($keyLower, ['title', 'slug', 'template', 'seo', 'ogimage', 'metatitle', 'metadescription', 'ogtitle', 'ogdescription', 'robots', 'canonicalurl', 'metaauthor'], true)) {
                 continue;
             }
 
@@ -505,14 +507,17 @@ class MetaKitController
             return ApiResponse::notFound();
         }
 
+        $previousLanguage = $kirby->language()?->code();
+        $shouldRestoreLanguage = false;
+
+        if ($language && $kirby->multilang()) {
+            $kirby->setCurrentLanguage($language);
+            $shouldRestoreLanguage = true;
+        }
+
         try {
             $metaKit = new MetaKit($kirby);
             $languageCode = $language ?: $kirby->language()?->code();
-
-            if ($language && $kirby->multilang()) {
-                $kirby->setCurrentLanguage($language);
-            }
-
             $content = self::getContentForGeneration($page, $isSite);
 
             $fieldTypeMap = [
@@ -556,6 +561,10 @@ class MetaKitController
 
         } catch (\Exception $e) {
             return ApiResponse::error($e->getMessage());
+        } finally {
+            if ($shouldRestoreLanguage && $previousLanguage) {
+                $kirby->setCurrentLanguage($previousLanguage);
+            }
         }
     }
 

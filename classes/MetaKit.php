@@ -90,7 +90,7 @@ class MetaKit
     /**
      * Calculate target title length accounting for site name appending
      */
-    protected function calculateTargetTitleLength(string $fieldType = 'title', ?string $template = null, ?Page $page = null): string
+    protected function calculateTargetTitleLength(string $fieldType = 'title', ?string $template = null): string
     {
         $ranges = $this->getValidationRanges($fieldType, $template);
         $optimalMin = $ranges['optimal']['min'] ?? 20;
@@ -145,7 +145,7 @@ class MetaKit
         $languageName = $languageNames[$language] ?? 'English';
 
         // Calculate target title length based on field type and template
-        $targetLength = $this->calculateTargetTitleLength($fieldType, $template, $page);
+        $targetLength = $this->calculateTargetTitleLength($fieldType, $template);
 
         // Limit content length to avoid token limits
         $contentPreview = mb_substr(strip_tags($content), 0, 1000);

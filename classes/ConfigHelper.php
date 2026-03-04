@@ -10,6 +10,7 @@ use Kirby\Content\Field;
  */
 class ConfigHelper
 {
+    private static $siteSettingsCache = null;
     /**
      * Get string value from field with fallback
      */
@@ -46,7 +47,7 @@ class ConfigHelper
     /**
      * Merge configuration with priority: defaults < site settings < config.php
      */
-    public static function mergeOptions(array $defaults, array $siteSettings, array $configKey = []): array
+    public static function mergeOptions(array $defaults, array $siteSettings): array
     {
         $configSettings = kirby()->option('tearoom1.meta-kit', []);
         return array_merge($defaults, $siteSettings, $configSettings);
@@ -57,14 +58,13 @@ class ConfigHelper
      */
     public static function getSiteSettings(): array
     {
-        static $cache = null;
-        if ($cache !== null) {
-            return $cache;
+        if (self::$siteSettingsCache !== null) {
+            return self::$siteSettingsCache;
         }
 
         $site = kirby()->site();
 
-        $cache = [
+        self::$siteSettingsCache = [
             'appendSiteName' => self::getBool($site->appendSiteName(), true),
             'appendSiteNameTo' => self::getString($site->appendSiteNameTo(), 'meta,og'),
             'siteMetaTitle' => self::getString($site->metaTitle()) ?: $site->title()->value(),
@@ -73,7 +73,7 @@ class ConfigHelper
             'titleSeparator' => self::getString($site->titleSeparator(), '|'),
         ];
 
-        return $cache;
+        return self::$siteSettingsCache;
     }
 
     /**
@@ -81,9 +81,7 @@ class ConfigHelper
      */
     public static function clearCache(): void
     {
-        // Force cache refresh on next call
-        $site = kirby()->site();
-        // The static cache in getSiteSettings will be cleared on next request
+        self::$siteSettingsCache = null;
     }
 
     /**
