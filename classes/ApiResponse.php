@@ -10,7 +10,7 @@ class ApiResponse
     /**
      * Create a success response
      */
-    public static function success($data = null, string $message = null): array
+    public static function success($data = null, ?string $message = null): array
     {
         $response = ['status' => 'success'];
 
@@ -50,7 +50,7 @@ class ApiResponse
     /**
      * Create a response with generation results
      */
-    public static function generated(string $content, string $message = null): array
+    public static function generated(string $content, ?string $message = null): array
     {
         $response = [
             'status' => 'success',
@@ -67,7 +67,7 @@ class ApiResponse
     /**
      * Create a batch operation response
      */
-    public static function batch(int $generated, int $skipped, int $failed, string $message = null): array
+    public static function batch(int $generated, int $skipped, int $failed, ?string $message = null): array
     {
         return [
             'status' => 'success',

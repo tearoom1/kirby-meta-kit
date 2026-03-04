@@ -500,7 +500,7 @@ class MetaKitController
         return implode(' ', $texts);
     }
 
-    public static function generateField(string $pageId, string $fieldName, string $language = null, bool $save = false): array
+    public static function generateField(string $pageId, string $fieldName, ?string $language = null, bool $save = false): array
     {
         $kirby = kirby();
         $isSite = ($pageId === 'site');
