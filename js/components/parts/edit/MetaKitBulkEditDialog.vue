@@ -161,7 +161,9 @@ export default {
       this.$refs.dialog.open();
 
       try {
-        const response = await this.api.get('meta-kit/pages-with-content', { pageIds });
+        const response = await this.api.get('meta-kit/pages-with-content', {
+          pageIds: Array.isArray(pageIds) ? pageIds.join(',') : pageIds
+        });
         if (response.status === 'success' && response.data) {
           this.pages = response.data;
 

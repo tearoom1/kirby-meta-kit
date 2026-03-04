@@ -39,7 +39,7 @@ export function getRangesForPageAndType(page, type, validationSettings = {}) {
 
   const templateName = page?.template;
   const templateConfig = templateName && templates[templateName] ? templates[templateName] : {};
-  const templateRanges = templateConfig?.ranges || {};
+  const templateRanges = templateConfig?.ranges || templateConfig || {};
 
   const merged = {
     ...DEFAULT_SEO_RANGES,

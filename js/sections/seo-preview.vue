@@ -128,6 +128,14 @@ export default {
     if (this.filesObserver) {
       this.filesObserver.disconnect();
     }
+
+    // Clear pending timeouts
+    if (this.updateTimeout) {
+      clearTimeout(this.updateTimeout);
+    }
+    if (this.contextChangeTimeout) {
+      clearTimeout(this.contextChangeTimeout);
+    }
   },
   methods: {
     async handleContextChange() {
