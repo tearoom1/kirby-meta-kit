@@ -2078,7 +2078,6 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
             ]
           }),
           this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyTitle(page), "Meta Title", {
-            attentionStatuses: ["fix"],
             detailLines: [
               "Good = valid title, including page-title fallback",
               "Review = title length warning only",
