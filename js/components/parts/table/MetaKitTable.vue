@@ -239,7 +239,11 @@
 
         <!-- Robots (only in meta mode when not showing preview) -->
         <td v-if="!showPreview && previewMode === 'meta'" class="k-meta-kit-table-center">
-          <span v-if="page.robots && page.robots.includes('noindex')" class="k-meta-kit-robots-noindex">noindex</span>
+          <template v-if="page.robots && page.robots.includes('noindex')">
+            <Tooltip :content="getRobotsTooltip(page)">
+              <span class="k-meta-kit-robots-noindex k-meta-kit-table-tooltip">{{ getRobotsDisplay(page) }}</span>
+            </Tooltip>
+          </template>
           <span v-else>—</span>
         </td>
         <td class="k-meta-kit-table-center">
@@ -595,6 +599,15 @@ export default {
 
     getStatusDotClass(page) {
       return page.status ? (this.statusMappings[page.status]?.dotClass || '') : '';
+    },
+
+    getRobotsDisplay(page) {
+      if (!page.robots) return '—';
+      return page.robots.includes('noindex') ? 'nidx' : page.robots;
+    },
+
+    getRobotsTooltip(page) {
+      return page.robots || 'Robots directives not set';
     }
   }
 };

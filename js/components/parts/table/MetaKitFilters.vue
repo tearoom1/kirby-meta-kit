@@ -57,7 +57,7 @@
       </button>
 
       <div v-if="isDropdownOpen" class="k-meta-kit-filter-dropdown-content">
-        <div class="k-meta-kit-filter-group">
+        <div class="k-meta-kit-filter-group k-meta-kit-filter-group-grid">
           <div class="k-meta-kit-filter-group-title">State</div>
           <label class="k-meta-kit-filter-option">
             <input
@@ -97,7 +97,7 @@
           </label>
         </div>
 
-        <div class="k-meta-kit-filter-group">
+        <div class="k-meta-kit-filter-group k-meta-kit-filter-group-grid">
           <div class="k-meta-kit-filter-group-title">Fields</div>
           <label class="k-meta-kit-filter-option">
             <input
@@ -124,7 +124,7 @@
               :checked="isFilterActive('type-description')"
               @change="toggleFilter('type-description')"
             />
-            <span>Meta Description</span>
+            <span>Meta Desc.</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -142,7 +142,7 @@
               :checked="isFilterActive('type-og-description')"
               @change="toggleFilter('type-og-description')"
             />
-            <span>OG Description</span>
+            <span>OG Desc.</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -151,7 +151,7 @@
               :checked="isFilterActive('type-og-image')"
               @change="toggleFilter('type-og-image')"
             />
-            <span>OG Image</span>
+            <span>OG Img.</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -160,7 +160,7 @@
               :checked="isFilterActive('type-noindex')"
               @change="toggleFilter('type-noindex')"
             />
-            <span>Noindex</span>
+            <span>Noidx</span>
           </label>
         </div>
 
@@ -220,17 +220,6 @@
 </template>
 
 <script>
-const STATE_FILTERS = new Set(['attention', 'good', 'warning', 'error']);
-const TYPE_FILTERS = new Set([
-  'type-slug',
-  'type-title',
-  'type-description',
-  'type-og-title',
-  'type-og-description',
-  'type-og-image',
-  'type-noindex'
-]);
-
 export default {
   props: {
     showPreview: {
@@ -285,15 +274,7 @@ export default {
         }
       }
 
-      const nextFilters = Array.from(filters);
-      const hasStateFilter = nextFilters.some((activeFilter) => STATE_FILTERS.has(activeFilter));
-      const typeFilterCount = nextFilters.filter((activeFilter) => TYPE_FILTERS.has(activeFilter)).length;
-
-      if (hasStateFilter && typeFilterCount === 0) {
-        nextFilters.push('type-description');
-      }
-
-      this.$emit('update:active-filters', nextFilters);
+      this.$emit('update:active-filters', Array.from(filters));
     },
     clearFilters() {
       this.$emit('update:active-filters', []);

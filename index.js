@@ -458,16 +458,6 @@
   );
   __component__$c.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/table/MetaKitStats.vue";
   const MetaKitStats = __component__$c.exports;
-  const STATE_FILTERS = /* @__PURE__ */ new Set(["attention", "good", "warning", "error"]);
-  const TYPE_FILTERS$1 = /* @__PURE__ */ new Set([
-    "type-slug",
-    "type-title",
-    "type-description",
-    "type-og-title",
-    "type-og-description",
-    "type-og-image",
-    "type-noindex"
-  ]);
   const _sfc_main$b = {
     props: {
       showPreview: {
@@ -520,13 +510,7 @@
             filters.add(filter);
           }
         }
-        const nextFilters = Array.from(filters);
-        const hasStateFilter = nextFilters.some((activeFilter) => STATE_FILTERS.has(activeFilter));
-        const typeFilterCount = nextFilters.filter((activeFilter) => TYPE_FILTERS$1.has(activeFilter)).length;
-        if (hasStateFilter && typeFilterCount === 0) {
-          nextFilters.push("type-description");
-        }
-        this.$emit("update:active-filters", nextFilters);
+        this.$emit("update:active-filters", Array.from(filters));
       },
       clearFilters() {
         this.$emit("update:active-filters", []);
@@ -557,7 +541,7 @@
       return _vm.$emit("update:search-query", $event);
     } } }), _vm.searchQuery ? _c("button", { staticClass: "k-meta-kit-search-clear", attrs: { "title": "Clear search" }, on: { "click": function($event) {
       return _vm.$emit("update:search-query", "");
-    } } }, [_c("k-icon", { attrs: { "type": "cancel" } })], 1) : _vm._e()], 1), _c("div", { staticClass: "k-meta-kit-filter-dropdown" }, [_c("button", { staticClass: "k-meta-kit-filter-button", class: { "active": _vm.isDropdownOpen || _vm.activeFilters.length > 0 }, on: { "click": _vm.toggleFilterDropdown } }, [_c("k-icon", { attrs: { "type": "filter" } }), _c("span", [_vm._v("Filters")]), _vm.activeFilters.length > 0 ? _c("span", { staticClass: "k-meta-kit-filter-count" }, [_vm._v(_vm._s(_vm.activeFilters.length))]) : _vm._e(), _c("k-icon", { attrs: { "type": _vm.isDropdownOpen ? "angle-up" : "angle-down" } })], 1), _vm.isDropdownOpen ? _c("div", { staticClass: "k-meta-kit-filter-dropdown-content" }, [_c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("State")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "good" }, domProps: { "checked": _vm.isFilterActive("good") }, on: { "change": function($event) {
+    } } }, [_c("k-icon", { attrs: { "type": "cancel" } })], 1) : _vm._e()], 1), _c("div", { staticClass: "k-meta-kit-filter-dropdown" }, [_c("button", { staticClass: "k-meta-kit-filter-button", class: { "active": _vm.isDropdownOpen || _vm.activeFilters.length > 0 }, on: { "click": _vm.toggleFilterDropdown } }, [_c("k-icon", { attrs: { "type": "filter" } }), _c("span", [_vm._v("Filters")]), _vm.activeFilters.length > 0 ? _c("span", { staticClass: "k-meta-kit-filter-count" }, [_vm._v(_vm._s(_vm.activeFilters.length))]) : _vm._e(), _c("k-icon", { attrs: { "type": _vm.isDropdownOpen ? "angle-up" : "angle-down" } })], 1), _vm.isDropdownOpen ? _c("div", { staticClass: "k-meta-kit-filter-dropdown-content" }, [_c("div", { staticClass: "k-meta-kit-filter-group k-meta-kit-filter-group-grid" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("State")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "good" }, domProps: { "checked": _vm.isFilterActive("good") }, on: { "change": function($event) {
       return _vm.toggleFilter("good");
     } } }), _c("span", [_vm._v("Good")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "attention" }, domProps: { "checked": _vm.isFilterActive("attention") }, on: { "change": function($event) {
       return _vm.toggleFilter("attention");
@@ -565,21 +549,21 @@
       return _vm.toggleFilter("warning");
     } } }), _c("span", [_vm._v("Warnings")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "error" }, domProps: { "checked": _vm.isFilterActive("error") }, on: { "change": function($event) {
       return _vm.toggleFilter("error");
-    } } }), _c("span", [_vm._v("Fixes")])])]), _c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("Fields")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-slug" }, domProps: { "checked": _vm.isFilterActive("type-slug") }, on: { "change": function($event) {
+    } } }), _c("span", [_vm._v("Fixes")])])]), _c("div", { staticClass: "k-meta-kit-filter-group k-meta-kit-filter-group-grid" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("Fields")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-slug" }, domProps: { "checked": _vm.isFilterActive("type-slug") }, on: { "change": function($event) {
       return _vm.toggleFilter("type-slug");
     } } }), _c("span", [_vm._v("Slug")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-title" }, domProps: { "checked": _vm.isFilterActive("type-title") }, on: { "change": function($event) {
       return _vm.toggleFilter("type-title");
     } } }), _c("span", [_vm._v("Meta Title")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-description" }, domProps: { "checked": _vm.isFilterActive("type-description") }, on: { "change": function($event) {
       return _vm.toggleFilter("type-description");
-    } } }), _c("span", [_vm._v("Meta Description")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-title" }, domProps: { "checked": _vm.isFilterActive("type-og-title") }, on: { "change": function($event) {
+    } } }), _c("span", [_vm._v("Meta Desc.")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-title" }, domProps: { "checked": _vm.isFilterActive("type-og-title") }, on: { "change": function($event) {
       return _vm.toggleFilter("type-og-title");
     } } }), _c("span", [_vm._v("OG Title")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-description" }, domProps: { "checked": _vm.isFilterActive("type-og-description") }, on: { "change": function($event) {
       return _vm.toggleFilter("type-og-description");
-    } } }), _c("span", [_vm._v("OG Description")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-image" }, domProps: { "checked": _vm.isFilterActive("type-og-image") }, on: { "change": function($event) {
+    } } }), _c("span", [_vm._v("OG Desc.")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-image" }, domProps: { "checked": _vm.isFilterActive("type-og-image") }, on: { "change": function($event) {
       return _vm.toggleFilter("type-og-image");
-    } } }), _c("span", [_vm._v("OG Image")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-noindex" }, domProps: { "checked": _vm.isFilterActive("type-noindex") }, on: { "change": function($event) {
+    } } }), _c("span", [_vm._v("OG Img.")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-noindex" }, domProps: { "checked": _vm.isFilterActive("type-noindex") }, on: { "change": function($event) {
       return _vm.toggleFilter("type-noindex");
-    } } }), _c("span", [_vm._v("Noindex")])])]), _c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("Metadata")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "complete" }, domProps: { "checked": _vm.isFilterActive("complete") }, on: { "change": function($event) {
+    } } }), _c("span", [_vm._v("Noidx")])])]), _c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("Metadata")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "complete" }, domProps: { "checked": _vm.isFilterActive("complete") }, on: { "change": function($event) {
       return _vm.toggleFilter("complete");
     } } }), _c("span", [_vm._v("Complete Metadata")])])]), _c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("Status")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "listed" }, domProps: { "checked": _vm.isFilterActive("listed") }, on: { "change": function($event) {
       return _vm.toggleFilter("listed");
@@ -1193,6 +1177,13 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       getStatusDotClass(page) {
         var _a;
         return page.status ? ((_a = this.statusMappings[page.status]) == null ? void 0 : _a.dotClass) || "" : "";
+      },
+      getRobotsDisplay(page) {
+        if (!page.robots) return "—";
+        return page.robots.includes("noindex") ? "nidx" : page.robots;
+      },
+      getRobotsTooltip(page) {
+        return page.robots || "Robots directives not set";
       }
     }
   };
@@ -1226,7 +1217,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         _vm.getOgDescriptionStatusClass(page),
         _vm.getOgDescriptionStatusClass(page) === "k-meta-kit-status-optimal" ? "k-meta-kit-table-value-muted" : "",
         _vm.isOgDescriptionInherited(page) ? "k-meta-kit-inherited" : ""
-      ] }, [_vm._v(" " + _vm._s(_vm.getOgDescriptionDisplay(page)) + " ")]), _vm.getInheritanceBadgeLabel(page, "ogDescription") ? _c("span", { staticClass: "k-meta-kit-table-source-marker" }, [_vm._v(" " + _vm._s(_vm.getInheritanceBadgeLabel(page, "ogDescription")) + " ")]) : _vm._e()])])], 1) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? [_c("Tooltip", { attrs: { "content": "Has OG image" } }, [_c("span", { staticClass: "k-meta-kit-og-image-indicator" }, [_c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } })], 1)])] : !page.hasOgImage && _vm.siteSettings.siteHasOgImage ? [_c("Tooltip", { attrs: { "content": "OG image inherited from site" } }, [_c("span", { staticClass: "k-meta-kit-og-image-indicator k-meta-kit-inherited" }, [_c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } })], 1)])] : [_c("Tooltip", { attrs: { "content": "No OG image" } }, [_c("span", [_vm._v("—")])])]], 2), !_vm.showPreview && _vm.previewMode === "meta" ? _c("td", { staticClass: "k-meta-kit-table-center" }, [page.robots && page.robots.includes("noindex") ? _c("span", { staticClass: "k-meta-kit-robots-noindex" }, [_vm._v("noindex")]) : _c("span", [_vm._v("—")])]) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("div", { staticClass: "k-meta-kit-table-actions" }, [_c("k-button", { attrs: { "icon": "edit", "size": "sm", "title": "Edit Metadata" }, on: { "click": function($event) {
+      ] }, [_vm._v(" " + _vm._s(_vm.getOgDescriptionDisplay(page)) + " ")]), _vm.getInheritanceBadgeLabel(page, "ogDescription") ? _c("span", { staticClass: "k-meta-kit-table-source-marker" }, [_vm._v(" " + _vm._s(_vm.getInheritanceBadgeLabel(page, "ogDescription")) + " ")]) : _vm._e()])])], 1) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? [_c("Tooltip", { attrs: { "content": "Has OG image" } }, [_c("span", { staticClass: "k-meta-kit-og-image-indicator" }, [_c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } })], 1)])] : !page.hasOgImage && _vm.siteSettings.siteHasOgImage ? [_c("Tooltip", { attrs: { "content": "OG image inherited from site" } }, [_c("span", { staticClass: "k-meta-kit-og-image-indicator k-meta-kit-inherited" }, [_c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } })], 1)])] : [_c("Tooltip", { attrs: { "content": "No OG image" } }, [_c("span", [_vm._v("—")])])]], 2), !_vm.showPreview && _vm.previewMode === "meta" ? _c("td", { staticClass: "k-meta-kit-table-center" }, [page.robots && page.robots.includes("noindex") ? [_c("Tooltip", { attrs: { "content": _vm.getRobotsTooltip(page) } }, [_c("span", { staticClass: "k-meta-kit-robots-noindex k-meta-kit-table-tooltip" }, [_vm._v(_vm._s(_vm.getRobotsDisplay(page)))])])] : _c("span", [_vm._v("—")])], 2) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("div", { staticClass: "k-meta-kit-table-actions" }, [_c("k-button", { attrs: { "icon": "edit", "size": "sm", "title": "Edit Metadata" }, on: { "click": function($event) {
         return _vm.$emit("edit-page", page.id);
       } } }), _vm.aiEnabled ? _c("k-button", { attrs: { "icon": "sparkling", "size": "sm", "title": "Generate with AI" }, on: { "click": function($event) {
         return _vm.$emit("generate-page", page.id);
