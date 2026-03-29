@@ -31,6 +31,25 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         $this->assertStringContainsString('<script type="application/ld+json">', $html);
     }
 
+    public function testSeoSnippetAlwaysRendersFullOutputWithoutLicense(): void
+    {
+        $kirby = $this->makeKirby([
+            'site.txt' => "Title: Site Title\n----\nMetatitle: Site Meta\n----\nMetadescription: Site description\n----\nAppendsitename: true\n----\nAppendsitenameto: meta,og\n----\nTitleseparator: |\n",
+            'article/default.txt' => "Title: Article\n----\nMetatitle: This is a deliberately long custom meta title for testing\n----\nMetadescription: This is a deliberately long custom meta description that should still render in full even when no valid license is present in the test environment.\n----\nOgtitle: This is a deliberately long Open Graph title for testing\n----\nOgdescription: This is a deliberately long Open Graph description that should still render in full even when no valid license is present in the test environment.\n",
+        ]);
+
+        $this->assertFalse(MetaKit::hasValidLicense());
+
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('article'));
+
+        $this->assertStringContainsString('This is a deliberately long custom meta title for testing | Site Meta', $html);
+        $this->assertStringContainsString('This is a deliberately long custom meta description that should still render in full even when no valid license is present in the test environment.', $html);
+        $this->assertStringContainsString('This is a deliberately long Open Graph title for testing | Site Meta', $html);
+        $this->assertStringContainsString('This is a deliberately long Open Graph description that should still render in full even when no valid license is present in the test environment.', $html);
+        $this->assertStringNotContainsString('...', $html);
+    }
+
     public function testSeoSnippetRespectsFeatureToggles(): void
     {
         $kirby = $this->makeKirby(

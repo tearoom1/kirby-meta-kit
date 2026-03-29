@@ -6,6 +6,8 @@ The complete SEO solution for Kirby CMS with AI-powered content generation, real
 
 Get a license: [www.tearoom.one/kirby-plugins/meta-kit](https://www.tearoom.one/kirby-plugins/meta-kit)
 
+Frontend SEO output, `sitemap.xml`, and `robots.txt` work without license activation. A license is only required for AI generation and saving changes from the dedicated Meta Kit Panel area.
+
 ## Why Meta Kit?
 
 ### For Content Editors
@@ -824,6 +826,9 @@ $ogImage = $page->ogImage()->toFile();
 ## License
 
 This plugin is licensed under a commercial [LICENSE](LICENSE).
+
+License activation is required for AI generation and saving changes from the Meta Kit Panel area.
+The frontend SEO snippet, sitemap, and robots.txt remain fully functional without activation.
 
 ---
 

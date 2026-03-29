@@ -5,7 +5,6 @@
  */
 
 use TearoomOne\MetaHelper;
-use TearoomOne\MetaKit;
 
 $site = $site ?? site();
 $page = $page ?? page();
@@ -15,10 +14,6 @@ $enableMeta = option('tearoom1.meta-kit.meta.enabled', true);
 $enableOpengraph = option('tearoom1.meta-kit.opengraph.enabled', true);
 $enableSchema = option('tearoom1.meta-kit.schema.enabled', true);
 
-// Check license status
-$hasValidLicense = true; // no limit for demo //MetaKit::hasValidLicense();
-$charLimit = $hasValidLicense ? null : 20;
-
 // ==============================================================
 // Build Common Data
 // ==============================================================
@@ -26,14 +21,6 @@ $charLimit = $hasValidLicense ? null : 20;
 // Build meta title and description using helper (reads from flat page fields)
 $metaTitle = MetaHelper::buildTitle($page, $site, 'meta');
 $metaDescription = MetaHelper::buildDescription($page, $site);
-
-// Limit output if unlicensed
-if ($charLimit && mb_strlen($metaTitle) > $charLimit) {
-    $metaTitle = mb_substr($metaTitle, 0, $charLimit) . '...';
-}
-if ($charLimit && mb_strlen($metaDescription) > $charLimit) {
-    $metaDescription = mb_substr($metaDescription, 0, $charLimit) . '...';
-}
 
 // Get canonical URL (flat field on page)
 if ($page->canonicalUrl()->isNotEmpty()) {
@@ -52,14 +39,6 @@ $ogTitle = MetaHelper::buildTitle($page, $site, 'og');
 
 // Get OG description using helper
 $ogDescription = MetaHelper::buildOgDescription($page, $site, $metaDescription);
-
-// Limit OG content if unlicensed
-if ($charLimit && mb_strlen($ogTitle) > $charLimit) {
-    $ogTitle = mb_substr($ogTitle, 0, $charLimit) . '...';
-}
-if ($charLimit && mb_strlen($ogDescription) > $charLimit) {
-    $ogDescription = mb_substr($ogDescription, 0, $charLimit) . '...';
-}
 
 // Get OG image (flat field on page, fallback to site flat field)
 $ogImage = null;

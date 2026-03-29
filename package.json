@@ -1,6 +1,7 @@
 {
   "name": "@tearoom1/meta-kit",
-  "version": "1.0.0",
+  "version": "1.2.0",
+  "type": "module",
   "description": "AI-powered SEO plugin for Kirby with meta descriptions, previews, and Schema.org",
   "scripts": {
     "dev": "npx -y kirbyup js/index.js --watch",
@@ -15,5 +16,5 @@
     "opengraph"
   ],
   "author": "TearoomOne",
-  "license": "MIT"
+  "license": "SEE LICENSE IN LICENSE.md"
 }
