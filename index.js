@@ -483,7 +483,23 @@
         isDropdownOpen: false
       };
     },
+    computed: {
+      viewMode() {
+        if (!this.showPreview) {
+          return "count";
+        }
+        return this.previewMode === "og" ? "og" : "meta";
+      }
+    },
     methods: {
+      updateViewMode(mode) {
+        if (mode === "count") {
+          this.$emit("update:show-preview", false);
+          return;
+        }
+        this.$emit("update:preview-mode", mode);
+        this.$emit("update:show-preview", true);
+      },
       toggleFilterDropdown() {
         this.isDropdownOpen = !this.isDropdownOpen;
       },
@@ -531,13 +547,9 @@
   };
   var _sfc_render$b = function render() {
     var _vm = this, _c = _vm._self._c;
-    return _c("div", { staticClass: "k-meta-kit-controls" }, [_c("k-button-group", [_vm.showPreview ? _c("k-button", { attrs: { "size": "sm", "theme": _vm.previewMode === "meta" ? "positive" : "", "title": "Show meta title and description" }, on: { "click": function($event) {
-      return _vm.$emit("update:preview-mode", "meta");
-    } } }, [_vm._v(" Meta ")]) : _vm._e(), _vm.showPreview ? _c("k-button", { attrs: { "size": "sm", "theme": _vm.previewMode === "og" ? "positive" : "", "title": "Show OG title and description" }, on: { "click": function($event) {
-      return _vm.$emit("update:preview-mode", "og");
-    } } }, [_vm._v(" OG ")]) : _vm._e(), _c("k-button", { attrs: { "size": "sm", "title": _vm.showPreview ? "Show character counts" : "Show preview text" }, on: { "click": function($event) {
-      return _vm.$emit("update:show-preview", !_vm.showPreview);
-    } } }, [_vm._v(" " + _vm._s(_vm.showPreview ? "Back" : "Show Content") + " ")])], 1), _c("div", { staticClass: "k-meta-kit-search-wrapper" }, [_c("k-search-input", { staticClass: "k-meta-kit-search", attrs: { "icon": "search", "value": _vm.searchQuery, "placeholder": "Filter pages..." }, on: { "input": function($event) {
+    return _c("div", { staticClass: "k-meta-kit-controls" }, [_c("div", { staticClass: "k-meta-kit-view-select" }, [_c("label", { staticClass: "k-meta-kit-view-select-label", attrs: { "for": "k-meta-kit-view-mode" } }, [_vm._v("View")]), _c("select", { staticClass: "k-meta-kit-view-select-input", attrs: { "id": "k-meta-kit-view-mode", "title": "Choose table view" }, domProps: { "value": _vm.viewMode }, on: { "change": function($event) {
+      return _vm.updateViewMode($event.target.value);
+    } } }, [_c("option", { attrs: { "value": "count" } }, [_vm._v("Count")]), _c("option", { attrs: { "value": "meta" } }, [_vm._v("Meta content")]), _c("option", { attrs: { "value": "og" } }, [_vm._v("OG content")])])]), _c("div", { staticClass: "k-meta-kit-search-wrapper" }, [_c("k-search-input", { staticClass: "k-meta-kit-search", attrs: { "icon": "search", "value": _vm.searchQuery, "placeholder": "Filter pages..." }, on: { "input": function($event) {
       return _vm.$emit("update:search-query", $event);
     } } }), _vm.searchQuery ? _c("button", { staticClass: "k-meta-kit-search-clear", attrs: { "title": "Clear search" }, on: { "click": function($event) {
       return _vm.$emit("update:search-query", "");
@@ -571,7 +583,7 @@
       return _vm.toggleFilter("unlisted");
     } } }), _c("span", [_vm._v("Unlisted")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "drafts" }, domProps: { "checked": _vm.isFilterActive("drafts") }, on: { "change": function($event) {
       return _vm.toggleFilter("drafts");
-    } } }), _c("span", [_vm._v("Drafts")])])]), _vm.activeFilters.length > 0 ? _c("div", { staticClass: "k-meta-kit-filter-actions" }, [_c("button", { staticClass: "k-meta-kit-filter-clear", on: { "click": _vm.clearFilters } }, [_vm._v(" Clear all ")])]) : _vm._e()]) : _vm._e()])], 1);
+    } } }), _c("span", [_vm._v("Drafts")])])]), _vm.activeFilters.length > 0 ? _c("div", { staticClass: "k-meta-kit-filter-actions" }, [_c("button", { staticClass: "k-meta-kit-filter-clear", on: { "click": _vm.clearFilters } }, [_vm._v(" Clear all ")])]) : _vm._e()]) : _vm._e()])]);
   };
   var _sfc_staticRenderFns$b = [];
   _sfc_render$b._withStripped = true;
@@ -1191,7 +1203,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
     var _vm = this, _c = _vm._self._c;
     return _c("div", { staticClass: "k-meta-kit-table", class: { "k-meta-kit-table-preview": _vm.showPreview } }, [_c("table", [_c("thead", [_c("tr", [_c("th", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isAllSelected }, on: { "change": function($event) {
       return _vm.$emit("toggle-select-all");
-    } } })]), _c("th", [_vm._v("#")]), _c("th", [_vm._v("Page")]), !_vm.showPreview ? _c("th", [_vm._v("Slug")]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Title" : "Meta Title"))]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Desc." : "Meta Desc."))]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Meta Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Meta Desc.")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Desc.")]) : _vm._e(), _c("th", [_vm._v("OG Img.")]), !_vm.showPreview && _vm.previewMode === "meta" ? _c("th", [_vm._v("Robots")]) : _vm._e(), _c("th", [_vm._v("Actions")])])]), _c("tbody", _vm._l(_vm.pages, function(page, index) {
+    } } })]), _c("th", [_vm._v("#")]), _c("th", [_vm._v("Page")]), !_vm.showPreview ? _c("th", [_vm._v("Slug")]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Title" : "Meta Title"))]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Desc." : "Meta Desc."))]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Meta Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Meta Desc.")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Desc.")]) : _vm._e(), !_vm.showPreview || _vm.previewMode === "og" ? _c("th", [_vm._v("OG Img.")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Robots")]) : _vm._e(), _c("th", [_vm._v("Actions")])])]), _c("tbody", _vm._l(_vm.pages, function(page, index) {
       return _c("tr", { key: page.id, class: { "k-meta-kit-row-selected": _vm.isPageSelected(page.id) } }, [_c("td", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isPageSelected(page.id) }, on: { "change": function($event) {
         return _vm.$emit("toggle-page", page.id);
       } } })]), _c("td", [_vm._v(_vm._s(_vm.startIndex + index + 1))]), _c("td", [_c("div", { staticClass: "k-meta-kit-table-page" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("div", { staticClass: "k-meta-kit-page-title-wrapper" }, [_c("span", { staticClass: "k-meta-kit-table-page-id" }, [_vm._v(_vm._s(page.template))]), _c("span", { class: ["k-meta-kit-status-dot", _vm.getStatusDotClass(page)], attrs: { "title": _vm.getStatusLabel(page) } })])])]), !_vm.showPreview ? _c("td", [_c("Tooltip", { attrs: { "content": _vm.getSlugTooltip(page) } }, [_c("span", { class: [_vm.getSlugStatusClass(page), "k-meta-kit-table-tooltip"] }, [_vm._v(" " + _vm._s(page.id) + " ")])])], 1) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("Tooltip", { attrs: { "content": _vm.getTitleTooltip(page, false) } }, [_c("span", { class: [
@@ -1217,7 +1229,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         _vm.getOgDescriptionStatusClass(page),
         _vm.getOgDescriptionStatusClass(page) === "k-meta-kit-status-optimal" ? "k-meta-kit-table-value-muted" : "",
         _vm.isOgDescriptionInherited(page) ? "k-meta-kit-inherited" : ""
-      ] }, [_vm._v(" " + _vm._s(_vm.getOgDescriptionDisplay(page)) + " ")]), _vm.getInheritanceBadgeLabel(page, "ogDescription") ? _c("span", { staticClass: "k-meta-kit-table-source-marker" }, [_vm._v(" " + _vm._s(_vm.getInheritanceBadgeLabel(page, "ogDescription")) + " ")]) : _vm._e()])])], 1) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? [_c("Tooltip", { attrs: { "content": "Has OG image" } }, [_c("span", { staticClass: "k-meta-kit-og-image-indicator" }, [_c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } })], 1)])] : !page.hasOgImage && _vm.siteSettings.siteHasOgImage ? [_c("Tooltip", { attrs: { "content": "OG image inherited from site" } }, [_c("span", { staticClass: "k-meta-kit-og-image-indicator k-meta-kit-inherited" }, [_c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } })], 1)])] : [_c("Tooltip", { attrs: { "content": "No OG image" } }, [_c("span", [_vm._v("—")])])]], 2), !_vm.showPreview && _vm.previewMode === "meta" ? _c("td", { staticClass: "k-meta-kit-table-center" }, [page.robots && page.robots.includes("noindex") ? [_c("Tooltip", { attrs: { "content": _vm.getRobotsTooltip(page) } }, [_c("span", { staticClass: "k-meta-kit-robots-noindex k-meta-kit-table-tooltip" }, [_vm._v(_vm._s(_vm.getRobotsDisplay(page)))])])] : _c("span", [_vm._v("—")])], 2) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("div", { staticClass: "k-meta-kit-table-actions" }, [_c("k-button", { attrs: { "icon": "edit", "size": "sm", "title": "Edit Metadata" }, on: { "click": function($event) {
+      ] }, [_vm._v(" " + _vm._s(_vm.getOgDescriptionDisplay(page)) + " ")]), _vm.getInheritanceBadgeLabel(page, "ogDescription") ? _c("span", { staticClass: "k-meta-kit-table-source-marker" }, [_vm._v(" " + _vm._s(_vm.getInheritanceBadgeLabel(page, "ogDescription")) + " ")]) : _vm._e()])])], 1) : _vm._e(), !_vm.showPreview || _vm.previewMode === "og" ? _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? [_c("Tooltip", { attrs: { "content": "Has OG image" } }, [_c("span", { staticClass: "k-meta-kit-og-image-indicator" }, [_c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } })], 1)])] : !page.hasOgImage && _vm.siteSettings.siteHasOgImage ? [_c("Tooltip", { attrs: { "content": "OG image inherited from site" } }, [_c("span", { staticClass: "k-meta-kit-og-image-indicator k-meta-kit-inherited" }, [_c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } })], 1)])] : [_c("Tooltip", { attrs: { "content": "No OG image" } }, [_c("span", [_vm._v("—")])])]], 2) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [page.robots && page.robots.includes("noindex") ? [_c("Tooltip", { attrs: { "content": _vm.getRobotsTooltip(page) } }, [_c("span", { staticClass: "k-meta-kit-robots-noindex k-meta-kit-table-tooltip" }, [_vm._v(_vm._s(_vm.getRobotsDisplay(page)))])])] : _c("span", [_vm._v("—")])], 2) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("div", { staticClass: "k-meta-kit-table-actions" }, [_c("k-button", { attrs: { "icon": "edit", "size": "sm", "title": "Edit Metadata" }, on: { "click": function($event) {
         return _vm.$emit("edit-page", page.id);
       } } }), _vm.aiEnabled ? _c("k-button", { attrs: { "icon": "sparkling", "size": "sm", "title": "Generate with AI" }, on: { "click": function($event) {
         return _vm.$emit("generate-page", page.id);

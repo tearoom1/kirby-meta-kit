@@ -19,8 +19,8 @@
         <th v-if="!showPreview">Meta Desc.</th>
         <th v-if="!showPreview">OG Title</th>
         <th v-if="!showPreview">OG Desc.</th>
-        <th>OG Img.</th>
-        <th v-if="!showPreview && previewMode === 'meta'">Robots</th>
+        <th v-if="!showPreview || previewMode === 'og'">OG Img.</th>
+        <th v-if="!showPreview">Robots</th>
         <th>Actions</th>
       </tr>
       </thead>
@@ -215,7 +215,7 @@
         </td>
 
         <!-- OG Image (only in OG mode) -->
-        <td class="k-meta-kit-table-center">
+        <td class="k-meta-kit-table-center" v-if="!showPreview || previewMode === 'og'">
           <template v-if="page.hasOgImage">
             <Tooltip content="Has OG image">
               <span class="k-meta-kit-og-image-indicator">
@@ -238,7 +238,7 @@
         </td>
 
         <!-- Robots (only in meta mode when not showing preview) -->
-        <td v-if="!showPreview && previewMode === 'meta'" class="k-meta-kit-table-center">
+        <td v-if="!showPreview" class="k-meta-kit-table-center">
           <template v-if="page.robots && page.robots.includes('noindex')">
             <Tooltip :content="getRobotsTooltip(page)">
               <span class="k-meta-kit-robots-noindex k-meta-kit-table-tooltip">{{ getRobotsDisplay(page) }}</span>

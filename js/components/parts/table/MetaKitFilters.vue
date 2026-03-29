@@ -1,30 +1,19 @@
 <template>
   <div class="k-meta-kit-controls">
-    <k-button-group>
-      <k-button v-if="showPreview"
-        size="sm"
-        :theme="previewMode === 'meta' ? 'positive' : ''"
-        @click="$emit('update:preview-mode', 'meta')"
-        title="Show meta title and description"
+    <div class="k-meta-kit-view-select">
+      <label class="k-meta-kit-view-select-label" for="k-meta-kit-view-mode">View</label>
+      <select
+        id="k-meta-kit-view-mode"
+        class="k-meta-kit-view-select-input"
+        :value="viewMode"
+        @change="updateViewMode($event.target.value)"
+        title="Choose table view"
       >
-        Meta
-      </k-button>
-      <k-button v-if="showPreview"
-        size="sm"
-        :theme="previewMode === 'og' ? 'positive' : ''"
-        @click="$emit('update:preview-mode', 'og')"
-        title="Show OG title and description"
-      >
-        OG
-      </k-button>
-      <k-button
-        size="sm"
-        @click="$emit('update:show-preview', !showPreview)"
-        :title="showPreview ? 'Show character counts' : 'Show preview text'"
-      >
-        {{ showPreview ? 'Back' : 'Show Content' }}
-      </k-button>
-    </k-button-group>
+        <option value="count">Count</option>
+        <option value="meta">Meta content</option>
+        <option value="og">OG content</option>
+      </select>
+    </div>
 
     <div class="k-meta-kit-search-wrapper">
       <k-search-input
@@ -245,7 +234,25 @@ export default {
       isDropdownOpen: false
     };
   },
+  computed: {
+    viewMode() {
+      if (!this.showPreview) {
+        return 'count';
+      }
+
+      return this.previewMode === 'og' ? 'og' : 'meta';
+    }
+  },
   methods: {
+    updateViewMode(mode) {
+      if (mode === 'count') {
+        this.$emit('update:show-preview', false);
+        return;
+      }
+
+      this.$emit('update:preview-mode', mode);
+      this.$emit('update:show-preview', true);
+    },
     toggleFilterDropdown() {
       this.isDropdownOpen = !this.isDropdownOpen;
     },
