@@ -407,10 +407,11 @@ export default {
     handleSavedUpdates(payload = {}) {
       if (payload.page) {
         this.mergeUpdatedPage(payload.page);
-      }
-
-      if (Array.isArray(payload.pages)) {
+      } else if (Array.isArray(payload.pages)) {
         payload.pages.forEach((page) => this.mergeUpdatedPage(page));
+      } else {
+        // Dialog didn't pass updated data — fall back to full refresh
+        this.refreshPages();
       }
 
       if (payload.siteSettings) {
@@ -543,7 +544,6 @@ export default {
           errorMessage += `: ${error.error}`;
         }
         window.panel.notification.error(errorMessage);
-        console.error('Generation error details:', error);
       } finally {
         this.isGeneratingAll = false;
         this.loadingProgress = '';

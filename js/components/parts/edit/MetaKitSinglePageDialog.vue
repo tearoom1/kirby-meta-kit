@@ -318,18 +318,6 @@ export default {
     editInPanel() {
       if (this.page && this.page.panelUrl) {
         this.close();
-        try {
-          const url = new URL(this.page.panelUrl, window.location.origin);
-          const internalPath = `${url.pathname}${url.search}${url.hash}`;
-
-          if (window.panel?.view?.open && url.origin === window.location.origin) {
-            window.panel.view.open(internalPath);
-            return;
-          }
-        } catch (error) {
-          // Fallback below if panelUrl isn't parseable
-        }
-
         window.location.assign(this.page.panelUrl);
       }
     }

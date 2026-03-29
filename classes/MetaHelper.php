@@ -44,7 +44,9 @@ class MetaHelper
             return $title;
         }
 
-        $appendToTypes = array_map('trim', explode(',', $settings['appendSiteNameTo']));
+        $appendToTypes = !empty($settings['appendSiteNameTo'])
+            ? array_map('trim', explode(',', $settings['appendSiteNameTo']))
+            : [];
         if (in_array($type, $appendToTypes) && !empty($settings['siteMetaTitle'])) {
             $title = $title . ' ' . $settings['titleSeparator'] . ' ' . $settings['siteMetaTitle'];
         }

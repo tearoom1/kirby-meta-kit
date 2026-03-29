@@ -1743,6 +1743,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         this.isLoading = true;
         this.resetSaveFeedback();
         this.$refs.dialog.open();
+        document.addEventListener("keydown", this.handleKeydown);
         try {
           const response = await this.api.get("meta-kit/single-page", { pageId });
           if (response.status === "success") {
@@ -1759,6 +1760,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         }
       },
       close() {
+        document.removeEventListener("keydown", this.handleKeydown);
         this.resetSaveFeedback();
         this.$refs.dialog.close();
         this.page = null;
@@ -1777,6 +1779,15 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
           this.saveFeedback = { type: "", text: "" };
           this.saveFeedbackTimer = null;
         }, 3200);
+      },
+      handleKeydown(event) {
+        if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "s") {
+          return;
+        }
+        event.preventDefault();
+        if (this.page && this.hasChanges) {
+          this.save();
+        }
       },
       async generate(fieldName) {
         if (!this.page) return;
@@ -1848,11 +1859,12 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       editInPanel() {
         if (this.page && this.page.panelUrl) {
           this.close();
-          window.panel.view.open(this.page.panelUrl);
+          window.location.assign(this.page.panelUrl);
         }
       }
     },
     beforeDestroy() {
+      document.removeEventListener("keydown", this.handleKeydown);
       this.resetSaveFeedback();
     }
   };
@@ -2240,6 +2252,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         this.activeTab = "meta";
         this.resetSaveFeedback();
         this.$refs.dialog.open();
+        document.addEventListener("keydown", this.handleKeydown);
         try {
           const response = await this.api.get("meta-kit/pages-with-content", {
             pageIds: Array.isArray(pageIds) ? pageIds.join(",") : pageIds
@@ -2270,6 +2283,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         }
       },
       close() {
+        document.removeEventListener("keydown", this.handleKeydown);
         this.resetSaveFeedback();
         this.$refs.dialog.close();
         this.pages = [];
@@ -2290,6 +2304,15 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
           this.saveFeedback = { type: "", text: "" };
           this.saveFeedbackTimer = null;
         }, 3200);
+      },
+      handleKeydown(event) {
+        if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "s") {
+          return;
+        }
+        event.preventDefault();
+        if (this.pages.length > 0 && this.hasAnyChanges) {
+          this.saveAll();
+        }
       },
       async generate(pageId, fieldName) {
         if (!this.generating[pageId]) return;
@@ -2357,6 +2380,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       }
     },
     beforeDestroy() {
+      document.removeEventListener("keydown", this.handleKeydown);
       this.resetSaveFeedback();
     }
   };
@@ -2713,7 +2737,6 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
             errorMessage += `: ${error.error}`;
           }
           window.panel.notification.error(errorMessage);
-          console.error("Generation error details:", error);
         } finally {
           this.isGeneratingAll = false;
           this.loadingProgress = "";
