@@ -15,6 +15,26 @@
       </select>
     </div>
 
+    <div class="k-meta-kit-view-select">
+      <label class="k-meta-kit-view-select-label" for="k-meta-kit-sort-mode">Sort</label>
+      <select
+        id="k-meta-kit-sort-mode"
+        class="k-meta-kit-view-select-input"
+        :value="sortBy"
+        @change="$emit('update:sort-by', $event.target.value)"
+        title="Choose table sort order"
+      >
+        <option value="default">Default</option>
+        <option value="attention">Needs attention</option>
+        <option value="name-asc">Name A-Z</option>
+        <option value="name-desc">Name Z-A</option>
+        <option value="level-asc">Level low-high</option>
+        <option value="level-desc">Level high-low</option>
+        <option value="status">Status</option>
+        <option value="template">Template</option>
+      </select>
+    </div>
+
     <div class="k-meta-kit-search-wrapper">
       <k-search-input
         icon="search"
@@ -228,6 +248,10 @@ export default {
       type: Array,
       default: () => []
     },
+    sortBy: {
+      type: String,
+      default: 'default'
+    }
   },
   data() {
     return {

@@ -54,6 +54,7 @@
           :preview-mode.sync="previewMode"
           :search-query.sync="searchQuery"
           :active-filters.sync="activeFilters"
+          :sort-by.sync="sortBy"
         />
       </template>
     </meta-kit-actions>
@@ -170,6 +171,7 @@ import MetaKitSinglePageDialog from './parts/edit/MetaKitSinglePageDialog.vue';
 import MetaKitBulkEditDialog from './parts/edit/MetaKitBulkEditDialog.vue';
 import {
   filterPages,
+  sortPages,
   paginatePages,
   getTotalPages,
   isAllCurrentPageSelected as isAllSelectedOnPage,
@@ -246,6 +248,7 @@ export default {
       ],
       searchQuery: '',
       activeFilters: [],
+      sortBy: 'default',
       showPreviewInTable: false,
       previewMode: 'meta',
       loadingProgress: ''
@@ -253,7 +256,12 @@ export default {
   },
   computed: {
     filteredPages() {
-      return filterPages(this.pagesData, this.activeFilters, this.searchQuery, {
+      const filtered = filterPages(this.pagesData, this.activeFilters, this.searchQuery, {
+        siteSettings: this.siteSettingsData,
+        validationSettings: this.validationSettingsData
+      });
+
+      return sortPages(filtered, this.sortBy, {
         siteSettings: this.siteSettingsData,
         validationSettings: this.validationSettingsData
       });
@@ -316,6 +324,9 @@ export default {
       this.currentPage = 1;
     },
     activeFilters() {
+      this.currentPage = 1;
+    },
+    sortBy() {
       this.currentPage = 1;
     }
   },

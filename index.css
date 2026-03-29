@@ -994,6 +994,7 @@
   .k-meta-kit-controls {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 1rem;
   }
 
@@ -1019,7 +1020,7 @@
 
   .k-meta-kit-view-select-input {
     padding: 0.5rem 2rem 0.5rem 0.75rem;
-    min-width: 150px;
+    min-width: 142px;
     background: var(--color-back);
     border: 1px solid var(--color-border);
     border-radius: var(--rounded-sm);

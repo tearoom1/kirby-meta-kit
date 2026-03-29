@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   filterPages,
+  sortPages,
   paginatePages,
   getTotalPages,
   isAllCurrentPageSelected,
@@ -295,6 +296,88 @@ test('pagination helpers compute slices and total pages', () => {
   assert.equal(getTotalPages(filtered, 2), 2);
   assert.deepEqual(paginatePages(filtered, 2, 2).map((p) => p.id), ['blog/post-b', 'drafts/post-c']);
   assert.equal(getTotalPages(filtered, 99999), 1);
+});
+
+test('sortPages supports name, level, status and attention sorting', () => {
+  const sortablePages = [
+    {
+      id: 'products',
+      title: 'Products',
+      template: 'default',
+      status: 'listed',
+      hasMetaTitle: true,
+      metaTitle: 'Products page title',
+      hasMetaDescription: true,
+      metaDescription: 'A'.repeat(150),
+      hasOgTitle: true,
+      ogTitle: 'Products Open Graph Title',
+      hasOgDescription: true,
+      ogDescription: 'B'.repeat(180),
+      hasOgImage: true,
+      robots: ''
+    },
+    {
+      id: 'about/team',
+      title: 'Team',
+      template: 'article',
+      status: 'unlisted',
+      hasMetaTitle: true,
+      metaTitle: 'Team page title',
+      hasMetaDescription: true,
+      metaDescription: 'short',
+      hasOgTitle: true,
+      ogTitle: 'Team Open Graph Title',
+      hasOgDescription: true,
+      ogDescription: 'C'.repeat(180),
+      hasOgImage: false,
+      robots: ''
+    },
+    {
+      id: 'blog/news/update',
+      title: 'Update',
+      template: 'news',
+      status: 'draft',
+      hasMetaTitle: false,
+      metaTitle: null,
+      hasMetaDescription: false,
+      metaDescription: null,
+      hasOgTitle: false,
+      ogTitle: null,
+      hasOgDescription: false,
+      ogDescription: null,
+      hasOgImage: false,
+      robots: ''
+    }
+  ];
+
+  const context = {
+    siteSettings: {
+      siteMetaDescription: 'Fallback site description',
+      appendSiteName: false,
+      siteHasOgImage: true
+    },
+    validationSettings: {}
+  };
+
+  assert.deepEqual(
+    sortPages(sortablePages, 'name-asc', context).map((page) => page.title),
+    ['Products', 'Team', 'Update']
+  );
+
+  assert.deepEqual(
+    sortPages(sortablePages, 'level-asc', context).map((page) => page.id),
+    ['products', 'about/team', 'blog/news/update']
+  );
+
+  assert.deepEqual(
+    sortPages(sortablePages, 'status', context).map((page) => page.status),
+    ['listed', 'unlisted', 'draft']
+  );
+
+  assert.deepEqual(
+    sortPages(sortablePages, 'attention', context).map((page) => page.id),
+    ['about/team', 'blog/news/update', 'products']
+  );
 });
 
 test('selection helpers detect all-selected and toggle correctly', () => {

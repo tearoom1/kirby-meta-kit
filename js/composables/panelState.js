@@ -281,6 +281,72 @@ export function filterPages(pages = [], activeFilters = [], searchQuery = '', co
   });
 }
 
+function getPageLevel(page) {
+  if (!page?.id || page.id === 'site') {
+    return 0;
+  }
+
+  return page.id.split('/').length - 1;
+}
+
+function getStatusRank(page) {
+  switch (page?.status) {
+    case 'listed':
+    case 'published':
+      return 0;
+    case 'unlisted':
+      return 1;
+    case 'draft':
+      return 2;
+    default:
+      return 3;
+  }
+}
+
+function compareText(a = '', b = '') {
+  return String(a).localeCompare(String(b), undefined, { sensitivity: 'base', numeric: true });
+}
+
+export function sortPages(pages = [], sortBy = 'default', context = {}) {
+  if (!Array.isArray(pages) || pages.length <= 1 || sortBy === 'default') {
+    return pages;
+  }
+
+  const sorted = [...pages];
+
+  sorted.sort((a, b) => {
+    switch (sortBy) {
+      case 'name-asc':
+        return compareText(a.title, b.title) || compareText(a.id, b.id);
+      case 'name-desc':
+        return compareText(b.title, a.title) || compareText(b.id, a.id);
+      case 'level-asc':
+        return getPageLevel(a) - getPageLevel(b) || compareText(a.id, b.id);
+      case 'level-desc':
+        return getPageLevel(b) - getPageLevel(a) || compareText(a.id, b.id);
+      case 'status':
+        return getStatusRank(a) - getStatusRank(b) || compareText(a.title, b.title);
+      case 'template':
+        return compareText(a.template, b.template) || compareText(a.title, b.title);
+      case 'attention':
+        return (
+          getAttentionRank(a, context) - getAttentionRank(b, context) ||
+          compareText(a.title, b.title)
+        );
+      default:
+        return 0;
+    }
+  });
+
+  return sorted;
+}
+
+function getAttentionRank(page, context = {}) {
+  if (hasErrorAttention(page, context)) return 0;
+  if (hasWarningAttention(page, context)) return 1;
+  return 2;
+}
+
 export function paginatePages(filteredPages = [], currentPage = 1, pageSize = 25) {
   if (pageSize >= 99999) {
     return filteredPages;
