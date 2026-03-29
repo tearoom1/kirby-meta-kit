@@ -8,6 +8,7 @@ import {
   getEffectiveTitle,
   getEffectiveDescription,
   getInheritanceSource,
+  isInheritedFromSite,
   buildTooltipText
 } from '../js/composables/useInheritance.js';
 
@@ -235,6 +236,19 @@ test('getInheritanceSource returns language code when language inheritance is se
     getInheritanceSource(pageWithLanguageInheritance, 'metaTitle', emptySiteSettings),
     'en'
   );
+});
+
+test('isInheritedFromSite returns true for meta description from site fallback', () => {
+  assert.equal(isInheritedFromSite(pageWithNoMeta, 'metaDescription', siteSettings), true);
+});
+
+test('isInheritedFromSite returns true for OG description from site fallback', () => {
+  assert.equal(isInheritedFromSite(pageWithNoMeta, 'ogDescription', siteSettings), true);
+});
+
+test('isInheritedFromSite returns false for OG description inherited from meta description', () => {
+  const page = { ...pageWithNoMeta, hasMetaDescription: true, metaDescription: 'Meta desc' };
+  assert.equal(isInheritedFromSite(page, 'ogDescription', emptySiteSettings), false);
 });
 
 // ─── buildTooltipText ─────────────────────────────────────────────────────────

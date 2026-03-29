@@ -145,6 +145,17 @@ export function getInheritanceSource(page, fieldType, siteSettings = {}) {
 }
 
 /**
+ * Check whether a field is specifically inherited from the site fallback
+ * @param {Object} page - Page object
+ * @param {string} fieldType - Field type (metaDescription, ogDescription, etc.)
+ * @param {Object} siteSettings - Site settings object
+ * @returns {boolean}
+ */
+export function isInheritedFromSite(page, fieldType, siteSettings = {}) {
+  return getInheritanceSource(page, fieldType, siteSettings) === 'site';
+}
+
+/**
  * Build tooltip text with inheritance prefix
  * @param {string} content - Content text
  * @param {string|false} inheritanceSource - Source name or false
@@ -180,5 +191,6 @@ export default {
   getEffectiveTitle,
   getEffectiveDescription,
   getInheritanceSource,
+  isInheritedFromSite,
   buildTooltipText
 };

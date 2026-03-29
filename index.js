@@ -825,6 +825,9 @@ Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
         return false;
     }
   }
+  function isInheritedFromSite(page, fieldType, siteSettings = {}) {
+    return getInheritanceSource(page, fieldType, siteSettings) === "site";
+  }
   function buildTooltipText(content, inheritanceSource, showContent = true, maxLength = 200) {
     let text = content || "";
     let prefix = "";
@@ -1084,6 +1087,9 @@ ${reason}`;
       },
       getDescriptionStatusClass(page) {
         const desc = getEffectiveDescription(page, "meta", this.siteSettings);
+        if (isInheritedFromSite(page, "metaDescription", this.siteSettings) && desc) {
+          return "k-meta-kit-status-warning";
+        }
         return this.getStatusClass(page, (desc == null ? void 0 : desc.length) || 0, "description");
       },
       getOgTitleDisplay(page) {
@@ -1096,6 +1102,9 @@ ${reason}`;
       },
       getOgDescriptionStatusClass(page) {
         const desc = getEffectiveDescription(page, "og", this.siteSettings);
+        if (isInheritedFromSite(page, "ogDescription", this.siteSettings) && desc) {
+          return "k-meta-kit-status-warning";
+        }
         return this.getStatusClass(page, (desc == null ? void 0 : desc.length) || 0, "ogDescription");
       },
       // Slug methods

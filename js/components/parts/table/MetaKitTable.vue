@@ -283,6 +283,7 @@ import {
   isOgDescriptionInherited,
   getEffectiveDescription,
   getInheritanceSource,
+  isInheritedFromSite,
   buildTooltipText
 } from '../../../composables/useInheritance.js';
 import {
@@ -502,6 +503,9 @@ export default {
 
     getDescriptionStatusClass(page) {
       const desc = getEffectiveDescription(page, 'meta', this.siteSettings);
+      if (isInheritedFromSite(page, 'metaDescription', this.siteSettings) && desc) {
+        return 'k-meta-kit-status-warning';
+      }
       return this.getStatusClass(page, desc?.length || 0, 'description');
     },
 
@@ -517,6 +521,9 @@ export default {
 
     getOgDescriptionStatusClass(page) {
       const desc = getEffectiveDescription(page, 'og', this.siteSettings);
+      if (isInheritedFromSite(page, 'ogDescription', this.siteSettings) && desc) {
+        return 'k-meta-kit-status-warning';
+      }
       return this.getStatusClass(page, desc?.length || 0, 'ogDescription');
     },
 
