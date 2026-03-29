@@ -177,6 +177,7 @@ export default {
       this.activeTab = 'meta';
       this.resetSaveFeedback();
       this.$refs.dialog.open();
+      document.addEventListener('keydown', this.handleKeydown);
 
       try {
         const response = await this.api.get('meta-kit/pages-with-content', {
@@ -213,6 +214,7 @@ export default {
     },
 
     close() {
+      document.removeEventListener('keydown', this.handleKeydown);
       this.resetSaveFeedback();
       this.$refs.dialog.close();
       this.pages = [];
@@ -236,6 +238,18 @@ export default {
         this.saveFeedback = { type: '', text: '' };
         this.saveFeedbackTimer = null;
       }, 3200);
+    },
+
+    handleKeydown(event) {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 's') {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (this.pages.length > 0 && this.hasAnyChanges) {
+        this.saveAll();
+      }
     },
 
     async generate(pageId, fieldName) {
@@ -309,6 +323,7 @@ export default {
     }
   },
   beforeDestroy() {
+    document.removeEventListener('keydown', this.handleKeydown);
     this.resetSaveFeedback();
   }
 };

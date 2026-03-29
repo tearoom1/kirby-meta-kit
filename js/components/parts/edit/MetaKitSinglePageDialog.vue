@@ -184,6 +184,7 @@ export default {
       this.isLoading = true;
       this.resetSaveFeedback();
       this.$refs.dialog.open();
+      document.addEventListener('keydown', this.handleKeydown);
 
       try {
         const response = await this.api.get('meta-kit/single-page', { pageId });
@@ -202,6 +203,7 @@ export default {
     },
 
     close() {
+      document.removeEventListener('keydown', this.handleKeydown);
       this.resetSaveFeedback();
       this.$refs.dialog.close();
       this.page = null;
@@ -223,6 +225,18 @@ export default {
         this.saveFeedback = { type: '', text: '' };
         this.saveFeedbackTimer = null;
       }, 3200);
+    },
+
+    handleKeydown(event) {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 's') {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (this.page && this.hasChanges) {
+        this.save();
+      }
     },
 
     async generate(fieldName) {
@@ -304,11 +318,24 @@ export default {
     editInPanel() {
       if (this.page && this.page.panelUrl) {
         this.close();
-        window.panel.view.open(this.page.panelUrl);
+        try {
+          const url = new URL(this.page.panelUrl, window.location.origin);
+          const internalPath = `${url.pathname}${url.search}${url.hash}`;
+
+          if (window.panel?.view?.open && url.origin === window.location.origin) {
+            window.panel.view.open(internalPath);
+            return;
+          }
+        } catch (error) {
+          // Fallback below if panelUrl isn't parseable
+        }
+
+        window.location.assign(this.page.panelUrl);
       }
     }
   },
   beforeDestroy() {
+    document.removeEventListener('keydown', this.handleKeydown);
     this.resetSaveFeedback();
   }
 };
