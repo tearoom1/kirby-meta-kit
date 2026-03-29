@@ -147,7 +147,7 @@ class MetaKit
      *
      * @throws Exception When the API key is missing or the API returns an error
      */
-    private function callApi(string $prompt, int $maxTokens): string
+    protected function callApi(string $prompt, int $maxTokens): string
     {
         $apiKey = $this->options['api.key'] ?? null;
 
@@ -239,46 +239,98 @@ class MetaKit
 
         try {
             $description = $this->callApi($prompt, 100);
-            return $description ? $this->sanitizeDescription($description, $fieldType, $template) : null;
+            if (!$description) {
+                return null;
+            }
+
+            $normalizedDescription = $this->normalizeGeneratedText($description);
+            $optimalMin = $ranges['optimal']['min'] ?? 140;
+            $optimalMax = $ranges['optimal']['max'] ?? 160;
+
+            $attempts = 0;
+            while (
+                $attempts < 2 &&
+                !$this->isWithinOptimalRange($normalizedDescription, $optimalMin, $optimalMax)
+            ) {
+                $retryPrompt = $this->buildDescriptionRetryPrompt(
+                    $contentPreview,
+                    $languageName,
+                    $normalizedDescription,
+                    $optimalMin,
+                    $optimalMax
+                );
+
+                $description = $this->callApi($retryPrompt, 100);
+                if (!$description) {
+                    break;
+                }
+
+                $normalizedDescription = $this->normalizeGeneratedText($description);
+                $attempts++;
+            }
+
+            return $this->sanitizeDescription($normalizedDescription, $fieldType, $template);
         } catch (\Exception $e) {
             kirbylog('Meta Kit Error: ' . $e->getMessage());
             throw $e;
         }
     }
 
+    protected function normalizeGeneratedText(string $text): string
+    {
+        $text = strip_tags($text);
+        $text = preg_replace('/\s+/', ' ', $text);
+        return trim($text, " \t\n\r\0\x0B\"'`");
+    }
+
+    protected function isWithinOptimalRange(string $text, int $optimalMin, int $optimalMax): bool
+    {
+        $length = mb_strlen($text);
+        return $length >= $optimalMin && $length <= $optimalMax;
+    }
+
+    protected function buildDescriptionRetryPrompt(
+        string $contentPreview,
+        string $languageName,
+        string $currentDescription,
+        int $optimalMin,
+        int $optimalMax
+    ): string {
+        $currentLength = mb_strlen($currentDescription);
+
+        return "Rewrite this meta description in {$languageName} so it is between {$optimalMin} and {$optimalMax} characters.\n\n" .
+            "Current description ({$currentLength} characters):\n{$currentDescription}\n\n" .
+            "Source content:\n{$contentPreview}\n\n" .
+            "Keep the meaning specific and factual. Avoid filler. Do not explain your changes. " .
+            "Return ONLY the rewritten description.";
+    }
+
+    protected function truncateDescriptionToLength(string $description, int $maxLength): string
+    {
+        $shortened = mb_substr($description, 0, $maxLength);
+
+        if (preg_match('/^(.+[.!?])(?:\s|$)/u', $shortened, $matches)) {
+            return trim($matches[1]);
+        }
+
+        $lastSpace = mb_strrpos($shortened, ' ');
+
+        if ($lastSpace !== false && $lastSpace > $maxLength * 0.75) {
+            return rtrim(mb_substr($shortened, 0, $lastSpace), ',-:; ');
+        }
+
+        return rtrim($shortened, ',-:; ');
+    }
+
     protected function sanitizeDescription(string $description, string $fieldType = 'description', ?string $template = null): string
     {
-        $description = strip_tags($description);
-        $description = preg_replace('/\s+/', ' ', $description);
-        $description = trim($description, " \t\n\r\0\x0B\"'`");
+        $description = $this->normalizeGeneratedText($description);
 
         // Get validation ranges for this field type and template
         $ranges = $this->getValidationRanges($fieldType, $template);
         $maxLength = $ranges['optimal']['max'] ?? 160;
-        $flexibleLength = $maxLength + 20; // Allow up to 20 extra chars
-
-        if (mb_strlen($description) > $flexibleLength) {
-            // Only truncate if significantly over limit
-            $shortened = mb_substr($description, 0, $maxLength);
-
-            // Look for last sentence ending (. ! ?) within reasonable range
-            if (preg_match('/^(.+[.!?])(?:\s|$)/u', $shortened, $matches)) {
-                $description = $matches[1];
-            } else {
-                // No sentence boundary, look for last word boundary
-                $lastSpace = mb_strrpos($shortened, ' ');
-
-                if ($lastSpace !== false && $lastSpace > $maxLength * 0.8) {
-                    // Cut at last space (but only if we're not losing too much text)
-                    $description = mb_substr($shortened, 0, $lastSpace);
-
-                    // Clean up trailing punctuation if incomplete
-                    $description = rtrim($description, ',-:;');
-                } else {
-                    // Fallback: hard cut at word boundary
-                    $description = $shortened;
-                }
-            }
+        if (mb_strlen($description) > $maxLength) {
+            $description = $this->truncateDescriptionToLength($description, $maxLength);
         }
 
         return $description;

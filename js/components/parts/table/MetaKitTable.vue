@@ -19,7 +19,7 @@
         <th v-if="!showPreview">Meta Desc.</th>
         <th v-if="!showPreview">OG Title</th>
         <th v-if="!showPreview">OG Desc.</th>
-        <th>OG Image</th>
+        <th>OG Img.</th>
         <th v-if="!showPreview && previewMode === 'meta'">Robots</th>
         <th>Actions</th>
       </tr>

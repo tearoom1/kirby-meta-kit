@@ -146,6 +146,60 @@ class MetaKitCoreTest extends KirbyTestCase
         $this->assertEquals('de', $kirby->language()->code());
     }
 
+    public function testSanitizeDescriptionTrimsWarningLengthBackToOptimalMax(): void
+    {
+        $kirby = $this->makeKirby([
+            'site.txt' => "Title: Test Site",
+        ]);
+
+        $metaKit = new MetaKit($kirby);
+        $reflection = new \ReflectionClass(MetaKit::class);
+        $method = $reflection->getMethod('sanitizeDescription');
+
+        $description = 'This meta description is intentionally a bit too long for the optimal range, but it should still be trimmed back cleanly at a word boundary without sounding broken or abrupt.';
+        $sanitized = $method->invoke($metaKit, $description, 'description', null);
+
+        $this->assertLessThanOrEqual(160, mb_strlen($sanitized));
+        $this->assertNotSame($description, $sanitized);
+        $this->assertDoesNotMatchRegularExpression('/[,:;\-]$/', $sanitized);
+    }
+
+    public function testGenerateDescriptionRetriesWhenFirstDraftIsTooLong(): void
+    {
+        $kirby = $this->makeKirby([
+            'site.txt' => "Title: Test Site",
+        ]);
+
+        $metaKit = new class($kirby) extends MetaKit
+        {
+            public array $prompts = [];
+            private array $responses = [
+                'This meta description is too long for the optimal range because it keeps going with extra detail that should trigger a rewrite attempt before the plugin accepts it.',
+                'Clear summary of the page content with a tighter, properly sized description that stays concise, specific, useful, and comfortably within the ideal length range.'
+            ];
+
+            protected function callApi(string $prompt, int $maxTokens): string
+            {
+                $this->prompts[] = $prompt;
+                return array_shift($this->responses) ?? '';
+            }
+        };
+
+        $description = $metaKit->generateDescription(
+            'This page explains the most important content in a straightforward way.',
+            ['language' => 'en', 'fieldType' => 'description']
+        );
+
+        $this->assertGreaterThanOrEqual(2, count($metaKit->prompts));
+        $this->assertStringContainsString('Rewrite this meta description', $metaKit->prompts[1]);
+        $this->assertLessThanOrEqual(160, mb_strlen($description));
+        $this->assertGreaterThanOrEqual(140, mb_strlen($description));
+        $this->assertStringStartsWith(
+            'Clear summary of the page content with a tighter, properly sized description',
+            $description
+        );
+    }
+
     private function resetAiEnabledCache(): void
     {
         $reflection = new \ReflectionClass(MetaKit::class);
