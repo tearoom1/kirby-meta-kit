@@ -55,6 +55,7 @@ export function isOgDescriptionInherited(page, siteSettings) {
 export function getEffectiveTitle(page, type = 'meta') {
   const isOg = type === 'og';
   const inheritance = isOg ? page.ogTitleInheritance : page.metaTitleInheritance;
+  const inheritedMetaTitle = page.metaTitleInheritance?.inheritedValue || null;
 
   // Check for language inheritance first
   if (inheritance?.inherited && inheritance.inheritedValue) {
@@ -62,10 +63,10 @@ export function getEffectiveTitle(page, type = 'meta') {
   }
 
   if (isOg) {
-    return page.hasOgTitle ? page.ogTitle : (page.hasMetaTitle ? page.metaTitle : page.title);
+    return page.hasOgTitle ? page.ogTitle : ((page.hasMetaTitle ? page.metaTitle : inheritedMetaTitle) || page.title);
   }
 
-  return page.hasMetaTitle ? page.metaTitle : page.title;
+  return (page.hasMetaTitle ? page.metaTitle : inheritedMetaTitle) || page.title;
 }
 
 /**
@@ -78,6 +79,7 @@ export function getEffectiveTitle(page, type = 'meta') {
 export function getEffectiveDescription(page, type = 'meta', siteSettings = {}) {
   const isOg = type === 'og';
   const inheritance = isOg ? page.ogDescriptionInheritance : page.metaDescriptionInheritance;
+  const inheritedMetaDescription = page.metaDescriptionInheritance?.inheritedValue || null;
 
   // Check for language inheritance first
   if (inheritance?.inherited && inheritance.inheritedValue) {
@@ -86,11 +88,11 @@ export function getEffectiveDescription(page, type = 'meta', siteSettings = {}) 
 
   if (isOg) {
     if (page.hasOgDescription) return page.ogDescription;
-    if (page.hasMetaDescription) return page.metaDescription;
+    if (page.hasMetaDescription || inheritedMetaDescription) return page.metaDescription || inheritedMetaDescription;
     return siteSettings?.siteMetaDescription || null;
   }
 
-  return page.hasMetaDescription ? page.metaDescription : (siteSettings?.siteMetaDescription || null);
+  return (page.hasMetaDescription ? page.metaDescription : inheritedMetaDescription) || siteSettings?.siteMetaDescription || null;
 }
 
 /**
@@ -101,6 +103,8 @@ export function getEffectiveDescription(page, type = 'meta', siteSettings = {}) 
  * @returns {string|false} Source name or false if not inherited
  */
 export function getInheritanceSource(page, fieldType, siteSettings = {}) {
+  const hasInheritedMetaTitle = !!page.metaTitleInheritance?.inheritedValue;
+  const hasInheritedMetaDescription = !!page.metaDescriptionInheritance?.inheritedValue;
   const inheritanceMap = {
     metaTitle: page.metaTitleInheritance,
     metaDescription: page.metaDescriptionInheritance,
@@ -128,13 +132,13 @@ export function getInheritanceSource(page, fieldType, siteSettings = {}) {
 
     case 'ogTitle':
       if (!page.hasOgTitle) {
-        return page.hasMetaTitle ? 'meta title' : 'page title';
+        return (page.hasMetaTitle || hasInheritedMetaTitle) ? 'meta title' : 'page title';
       }
       return false;
 
     case 'ogDescription':
       if (!page.hasOgDescription) {
-        if (page.hasMetaDescription) return 'meta description';
+        if (page.hasMetaDescription || hasInheritedMetaDescription) return 'meta description';
         if (siteSettings?.siteMetaDescription) return 'site';
       }
       return false;
@@ -177,22 +181,22 @@ export function isInheritedFromLanguage(page, fieldType, siteSettings = {}) {
  */
 export function buildTooltipText(content, inheritanceSource, showContent = true, maxLength = 200) {
   let text = content || '';
-  let prefix = '';
+  const knownFallbackSources = new Set(['site', 'page title', 'meta title', 'meta description']);
+  const shouldShowSource = inheritanceSource && knownFallbackSources.has(inheritanceSource);
 
   if (text && text.length > maxLength) {
     text = text.substring(0, maxLength) + '...';
   }
 
-  if (inheritanceSource) {
-    prefix = 'Inherited from ' + inheritanceSource;
-  }
-
   if (showContent) {
-    text = (inheritanceSource ? ':\n\n' : '') + text;
-    return prefix + text;
+    if (shouldShowSource) {
+      return `${text}\n\nSource: ${inheritanceSource}`;
+    }
+
+    return text;
   }
 
-  return prefix;
+  return shouldShowSource ? `Source: ${inheritanceSource}` : '';
 }
 
 export default {

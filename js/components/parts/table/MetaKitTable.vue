@@ -285,6 +285,7 @@ import {
   isDescriptionInherited,
   isOgTitleInherited,
   isOgDescriptionInherited,
+  getEffectiveTitle,
   getEffectiveDescription,
   getInheritanceSource,
   isInheritedFromSite,
@@ -445,7 +446,44 @@ export default {
     },
 
     combineReasonParts(...reasons) {
-      return reasons.filter(Boolean).join('\n\n');
+      const grouped = {
+        error: [],
+        warning: [],
+        info: []
+      };
+
+      reasons.filter(Boolean).forEach((reason) => {
+        const severity = this.getReasonSeverity(reason);
+        const body = reason.replace(/^(Warning|Error):\n?/, '').trim();
+
+        if (severity === 'error') {
+          grouped.error.push(body);
+          return;
+        }
+
+        if (severity === 'warning') {
+          grouped.warning.push(body);
+          return;
+        }
+
+        grouped.info.push(reason.trim());
+      });
+
+      const sections = [];
+
+      if (grouped.error.length > 0) {
+        sections.push(`Error:\n${grouped.error.join('\n')}`);
+      }
+
+      if (grouped.warning.length > 0) {
+        sections.push(`Warning:\n${grouped.warning.join('\n')}`);
+      }
+
+      if (grouped.info.length > 0) {
+        sections.push(grouped.info.join('\n\n'));
+      }
+
+      return sections.join('\n\n');
     },
 
     getInheritanceWarningReason(page, fieldType) {
@@ -506,7 +544,7 @@ export default {
       if (!page.title && !page.ogTitle && !page.metaTitle) return 'No OG title';
       if (page.id === 'site') {
         const source = getInheritanceSource(page, 'ogTitle', this.siteSettings);
-        const content = page.hasOgTitle ? page.ogTitle : (page.hasMetaTitle ? page.metaTitle : page.title);
+        const content = getEffectiveTitle(page, 'og');
         const base = this.tooltipText(content, source, showContent);
         const inheritanceReason = this.getInheritanceWarningReason(page, 'ogTitle');
         const lengthReason = this.getLengthValidationReason(page, 'ogTitle', this.getTitleLength(page, 'og'));

@@ -175,6 +175,14 @@ test('getEffectiveTitle returns language-inherited value when set', () => {
   assert.equal(getEffectiveTitle(pageWithLanguageInheritance, 'og'), 'News EN OG Title');
 });
 
+test('getEffectiveTitle falls back to inherited meta title for OG when no explicit OG title exists', () => {
+  const page = {
+    ...pageWithLanguageInheritance,
+    ogTitleInheritance: { inherited: false }
+  };
+  assert.equal(getEffectiveTitle(page, 'og'), 'News EN Title');
+});
+
 // ─── getEffectiveDescription ──────────────────────────────────────────────────
 
 test('getEffectiveDescription returns meta description when set', () => {
@@ -201,6 +209,17 @@ test('getEffectiveDescription falls back meta → site for OG type', () => {
 test('getEffectiveDescription returns language-inherited value when set', () => {
   assert.equal(
     getEffectiveDescription(pageWithLanguageInheritance, 'meta', emptySiteSettings),
+    'News EN Description'
+  );
+});
+
+test('getEffectiveDescription falls back to inherited meta description for OG when no explicit OG description exists', () => {
+  const page = {
+    ...pageWithLanguageInheritance,
+    ogDescriptionInheritance: { inherited: false }
+  };
+  assert.equal(
+    getEffectiveDescription(page, 'og', emptySiteSettings),
     'News EN Description'
   );
 });
@@ -270,15 +289,20 @@ test('buildTooltipText returns content without prefix when no inheritance', () =
   assert.equal(buildTooltipText('Hello world', false, true), 'Hello world');
 });
 
-test('buildTooltipText prepends inherited-from prefix when inheritance exists', () => {
+test('buildTooltipText appends source details below content for known fallback sources', () => {
   const result = buildTooltipText('Hello world', 'page title', true);
-  assert.ok(result.startsWith('Inherited from page title'));
-  assert.ok(result.includes('Hello world'));
+  assert.ok(result.startsWith('Hello world'));
+  assert.ok(result.includes('Source: page title'));
 });
 
-test('buildTooltipText omits content when showContent is false', () => {
+test('buildTooltipText omits source line for language inheritance to avoid repetition', () => {
+  const result = buildTooltipText('Hello world', 'English', true);
+  assert.equal(result, 'Hello world');
+});
+
+test('buildTooltipText returns source-only details when content is hidden', () => {
   const result = buildTooltipText('Hello world', 'site', false);
-  assert.equal(result, 'Inherited from site');
+  assert.equal(result, 'Source: site');
   assert.ok(!result.includes('Hello world'));
 });
 

@@ -788,30 +788,37 @@ Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
     return page.hasMetaDescription || !!(siteSettings == null ? void 0 : siteSettings.siteMetaDescription);
   }
   function getEffectiveTitle(page, type = "meta") {
+    var _a;
     const isOg = type === "og";
     const inheritance = isOg ? page.ogTitleInheritance : page.metaTitleInheritance;
+    const inheritedMetaTitle = ((_a = page.metaTitleInheritance) == null ? void 0 : _a.inheritedValue) || null;
     if ((inheritance == null ? void 0 : inheritance.inherited) && inheritance.inheritedValue) {
       return inheritance.inheritedValue;
     }
     if (isOg) {
-      return page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
+      return page.hasOgTitle ? page.ogTitle : (page.hasMetaTitle ? page.metaTitle : inheritedMetaTitle) || page.title;
     }
-    return page.hasMetaTitle ? page.metaTitle : page.title;
+    return (page.hasMetaTitle ? page.metaTitle : inheritedMetaTitle) || page.title;
   }
   function getEffectiveDescription(page, type = "meta", siteSettings = {}) {
+    var _a;
     const isOg = type === "og";
     const inheritance = isOg ? page.ogDescriptionInheritance : page.metaDescriptionInheritance;
+    const inheritedMetaDescription = ((_a = page.metaDescriptionInheritance) == null ? void 0 : _a.inheritedValue) || null;
     if ((inheritance == null ? void 0 : inheritance.inherited) && inheritance.inheritedValue) {
       return inheritance.inheritedValue;
     }
     if (isOg) {
       if (page.hasOgDescription) return page.ogDescription;
-      if (page.hasMetaDescription) return page.metaDescription;
+      if (page.hasMetaDescription || inheritedMetaDescription) return page.metaDescription || inheritedMetaDescription;
       return (siteSettings == null ? void 0 : siteSettings.siteMetaDescription) || null;
     }
-    return page.hasMetaDescription ? page.metaDescription : (siteSettings == null ? void 0 : siteSettings.siteMetaDescription) || null;
+    return (page.hasMetaDescription ? page.metaDescription : inheritedMetaDescription) || (siteSettings == null ? void 0 : siteSettings.siteMetaDescription) || null;
   }
   function getInheritanceSource(page, fieldType, siteSettings = {}) {
+    var _a, _b;
+    const hasInheritedMetaTitle = !!((_a = page.metaTitleInheritance) == null ? void 0 : _a.inheritedValue);
+    const hasInheritedMetaDescription = !!((_b = page.metaDescriptionInheritance) == null ? void 0 : _b.inheritedValue);
     const inheritanceMap = {
       metaTitle: page.metaTitleInheritance,
       metaDescription: page.metaDescriptionInheritance,
@@ -832,12 +839,12 @@ Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
         return false;
       case "ogTitle":
         if (!page.hasOgTitle) {
-          return page.hasMetaTitle ? "meta title" : "page title";
+          return page.hasMetaTitle || hasInheritedMetaTitle ? "meta title" : "page title";
         }
         return false;
       case "ogDescription":
         if (!page.hasOgDescription) {
-          if (page.hasMetaDescription) return "meta description";
+          if (page.hasMetaDescription || hasInheritedMetaDescription) return "meta description";
           if (siteSettings == null ? void 0 : siteSettings.siteMetaDescription) return "site";
         }
         return false;
@@ -854,18 +861,20 @@ Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
   }
   function buildTooltipText(content, inheritanceSource, showContent = true, maxLength = 200) {
     let text = content || "";
-    let prefix = "";
+    const knownFallbackSources = /* @__PURE__ */ new Set(["site", "page title", "meta title", "meta description"]);
+    const shouldShowSource = inheritanceSource && knownFallbackSources.has(inheritanceSource);
     if (text && text.length > maxLength) {
       text = text.substring(0, maxLength) + "...";
     }
-    if (inheritanceSource) {
-      prefix = "Inherited from " + inheritanceSource;
-    }
     if (showContent) {
-      text = (inheritanceSource ? ":\n\n" : "") + text;
-      return prefix + text;
+      if (shouldShowSource) {
+        return `${text}
+
+Source: ${inheritanceSource}`;
+      }
+      return text;
     }
-    return prefix;
+    return shouldShowSource ? `Source: ${inheritanceSource}` : "";
   }
   function shouldAppendSiteName$1(siteSettings = {}, type = "meta") {
     const appendSiteName = !!siteSettings.appendSiteName;
@@ -1060,7 +1069,37 @@ ${reason}`;
         return "";
       },
       combineReasonParts(...reasons) {
-        return reasons.filter(Boolean).join("\n\n");
+        const grouped = {
+          error: [],
+          warning: [],
+          info: []
+        };
+        reasons.filter(Boolean).forEach((reason) => {
+          const severity = this.getReasonSeverity(reason);
+          const body = reason.replace(/^(Warning|Error):\n?/, "").trim();
+          if (severity === "error") {
+            grouped.error.push(body);
+            return;
+          }
+          if (severity === "warning") {
+            grouped.warning.push(body);
+            return;
+          }
+          grouped.info.push(reason.trim());
+        });
+        const sections = [];
+        if (grouped.error.length > 0) {
+          sections.push(`Error:
+${grouped.error.join("\n")}`);
+        }
+        if (grouped.warning.length > 0) {
+          sections.push(`Warning:
+${grouped.warning.join("\n")}`);
+        }
+        if (grouped.info.length > 0) {
+          sections.push(grouped.info.join("\n\n"));
+        }
+        return sections.join("\n\n");
       },
       getInheritanceWarningReason(page, fieldType) {
         if (isInheritedFromLanguage(page, fieldType, this.siteSettings)) {
@@ -1103,7 +1142,7 @@ ${reason}`;
         if (!page.title && !page.ogTitle && !page.metaTitle) return "No OG title";
         if (page.id === "site") {
           const source2 = getInheritanceSource(page, "ogTitle", this.siteSettings);
-          const content = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
+          const content = getEffectiveTitle(page, "og");
           const base2 = this.tooltipText(content, source2, showContent);
           const inheritanceReason2 = this.getInheritanceWarningReason(page, "ogTitle");
           const lengthReason2 = this.getLengthValidationReason(page, "ogTitle", this.getTitleLength(page, "og"));

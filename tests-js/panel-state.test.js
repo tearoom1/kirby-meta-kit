@@ -225,7 +225,11 @@ test('filterPages treats main-language inherited meta title and description as w
       metaTitleInheritance: { inherited: true, inheritedFrom: 'en', inheritedValue: 'English title fallback' },
       hasMetaDescription: false,
       metaDescription: null,
-      metaDescriptionInheritance: { inherited: true, inheritedFrom: 'en', inheritedValue: 'English description fallback for translated page' },
+      metaDescriptionInheritance: {
+        inherited: true,
+        inheritedFrom: 'en',
+        inheritedValue: 'English description fallback for the translated page that is long enough to stay comfortably inside the configured OG description warning range for this regression test.'
+      },
       hasOgTitle: true,
       ogTitle: 'OG title',
       hasOgDescription: true,
