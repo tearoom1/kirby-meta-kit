@@ -58,52 +58,114 @@
 
       <div v-if="isDropdownOpen" class="k-meta-kit-filter-dropdown-content">
         <div class="k-meta-kit-filter-group">
+          <div class="k-meta-kit-filter-group-title">State</div>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="attention"
+              :checked="isFilterActive('attention')"
+              @change="toggleFilter('attention')"
+            />
+            <span>Needs Attention</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="good"
+              :checked="isFilterActive('good')"
+              @change="toggleFilter('good')"
+            />
+            <span>Good</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="warning"
+              :checked="isFilterActive('warning')"
+              @change="toggleFilter('warning')"
+            />
+            <span>Warnings</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="error"
+              :checked="isFilterActive('error')"
+              @change="toggleFilter('error')"
+            />
+            <span>Fixes</span>
+          </label>
+        </div>
+
+        <div class="k-meta-kit-filter-group">
+          <div class="k-meta-kit-filter-group-title">Fields</div>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-description"
+              :checked="isFilterActive('type-description')"
+              @change="toggleFilter('type-description')"
+            />
+            <span>Meta Description</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-title"
+              :checked="isFilterActive('type-title')"
+              @change="toggleFilter('type-title')"
+            />
+            <span>Meta Title</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-og-description"
+              :checked="isFilterActive('type-og-description')"
+              @change="toggleFilter('type-og-description')"
+            />
+            <span>OG Description</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-og-title"
+              :checked="isFilterActive('type-og-title')"
+              @change="toggleFilter('type-og-title')"
+            />
+            <span>OG Title</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-og-image"
+              :checked="isFilterActive('type-og-image')"
+              @change="toggleFilter('type-og-image')"
+            />
+            <span>OG Image</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-slug"
+              :checked="isFilterActive('type-slug')"
+              @change="toggleFilter('type-slug')"
+            />
+            <span>Slug</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-noindex"
+              :checked="isFilterActive('type-noindex')"
+              @change="toggleFilter('type-noindex')"
+            />
+            <span>Noindex</span>
+          </label>
+        </div>
+
+        <div class="k-meta-kit-filter-group">
           <div class="k-meta-kit-filter-group-title">Metadata</div>
-          <label class="k-meta-kit-filter-option">
-            <input
-              type="checkbox"
-              value="missing-title"
-              :checked="isFilterActive('missing-title')"
-              @change="toggleFilter('missing-title')"
-            />
-            <span>Missing Title</span>
-          </label>
-          <label class="k-meta-kit-filter-option">
-            <input
-              type="checkbox"
-              value="missing-description"
-              :checked="isFilterActive('missing-description')"
-              @change="toggleFilter('missing-description')"
-            />
-            <span>Missing Description</span>
-          </label>
-          <label class="k-meta-kit-filter-option">
-            <input
-              type="checkbox"
-              value="missing-og-title"
-              :checked="isFilterActive('missing-og-title')"
-              @change="toggleFilter('missing-og-title')"
-            />
-            <span>Missing OG Title</span>
-          </label>
-          <label class="k-meta-kit-filter-option">
-            <input
-              type="checkbox"
-              value="missing-og-description"
-              :checked="isFilterActive('missing-og-description')"
-              @change="toggleFilter('missing-og-description')"
-            />
-            <span>Missing OG Description</span>
-          </label>
-          <label class="k-meta-kit-filter-option">
-            <input
-              type="checkbox"
-              value="missing-og-image"
-              :checked="isFilterActive('missing-og-image')"
-              @change="toggleFilter('missing-og-image')"
-            />
-            <span>Missing OG Image</span>
-          </label>
           <label class="k-meta-kit-filter-option">
             <input
               type="checkbox"
@@ -112,15 +174,6 @@
               @change="toggleFilter('complete')"
             />
             <span>Complete Metadata</span>
-          </label>
-          <label class="k-meta-kit-filter-option">
-            <input
-              type="checkbox"
-              value="noindex"
-              :checked="isFilterActive('noindex')"
-              @change="toggleFilter('noindex')"
-            />
-            <span>Noindex</span>
           </label>
         </div>
 
@@ -167,6 +220,17 @@
 </template>
 
 <script>
+const STATE_FILTERS = new Set(['attention', 'good', 'warning', 'error']);
+const TYPE_FILTERS = new Set([
+  'type-slug',
+  'type-title',
+  'type-description',
+  'type-og-title',
+  'type-og-description',
+  'type-og-image',
+  'type-noindex'
+]);
+
 export default {
   props: {
     showPreview: {
@@ -207,6 +271,13 @@ export default {
         filters.splice(index, 1);
       } else {
         filters.push(filter);
+      }
+
+      const hasStateFilter = filters.some((activeFilter) => STATE_FILTERS.has(activeFilter));
+      const typeFilterCount = filters.filter((activeFilter) => TYPE_FILTERS.has(activeFilter)).length;
+
+      if (hasStateFilter && typeFilterCount === 0) {
+        filters.push('type-description');
       }
 
       this.$emit('update:active-filters', filters);

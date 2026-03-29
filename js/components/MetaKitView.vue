@@ -252,7 +252,10 @@ export default {
   },
   computed: {
     filteredPages() {
-      return filterPages(this.pagesData, this.activeFilters, this.searchQuery);
+      return filterPages(this.pagesData, this.activeFilters, this.searchQuery, {
+        siteSettings: this.siteSettingsData,
+        validationSettings: this.validationSettingsData
+      });
     },
     paginatedPages() {
       return paginatePages(this.filteredPages, this.currentPage, this.pageSize);

@@ -81,6 +81,133 @@ test('filterPages applies case-insensitive search across fields', () => {
   assert.deepEqual(result.map((p) => p.id), ['drafts/post-c']);
 });
 
+test('filterPages supports attention, warning and error filters', () => {
+  const attentionPages = [
+    {
+      id: 'alpha',
+      title: 'Alpha landing page',
+      template: 'default',
+      status: 'listed',
+      hasMetaTitle: true,
+      metaTitle: 'Strong landing title',
+      hasMetaDescription: false,
+      metaDescription: '',
+      hasOgTitle: true,
+      ogTitle: 'Strong OG title',
+      hasOgDescription: false,
+      ogDescription: '',
+      hasOgImage: false,
+      robots: ''
+    },
+    {
+      id: 'beta',
+      title: 'Beta landing page',
+      template: 'default',
+      status: 'listed',
+      hasMetaTitle: true,
+      metaTitle: 'Another strong title',
+      hasMetaDescription: false,
+      metaDescription: '',
+      hasOgTitle: true,
+      ogTitle: 'Another OG title',
+      hasOgDescription: false,
+      ogDescription: '',
+      hasOgImage: true,
+      robots: 'noindex, follow'
+    },
+    {
+      id: 'gamma',
+      title: 'Gamma landing page',
+      template: 'default',
+      status: 'listed',
+      hasMetaTitle: true,
+      metaTitle: 'Gamma strong title',
+      hasMetaDescription: true,
+      metaDescription: 'Gamma has a unique description',
+      hasOgTitle: true,
+      ogTitle: 'Gamma OG title',
+      hasOgDescription: true,
+      ogDescription: 'Gamma OG description',
+      hasOgImage: true,
+      robots: ''
+    },
+    {
+      id: 'one/two/three/four/five',
+      title: 'Delta landing page',
+      template: 'default',
+      status: 'listed',
+      hasMetaTitle: true,
+      metaTitle: 'Delta strong title',
+      hasMetaDescription: true,
+      metaDescription: 'Delta has a unique description',
+      hasOgTitle: true,
+      ogTitle: 'Delta OG title',
+      hasOgDescription: true,
+      ogDescription: 'Delta OG description',
+      hasOgImage: true,
+      robots: ''
+    }
+  ];
+
+  const context = {
+    siteSettings: {
+      siteMetaDescription: 'Fallback site description',
+      appendSiteName: false,
+      siteHasOgImage: true
+    },
+    validationSettings: {
+      ranges: {
+        title: {
+          optimal: { min: 1, max: 120 },
+          warning: { min: 1, max: 140 }
+        },
+        ogTitle: {
+          optimal: { min: 1, max: 120 },
+          warning: { min: 1, max: 140 }
+        },
+        description: {
+          optimal: { min: 1, max: 220 },
+          warning: { min: 1, max: 260 }
+        },
+        ogDescription: {
+          optimal: { min: 1, max: 220 },
+          warning: { min: 1, max: 260 }
+        }
+      }
+    }
+  };
+
+  assert.deepEqual(
+    filterPages(attentionPages, ['attention'], '', context).map((p) => p.id),
+    ['alpha', 'beta', 'one/two/three/four/five']
+  );
+
+  assert.deepEqual(
+    filterPages(attentionPages, ['warning'], '', context).map((p) => p.id),
+    ['alpha', 'beta']
+  );
+
+  assert.deepEqual(
+    filterPages(attentionPages, ['error'], '', context).map((p) => p.id),
+    ['one/two/three/four/five']
+  );
+
+  assert.deepEqual(
+    filterPages(attentionPages, ['warning', 'type-description'], '', context).map((p) => p.id),
+    ['alpha', 'beta']
+  );
+
+  assert.deepEqual(
+    filterPages(attentionPages, ['warning', 'type-og-image'], '', context).map((p) => p.id),
+    ['alpha']
+  );
+
+  assert.deepEqual(
+    filterPages(attentionPages, ['good', 'type-description'], '', context).map((p) => p.id),
+    ['gamma', 'one/two/three/four/five']
+  );
+});
+
 test('pagination helpers compute slices and total pages', () => {
   const filtered = filterPages(pages, [], '');
   assert.equal(getTotalPages(filtered, 2), 2);
@@ -140,4 +267,3 @@ test('change detection helpers cover popup edit scenarios', () => {
 
   assert.equal(hasAnyBulkChanges(bulkPages, editedFields), true);
 });
-

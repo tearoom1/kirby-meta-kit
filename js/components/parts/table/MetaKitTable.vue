@@ -448,7 +448,11 @@ export default {
     getOgTitleTooltip(page, showContent = true) {
       if (!page.title && !page.ogTitle && !page.metaTitle) return 'No OG title';
       if (page.id === 'site') {
-        return showContent ? (page.hasOgTitle ? page.ogTitle : page.title) : '';
+        const source = getInheritanceSource(page, 'ogTitle', this.siteSettings);
+        const content = page.hasOgTitle ? page.ogTitle : (page.hasMetaTitle ? page.metaTitle : page.title);
+        const base = this.tooltipText(content, source, showContent);
+        const reason = this.getLengthValidationReason(page, 'ogTitle', this.getTitleLength(page, 'og'));
+        return this.joinTooltipParts(base, reason);
       }
 
       const source = getInheritanceSource(page, 'ogTitle', this.siteSettings);

@@ -458,6 +458,16 @@
   );
   __component__$c.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/table/MetaKitStats.vue";
   const MetaKitStats = __component__$c.exports;
+  const STATE_FILTERS = /* @__PURE__ */ new Set(["attention", "good", "warning", "error"]);
+  const TYPE_FILTERS$1 = /* @__PURE__ */ new Set([
+    "type-slug",
+    "type-title",
+    "type-description",
+    "type-og-title",
+    "type-og-description",
+    "type-og-image",
+    "type-noindex"
+  ]);
   const _sfc_main$b = {
     props: {
       showPreview: {
@@ -498,6 +508,11 @@
         } else {
           filters.push(filter);
         }
+        const hasStateFilter = filters.some((activeFilter) => STATE_FILTERS.has(activeFilter));
+        const typeFilterCount = filters.filter((activeFilter) => TYPE_FILTERS$1.has(activeFilter)).length;
+        if (hasStateFilter && typeFilterCount === 0) {
+          filters.push("type-description");
+        }
         this.$emit("update:active-filters", filters);
       },
       clearFilters() {
@@ -529,21 +544,31 @@
       return _vm.$emit("update:search-query", $event);
     } } }), _vm.searchQuery ? _c("button", { staticClass: "k-meta-kit-search-clear", attrs: { "title": "Clear search" }, on: { "click": function($event) {
       return _vm.$emit("update:search-query", "");
-    } } }, [_c("k-icon", { attrs: { "type": "cancel" } })], 1) : _vm._e()], 1), _c("div", { staticClass: "k-meta-kit-filter-dropdown" }, [_c("button", { staticClass: "k-meta-kit-filter-button", class: { "active": _vm.isDropdownOpen || _vm.activeFilters.length > 0 }, on: { "click": _vm.toggleFilterDropdown } }, [_c("k-icon", { attrs: { "type": "filter" } }), _c("span", [_vm._v("Filters")]), _vm.activeFilters.length > 0 ? _c("span", { staticClass: "k-meta-kit-filter-count" }, [_vm._v(_vm._s(_vm.activeFilters.length))]) : _vm._e(), _c("k-icon", { attrs: { "type": _vm.isDropdownOpen ? "angle-up" : "angle-down" } })], 1), _vm.isDropdownOpen ? _c("div", { staticClass: "k-meta-kit-filter-dropdown-content" }, [_c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("Metadata")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "missing-title" }, domProps: { "checked": _vm.isFilterActive("missing-title") }, on: { "change": function($event) {
-      return _vm.toggleFilter("missing-title");
-    } } }), _c("span", [_vm._v("Missing Title")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "missing-description" }, domProps: { "checked": _vm.isFilterActive("missing-description") }, on: { "change": function($event) {
-      return _vm.toggleFilter("missing-description");
-    } } }), _c("span", [_vm._v("Missing Description")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "missing-og-title" }, domProps: { "checked": _vm.isFilterActive("missing-og-title") }, on: { "change": function($event) {
-      return _vm.toggleFilter("missing-og-title");
-    } } }), _c("span", [_vm._v("Missing OG Title")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "missing-og-description" }, domProps: { "checked": _vm.isFilterActive("missing-og-description") }, on: { "change": function($event) {
-      return _vm.toggleFilter("missing-og-description");
-    } } }), _c("span", [_vm._v("Missing OG Description")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "missing-og-image" }, domProps: { "checked": _vm.isFilterActive("missing-og-image") }, on: { "change": function($event) {
-      return _vm.toggleFilter("missing-og-image");
-    } } }), _c("span", [_vm._v("Missing OG Image")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "complete" }, domProps: { "checked": _vm.isFilterActive("complete") }, on: { "change": function($event) {
+    } } }, [_c("k-icon", { attrs: { "type": "cancel" } })], 1) : _vm._e()], 1), _c("div", { staticClass: "k-meta-kit-filter-dropdown" }, [_c("button", { staticClass: "k-meta-kit-filter-button", class: { "active": _vm.isDropdownOpen || _vm.activeFilters.length > 0 }, on: { "click": _vm.toggleFilterDropdown } }, [_c("k-icon", { attrs: { "type": "filter" } }), _c("span", [_vm._v("Filters")]), _vm.activeFilters.length > 0 ? _c("span", { staticClass: "k-meta-kit-filter-count" }, [_vm._v(_vm._s(_vm.activeFilters.length))]) : _vm._e(), _c("k-icon", { attrs: { "type": _vm.isDropdownOpen ? "angle-up" : "angle-down" } })], 1), _vm.isDropdownOpen ? _c("div", { staticClass: "k-meta-kit-filter-dropdown-content" }, [_c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("State")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "attention" }, domProps: { "checked": _vm.isFilterActive("attention") }, on: { "change": function($event) {
+      return _vm.toggleFilter("attention");
+    } } }), _c("span", [_vm._v("Needs Attention")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "good" }, domProps: { "checked": _vm.isFilterActive("good") }, on: { "change": function($event) {
+      return _vm.toggleFilter("good");
+    } } }), _c("span", [_vm._v("Good")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "warning" }, domProps: { "checked": _vm.isFilterActive("warning") }, on: { "change": function($event) {
+      return _vm.toggleFilter("warning");
+    } } }), _c("span", [_vm._v("Warnings")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "error" }, domProps: { "checked": _vm.isFilterActive("error") }, on: { "change": function($event) {
+      return _vm.toggleFilter("error");
+    } } }), _c("span", [_vm._v("Fixes")])])]), _c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("Fields")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-description" }, domProps: { "checked": _vm.isFilterActive("type-description") }, on: { "change": function($event) {
+      return _vm.toggleFilter("type-description");
+    } } }), _c("span", [_vm._v("Meta Description")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-title" }, domProps: { "checked": _vm.isFilterActive("type-title") }, on: { "change": function($event) {
+      return _vm.toggleFilter("type-title");
+    } } }), _c("span", [_vm._v("Meta Title")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-description" }, domProps: { "checked": _vm.isFilterActive("type-og-description") }, on: { "change": function($event) {
+      return _vm.toggleFilter("type-og-description");
+    } } }), _c("span", [_vm._v("OG Description")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-title" }, domProps: { "checked": _vm.isFilterActive("type-og-title") }, on: { "change": function($event) {
+      return _vm.toggleFilter("type-og-title");
+    } } }), _c("span", [_vm._v("OG Title")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-image" }, domProps: { "checked": _vm.isFilterActive("type-og-image") }, on: { "change": function($event) {
+      return _vm.toggleFilter("type-og-image");
+    } } }), _c("span", [_vm._v("OG Image")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-slug" }, domProps: { "checked": _vm.isFilterActive("type-slug") }, on: { "change": function($event) {
+      return _vm.toggleFilter("type-slug");
+    } } }), _c("span", [_vm._v("Slug")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-noindex" }, domProps: { "checked": _vm.isFilterActive("type-noindex") }, on: { "change": function($event) {
+      return _vm.toggleFilter("type-noindex");
+    } } }), _c("span", [_vm._v("Noindex")])])]), _c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("Metadata")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "complete" }, domProps: { "checked": _vm.isFilterActive("complete") }, on: { "change": function($event) {
       return _vm.toggleFilter("complete");
-    } } }), _c("span", [_vm._v("Complete Metadata")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "noindex" }, domProps: { "checked": _vm.isFilterActive("noindex") }, on: { "change": function($event) {
-      return _vm.toggleFilter("noindex");
-    } } }), _c("span", [_vm._v("Noindex")])])]), _c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("Status")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "listed" }, domProps: { "checked": _vm.isFilterActive("listed") }, on: { "change": function($event) {
+    } } }), _c("span", [_vm._v("Complete Metadata")])])]), _c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("Status")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "listed" }, domProps: { "checked": _vm.isFilterActive("listed") }, on: { "change": function($event) {
       return _vm.toggleFilter("listed");
     } } }), _c("span", [_vm._v("Listed")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "unlisted" }, domProps: { "checked": _vm.isFilterActive("unlisted") }, on: { "change": function($event) {
       return _vm.toggleFilter("unlisted");
@@ -1023,7 +1048,11 @@ ${reason}`;
       getOgTitleTooltip(page, showContent = true) {
         if (!page.title && !page.ogTitle && !page.metaTitle) return "No OG title";
         if (page.id === "site") {
-          return showContent ? page.hasOgTitle ? page.ogTitle : page.title : "";
+          const source2 = getInheritanceSource(page, "ogTitle", this.siteSettings);
+          const content = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
+          const base2 = this.tooltipText(content, source2, showContent);
+          const reason2 = this.getLengthValidationReason(page, "ogTitle", this.getTitleLength(page, "og"));
+          return this.joinTooltipParts(base2, reason2);
         }
         const source = getInheritanceSource(page, "ogTitle", this.siteSettings);
         const tooltip = buildTitleWithSiteName(
@@ -1722,6 +1751,16 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
     "complete",
     "noindex"
   ]);
+  const ATTENTION_FILTERS = /* @__PURE__ */ new Set(["attention", "good", "warning", "error"]);
+  const TYPE_FILTERS = /* @__PURE__ */ new Set([
+    "type-slug",
+    "type-title",
+    "type-description",
+    "type-og-title",
+    "type-og-description",
+    "type-og-image",
+    "type-noindex"
+  ]);
   const STATUS_FILTERS = /* @__PURE__ */ new Set(["listed", "unlisted", "drafts"]);
   function matchesMetadataFilter(page, filter) {
     switch (filter) {
@@ -1755,15 +1794,146 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         return false;
     }
   }
-  function filterPages(pages = [], activeFilters = [], searchQuery = "") {
+  function classifyTitle(page, validationSettings = {}, siteSettings = {}) {
+    const length = getTableTitleDisplay(page, siteSettings, "meta").charCount;
+    const status = getStatusClass(page, length, "title", validationSettings);
+    if (status === "k-meta-kit-status-error" || !status) return "error";
+    if (status === "k-meta-kit-status-warning") return "warning";
+    return "good";
+  }
+  function classifyDescription(page, validationSettings = {}, siteSettings = {}) {
+    const desc = getEffectiveDescription(page, "meta", siteSettings);
+    if (!desc) return "error";
+    if (isInheritedFromSite(page, "metaDescription", siteSettings)) return "warning";
+    const status = getStatusClass(page, desc.length, "description", validationSettings);
+    if (status === "k-meta-kit-status-error" || !status) return "error";
+    if (status === "k-meta-kit-status-warning") return "warning";
+    return "good";
+  }
+  function classifyOgTitle(page, validationSettings = {}, siteSettings = {}) {
+    const length = getTableTitleDisplay(page, siteSettings, "og").charCount;
+    const status = getStatusClass(page, length, "ogTitle", validationSettings);
+    if (status === "k-meta-kit-status-error" || !status) return "error";
+    if (status === "k-meta-kit-status-warning") return "warning";
+    return "good";
+  }
+  function classifyOgDescription(page, validationSettings = {}, siteSettings = {}) {
+    const desc = getEffectiveDescription(page, "og", siteSettings);
+    if (!desc) return "error";
+    if (isInheritedFromSite(page, "ogDescription", siteSettings)) return "warning";
+    const status = getStatusClass(page, desc.length, "ogDescription", validationSettings);
+    if (status === "k-meta-kit-status-error" || !status) return "error";
+    if (status === "k-meta-kit-status-warning") return "warning";
+    return "good";
+  }
+  function classifyOgImage(page, siteSettings = {}) {
+    if (page.hasOgImage) return "good";
+    if (siteSettings == null ? void 0 : siteSettings.siteHasOgImage) return "warning";
+    return "error";
+  }
+  function classifyNoindex(page) {
+    return page.robots && page.robots.includes("noindex") ? "warning" : "good";
+  }
+  function classifySlug(page, validationSettings = {}) {
+    if (page.id === "site") return "good";
+    const slug = page.id.split("/").pop() || "";
+    const wordCount = slug.split(/[-_]/).filter(Boolean).length;
+    const length = slug.length;
+    const numSlashes = page.id.split("/").length - 1;
+    const cfg = getSlugValidationConfig(page, validationSettings);
+    const avgWordLength = wordCount > 0 ? Math.ceil(length / wordCount) : length;
+    const issues = getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg });
+    if (issues.some((issue) => issue.severity === "error")) return "error";
+    if (issues.some((issue) => issue.severity === "warning")) return "warning";
+    return "good";
+  }
+  function hasWarningAttention(page, context = {}) {
+    const { siteSettings = {}, validationSettings = {} } = context;
+    return [
+      classifySlug(page, validationSettings),
+      classifyTitle(page, validationSettings, siteSettings),
+      classifyDescription(page, validationSettings, siteSettings),
+      classifyOgTitle(page, validationSettings, siteSettings),
+      classifyOgDescription(page, validationSettings, siteSettings),
+      classifyOgImage(page, siteSettings),
+      classifyNoindex(page)
+    ].includes("warning");
+  }
+  function hasErrorAttention(page, context = {}) {
+    const { siteSettings = {}, validationSettings = {} } = context;
+    return [
+      classifySlug(page, validationSettings),
+      classifyTitle(page, validationSettings, siteSettings),
+      classifyDescription(page, validationSettings, siteSettings),
+      classifyOgTitle(page, validationSettings, siteSettings),
+      classifyOgDescription(page, validationSettings, siteSettings),
+      classifyOgImage(page, siteSettings)
+    ].includes("error");
+  }
+  function matchesAttentionFilter(page, filter, context = {}) {
+    switch (filter) {
+      case "attention":
+        return hasWarningAttention(page, context) || hasErrorAttention(page, context);
+      case "good":
+        return !hasWarningAttention(page, context) && !hasErrorAttention(page, context);
+      case "warning":
+        return hasWarningAttention(page, context);
+      case "error":
+        return hasErrorAttention(page, context);
+      default:
+        return false;
+    }
+  }
+  function getTypeStatus(page, filter, context = {}) {
+    const { siteSettings = {}, validationSettings = {} } = context;
+    switch (filter) {
+      case "type-slug":
+        return classifySlug(page, validationSettings);
+      case "type-title":
+        return classifyTitle(page, validationSettings, siteSettings);
+      case "type-description":
+        return classifyDescription(page, validationSettings, siteSettings);
+      case "type-og-title":
+        return classifyOgTitle(page, validationSettings, siteSettings);
+      case "type-og-description":
+        return classifyOgDescription(page, validationSettings, siteSettings);
+      case "type-og-image":
+        return classifyOgImage(page, siteSettings);
+      case "type-noindex":
+        return classifyNoindex(page);
+      default:
+        return "good";
+    }
+  }
+  function filterPages(pages = [], activeFilters = [], searchQuery = "", context = {}) {
     let filtered = pages;
     if (activeFilters.length > 0) {
       const metadataFilters = activeFilters.filter((f) => METADATA_FILTERS.has(f));
+      const attentionFilters = activeFilters.filter((f) => ATTENTION_FILTERS.has(f));
+      const typeFilters = activeFilters.filter((f) => TYPE_FILTERS.has(f));
       const statusFilters = activeFilters.filter((f) => STATUS_FILTERS.has(f));
       filtered = filtered.filter((page) => {
         const matchesMetadata = metadataFilters.length === 0 || metadataFilters.every((filter) => matchesMetadataFilter(page, filter));
+        const typeStatuses = typeFilters.map((filter) => getTypeStatus(page, filter, context));
+        const matchesType = typeFilters.length === 0 || (attentionFilters.length > 0 || typeStatuses.some((status) => status !== "good"));
+        const matchesAttention = (() => {
+          if (attentionFilters.length === 0) {
+            return true;
+          }
+          if (typeFilters.length > 0) {
+            return typeStatuses.some((status) => {
+              return attentionFilters.some((filter) => {
+                if (filter === "attention") {
+                  return status === "warning" || status === "error";
+                }
+                return status === filter;
+              });
+            });
+          }
+          return attentionFilters.some((filter) => matchesAttentionFilter(page, filter, context));
+        })();
         const matchesStatus = statusFilters.length === 0 || statusFilters.some((filter) => matchesStatusFilter(page, filter));
-        return matchesMetadata && matchesStatus;
+        return matchesMetadata && matchesType && matchesAttention && matchesStatus;
       });
     }
     const query = searchQuery.trim().toLowerCase();
@@ -2057,7 +2227,10 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
     },
     computed: {
       filteredPages() {
-        return filterPages(this.pagesData, this.activeFilters, this.searchQuery);
+        return filterPages(this.pagesData, this.activeFilters, this.searchQuery, {
+          siteSettings: this.siteSettingsData,
+          validationSettings: this.validationSettingsData
+        });
       },
       paginatedPages() {
         return paginatePages(this.filteredPages, this.currentPage, this.pageSize);
