@@ -119,4 +119,7 @@ return [
             kirbylog("Meta Kit auto-generate error: " . $e->getMessage());
         }
     },
+    "site.update:after" => function () {
+        TearoomOne\ConfigHelper::clearCache();
+    },
 ];

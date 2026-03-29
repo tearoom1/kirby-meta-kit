@@ -381,6 +381,14 @@
     display: inline-block;
   }
 
+  .k-meta-kit-table-value-group {
+    position: relative;
+    display: inline-block;
+    min-width: 1.8ch;
+    padding-right: 0.62rem;
+    white-space: nowrap;
+  }
+
   .k-meta-kit-table-tooltip:hover {
     border-bottom-color: var(--color-focus);
   }
@@ -455,6 +463,21 @@
   .k-meta-kit-inherited {
     /*opacity: 0.6;*/
     font-style: italic;
+  }
+
+  .k-meta-kit-table-source-marker {
+    display: inline-block;
+    color: var(--color-text-dimmed);
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-style: normal;
+    line-height: 1;
+    position: absolute;
+    right: 0;
+    top: -0.2em;
+    opacity: 0.9;
+    width: 0.55rem;
+    text-align: center;
   }
   .k-meta-kit-og-image-indicator.k-meta-kit-inherited {
     opacity: 0.6;
@@ -701,6 +724,10 @@
 
   .k-panel[data-color-scheme="dark"] .k-meta-kit-status-optimal,
   .k-panel[data-color-scheme="dark"] .k-meta-kit-table-value-muted {
+    color: var(--color-gray-400);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-table-source-marker {
     color: var(--color-gray-400);
   }
 

@@ -84,6 +84,7 @@
       :show-preview="showPreviewInTable"
       :preview-mode="previewMode"
       :ai-enabled="aiEnabled"
+      :site-settings="siteSettingsData"
       :validation-settings="validationSettingsData"
       @toggle-select-all="toggleSelectAllCurrentPage"
       @toggle-page="togglePageSelection"
@@ -135,7 +136,7 @@
     <meta-kit-bulk-edit-dialog
       ref="allPagesDialog"
       :api="$api"
-      :site-settings="siteSettings"
+      :site-settings="siteSettingsData"
       :ai-enabled="aiEnabled"
       @saved="refreshPages"
     />
@@ -144,7 +145,7 @@
     <meta-kit-single-page-dialog
       ref="singlePageDialog"
       :api="$api"
-      :site-settings="siteSettings"
+      :site-settings="siteSettingsData"
       :ai-enabled="aiEnabled"
       @saved="refreshPages"
     />
@@ -203,11 +204,6 @@ export default {
     MetaKitFilters,
     MetaKitActions
   },
-  provide() {
-    return {
-      siteSettings: this.siteSettings
-    };
-  },
   props: {
     pages: Array,
     language: String,
@@ -238,6 +234,7 @@ export default {
       isLoadingPages: false,
       isGeneratingAll: false,
       pagesData: this.pages || [],
+      siteSettingsData: this.siteSettings || {},
       validationSettingsData: this.validationSettings || {},
 
       // Single-page AI generate: null = bulk mode, string = single page ID
@@ -246,8 +243,9 @@ export default {
       // Pagination & Selection
       selectedPages: [],
       currentPage: 1,
-      pageSize: 25,
+      pageSize: 10,
       pageSizeOptions: [
+        {value: 10, text: '10/page'},
         {value: 25, text: '25/page'},
         {value: 50, text: '50/page'},
         {value: 100, text: '100/page'},
@@ -354,9 +352,14 @@ export default {
     async refreshPages() {
       this.isLoadingPages = true;
       try {
-        const response = await this.$api.get('meta-kit/pages');
+        const response = await this.$api.get('meta-kit/pages', {
+          _ts: Date.now()
+        });
         if (response.status === 'success') {
           this.pagesData = response.data;
+          if (response.siteSettings) {
+            this.siteSettingsData = response.siteSettings;
+          }
           if (response.validationSettings) {
             this.validationSettingsData = response.validationSettings;
           }

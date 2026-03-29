@@ -143,13 +143,17 @@
         <!-- Title Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
           <Tooltip :content="getTitleTooltip(page)">
-              <span :class="[
-                getTableTitleStatusClass(page),
-                getTableTitleStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
-                isTitleInherited(page) ? 'k-meta-kit-inherited' : '',
-                'k-meta-kit-table-tooltip'
-              ]">
+              <span class="k-meta-kit-table-value-group k-meta-kit-table-tooltip">
+                <span :class="[
+                  getTableTitleStatusClass(page),
+                  getTableTitleStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
+                  isTitleInherited(page) ? 'k-meta-kit-inherited' : ''
+                ]">
                   {{ getTitleDisplay(page) }}
+                </span>
+                <span v-if="getInheritanceBadgeLabel(page, 'metaTitle')" class="k-meta-kit-table-source-marker">
+                  {{ getInheritanceBadgeLabel(page, 'metaTitle') }}
+                </span>
               </span>
           </Tooltip>
         </td>
@@ -157,14 +161,18 @@
         <!-- Description Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
           <Tooltip :content="getDescriptionTooltip(page)">
-              <span
-                :class="[
-                  getDescriptionStatusClass(page),
-                  getDescriptionStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
-                  isDescriptionInherited(page) ? 'k-meta-kit-inherited' : '',
-                  'k-meta-kit-table-tooltip'
-                ]">
+              <span class="k-meta-kit-table-value-group k-meta-kit-table-tooltip">
+                <span
+                  :class="[
+                    getDescriptionStatusClass(page),
+                    getDescriptionStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
+                    isDescriptionInherited(page) ? 'k-meta-kit-inherited' : ''
+                  ]">
                   {{ getDescriptionDisplay(page) }}
+                </span>
+                <span v-if="getInheritanceBadgeLabel(page, 'metaDescription')" class="k-meta-kit-table-source-marker">
+                  {{ getInheritanceBadgeLabel(page, 'metaDescription') }}
+                </span>
               </span>
           </Tooltip>
         </td>
@@ -172,13 +180,17 @@
         <!-- OG Title Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
           <Tooltip :content="getOgTitleTooltip(page)">
-              <span :class="[
-                getTableOgTitleStatusClass(page),
-                getTableOgTitleStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
-                isOgTitleInherited(page) ? 'k-meta-kit-inherited' : '',
-                'k-meta-kit-table-tooltip'
-                ]">
+              <span class="k-meta-kit-table-value-group k-meta-kit-table-tooltip">
+                <span :class="[
+                  getTableOgTitleStatusClass(page),
+                  getTableOgTitleStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
+                  isOgTitleInherited(page) ? 'k-meta-kit-inherited' : ''
+                  ]">
                   {{ getOgTitleDisplay(page) }}
+                </span>
+                <span v-if="getInheritanceBadgeLabel(page, 'ogTitle')" class="k-meta-kit-table-source-marker">
+                  {{ getInheritanceBadgeLabel(page, 'ogTitle') }}
+                </span>
               </span>
           </Tooltip>
         </td>
@@ -186,14 +198,18 @@
         <!-- OG Description Column only when not preview -->
         <td v-if="!showPreview" class="k-meta-kit-table-center">
           <Tooltip :content="getOgDescriptionTooltip(page)">
-              <span
-                :class="[
-                  getOgDescriptionStatusClass(page),
-                  getOgDescriptionStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
-                  isOgDescriptionInherited(page) ? 'k-meta-kit-inherited' : '',
-                  'k-meta-kit-table-tooltip'
-                ]">
+              <span class="k-meta-kit-table-value-group k-meta-kit-table-tooltip">
+                <span
+                  :class="[
+                    getOgDescriptionStatusClass(page),
+                    getOgDescriptionStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
+                    isOgDescriptionInherited(page) ? 'k-meta-kit-inherited' : ''
+                  ]">
                   {{ getOgDescriptionDisplay(page) }}
+                </span>
+                <span v-if="getInheritanceBadgeLabel(page, 'ogDescription')" class="k-meta-kit-table-source-marker">
+                  {{ getInheritanceBadgeLabel(page, 'ogDescription') }}
+                </span>
               </span>
           </Tooltip>
         </td>
@@ -309,12 +325,15 @@ export default {
       type: Boolean,
       default: true
     },
+    siteSettings: {
+      type: Object,
+      default: () => ({})
+    },
     validationSettings: {
       type: Object,
       default: () => ({})
     }
   },
-  inject: ['siteSettings'],
   data() {
     return {
       // Status mappings
@@ -451,6 +470,23 @@ export default {
       const base = this.tooltipText(text, source, showContent);
       const reason = this.getLengthValidationReason(page, 'ogDescription', text.length);
       return this.joinTooltipParts(base, reason);
+    },
+
+    getInheritanceBadgeLabel(page, fieldType) {
+      const source = getInheritanceSource(page, fieldType, this.siteSettings);
+
+      switch (source) {
+        case 'site':
+          return 's';
+        case 'page title':
+          return 't';
+        case 'meta title':
+          return 'm';
+        case 'meta description':
+          return 'm';
+        default:
+          return source ? source.charAt(0).toLowerCase() : '';
+      }
     },
 
     // Display methods
