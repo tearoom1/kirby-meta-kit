@@ -36,6 +36,7 @@
 
           <!-- Meta Title -->
           <meta-kit-title-field
+            label="Meta Title"
             :value="editedFields[page.id].metaTitle"
             @input="editedFields[page.id].metaTitle = $event"
             :page-id="page.id"
@@ -50,12 +51,14 @@
 
           <!-- Meta Description -->
           <meta-kit-description-field
+            label="Meta Description"
             :value="editedFields[page.id].metaDescription"
             @input="editedFields[page.id].metaDescription = $event"
             :ai-enabled="aiEnabled"
             :is-generating="generating[page.id].metaDescription"
             @generate="generate(page.id, 'metaDescription')"
             :placeholder="page.metaDescription || siteSettings.siteMetaDescription || 'No meta description'"
+            :rows="3"
           />
         </div>
       </div>
@@ -70,6 +73,7 @@
 
           <!-- OG Title -->
           <meta-kit-title-field
+            label="OG Title"
             :value="editedFields[page.id].ogTitle"
             @input="editedFields[page.id].ogTitle = $event"
             :page-id="page.id"
@@ -85,6 +89,7 @@
 
           <!-- OG Description -->
           <meta-kit-description-field
+            label="OG Description"
             :value="editedFields[page.id].ogDescription"
             @input="editedFields[page.id].ogDescription = $event"
             :ai-enabled="aiEnabled"
@@ -92,6 +97,7 @@
             @generate="generate(page.id, 'ogDescription')"
             :placeholder="page.ogDescription || page.metaDescription || siteSettings.siteMetaDescription || 'No OG description'"
             type="og"
+            :rows="3"
           />
         </div>
       </div>

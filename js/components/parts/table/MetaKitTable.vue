@@ -63,11 +63,12 @@
             <Tooltip :content="getTitleTooltip(page, false)">
               <span
                 :class="['k-meta-kit-table-preview-indicator',
-                  'k-meta-kit-table-tooltip',
-                  isTitleInherited(page) ? 'k-meta-kit-inherited-preview' : '']"
+                  'k-meta-kit-table-tooltip']"
                 :data-status="getStatusValue(getTableTitleStatusClass(page))"
               >
+                <span :class="isTitleInherited(page) ? 'k-meta-kit-inherited-preview' : ''">
                   {{ getFullTitlePreview(page, 'meta') }}
+                  </span>
               </span>
             </Tooltip>
           </template>
@@ -374,12 +375,12 @@ export default {
     },
 
     getTableTitleStatusClass(page) {
-      if (page.id === 'site') return '';
+      //if (page.id === 'site') return '';
       return this.getStatusClass(page, this.getTitleLength(page, 'meta'), 'title');
     },
 
     getTableOgTitleStatusClass(page) {
-      if (page.id === 'site') return '';
+      //if (page.id === 'site') return '';
       return this.getStatusClass(page, this.getTitleLength(page, 'og'), 'ogTitle');
     },
 
@@ -496,7 +497,7 @@ export default {
     },
 
     getSlugStatusClass(page) {
-      if (page.id === 'site') return '';
+      if (page.id === 'site') return 'k-meta-kit-status-optimal';
 
       const slug = this.getSlug(page);
       const wordCount = this.getSlugWordCount(slug);

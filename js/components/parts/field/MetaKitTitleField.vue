@@ -1,5 +1,18 @@
 <template>
   <div :class="fieldClass">
+    <div v-if="label || aiEnabled" class="k-meta-kit-dialog-field-header">
+      <label v-if="label" class="k-meta-kit-dialog-field-label">{{ label }}</label>
+      <k-button
+        v-if="aiEnabled"
+        icon="sparkling"
+        :size="buttonSize"
+        :disabled="isGenerating"
+        @click="$emit('generate')"
+        :title="buttonSize === 'xs' ? 'AI Generate' : undefined"
+      >
+        <template v-if="buttonSize !== 'xs'">AI Generate</template>
+      </k-button>
+    </div>
     <k-input
       :value="value"
       @input="$emit('input', $event)"
@@ -17,16 +30,6 @@
           {{ charCount }} chars
         </span>
       </span>
-      <k-button
-        v-if="aiEnabled"
-        icon="sparkling"
-        :size="buttonSize"
-        :disabled="isGenerating"
-        @click="$emit('generate')"
-        :title="buttonSize === 'xs' ? 'AI Generate' : undefined"
-      >
-        <template v-if="buttonSize !== 'xs'">AI Generate</template>
-      </k-button>
     </div>
     <div v-if="isGenerating" class="k-meta-kit-dialog-generating">
       <k-icon class="k-meta-kit-spinner" type="loader"/>
@@ -41,6 +44,10 @@ import { getFieldTitleDisplay, shouldAppendSiteName } from '../../../composables
 export default {
   props: {
     value: String,
+    label: {
+      type: String,
+      default: ''
+    },
     placeholder: {
       type: String,
       default: 'No meta title'

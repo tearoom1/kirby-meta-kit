@@ -10,8 +10,8 @@
     <div v-else-if="page" class="k-meta-kit-single-edit">
       <!-- Meta Title -->
       <div class="k-meta-kit-single-field">
-        <label class="k-meta-kit-single-field-label">Meta Title</label>
         <meta-kit-title-field
+          label="Meta Title"
           :value="editedFields.metaTitle"
           @input="editedFields.metaTitle = $event"
           :page-id="page.id"
@@ -28,8 +28,8 @@
 
       <!-- Meta Description -->
       <div class="k-meta-kit-single-field">
-        <label class="k-meta-kit-single-field-label">Meta Description</label>
         <meta-kit-description-field
+          label="Meta Description"
           :value="editedFields.metaDescription"
           @input="editedFields.metaDescription = $event"
           :ai-enabled="aiEnabled"
@@ -37,7 +37,7 @@
           @generate="generate('metaDescription')"
           :placeholder="page.metaDescription || siteSettings.siteMetaDescription || 'No meta description set'"
           button-size="sm"
-          :rows="4"
+          :rows="3"
           buttons="false"
           field-class="k-meta-kit-single-field-content"
         />
@@ -45,8 +45,8 @@
 
       <!-- OG Title -->
       <div class="k-meta-kit-single-field">
-        <label class="k-meta-kit-single-field-label">OG Title</label>
         <meta-kit-title-field
+          label="OG Title"
           :value="editedFields.ogTitle"
           @input="editedFields.ogTitle = $event"
           :page-id="page.id"
@@ -65,8 +65,8 @@
 
       <!-- OG Description -->
       <div class="k-meta-kit-single-field">
-        <label class="k-meta-kit-single-field-label">OG Description</label>
         <meta-kit-description-field
+          label="OG Description"
           :value="editedFields.ogDescription"
           @input="editedFields.ogDescription = $event"
           :ai-enabled="aiEnabled"
@@ -75,7 +75,7 @@
           :placeholder="page.ogDescription || page.metaDescription || siteSettings.siteMetaDescription || 'No OG description'"
           type="og"
           button-size="sm"
-          :rows="4"
+          :rows="3"
           buttons="false"
           field-class="k-meta-kit-single-field-content"
         />
@@ -83,7 +83,7 @@
 
       <!-- OG Image -->
       <div class="k-meta-kit-single-field">
-        <label class="k-meta-kit-single-field-label">OG Image</label>
+        <label class="k-meta-kit-dialog-field-label">OG Image</label>
         <div class="k-meta-kit-single-field-content">
           <div v-if="page.ogImage" class="k-meta-kit-og-image-current">
             <img :src="page.ogImage.url" :alt="page.ogImage.filename"/>
