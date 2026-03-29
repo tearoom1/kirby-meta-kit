@@ -4,7 +4,7 @@
  */
 
 // Default SEO length ranges for different field types
-const DEFAULT_SEO_RANGES = {
+export const DEFAULT_SEO_RANGES = {
   title: { optimal: { min: 20, max: 60 }, warning: { min: 15, max: 75 } },
   ogTitle: { optimal: { min: 20, max: 60 }, warning: { min: 15, max: 75 } },
   description: { optimal: { min: 140, max: 160 }, warning: { min: 126, max: 176 } },
@@ -12,7 +12,7 @@ const DEFAULT_SEO_RANGES = {
 };
 
 // Default slug validation ranges
-const DEFAULT_SLUG_RANGES = {
+export const DEFAULT_SLUG_RANGES = {
   depth: { optimal: { min: 0, max: 2 }, warning: { min: 0, max: 3 } },
   words: { optimal: { min: 1, max: 8 }, warning: { min: 1, max: 10 } },
   length: { optimal: { min: 1, max: 60 }, warning: { min: 1, max: 70 } },
@@ -20,7 +20,7 @@ const DEFAULT_SLUG_RANGES = {
 };
 
 // Status CSS class mappings
-const STATUS_CLASSES = {
+export const STATUS_CLASSES = {
   optimal: 'k-meta-kit-status-optimal',
   warning: 'k-meta-kit-status-warning',
   error: 'k-meta-kit-status-error'
@@ -66,6 +66,13 @@ export function getSlugValidationConfig(page, validationSettings = {}) {
 
   const mergeRule = (key, fallbackOptimal, fallbackWarning) => {
     const raw = { ...(defaults[key] || {}), ...(templateSlug[key] || {}) };
+
+    if (Object.keys(raw).length === 0) {
+      return {
+        optimal: { ...fallbackOptimal },
+        warning: { ...fallbackWarning }
+      };
+    }
 
     // New format
     if (raw.optimal && raw.warning) {

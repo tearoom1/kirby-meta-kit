@@ -226,12 +226,11 @@
               title="Edit Metadata"
             />
             <k-button
-              v-if="aiEnabled && false"
+              v-if="aiEnabled"
               icon="sparkling"
               size="sm"
-              :disabled="page.hasMetaDescription"
-              @click="$emit('generate-description', page.id)"
-              title="Generate Description"
+              @click="$emit('generate-page', page.id)"
+              title="Generate with AI"
             />
           </div>
         </td>

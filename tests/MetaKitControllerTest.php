@@ -320,7 +320,7 @@ class MetaKitControllerTest extends TestCase
         // Create a page with legacy fields
         file_put_contents(
             $this->testDir . '/content/test-page/default.txt',
-            "Title: Test Page\n----\nText: Test content\n----\nMetatitle: Legacy Meta Title\n----\nMetadescription: Legacy meta description"
+            "Title: Test Page\n----\nText: Test content\n----\nCustomtitle: Legacy Meta Title\n----\nSeodescription: Legacy meta description"
         );
 
         // Reload Kirby to pick up new content
@@ -338,6 +338,8 @@ class MetaKitControllerTest extends TestCase
         $this->assertNotNull($result['data']['legacy']);
         $this->assertArrayHasKey('metaTitle', $result['data']['legacy']);
         $this->assertEquals('Legacy Meta Title', $result['data']['legacy']['metaTitle']);
+        $this->assertArrayHasKey('metaDescription', $result['data']['legacy']);
+        $this->assertEquals('Legacy meta description', $result['data']['legacy']['metaDescription']);
     }
 
     /**

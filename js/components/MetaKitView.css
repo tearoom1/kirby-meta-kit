@@ -11,9 +11,12 @@
   .k-meta-kit-language-bar {
     margin-bottom: 1rem;
     display: flex;
-    justify-content: space-between;
+    justify-content: end;
     align-items: center;
-    gap:.5rem;
+
+    .k-button-group {
+      gap: 0;
+    }
   }
 
   .k-meta-kit-warning {
@@ -1096,13 +1099,24 @@
   /* Pagination */
 
   .k-meta-kit-pagination {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: center;
-    gap: 1rem;
     padding: 1rem;
     margin-top: 1rem;
     border-top: 1px solid var(--color-border);
+  }
+
+  .k-meta-kit-pagination-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .k-meta-kit-pagination-end {
+    display: flex;
+    justify-content: flex-end;
   }
 
   .k-meta-kit-pagination-info {

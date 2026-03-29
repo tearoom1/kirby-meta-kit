@@ -9,7 +9,8 @@ const METADATA_FILTERS = new Set([
   'missing-og-title',
   'missing-og-description',
   'missing-og-image',
-  'complete'
+  'complete',
+  'noindex'
 ]);
 
 const STATUS_FILTERS = new Set(['listed', 'unlisted', 'drafts']);
@@ -28,6 +29,8 @@ function matchesMetadataFilter(page, filter) {
       return !page.hasOgImage;
     case 'complete':
       return page.hasMetaTitle && page.hasMetaDescription && page.hasOgImage;
+    case 'noindex':
+      return !!(page.robots && page.robots.includes('noindex'));
     default:
       return true;
   }

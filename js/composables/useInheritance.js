@@ -20,8 +20,8 @@ export function isTitleInherited(page) {
  * @returns {boolean}
  */
 export function isDescriptionInherited(page, siteSettings) {
-  return page.metaDescriptionInheritance?.inherited ||
-    (!page.hasMetaDescription && siteSettings?.siteMetaDescription);
+  return page.metaDescriptionInheritance?.inherited === true ||
+    (!page.hasMetaDescription && !!siteSettings?.siteMetaDescription);
 }
 
 /**
@@ -43,7 +43,7 @@ export function isOgTitleInherited(page) {
 export function isOgDescriptionInherited(page, siteSettings) {
   if (page.ogDescriptionInheritance?.inherited) return true;
   if (page.hasOgDescription) return false;
-  return page.hasMetaDescription || siteSettings?.siteMetaDescription;
+  return page.hasMetaDescription || !!siteSettings?.siteMetaDescription;
 }
 
 /**

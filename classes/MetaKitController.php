@@ -607,25 +607,13 @@ class MetaKitController
             return $model->$fieldName()->isNotEmpty();
         }
 
-        // For Site object
-        if ($model instanceof \Kirby\Cms\Site) {
-            $translation = $model->translation($languageCode);
-            if (!$translation || !$translation->exists()) {
-                return false;
-            }
-            $content = $translation->content();
-            $key = strtolower($fieldName);
-            return isset($content[$key]) && !empty(trim((string)$content[$key]));
-        }
-
-        // For Page object - check if the field exists in this specific language's content
         $translation = $model->translation($languageCode);
         if (!$translation || !$translation->exists()) {
             return false;
         }
 
-        $content = $translation->content();
-        // Field names are stored lowercase in Kirby
+        // Read the raw content file for this language without Kirby's fallback.
+        $content = $model->version('latest')->read($translation->language());
         $key = strtolower($fieldName);
 
         return isset($content[$key]) && !empty(trim((string)$content[$key]));
@@ -679,7 +667,7 @@ class MetaKitController
             return $noInheritance;
         }
 
-        $defaultContent = $defaultTranslation->content();
+        $defaultContent = $model->version('latest')->read($defaultTranslation->language());
         if (!isset($defaultContent[$key]) || empty(trim((string)$defaultContent[$key]))) {
             return $noInheritance;
         }

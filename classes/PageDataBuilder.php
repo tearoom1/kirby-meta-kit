@@ -16,8 +16,8 @@ class PageDataBuilder
     /**
      * Legacy field mappings to check for migration
      */
-    private const LEGACY_TITLE_FIELDS = ['metatitle', 'Metatitle', 'customtitle', 'seotitle'];
-    private const LEGACY_DESC_FIELDS = ['metadescription', 'seodescription'];
+    private const LEGACY_TITLE_FIELDS = ['customtitle', 'seotitle'];
+    private const LEGACY_DESC_FIELDS = ['seodescription'];
 
     public function __construct($model, array $options = [])
     {

@@ -82,6 +82,7 @@ abstract class KirbyTestCase extends TestCase
         }
 
         $kirby = new KirbyApp($config);
+        $this->removeForeignPluginAutoloaders();
         $kirby->impersonate('test@test.com');
         return $kirby;
     }
@@ -114,5 +115,46 @@ abstract class KirbyTestCase extends TestCase
             is_dir($path) ? $this->deleteDirectory($path) : unlink($path);
         }
         rmdir($dir);
+    }
+
+    /**
+     * Some neighboring plugins in the same workspace ship their own PHPUnit
+     * versions and register Composer autoloaders when Kirby boots. Remove those
+     * foreign plugin autoloaders so the suite stays bound to Meta Kit's own
+     * PHPUnit dependency graph.
+     */
+    private function removeForeignPluginAutoloaders(): void
+    {
+        $currentPluginVendor = realpath(__DIR__ . '/../vendor');
+
+        foreach (spl_autoload_functions() as $autoload) {
+            if (
+                is_array($autoload) !== true ||
+                is_object($autoload[0]) !== true ||
+                $autoload[1] !== 'loadClass'
+            ) {
+                continue;
+            }
+
+            $loader = $autoload[0];
+            if ($loader instanceof \Composer\Autoload\ClassLoader !== true) {
+                continue;
+            }
+
+            $reflection = new \ReflectionObject($loader);
+            if ($reflection->hasProperty('vendorDir') !== true) {
+                continue;
+            }
+
+            $vendorDir = realpath($reflection->getProperty('vendorDir')->getValue($loader)) ?: '';
+
+            if (
+                $vendorDir !== '' &&
+                str_contains($vendorDir, '/site/plugins/') === true &&
+                $vendorDir !== $currentPluginVendor
+            ) {
+                spl_autoload_unregister($autoload);
+            }
+        }
     }
 }

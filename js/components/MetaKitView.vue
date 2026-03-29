@@ -9,31 +9,41 @@
     </div>
 
     <!-- Language Switcher -->
-    <div v-if="languages && languages.length > 1" class="k-meta-kit-language-bar">
-      <k-button-group>
-        <k-button
-          v-for="lang in languages"
-          :key="lang.code"
-          :theme="lang.code === language ? 'positive' : ''"
-          size="xs"
-          @click="goToLanguage(lang.code)"
-        >
-          {{ lang.code.toUpperCase() }}
-        </k-button>
-      </k-button-group>
+    <div
+      v-if="languages && languages.length > 1"
+      class="k-button-group k-language-selector k-meta-kit-language-bar"
+      data-layout="collapsed"
+      aria-label="Translations"
+    >
+      <k-button
+        v-for="lang in languages"
+        :key="lang.code"
+        :aria-current="lang.code === language ? 'true' : undefined"
+        :aria-label="lang.code"
+        :title="lang.name"
+        :theme="lang.code === language ? 'dark' : 'empty'"
+        variant="filled"
+        size="sm"
+        responsive="true"
+        @click="goToLanguage(lang.code)"
+      >
+        {{ lang.code }}
+      </k-button>
     </div>
 
     <!-- Stats Cards -->
     <meta-kit-stats
       :filtered-count="filteredPages.length"
       :total-count="pagesData.length"
+      :filtered-with-title="filteredPagesWithTitle"
+      :total-with-title="pagesWithTitle"
       :filtered-with-description="filteredPagesWithDescription"
       :total-with-description="pagesWithDescription"
       :filtered-with-image="filteredPagesWithOgImage"
       :total-with-image="pagesWithOgImage"
       :filtered-no-index="filteredPagesNoIndex"
       :total-no-index="pagesNoIndex"
-      :search-active="!!searchQuery"
+      :search-active="!!(searchQuery || activeFilters.length)"
     />
 
     <!-- Actions & Filters -->
@@ -51,9 +61,6 @@
           :preview-mode.sync="previewMode"
           :search-query.sync="searchQuery"
           :active-filters.sync="activeFilters"
-          :page-size="pageSize"
-          :page-size-options="pageSizeOptions"
-          @change-page-size="changePageSize"
         />
       </template>
     </meta-kit-actions>
@@ -71,26 +78,47 @@
       @toggle-select-all="toggleSelectAllCurrentPage"
       @toggle-page="togglePageSelection"
       @edit-page="editSinglePageMetadata"
-      @generate-description="generateDescription"
+      @generate-page="openSinglePageGenerate"
     />
 
-    <!-- Pagination -->
-    <div v-if="totalPages > 1" class="k-meta-kit-pagination">
-      <k-button
-        icon="angle-left"
-        :disabled="currentPage === 1"
-        @click="previousPage"
-      />
-      <span class="k-meta-kit-pagination-info">
-        Page {{ currentPage }} of {{ totalPages }}
-        <template v-if="searchQuery">({{ filteredPages.length }} of {{ pagesData.length }})</template>
-        <template v-else>({{ pagesData.length }} total)</template>
-      </span>
-      <k-button
-        icon="angle-right"
-        :disabled="currentPage === totalPages"
-        @click="nextPage"
-      />
+    <!-- Pagination + Page Size -->
+    <div class="k-meta-kit-pagination">
+      <!-- left: empty balancing column -->
+      <div></div>
+
+      <!-- center: page nav -->
+      <div class="k-meta-kit-pagination-nav">
+        <template v-if="totalPages > 1">
+          <k-button
+            icon="angle-left"
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          />
+          <span class="k-meta-kit-pagination-info">
+            Page {{ currentPage }} of {{ totalPages }}
+            <template v-if="searchQuery || activeFilters.length">({{ filteredPages.length }} of {{ pagesData.length }})</template>
+            <template v-else>({{ pagesData.length }} total)</template>
+          </span>
+          <k-button
+            icon="angle-right"
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          />
+        </template>
+      </div>
+
+      <!-- right: page size selector -->
+      <div class="k-meta-kit-pagination-end">
+        <select
+          class="k-meta-kit-pagesize-select"
+          :value="pageSize"
+          @change="changePageSize($event.target.value)"
+        >
+          <option v-for="option in pageSizeOptions" :key="option.value" :value="option.value">
+            {{ option.text }}
+          </option>
+        </select>
+      </div>
     </div>
 
     <!-- Bulk Edit Dialog -->
@@ -111,10 +139,10 @@
       @saved="refreshPages"
     />
 
-    <!-- Bulk Generation Dialog -->
+    <!-- Bulk Generation Dialog (used for both bulk and single-page AI generate) -->
     <meta-kit-bulk-generate-dialog
       ref="bulkGenerateDialog"
-      :selected-count="selectedPages.length"
+      :selected-count="singleGeneratePageId ? 1 : selectedPages.length"
       @generate="performBulkGeneration"
     />
 
@@ -201,8 +229,9 @@ export default {
       isGeneratingAll: false,
       pagesData: this.pages || [],
       validationSettingsData: this.validationSettings || {},
-      fieldChoices: {}, // { pageId: { fieldName: 'legacy|current|manual|ai', manualValue: '...' } }
-      generatingFields: {}, // { pageId: { fieldName: true } }
+
+      // Single-page AI generate: null = bulk mode, string = single page ID
+      singleGeneratePageId: null,
 
       // Pagination & Selection
       selectedPages: [],
@@ -234,6 +263,9 @@ export default {
     isAllCurrentPageSelected() {
       return isAllSelectedOnPage(this.paginatedPages, this.selectedPages);
     },
+    pagesWithTitle() {
+      return this.pagesData.filter(p => p.hasMetaTitle).length;
+    },
     pagesWithDescription() {
       return this.pagesData.filter(p => p.hasMetaDescription).length;
     },
@@ -242,6 +274,9 @@ export default {
     },
     pagesNoIndex() {
       return this.pagesData.filter(p => p.robots && p.robots.includes('noindex')).length;
+    },
+    filteredPagesWithTitle() {
+      return this.filteredPages.filter(p => p.hasMetaTitle).length;
     },
     filteredPagesWithDescription() {
       return this.filteredPages.filter(p => p.hasMetaDescription).length;
@@ -255,77 +290,13 @@ export default {
   },
   watch: {
     searchQuery() {
-      // Reset to first page when search changes
+      this.currentPage = 1;
+    },
+    activeFilters() {
       this.currentPage = 1;
     }
   },
   methods: {
-    getFullTitle(pageTitle) {
-      if (!pageTitle || !this.siteSettings.appendSiteName) {
-        return pageTitle || '';
-      }
-
-      const separator = this.siteSettings.titleSeparator || '|';
-      const siteName = this.siteSettings.siteMetaTitle || '';
-
-      if (!siteName) {
-        return pageTitle;
-      }
-
-      return `${pageTitle} ${separator} ${siteName}`;
-    },
-    getStatusClass(hasField, length, fieldType = 'description', pageTitle = null) {
-      if (!hasField) return '';
-
-      let optimal, warning;
-
-      if (fieldType === 'title') {
-        // For site page (pageTitle is null), no strict validation - just show the length
-        if (pageTitle === null) {
-          return ''; // No color coding for site meta title
-        }
-
-        // For regular pages, calculate final length if site name appending is enabled
-        let finalLength = length;
-        if (pageTitle && this.siteSettings.appendSiteName) {
-          finalLength = this.getFullTitle(pageTitle).length;
-        }
-
-        // Title: optimal 50-60, warning ±10% (45-66), error outside
-        optimal = { min: 50, max: 60 };
-        warning = { min: 45, max: 66 }; // 10% tolerance
-
-        // Green: within optimal range
-        if (finalLength >= optimal.min && finalLength <= optimal.max) {
-          return 'k-meta-kit-status-success';
-        }
-
-        // Yellow: within warning range (10% around optimal)
-        if (finalLength >= warning.min && finalLength <= warning.max) {
-          return 'k-meta-kit-status-warning';
-        }
-
-        // Red: outside acceptable range
-        return 'k-meta-kit-status-error';
-      } else {
-        // Description: optimal 140-160, warning ±10% (126-176), error outside
-        optimal = { min: 140, max: 160 };
-        warning = { min: 126, max: 176 }; // 10% tolerance
-
-        // Green: within optimal range
-        if (length >= optimal.min && length <= optimal.max) {
-          return 'k-meta-kit-status-success';
-        }
-
-        // Yellow: within warning range (10% around optimal)
-        if (length >= warning.min && length <= warning.max) {
-          return 'k-meta-kit-status-warning';
-        }
-
-        // Red: outside acceptable range
-        return 'k-meta-kit-status-error';
-      }
-    },
     async refreshPages() {
       this.isLoadingPages = true;
       try {
@@ -342,33 +313,20 @@ export default {
         this.isLoadingPages = false;
       }
     },
-    async generateDescription(pageId) {
-      try {
-        const response = await this.$api.post('meta-kit/generate-description', {pageId});
-        if (response.status === 'success') {
-          window.panel.notification.success(response.message || 'Description generated');
-          await this.refreshPages();
-        } else {
-          window.panel.notification.error(response.message || 'Failed to generate description');
-        }
-      } catch (error) {
-        let errorMessage = 'Failed to generate description';
-        if (error.message) {
-          errorMessage += `: ${error.message}`;
-        } else if (error.error) {
-          errorMessage += `: ${error.error}`;
-        }
-        window.panel.notification.error(errorMessage);
-        console.error('Generation error:', error);
-      }
+
+    // Open the field-selection dialog for a single page's AI generation
+    openSinglePageGenerate(pageId) {
+      this.singleGeneratePageId = pageId;
+      this.$refs.bulkGenerateDialog.open();
     },
+
+    // Open the field-selection dialog for bulk (selected pages) generation
     generateAllDescriptions() {
-      // Open the dialog (options are reset in the dialog component)
+      this.singleGeneratePageId = null;
       this.$refs.bulkGenerateDialog.open();
     },
 
     async performBulkGeneration(options) {
-      // Validate at least one option is selected
       if (!options.title && !options.description && !options.ogTitle && !options.ogDescription) {
         window.panel.notification.error('Please select at least one field to generate');
         return;
@@ -376,13 +334,12 @@ export default {
 
       this.isGeneratingAll = true;
 
-      // Build field list for message
-      const fields = [];
-      if (options.title) fields.push('meta titles');
-      if (options.description) fields.push('meta descriptions');
-      if (options.ogTitle) fields.push('OG titles');
-      if (options.ogDescription) fields.push('OG descriptions');
-      const fieldText = fields.join(', ');
+      // Single-page mode when triggered from the table row AI button
+      const pageIds = this.singleGeneratePageId
+        ? [this.singleGeneratePageId]
+        : this.selectedPages;
+
+      this.singleGeneratePageId = null;
 
       try {
         const response = await this.$api.post('meta-kit/generate-all', {
@@ -390,7 +347,7 @@ export default {
           generateDescription: options.description,
           generateOgTitle: options.ogTitle,
           generateOgDescription: options.ogDescription,
-          pageIds: this.selectedPages
+          pageIds
         });
 
         if (response.status === 'success') {
@@ -401,16 +358,12 @@ export default {
           window.panel.notification.error(response.message || 'Generation failed');
         }
       } catch (error) {
-        // Extract detailed error message
-        let errorMessage = `Failed to generate ${fieldText}`;
+        let errorMessage = 'Failed to generate metadata';
         if (error.message) {
           errorMessage += `: ${error.message}`;
         } else if (error.error) {
           errorMessage += `: ${error.error}`;
-        } else if (typeof error === 'string') {
-          errorMessage += `: ${error}`;
         }
-
         window.panel.notification.error(errorMessage);
         console.error('Generation error details:', error);
       } finally {
@@ -419,193 +372,19 @@ export default {
       }
     },
 
-    getManualValue(pageId, fieldName) {
-      return this.fieldChoices[pageId]?.[fieldName]?.manualValue || '';
-    },
-    setManualValue(pageId, fieldName, value) {
-      if (!this.fieldChoices[pageId]) {
-        this.$set(this.fieldChoices, pageId, {});
-      }
-      if (!this.fieldChoices[pageId][fieldName]) {
-        this.$set(this.fieldChoices[pageId], fieldName, {});
-      }
-      this.$set(this.fieldChoices[pageId][fieldName], 'manualValue', value);
-    },
-    getEditableValue(pageId, fieldName, currentValue) {
-      // Check if a manual value has been explicitly set (even if it's empty)
-      if (this.fieldChoices[pageId]?.[fieldName]?.hasOwnProperty('manualValue')) {
-        return this.fieldChoices[pageId][fieldName].manualValue;
-      }
-      return currentValue || '';
-    },
-    // Helper methods for title field rendering
-    isSitePage(pageId) {
-      return pageId === 'site';
-    },
-    shouldShowTitlePreview(pageId, value) {
-      return !this.isSitePage(pageId) &&
-             value &&
-             this.siteSettings.appendSiteName &&
-             this.siteSettings.siteMetaTitle;
-    },
-    getTitleCharCount(pageId, value) {
-      if (!value) return 0;
-
-      if (this.isSitePage(pageId)) {
-        return value.length;
-      }
-
-      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
-        return this.getFullTitle(value).length;
-      }
-
-      return value.length;
-    },
-    getTitleStatusClass(pageId, value) {
-      if (!value) return '';
-
-      const pageTitle = this.isSitePage(pageId) ? null : value;
-      return this.getStatusClass(true, value.length, 'title', pageTitle);
-    },
-    // Get all title field data at once to avoid multiple getEditableValue calls
-    getTitleFieldData(pageId, currentValue) {
-      const value = this.getEditableValue(pageId, 'metaTitle', currentValue);
-      return {
-        value,
-        showPreview: this.shouldShowTitlePreview(pageId, value),
-        fullTitle: this.getFullTitle(value),
-        charCount: this.getTitleCharCount(pageId, value),
-        statusClass: this.getTitleStatusClass(pageId, value)
-      };
-    },
-    // Helper for table title status (uses page object)
-    getFullTitleLength(page) {
-      // For site page, just return the meta title length or page title length
-      if (page.id === 'site') {
-        if (page.hasMetaTitle) {
-          return page.metaTitleLength;
-        }
-        // Fallback to page title
-        return page.title ? page.title.length : 0;
-      }
-
-      // For regular pages, use meta title or fallback to page title
-      const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
-      if (!titleToUse) return 0;
-
-      // Calculate full length with site name if enabled
-      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
-        const separator = this.siteSettings.titleSeparator || '|';
-        const siteName = this.siteSettings.siteMetaTitle || '';
-        const fullTitle = `${titleToUse} ${separator} ${siteName}`;
-        return fullTitle.length;
-      }
-
-      return titleToUse.length;
-    },
-
-    getFullTitlePreview(page) {
-      // For site page, just return the title
-      if (page.id === 'site') {
-        return page.hasMetaTitle ? page.metaTitle : page.title;
-      }
-
-      // For regular pages, use meta title or fallback to page title
-      const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
-      if (!titleToUse) return '—';
-
-      // Build full title with site name if enabled
-      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
-        const separator = this.siteSettings.titleSeparator || '|';
-        const siteName = this.siteSettings.siteMetaTitle || '';
-        return `${titleToUse} ${separator} ${siteName}`;
-      }
-
-      return titleToUse;
-    },
-
-    getTableTitleStatusClass(page) {
-      // For site page, no color coding
-      if (page.id === 'site') {
-        return '';
-      }
-
-      // For regular pages, use the full title length (with site name)
-      // This includes pages using the page title as fallback
-      const fullLength = this.getFullTitleLength(page);
-      const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
-      return this.getStatusClass(true, fullLength, 'title', titleToUse || '');
-    },
-
-    getStatusValue(statusClass) {
-      // Extract status value from class name
-      if (!statusClass) return '';
-      const match = statusClass.match(/k-meta-kit-status-(\w+)/);
-      return match ? match[1] : '';
-    },
-
-    getTitleTooltip(page) {
-      const titleToUse = page.hasMetaTitle ? page.metaTitle : page.title;
-
-      if (!titleToUse) {
-        return 'No title';
-      }
-
-      // For site page, just show the title
-      if (page.id === 'site') {
-        if (page.hasMetaTitle && page.metaTitle) {
-          return `${page.metaTitle}`;
-        }
-        return `${page.title}`;
-      }
-
-      // Build tooltip for regular pages
-      let tooltip = '';
-      if (page.hasMetaTitle && page.metaTitle) {
-        tooltip = `${page.metaTitle}`;
-      } else {
-        tooltip = `${page.title}`;
-      }
-
-      // Add preview if site name is appended
-      if (this.siteSettings.appendSiteName && this.siteSettings.siteMetaTitle) {
-        const separator = this.siteSettings.titleSeparator || '|';
-        const siteName = this.siteSettings.siteMetaTitle || '';
-        const preview = `${titleToUse} ${separator} ${siteName}`;
-        tooltip = `${preview}`;
-      }
-
-      return tooltip;
-    },
-
-    getDescriptionTooltip(page) {
-      if (!page.hasMetaDescription || !page.metaDescription) {
-        return 'No meta description';
-      }
-
-      // Show full description or truncated
-      const desc = page.metaDescription;
-      if (desc.length > 200) {
-        return desc.substring(0, 200) + '...';
-      }
-
-      return desc;
-    },
     async editSinglePageMetadata(pageId) {
       this.$refs.singlePageDialog.open(pageId);
     },
+
     goToLanguage(langCode) {
       if (langCode === this.language) return;
-
-      // Force full page reload with new language
       const baseUrl = window.location.origin + window.location.pathname.split('?')[0];
       window.location.href = baseUrl + '?language=' + langCode;
     },
 
-    // Pagination methods
     changePageSize(newSize) {
       this.pageSize = parseInt(newSize);
-      this.currentPage = 1; // Reset to first page
+      this.currentPage = 1;
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {
@@ -618,7 +397,6 @@ export default {
       }
     },
 
-    // Selection methods
     isPageSelected(pageId) {
       return this.selectedPages.includes(pageId);
     },

@@ -98,7 +98,9 @@
       <!-- Actions -->
       <div class="k-meta-kit-single-actions">
         <k-button icon="open" @click="editInPanel">Edit in Panel</k-button>
-        <k-button v-if="hasChanges" icon="check" theme="positive" @click="save">Apply Changes</k-button>
+        <k-button v-if="hasChanges" icon="check" theme="positive" @click="save">
+          Save {{ changedFieldCount }} {{ changedFieldCount === 1 ? 'Field' : 'Fields' }}
+        </k-button>
       </div>
     </div>
   </k-dialog>
@@ -146,12 +148,16 @@ export default {
     };
   },
   computed: {
+    changedFields() {
+      if (!this.page) return [];
+      const fields = ['metaTitle', 'metaDescription', 'ogTitle', 'ogDescription'];
+      return fields.filter(f => this.editedFields[f] !== (this.page[f] || ''));
+    },
+    changedFieldCount() {
+      return this.changedFields.length;
+    },
     hasChanges() {
-      if (!this.page) return false;
-      return this.editedFields.metaTitle !== (this.page.metaTitle || '') ||
-        this.editedFields.metaDescription !== (this.page.metaDescription || '') ||
-        this.editedFields.ogTitle !== (this.page.ogTitle || '') ||
-        this.editedFields.ogDescription !== (this.page.ogDescription || '');
+      return this.changedFieldCount > 0;
     }
   },
   methods: {
@@ -205,27 +211,26 @@ export default {
     async save() {
       if (!this.page || !this.hasChanges) return;
 
-      const fields = [
-        { name: 'metaTitle', value: this.editedFields.metaTitle, original: this.page.metaTitle || '' },
-        { name: 'metaDescription', value: this.editedFields.metaDescription, original: this.page.metaDescription || '' },
-        { name: 'ogTitle', value: this.editedFields.ogTitle, original: this.page.ogTitle || '' },
-        { name: 'ogDescription', value: this.editedFields.ogDescription, original: this.page.ogDescription || '' }
-      ];
+      const changedFields = this.changedFields.map(name => ({
+        name,
+        value: this.editedFields[name]
+      }));
 
-      let savedCount = 0;
-      for (const field of fields) {
-        if (field.value !== field.original) {
-          try {
-            await this.api.post('meta-kit/apply-single-field', {
-              pageId: this.page.id,
-              fieldName: field.name,
-              value: field.value
-            });
-            savedCount++;
-          } catch (error) {
-            window.panel.notification.error(`Failed to update ${field.name}`);
-          }
-        }
+      const results = await Promise.allSettled(
+        changedFields.map(field =>
+          this.api.post('meta-kit/apply-single-field', {
+            pageId: this.page.id,
+            fieldName: field.name,
+            value: field.value
+          })
+        )
+      );
+
+      const savedCount = results.filter(r => r.status === 'fulfilled').length;
+      const failedCount = results.filter(r => r.status === 'rejected').length;
+
+      if (failedCount > 0) {
+        window.panel.notification.error(`Failed to update ${failedCount} field${failedCount > 1 ? 's' : ''}`);
       }
 
       if (savedCount > 0) {

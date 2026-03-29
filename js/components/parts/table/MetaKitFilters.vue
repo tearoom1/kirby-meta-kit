@@ -113,6 +113,15 @@
             />
             <span>Complete Metadata</span>
           </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="noindex"
+              :checked="isFilterActive('noindex')"
+              @change="toggleFilter('noindex')"
+            />
+            <span>Noindex</span>
+          </label>
         </div>
 
         <div class="k-meta-kit-filter-group">
@@ -154,15 +163,6 @@
       </div>
     </div>
 
-    <select
-      class="k-meta-kit-pagesize-select"
-      :value="pageSize"
-      @change="$emit('change-page-size', $event.target.value)"
-    >
-      <option v-for="option in pageSizeOptions" :key="option.value" :value="option.value">
-        {{ option.text }}
-      </option>
-    </select>
   </div>
 </template>
 
@@ -186,19 +186,6 @@ export default {
       type: Array,
       default: () => []
     },
-    pageSize: {
-      type: Number,
-      default: 25
-    },
-    pageSizeOptions: {
-      type: Array,
-      default: () => [
-        {value: 25, text: '25/page'},
-        {value: 50, text: '50/page'},
-        {value: 100, text: '100/page'},
-        {value: 99999, text: 'All'}
-      ]
-    }
   },
   data() {
     return {
@@ -230,12 +217,15 @@ export default {
     }
   },
   mounted() {
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
+    this._outsideClickHandler = (e) => {
       if (!this.$el.contains(e.target)) {
         this.isDropdownOpen = false;
       }
-    });
+    };
+    document.addEventListener('click', this._outsideClickHandler);
+  },
+  beforeDestroy() {
+    document.removeEventListener('click', this._outsideClickHandler);
   }
 };
 </script>

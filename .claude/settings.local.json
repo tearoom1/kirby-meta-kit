@@ -11,7 +11,8 @@
       "Bash(vendor/bin/phpunit:*)",
       "Bash(grep:*)",
       "Bash(wc:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(composer test:*)"
     ]
   }
 }
