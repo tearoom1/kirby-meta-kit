@@ -303,7 +303,7 @@ class MetaKitController
                 'page' => $updatedPage,
                 'siteSettings' => $pageId === 'site' ? self::getSiteSettings() : null
             ], 'Field updated successfully');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return ApiResponse::error($e->getMessage());
         }
     }
@@ -566,7 +566,7 @@ class MetaKitController
 
             return ApiResponse::generated($result);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return ApiResponse::error($e->getMessage());
         } finally {
             if ($shouldRestoreLanguage && $previousLanguage) {

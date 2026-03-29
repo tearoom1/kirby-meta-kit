@@ -314,9 +314,24 @@ export default {
       }
 
       if (totalSaved > 0) {
+        this.pages = this.pages.map(page => updatedPages.get(page.id) || page);
+
+        this.pages.forEach(page => {
+          if (!this.editedFields[page.id]) {
+            return;
+          }
+
+          this.$set(this.editedFields, page.id, {
+            metaTitle: page.metaTitle || '',
+            metaDescription: page.metaDescription || '',
+            ogTitle: page.ogTitle || '',
+            ogDescription: page.ogDescription || ''
+          });
+        });
+
         this.setSaveFeedback('success', `Saved ${totalSaved} field${totalSaved > 1 ? 's' : ''} across ${this.pages.length} page${this.pages.length > 1 ? 's' : ''}`);
         this.$emit('saved', {
-          pages: Array.from(updatedPages.values()),
+          pages: this.pages,
           siteSettings: latestSiteSettings
         });
       }

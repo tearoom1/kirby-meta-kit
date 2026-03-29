@@ -98,7 +98,13 @@
       <!-- Actions -->
       <div class="k-meta-kit-dialog-footer">
         <div class="k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-start">
-          <k-button icon="open" @click="editInPanel">Edit in Panel</k-button>
+          <a
+            v-if="page && page.panelUrl"
+            :href="page.panelUrl"
+            class="k-link k-meta-kit-dialog-panel-link"
+          >
+            Edit in Panel
+          </a>
         </div>
         <div class="k-meta-kit-dialog-footer-meta">
           <span
@@ -314,13 +320,6 @@ export default {
         });
       }
     },
-
-    editInPanel() {
-      if (this.page && this.page.panelUrl) {
-        this.close();
-        window.location.assign(this.page.panelUrl);
-      }
-    }
   },
   beforeDestroy() {
     document.removeEventListener('keydown', this.handleKeydown);

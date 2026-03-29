@@ -209,7 +209,7 @@ class MetaKit
         try {
             $title = $this->callApi($prompt, 50);
             return $title ? $this->sanitizeTitle($title, $fieldType, $template) : null;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             kirbylog('Meta Kit Error: ' . $e->getMessage());
             throw $e;
         }
@@ -270,7 +270,7 @@ class MetaKit
             }
 
             return $this->sanitizeDescription($normalizedDescription, $fieldType, $template);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             kirbylog('Meta Kit Error: ' . $e->getMessage());
             throw $e;
         }

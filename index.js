@@ -1855,12 +1855,6 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
             siteSettings: latestSiteSettings
           });
         }
-      },
-      editInPanel() {
-        if (this.page && this.page.panelUrl) {
-          this.close();
-          window.location.assign(this.page.panelUrl);
-        }
       }
     },
     beforeDestroy() {
@@ -1889,7 +1883,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       _vm.editedFields.ogDescription = $event;
     }, "generate": function($event) {
       return _vm.generate("ogDescription");
-    } } })], 1), _c("div", { staticClass: "k-meta-kit-single-field" }, [_c("label", { staticClass: "k-meta-kit-dialog-field-label" }, [_vm._v("OG Image")]), _c("div", { staticClass: "k-meta-kit-single-field-content" }, [_vm.page.ogImage ? _c("div", { staticClass: "k-meta-kit-og-image-current" }, [_c("img", { attrs: { "src": _vm.page.ogImage.url, "alt": _vm.page.ogImage.filename } }), _c("span", { staticClass: "k-meta-kit-og-image-filename" }, [_vm._v(_vm._s(_vm.page.ogImage.filename))])]) : _c("div", { staticClass: "k-meta-kit-og-image-empty" }, [_vm._v(" No OG image set ")])])]), _c("div", { staticClass: "k-meta-kit-dialog-footer" }, [_c("div", { staticClass: "k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-start" }, [_c("k-button", { attrs: { "icon": "open" }, on: { "click": _vm.editInPanel } }, [_vm._v("Edit in Panel")])], 1), _c("div", { staticClass: "k-meta-kit-dialog-footer-meta" }, [_vm.saveFeedback.text ? _c("span", { class: ["k-meta-kit-dialog-feedback", `k-meta-kit-dialog-feedback-${_vm.saveFeedback.type}`] }, [_vm._v(" " + _vm._s(_vm.saveFeedback.text) + " ")]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-end" }, [_c("k-button", { on: { "click": _vm.close } }, [_vm._v("Close")]), _vm.hasChanges ? _c("k-button", { attrs: { "icon": "check", "theme": "positive" }, on: { "click": _vm.save } }, [_vm._v(" Save " + _vm._s(_vm.changedFieldCount) + " " + _vm._s(_vm.changedFieldCount === 1 ? "Field" : "Fields") + " ")]) : _vm._e()], 1)])]) : _vm._e()], 1);
+    } } })], 1), _c("div", { staticClass: "k-meta-kit-single-field" }, [_c("label", { staticClass: "k-meta-kit-dialog-field-label" }, [_vm._v("OG Image")]), _c("div", { staticClass: "k-meta-kit-single-field-content" }, [_vm.page.ogImage ? _c("div", { staticClass: "k-meta-kit-og-image-current" }, [_c("img", { attrs: { "src": _vm.page.ogImage.url, "alt": _vm.page.ogImage.filename } }), _c("span", { staticClass: "k-meta-kit-og-image-filename" }, [_vm._v(_vm._s(_vm.page.ogImage.filename))])]) : _c("div", { staticClass: "k-meta-kit-og-image-empty" }, [_vm._v(" No OG image set ")])])]), _c("div", { staticClass: "k-meta-kit-dialog-footer" }, [_c("div", { staticClass: "k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-start" }, [_vm.page && _vm.page.panelUrl ? _c("a", { staticClass: "k-link k-meta-kit-dialog-panel-link", attrs: { "href": _vm.page.panelUrl } }, [_vm._v(" Edit in Panel ")]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-dialog-footer-meta" }, [_vm.saveFeedback.text ? _c("span", { class: ["k-meta-kit-dialog-feedback", `k-meta-kit-dialog-feedback-${_vm.saveFeedback.type}`] }, [_vm._v(" " + _vm._s(_vm.saveFeedback.text) + " ")]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-end" }, [_c("k-button", { on: { "click": _vm.close } }, [_vm._v("Close")]), _vm.hasChanges ? _c("k-button", { attrs: { "icon": "check", "theme": "positive" }, on: { "click": _vm.save } }, [_vm._v(" Save " + _vm._s(_vm.changedFieldCount) + " " + _vm._s(_vm.changedFieldCount === 1 ? "Field" : "Fields") + " ")]) : _vm._e()], 1)])]) : _vm._e()], 1);
   };
   var _sfc_staticRenderFns$5 = [];
   _sfc_render$5._withStripped = true;
@@ -2371,9 +2365,21 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
           }
         }
         if (totalSaved > 0) {
+          this.pages = this.pages.map((page) => updatedPages.get(page.id) || page);
+          this.pages.forEach((page) => {
+            if (!this.editedFields[page.id]) {
+              return;
+            }
+            this.$set(this.editedFields, page.id, {
+              metaTitle: page.metaTitle || "",
+              metaDescription: page.metaDescription || "",
+              ogTitle: page.ogTitle || "",
+              ogDescription: page.ogDescription || ""
+            });
+          });
           this.setSaveFeedback("success", `Saved ${totalSaved} field${totalSaved > 1 ? "s" : ""} across ${this.pages.length} page${this.pages.length > 1 ? "s" : ""}`);
           this.$emit("saved", {
-            pages: Array.from(updatedPages.values()),
+            pages: this.pages,
             siteSettings: latestSiteSettings
           });
         }

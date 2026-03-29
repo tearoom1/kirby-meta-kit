@@ -111,8 +111,8 @@ class MetaKitLicense extends KirbyLicense
 
         if ($response->code() === 200) {
             $data = json_decode($response->content(), true);
-            if ($data['valid'] === true) {
-                return $data['license_key'];
+            if (is_array($data) && ($data['valid'] ?? false) === true) {
+                return $data['license_key'] ?? null;
             }
         }
         return null;

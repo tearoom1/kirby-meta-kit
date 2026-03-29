@@ -1601,6 +1601,7 @@
     min-height: 1.25rem;
     display: flex;
     align-items: center;
+    justify-content: end;
     flex: 1 1 12rem;
   }
 
