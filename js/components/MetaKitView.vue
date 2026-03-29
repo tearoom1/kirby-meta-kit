@@ -409,9 +409,9 @@ export default {
 
     classifyTitle(page) {
       const length = getTableTitleDisplay(page, this.siteSettingsData, 'meta').charCount;
-      if (isInheritedFromLanguage(page, 'metaTitle', this.siteSettingsData) && length) return 'review';
       const status = getStatusClass(page, length, 'title', this.validationSettingsData);
       if (status === 'k-meta-kit-status-error' || !status) return 'fix';
+      if (isInheritedFromLanguage(page, 'metaTitle', this.siteSettingsData) && length) return 'review';
       if (status === 'k-meta-kit-status-warning') return 'review';
       return 'good';
     },
@@ -419,6 +419,9 @@ export default {
     classifyDescription(page) {
       const desc = getEffectiveDescription(page, 'meta', this.siteSettingsData);
       if (!desc) return 'fix';
+      const status = getStatusClass(page, desc.length, 'description', this.validationSettingsData);
+      if (status === 'k-meta-kit-status-error' || !status) return 'fix';
+
       if (
         isInheritedFromSite(page, 'metaDescription', this.siteSettingsData) ||
         isInheritedFromLanguage(page, 'metaDescription', this.siteSettingsData)
@@ -426,8 +429,6 @@ export default {
         return 'review';
       }
 
-      const status = getStatusClass(page, desc.length, 'description', this.validationSettingsData);
-      if (status === 'k-meta-kit-status-error' || !status) return 'fix';
       if (status === 'k-meta-kit-status-warning') return 'review';
       return 'good';
     },

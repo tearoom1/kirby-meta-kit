@@ -73,10 +73,10 @@ function matchesStatusFilter(page, filter) {
 
 function classifyTitle(page, validationSettings = {}, siteSettings = {}) {
   const length = getTableTitleDisplay(page, siteSettings, 'meta').charCount;
-  if (isInheritedFromLanguage(page, 'metaTitle', siteSettings) && length) return 'warning';
   const status = getStatusClass(page, length, 'title', validationSettings);
 
   if (status === 'k-meta-kit-status-error' || !status) return 'error';
+  if (isInheritedFromLanguage(page, 'metaTitle', siteSettings) && length) return 'warning';
   if (status === 'k-meta-kit-status-warning') return 'warning';
   return 'good';
 }
@@ -84,6 +84,9 @@ function classifyTitle(page, validationSettings = {}, siteSettings = {}) {
 function classifyDescription(page, validationSettings = {}, siteSettings = {}) {
   const desc = getEffectiveDescription(page, 'meta', siteSettings);
   if (!desc) return 'error';
+  const status = getStatusClass(page, desc.length, 'description', validationSettings);
+  if (status === 'k-meta-kit-status-error' || !status) return 'error';
+
   if (
     isInheritedFromSite(page, 'metaDescription', siteSettings) ||
     isInheritedFromLanguage(page, 'metaDescription', siteSettings)
@@ -91,8 +94,6 @@ function classifyDescription(page, validationSettings = {}, siteSettings = {}) {
     return 'warning';
   }
 
-  const status = getStatusClass(page, desc.length, 'description', validationSettings);
-  if (status === 'k-meta-kit-status-error' || !status) return 'error';
   if (status === 'k-meta-kit-status-warning') return 'warning';
   return 'good';
 }
@@ -102,6 +103,7 @@ function classifyOgTitle(page, validationSettings = {}, siteSettings = {}) {
   const status = getStatusClass(page, length, 'ogTitle', validationSettings);
 
   if (status === 'k-meta-kit-status-error' || !status) return 'error';
+  if (!page.hasOgTitle && isInheritedFromLanguage(page, 'metaTitle', siteSettings) && length) return 'warning';
   if (status === 'k-meta-kit-status-warning') return 'warning';
   return 'good';
 }
@@ -109,10 +111,12 @@ function classifyOgTitle(page, validationSettings = {}, siteSettings = {}) {
 function classifyOgDescription(page, validationSettings = {}, siteSettings = {}) {
   const desc = getEffectiveDescription(page, 'og', siteSettings);
   if (!desc) return 'error';
-  if (isInheritedFromSite(page, 'ogDescription', siteSettings)) return 'warning';
-
   const status = getStatusClass(page, desc.length, 'ogDescription', validationSettings);
   if (status === 'k-meta-kit-status-error' || !status) return 'error';
+
+  if (!page.hasOgDescription && isInheritedFromLanguage(page, 'metaDescription', siteSettings)) return 'warning';
+  if (isInheritedFromSite(page, 'ogDescription', siteSettings)) return 'warning';
+
   if (status === 'k-meta-kit-status-warning') return 'warning';
   return 'good';
 }

@@ -264,6 +264,26 @@ test('filterPages treats main-language inherited meta title and description as w
     filterPages(inheritedPages, ['warning', 'type-description'], '', context).map((p) => p.id),
     ['translated-page']
   );
+
+  const inheritedOgPages = [
+    {
+      ...inheritedPages[0],
+      hasOgTitle: false,
+      ogTitle: null,
+      hasOgDescription: false,
+      ogDescription: null
+    }
+  ];
+
+  assert.deepEqual(
+    filterPages(inheritedOgPages, ['warning', 'type-og-title'], '', context).map((p) => p.id),
+    ['translated-page']
+  );
+
+  assert.deepEqual(
+    filterPages(inheritedOgPages, ['warning', 'type-og-description'], '', context).map((p) => p.id),
+    ['translated-page']
+  );
 });
 
 test('pagination helpers compute slices and total pages', () => {

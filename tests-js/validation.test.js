@@ -130,13 +130,13 @@ test('getLengthValidationReason returns empty string for optimal length', () => 
 
 test('getLengthValidationReason returns warning reason for warning-band length', () => {
   const reason = getLengthValidationReason(homePage, 'title', 70, {});
-  assert.ok(reason.includes('warning'));
+  assert.ok(reason.includes('Warning:'));
   assert.ok(reason.includes('70'));
 });
 
 test('getLengthValidationReason returns error reason for out-of-range length', () => {
   const reason = getLengthValidationReason(homePage, 'title', 5, {});
-  assert.ok(reason.includes('error'));
+  assert.ok(reason.includes('Error:'));
   assert.ok(reason.includes('5'));
 });
 

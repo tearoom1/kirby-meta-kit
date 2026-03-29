@@ -400,15 +400,28 @@ export default {
     },
 
     getTableTitleStatusClass(page) {
+      const baseStatus = this.getStatusClass(page, this.getTitleLength(page, 'meta'), 'title');
+      if (baseStatus === 'k-meta-kit-status-error') {
+        return baseStatus;
+      }
+
       if (isInheritedFromLanguage(page, 'metaTitle', this.siteSettings) && this.getTitleLength(page, 'meta')) {
         return 'k-meta-kit-status-warning';
       }
-      return this.getStatusClass(page, this.getTitleLength(page, 'meta'), 'title');
+      return baseStatus;
     },
 
     getTableOgTitleStatusClass(page) {
-      //if (page.id === 'site') return '';
-      return this.getStatusClass(page, this.getTitleLength(page, 'og'), 'ogTitle');
+      const baseStatus = this.getStatusClass(page, this.getTitleLength(page, 'og'), 'ogTitle');
+      if (baseStatus === 'k-meta-kit-status-error') {
+        return baseStatus;
+      }
+
+      if (!page.hasOgTitle && isInheritedFromLanguage(page, 'metaTitle', this.siteSettings) && this.getTitleLength(page, 'og')) {
+        return 'k-meta-kit-status-warning';
+      }
+
+      return baseStatus;
     },
 
     // Tooltip methods
@@ -424,9 +437,36 @@ export default {
       return `${base}\n\n${reason}`;
     },
 
+    getReasonSeverity(reason) {
+      if (!reason) return '';
+      if (reason.startsWith('Error:')) return 'error';
+      if (reason.startsWith('Warning:')) return 'warning';
+      return '';
+    },
+
+    combineReasonParts(...reasons) {
+      return reasons.filter(Boolean).join('\n\n');
+    },
+
     getInheritanceWarningReason(page, fieldType) {
       if (isInheritedFromLanguage(page, fieldType, this.siteSettings)) {
-        return 'Why warning: Inherited from other language.';
+        return 'Warning:\nInherited from the main language.';
+      }
+
+      if (
+        fieldType === 'ogTitle' &&
+        !page.hasOgTitle &&
+        isInheritedFromLanguage(page, 'metaTitle', this.siteSettings)
+      ) {
+        return 'Warning:\nInherited from the main language.';
+      }
+
+      if (
+        fieldType === 'ogDescription' &&
+        !page.hasOgDescription &&
+        isInheritedFromLanguage(page, 'metaDescription', this.siteSettings)
+      ) {
+        return 'Warning:\nInherited from the main language.';
       }
 
       return '';
@@ -448,7 +488,7 @@ export default {
       const base = this.tooltipText(tooltip, source, showContent);
       const inheritanceReason = this.getInheritanceWarningReason(page, 'metaTitle');
       const lengthReason = this.getLengthValidationReason(page, 'title', this.getTitleLength(page, 'meta'));
-      return this.joinTooltipParts(base, [inheritanceReason, lengthReason].filter(Boolean).join('\n\n'));
+      return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
     },
 
     getDescriptionTooltip(page, showContent = true) {
@@ -459,7 +499,7 @@ export default {
       const base = this.tooltipText(text, source, showContent);
       const inheritanceReason = this.getInheritanceWarningReason(page, 'metaDescription');
       const lengthReason = this.getLengthValidationReason(page, 'description', text.length);
-      return this.joinTooltipParts(base, [inheritanceReason, lengthReason].filter(Boolean).join('\n\n'));
+      return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
     },
 
     getOgTitleTooltip(page, showContent = true) {
@@ -468,8 +508,9 @@ export default {
         const source = getInheritanceSource(page, 'ogTitle', this.siteSettings);
         const content = page.hasOgTitle ? page.ogTitle : (page.hasMetaTitle ? page.metaTitle : page.title);
         const base = this.tooltipText(content, source, showContent);
-        const reason = this.getLengthValidationReason(page, 'ogTitle', this.getTitleLength(page, 'og'));
-        return this.joinTooltipParts(base, reason);
+        const inheritanceReason = this.getInheritanceWarningReason(page, 'ogTitle');
+        const lengthReason = this.getLengthValidationReason(page, 'ogTitle', this.getTitleLength(page, 'og'));
+        return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
       }
 
       const source = getInheritanceSource(page, 'ogTitle', this.siteSettings);
@@ -480,8 +521,9 @@ export default {
       );
 
       const base = this.tooltipText(tooltip, source, showContent);
-      const reason = this.getLengthValidationReason(page, 'ogTitle', this.getTitleLength(page, 'og'));
-      return this.joinTooltipParts(base, reason);
+      const inheritanceReason = this.getInheritanceWarningReason(page, 'ogTitle');
+      const lengthReason = this.getLengthValidationReason(page, 'ogTitle', this.getTitleLength(page, 'og'));
+      return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
     },
 
     getOgDescriptionTooltip(page, showContent = true) {
@@ -490,8 +532,9 @@ export default {
 
       const source = getInheritanceSource(page, 'ogDescription', this.siteSettings);
       const base = this.tooltipText(text, source, showContent);
-      const reason = this.getLengthValidationReason(page, 'ogDescription', text.length);
-      return this.joinTooltipParts(base, reason);
+      const inheritanceReason = this.getInheritanceWarningReason(page, 'ogDescription');
+      const lengthReason = this.getLengthValidationReason(page, 'ogDescription', text.length);
+      return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
     },
 
     getInheritanceBadgeLabel(page, fieldType) {
@@ -524,6 +567,11 @@ export default {
 
     getDescriptionStatusClass(page) {
       const desc = getEffectiveDescription(page, 'meta', this.siteSettings);
+      const baseStatus = this.getStatusClass(page, desc?.length || 0, 'description');
+      if (baseStatus === 'k-meta-kit-status-error') {
+        return baseStatus;
+      }
+
       if (
         (isInheritedFromSite(page, 'metaDescription', this.siteSettings) ||
           isInheritedFromLanguage(page, 'metaDescription', this.siteSettings)) &&
@@ -531,7 +579,7 @@ export default {
       ) {
         return 'k-meta-kit-status-warning';
       }
-      return this.getStatusClass(page, desc?.length || 0, 'description');
+      return baseStatus;
     },
 
     getOgTitleDisplay(page) {
@@ -546,10 +594,19 @@ export default {
 
     getOgDescriptionStatusClass(page) {
       const desc = getEffectiveDescription(page, 'og', this.siteSettings);
+      const baseStatus = this.getStatusClass(page, desc?.length || 0, 'ogDescription');
+      if (baseStatus === 'k-meta-kit-status-error') {
+        return baseStatus;
+      }
+
+      if (!page.hasOgDescription && isInheritedFromLanguage(page, 'metaDescription', this.siteSettings) && desc) {
+        return 'k-meta-kit-status-warning';
+      }
+
       if (isInheritedFromSite(page, 'ogDescription', this.siteSettings) && desc) {
         return 'k-meta-kit-status-warning';
       }
-      return this.getStatusClass(page, desc?.length || 0, 'ogDescription');
+      return baseStatus;
     },
 
     // Slug methods

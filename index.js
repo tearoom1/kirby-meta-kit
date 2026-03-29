@@ -351,6 +351,9 @@
   );
   __component__$e.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/sections/seo-preview.vue";
   const SeoPreview = __component__$e.exports;
+  function escapeHtml(value = "") {
+    return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
   const _sfc_main$d = {
     props: {
       content: {
@@ -366,7 +369,8 @@
     },
     computed: {
       formattedContent() {
-        return this.content.replace(/\n/g, "<br>");
+        const escaped = escapeHtml(this.content);
+        return escaped.replace(/^Warning:/gm, '<span class="k-meta-kit-tooltip-label k-meta-kit-tooltip-label-warning">Warning:</span>').replace(/^Error:/gm, '<span class="k-meta-kit-tooltip-label k-meta-kit-tooltip-label-error">Error:</span>').replace(/\n/g, "<br>");
       }
     },
     methods: {
@@ -724,10 +728,10 @@
     const optimal = `${ranges.optimal.min}-${ranges.optimal.max}`;
     const warning = `${ranges.warning.min}-${ranges.warning.max}`;
     if (statusClass === STATUS_CLASSES.warning) {
-      return `Why warning:
+      return `Warning:
 Length ${length} is outside optimal (${optimal}), but within warning (${warning}).`;
     }
-    return `Why error:
+    return `Error:
 Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
   }
   function getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg }) {
@@ -1017,13 +1021,24 @@ Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
         return preview || "—";
       },
       getTableTitleStatusClass(page) {
+        const baseStatus = this.getStatusClass(page, this.getTitleLength(page, "meta"), "title");
+        if (baseStatus === "k-meta-kit-status-error") {
+          return baseStatus;
+        }
         if (isInheritedFromLanguage(page, "metaTitle", this.siteSettings) && this.getTitleLength(page, "meta")) {
           return "k-meta-kit-status-warning";
         }
-        return this.getStatusClass(page, this.getTitleLength(page, "meta"), "title");
+        return baseStatus;
       },
       getTableOgTitleStatusClass(page) {
-        return this.getStatusClass(page, this.getTitleLength(page, "og"), "ogTitle");
+        const baseStatus = this.getStatusClass(page, this.getTitleLength(page, "og"), "ogTitle");
+        if (baseStatus === "k-meta-kit-status-error") {
+          return baseStatus;
+        }
+        if (!page.hasOgTitle && isInheritedFromLanguage(page, "metaTitle", this.siteSettings) && this.getTitleLength(page, "og")) {
+          return "k-meta-kit-status-warning";
+        }
+        return baseStatus;
       },
       // Tooltip methods
       tooltipText(content, inheritanceSource, showContent) {
@@ -1038,9 +1053,24 @@ Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
 
 ${reason}`;
       },
+      getReasonSeverity(reason) {
+        if (!reason) return "";
+        if (reason.startsWith("Error:")) return "error";
+        if (reason.startsWith("Warning:")) return "warning";
+        return "";
+      },
+      combineReasonParts(...reasons) {
+        return reasons.filter(Boolean).join("\n\n");
+      },
       getInheritanceWarningReason(page, fieldType) {
         if (isInheritedFromLanguage(page, fieldType, this.siteSettings)) {
-          return "Why warning: Inherited from other language.";
+          return "Warning:\nInherited from the main language.";
+        }
+        if (fieldType === "ogTitle" && !page.hasOgTitle && isInheritedFromLanguage(page, "metaTitle", this.siteSettings)) {
+          return "Warning:\nInherited from the main language.";
+        }
+        if (fieldType === "ogDescription" && !page.hasOgDescription && isInheritedFromLanguage(page, "metaDescription", this.siteSettings)) {
+          return "Warning:\nInherited from the main language.";
         }
         return "";
       },
@@ -1058,7 +1088,7 @@ ${reason}`;
         const base = this.tooltipText(tooltip, source, showContent);
         const inheritanceReason = this.getInheritanceWarningReason(page, "metaTitle");
         const lengthReason = this.getLengthValidationReason(page, "title", this.getTitleLength(page, "meta"));
-        return this.joinTooltipParts(base, [inheritanceReason, lengthReason].filter(Boolean).join("\n\n"));
+        return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
       },
       getDescriptionTooltip(page, showContent = true) {
         const text = getEffectiveDescription(page, "meta", this.siteSettings);
@@ -1067,7 +1097,7 @@ ${reason}`;
         const base = this.tooltipText(text, source, showContent);
         const inheritanceReason = this.getInheritanceWarningReason(page, "metaDescription");
         const lengthReason = this.getLengthValidationReason(page, "description", text.length);
-        return this.joinTooltipParts(base, [inheritanceReason, lengthReason].filter(Boolean).join("\n\n"));
+        return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
       },
       getOgTitleTooltip(page, showContent = true) {
         if (!page.title && !page.ogTitle && !page.metaTitle) return "No OG title";
@@ -1075,8 +1105,9 @@ ${reason}`;
           const source2 = getInheritanceSource(page, "ogTitle", this.siteSettings);
           const content = page.hasOgTitle ? page.ogTitle : page.hasMetaTitle ? page.metaTitle : page.title;
           const base2 = this.tooltipText(content, source2, showContent);
-          const reason2 = this.getLengthValidationReason(page, "ogTitle", this.getTitleLength(page, "og"));
-          return this.joinTooltipParts(base2, reason2);
+          const inheritanceReason2 = this.getInheritanceWarningReason(page, "ogTitle");
+          const lengthReason2 = this.getLengthValidationReason(page, "ogTitle", this.getTitleLength(page, "og"));
+          return this.joinTooltipParts(base2, this.combineReasonParts(inheritanceReason2, lengthReason2));
         }
         const source = getInheritanceSource(page, "ogTitle", this.siteSettings);
         const tooltip = buildTitleWithSiteName(
@@ -1085,16 +1116,18 @@ ${reason}`;
           "og"
         );
         const base = this.tooltipText(tooltip, source, showContent);
-        const reason = this.getLengthValidationReason(page, "ogTitle", this.getTitleLength(page, "og"));
-        return this.joinTooltipParts(base, reason);
+        const inheritanceReason = this.getInheritanceWarningReason(page, "ogTitle");
+        const lengthReason = this.getLengthValidationReason(page, "ogTitle", this.getTitleLength(page, "og"));
+        return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
       },
       getOgDescriptionTooltip(page, showContent = true) {
         const text = getEffectiveDescription(page, "og", this.siteSettings);
         if (!text) return "No OG description";
         const source = getInheritanceSource(page, "ogDescription", this.siteSettings);
         const base = this.tooltipText(text, source, showContent);
-        const reason = this.getLengthValidationReason(page, "ogDescription", text.length);
-        return this.joinTooltipParts(base, reason);
+        const inheritanceReason = this.getInheritanceWarningReason(page, "ogDescription");
+        const lengthReason = this.getLengthValidationReason(page, "ogDescription", text.length);
+        return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
       },
       getInheritanceBadgeLabel(page, fieldType) {
         const source = getInheritanceSource(page, fieldType, this.siteSettings);
@@ -1122,10 +1155,14 @@ ${reason}`;
       },
       getDescriptionStatusClass(page) {
         const desc = getEffectiveDescription(page, "meta", this.siteSettings);
+        const baseStatus = this.getStatusClass(page, (desc == null ? void 0 : desc.length) || 0, "description");
+        if (baseStatus === "k-meta-kit-status-error") {
+          return baseStatus;
+        }
         if ((isInheritedFromSite(page, "metaDescription", this.siteSettings) || isInheritedFromLanguage(page, "metaDescription", this.siteSettings)) && desc) {
           return "k-meta-kit-status-warning";
         }
-        return this.getStatusClass(page, (desc == null ? void 0 : desc.length) || 0, "description");
+        return baseStatus;
       },
       getOgTitleDisplay(page) {
         const length = this.getTitleLength(page, "og");
@@ -1137,10 +1174,17 @@ ${reason}`;
       },
       getOgDescriptionStatusClass(page) {
         const desc = getEffectiveDescription(page, "og", this.siteSettings);
+        const baseStatus = this.getStatusClass(page, (desc == null ? void 0 : desc.length) || 0, "ogDescription");
+        if (baseStatus === "k-meta-kit-status-error") {
+          return baseStatus;
+        }
+        if (!page.hasOgDescription && isInheritedFromLanguage(page, "metaDescription", this.siteSettings) && desc) {
+          return "k-meta-kit-status-warning";
+        }
         if (isInheritedFromSite(page, "ogDescription", this.siteSettings) && desc) {
           return "k-meta-kit-status-warning";
         }
-        return this.getStatusClass(page, (desc == null ? void 0 : desc.length) || 0, "ogDescription");
+        return baseStatus;
       },
       // Slug methods
       getSlug(page) {
@@ -1827,20 +1871,20 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
   }
   function classifyTitle(page, validationSettings = {}, siteSettings = {}) {
     const length = getTableTitleDisplay(page, siteSettings, "meta").charCount;
-    if (isInheritedFromLanguage(page, "metaTitle", siteSettings) && length) return "warning";
     const status = getStatusClass(page, length, "title", validationSettings);
     if (status === "k-meta-kit-status-error" || !status) return "error";
+    if (isInheritedFromLanguage(page, "metaTitle", siteSettings) && length) return "warning";
     if (status === "k-meta-kit-status-warning") return "warning";
     return "good";
   }
   function classifyDescription(page, validationSettings = {}, siteSettings = {}) {
     const desc = getEffectiveDescription(page, "meta", siteSettings);
     if (!desc) return "error";
+    const status = getStatusClass(page, desc.length, "description", validationSettings);
+    if (status === "k-meta-kit-status-error" || !status) return "error";
     if (isInheritedFromSite(page, "metaDescription", siteSettings) || isInheritedFromLanguage(page, "metaDescription", siteSettings)) {
       return "warning";
     }
-    const status = getStatusClass(page, desc.length, "description", validationSettings);
-    if (status === "k-meta-kit-status-error" || !status) return "error";
     if (status === "k-meta-kit-status-warning") return "warning";
     return "good";
   }
@@ -1848,15 +1892,17 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
     const length = getTableTitleDisplay(page, siteSettings, "og").charCount;
     const status = getStatusClass(page, length, "ogTitle", validationSettings);
     if (status === "k-meta-kit-status-error" || !status) return "error";
+    if (!page.hasOgTitle && isInheritedFromLanguage(page, "metaTitle", siteSettings) && length) return "warning";
     if (status === "k-meta-kit-status-warning") return "warning";
     return "good";
   }
   function classifyOgDescription(page, validationSettings = {}, siteSettings = {}) {
     const desc = getEffectiveDescription(page, "og", siteSettings);
     if (!desc) return "error";
-    if (isInheritedFromSite(page, "ogDescription", siteSettings)) return "warning";
     const status = getStatusClass(page, desc.length, "ogDescription", validationSettings);
     if (status === "k-meta-kit-status-error" || !status) return "error";
+    if (!page.hasOgDescription && isInheritedFromLanguage(page, "metaDescription", siteSettings)) return "warning";
+    if (isInheritedFromSite(page, "ogDescription", siteSettings)) return "warning";
     if (status === "k-meta-kit-status-warning") return "warning";
     return "good";
   }
@@ -2407,20 +2453,20 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       },
       classifyTitle(page) {
         const length = getTableTitleDisplay(page, this.siteSettingsData, "meta").charCount;
-        if (isInheritedFromLanguage(page, "metaTitle", this.siteSettingsData) && length) return "review";
         const status = getStatusClass(page, length, "title", this.validationSettingsData);
         if (status === "k-meta-kit-status-error" || !status) return "fix";
+        if (isInheritedFromLanguage(page, "metaTitle", this.siteSettingsData) && length) return "review";
         if (status === "k-meta-kit-status-warning") return "review";
         return "good";
       },
       classifyDescription(page) {
         const desc = getEffectiveDescription(page, "meta", this.siteSettingsData);
         if (!desc) return "fix";
+        const status = getStatusClass(page, desc.length, "description", this.validationSettingsData);
+        if (status === "k-meta-kit-status-error" || !status) return "fix";
         if (isInheritedFromSite(page, "metaDescription", this.siteSettingsData) || isInheritedFromLanguage(page, "metaDescription", this.siteSettingsData)) {
           return "review";
         }
-        const status = getStatusClass(page, desc.length, "description", this.validationSettingsData);
-        if (status === "k-meta-kit-status-error" || !status) return "fix";
         if (status === "k-meta-kit-status-warning") return "review";
         return "good";
       },

@@ -168,10 +168,10 @@ export function getLengthValidationReason(page, type, length, validationSettings
   const warning = `${ranges.warning.min}-${ranges.warning.max}`;
 
   if (statusClass === STATUS_CLASSES.warning) {
-    return `Why warning:\nLength ${length} is outside optimal (${optimal}), but within warning (${warning}).`;
+    return `Warning:\nLength ${length} is outside optimal (${optimal}), but within warning (${warning}).`;
   }
 
-  return `Why error:\nLength ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
+  return `Error:\nLength ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
 }
 
 /**
