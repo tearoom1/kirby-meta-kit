@@ -213,6 +213,59 @@ test('filterPages supports attention, warning and error filters', () => {
   );
 });
 
+test('filterPages treats main-language inherited meta title and description as warnings', () => {
+  const inheritedPages = [
+    {
+      id: 'translated-page',
+      title: 'Translated Page',
+      template: 'default',
+      status: 'listed',
+      hasMetaTitle: false,
+      metaTitle: null,
+      metaTitleInheritance: { inherited: true, inheritedFrom: 'en', inheritedValue: 'English title fallback' },
+      hasMetaDescription: false,
+      metaDescription: null,
+      metaDescriptionInheritance: { inherited: true, inheritedFrom: 'en', inheritedValue: 'English description fallback for translated page' },
+      hasOgTitle: true,
+      ogTitle: 'OG title',
+      hasOgDescription: true,
+      ogDescription: 'OG description',
+      hasOgImage: true,
+      robots: ''
+    }
+  ];
+
+  const context = {
+    siteSettings: {
+      siteMetaDescription: 'Fallback site description',
+      appendSiteName: false,
+      siteHasOgImage: true
+    },
+    validationSettings: {
+      ranges: {
+        title: {
+          optimal: { min: 1, max: 120 },
+          warning: { min: 1, max: 140 }
+        },
+        description: {
+          optimal: { min: 1, max: 220 },
+          warning: { min: 1, max: 260 }
+        }
+      }
+    }
+  };
+
+  assert.deepEqual(
+    filterPages(inheritedPages, ['warning', 'type-title'], '', context).map((p) => p.id),
+    ['translated-page']
+  );
+
+  assert.deepEqual(
+    filterPages(inheritedPages, ['warning', 'type-description'], '', context).map((p) => p.id),
+    ['translated-page']
+  );
+});
+
 test('pagination helpers compute slices and total pages', () => {
   const filtered = filterPages(pages, [], '');
   assert.equal(getTotalPages(filtered, 2), 2);

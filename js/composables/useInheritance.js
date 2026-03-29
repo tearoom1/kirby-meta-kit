@@ -156,6 +156,18 @@ export function isInheritedFromSite(page, fieldType, siteSettings = {}) {
 }
 
 /**
+ * Check whether a field is inherited from another language
+ * @param {Object} page - Page object
+ * @param {string} fieldType - Field type (metaTitle, metaDescription, etc.)
+ * @param {Object} siteSettings - Site settings object
+ * @returns {boolean}
+ */
+export function isInheritedFromLanguage(page, fieldType, siteSettings = {}) {
+  const source = getInheritanceSource(page, fieldType, siteSettings);
+  return !!source && !['site', 'page title', 'meta title', 'meta description'].includes(source);
+}
+
+/**
  * Build tooltip text with inheritance prefix
  * @param {string} content - Content text
  * @param {string|false} inheritanceSource - Source name or false
@@ -192,5 +204,6 @@ export default {
   getEffectiveDescription,
   getInheritanceSource,
   isInheritedFromSite,
+  isInheritedFromLanguage,
   buildTooltipText
 };

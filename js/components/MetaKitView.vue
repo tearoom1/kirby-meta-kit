@@ -182,7 +182,8 @@ import {
 } from '../composables/useValidation.js';
 import {
   getEffectiveDescription,
-  isInheritedFromSite
+  isInheritedFromSite,
+  isInheritedFromLanguage
 } from '../composables/useInheritance.js';
 import { getTableTitleDisplay } from '../composables/panelDisplay.js';
 
@@ -408,6 +409,7 @@ export default {
 
     classifyTitle(page) {
       const length = getTableTitleDisplay(page, this.siteSettingsData, 'meta').charCount;
+      if (isInheritedFromLanguage(page, 'metaTitle', this.siteSettingsData) && length) return 'review';
       const status = getStatusClass(page, length, 'title', this.validationSettingsData);
       if (status === 'k-meta-kit-status-error' || !status) return 'fix';
       if (status === 'k-meta-kit-status-warning') return 'review';
@@ -417,7 +419,12 @@ export default {
     classifyDescription(page) {
       const desc = getEffectiveDescription(page, 'meta', this.siteSettingsData);
       if (!desc) return 'fix';
-      if (isInheritedFromSite(page, 'metaDescription', this.siteSettingsData)) return 'review';
+      if (
+        isInheritedFromSite(page, 'metaDescription', this.siteSettingsData) ||
+        isInheritedFromLanguage(page, 'metaDescription', this.siteSettingsData)
+      ) {
+        return 'review';
+      }
 
       const status = getStatusClass(page, desc.length, 'description', this.validationSettingsData);
       if (status === 'k-meta-kit-status-error' || !status) return 'fix';

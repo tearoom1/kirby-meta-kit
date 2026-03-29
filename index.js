@@ -844,6 +844,10 @@ Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
   function isInheritedFromSite(page, fieldType, siteSettings = {}) {
     return getInheritanceSource(page, fieldType, siteSettings) === "site";
   }
+  function isInheritedFromLanguage(page, fieldType, siteSettings = {}) {
+    const source = getInheritanceSource(page, fieldType, siteSettings);
+    return !!source && !["site", "page title", "meta title", "meta description"].includes(source);
+  }
   function buildTooltipText(content, inheritanceSource, showContent = true, maxLength = 200) {
     let text = content || "";
     let prefix = "";
@@ -1013,6 +1017,9 @@ Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
         return preview || "—";
       },
       getTableTitleStatusClass(page) {
+        if (isInheritedFromLanguage(page, "metaTitle", this.siteSettings) && this.getTitleLength(page, "meta")) {
+          return "k-meta-kit-status-warning";
+        }
         return this.getStatusClass(page, this.getTitleLength(page, "meta"), "title");
       },
       getTableOgTitleStatusClass(page) {
@@ -1031,6 +1038,12 @@ Length ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
 
 ${reason}`;
       },
+      getInheritanceWarningReason(page, fieldType) {
+        if (isInheritedFromLanguage(page, fieldType, this.siteSettings)) {
+          return "Why warning: Inherited from other language.";
+        }
+        return "";
+      },
       getTitleTooltip(page, showContent = true) {
         if (!page.title && !page.metaTitle) return "No title";
         if (page.id === "site") {
@@ -1043,16 +1056,18 @@ ${reason}`;
           "meta"
         );
         const base = this.tooltipText(tooltip, source, showContent);
-        const reason = this.getLengthValidationReason(page, "title", this.getTitleLength(page, "meta"));
-        return this.joinTooltipParts(base, reason);
+        const inheritanceReason = this.getInheritanceWarningReason(page, "metaTitle");
+        const lengthReason = this.getLengthValidationReason(page, "title", this.getTitleLength(page, "meta"));
+        return this.joinTooltipParts(base, [inheritanceReason, lengthReason].filter(Boolean).join("\n\n"));
       },
       getDescriptionTooltip(page, showContent = true) {
         const text = getEffectiveDescription(page, "meta", this.siteSettings);
         if (!text) return "No meta description";
         const source = getInheritanceSource(page, "metaDescription", this.siteSettings);
         const base = this.tooltipText(text, source, showContent);
-        const reason = this.getLengthValidationReason(page, "description", text.length);
-        return this.joinTooltipParts(base, reason);
+        const inheritanceReason = this.getInheritanceWarningReason(page, "metaDescription");
+        const lengthReason = this.getLengthValidationReason(page, "description", text.length);
+        return this.joinTooltipParts(base, [inheritanceReason, lengthReason].filter(Boolean).join("\n\n"));
       },
       getOgTitleTooltip(page, showContent = true) {
         if (!page.title && !page.ogTitle && !page.metaTitle) return "No OG title";
@@ -1107,7 +1122,7 @@ ${reason}`;
       },
       getDescriptionStatusClass(page) {
         const desc = getEffectiveDescription(page, "meta", this.siteSettings);
-        if (isInheritedFromSite(page, "metaDescription", this.siteSettings) && desc) {
+        if ((isInheritedFromSite(page, "metaDescription", this.siteSettings) || isInheritedFromLanguage(page, "metaDescription", this.siteSettings)) && desc) {
           return "k-meta-kit-status-warning";
         }
         return this.getStatusClass(page, (desc == null ? void 0 : desc.length) || 0, "description");
@@ -1812,6 +1827,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
   }
   function classifyTitle(page, validationSettings = {}, siteSettings = {}) {
     const length = getTableTitleDisplay(page, siteSettings, "meta").charCount;
+    if (isInheritedFromLanguage(page, "metaTitle", siteSettings) && length) return "warning";
     const status = getStatusClass(page, length, "title", validationSettings);
     if (status === "k-meta-kit-status-error" || !status) return "error";
     if (status === "k-meta-kit-status-warning") return "warning";
@@ -1820,7 +1836,9 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
   function classifyDescription(page, validationSettings = {}, siteSettings = {}) {
     const desc = getEffectiveDescription(page, "meta", siteSettings);
     if (!desc) return "error";
-    if (isInheritedFromSite(page, "metaDescription", siteSettings)) return "warning";
+    if (isInheritedFromSite(page, "metaDescription", siteSettings) || isInheritedFromLanguage(page, "metaDescription", siteSettings)) {
+      return "warning";
+    }
     const status = getStatusClass(page, desc.length, "description", validationSettings);
     if (status === "k-meta-kit-status-error" || !status) return "error";
     if (status === "k-meta-kit-status-warning") return "warning";
@@ -2389,6 +2407,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       },
       classifyTitle(page) {
         const length = getTableTitleDisplay(page, this.siteSettingsData, "meta").charCount;
+        if (isInheritedFromLanguage(page, "metaTitle", this.siteSettingsData) && length) return "review";
         const status = getStatusClass(page, length, "title", this.validationSettingsData);
         if (status === "k-meta-kit-status-error" || !status) return "fix";
         if (status === "k-meta-kit-status-warning") return "review";
@@ -2397,7 +2416,9 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       classifyDescription(page) {
         const desc = getEffectiveDescription(page, "meta", this.siteSettingsData);
         if (!desc) return "fix";
-        if (isInheritedFromSite(page, "metaDescription", this.siteSettingsData)) return "review";
+        if (isInheritedFromSite(page, "metaDescription", this.siteSettingsData) || isInheritedFromLanguage(page, "metaDescription", this.siteSettingsData)) {
+          return "review";
+        }
         const status = getStatusClass(page, desc.length, "description", this.validationSettingsData);
         if (status === "k-meta-kit-status-error" || !status) return "fix";
         if (status === "k-meta-kit-status-warning") return "review";

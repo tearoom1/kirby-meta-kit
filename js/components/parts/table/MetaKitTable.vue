@@ -288,6 +288,7 @@ import {
   getEffectiveDescription,
   getInheritanceSource,
   isInheritedFromSite,
+  isInheritedFromLanguage,
   buildTooltipText
 } from '../../../composables/useInheritance.js';
 import {
@@ -399,7 +400,9 @@ export default {
     },
 
     getTableTitleStatusClass(page) {
-      //if (page.id === 'site') return '';
+      if (isInheritedFromLanguage(page, 'metaTitle', this.siteSettings) && this.getTitleLength(page, 'meta')) {
+        return 'k-meta-kit-status-warning';
+      }
       return this.getStatusClass(page, this.getTitleLength(page, 'meta'), 'title');
     },
 
@@ -421,6 +424,14 @@ export default {
       return `${base}\n\n${reason}`;
     },
 
+    getInheritanceWarningReason(page, fieldType) {
+      if (isInheritedFromLanguage(page, fieldType, this.siteSettings)) {
+        return 'Why warning: Inherited from other language.';
+      }
+
+      return '';
+    },
+
     getTitleTooltip(page, showContent = true) {
       if (!page.title && !page.metaTitle) return 'No title';
       if (page.id === 'site') {
@@ -435,8 +446,9 @@ export default {
       );
 
       const base = this.tooltipText(tooltip, source, showContent);
-      const reason = this.getLengthValidationReason(page, 'title', this.getTitleLength(page, 'meta'));
-      return this.joinTooltipParts(base, reason);
+      const inheritanceReason = this.getInheritanceWarningReason(page, 'metaTitle');
+      const lengthReason = this.getLengthValidationReason(page, 'title', this.getTitleLength(page, 'meta'));
+      return this.joinTooltipParts(base, [inheritanceReason, lengthReason].filter(Boolean).join('\n\n'));
     },
 
     getDescriptionTooltip(page, showContent = true) {
@@ -445,8 +457,9 @@ export default {
 
       const source = getInheritanceSource(page, 'metaDescription', this.siteSettings);
       const base = this.tooltipText(text, source, showContent);
-      const reason = this.getLengthValidationReason(page, 'description', text.length);
-      return this.joinTooltipParts(base, reason);
+      const inheritanceReason = this.getInheritanceWarningReason(page, 'metaDescription');
+      const lengthReason = this.getLengthValidationReason(page, 'description', text.length);
+      return this.joinTooltipParts(base, [inheritanceReason, lengthReason].filter(Boolean).join('\n\n'));
     },
 
     getOgTitleTooltip(page, showContent = true) {
@@ -511,7 +524,11 @@ export default {
 
     getDescriptionStatusClass(page) {
       const desc = getEffectiveDescription(page, 'meta', this.siteSettings);
-      if (isInheritedFromSite(page, 'metaDescription', this.siteSettings) && desc) {
+      if (
+        (isInheritedFromSite(page, 'metaDescription', this.siteSettings) ||
+          isInheritedFromLanguage(page, 'metaDescription', this.siteSettings)) &&
+        desc
+      ) {
         return 'k-meta-kit-status-warning';
       }
       return this.getStatusClass(page, desc?.length || 0, 'description');

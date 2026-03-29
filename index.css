@@ -402,7 +402,6 @@
     cursor: help;
     /*border-bottom: 1px dotted rgba(128, 128, 128, 0.5);*/
     display: inline-block;
-    line-height: 1.5;
   }
 
   .k-meta-kit-table-value-group {
@@ -433,29 +432,16 @@
     color: var(--color-text-dimmed);
   }
 
-  .k-meta-kit-table-preview-indicator:after {
-    background:green;
+  .k-meta-kit-table-preview-indicator[data-status="warning"] {
+    border-bottom: 3px solid #f59e0b !important;
   }
 
-  .k-meta-kit-table-preview-indicator[data-status="warning"]:after {
-    /*border-bottom: 2px solid #f59e0b !important;*/
-    background: #f59e0b;
-    content:"";
-    float:left;
-    width:100%;
-    height:2px;
-    border-radius: 1px;
-    margin-top: 5px;
+  .k-meta-kit-table-preview-indicator[data-status="error"] {
+    border-bottom: 3px solid #dc2626 !important;
   }
 
-  .k-meta-kit-table-preview-indicator[data-status="error"]:after {
-    background: #dc2626;
-    content:"";
-    float:left;
-    width:100%;
-    height:2px;
-    border-radius: 1px;
-    margin-top: 5px;
+  .k-meta-kit-table-preview-indicator[data-status="success"] {
+    border-bottom: none !important;
   }
 
   /* Dark mode support */
