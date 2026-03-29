@@ -22,7 +22,7 @@
         @click="$emit('update:show-preview', !showPreview)"
         :title="showPreview ? 'Show character counts' : 'Show preview text'"
       >
-        {{ showPreview ? 'Overview' : 'Preview' }}
+        {{ showPreview ? 'Back' : 'Show Content' }}
       </k-button>
     </k-button-group>
 

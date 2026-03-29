@@ -537,7 +537,7 @@
       return _vm.$emit("update:preview-mode", "og");
     } } }, [_vm._v(" OG ")]) : _vm._e(), _c("k-button", { attrs: { "size": "sm", "title": _vm.showPreview ? "Show character counts" : "Show preview text" }, on: { "click": function($event) {
       return _vm.$emit("update:show-preview", !_vm.showPreview);
-    } } }, [_vm._v(" " + _vm._s(_vm.showPreview ? "Overview" : "Preview") + " ")])], 1), _c("div", { staticClass: "k-meta-kit-search-wrapper" }, [_c("k-search-input", { staticClass: "k-meta-kit-search", attrs: { "icon": "search", "value": _vm.searchQuery, "placeholder": "Filter pages..." }, on: { "input": function($event) {
+    } } }, [_vm._v(" " + _vm._s(_vm.showPreview ? "Back" : "Show Content") + " ")])], 1), _c("div", { staticClass: "k-meta-kit-search-wrapper" }, [_c("k-search-input", { staticClass: "k-meta-kit-search", attrs: { "icon": "search", "value": _vm.searchQuery, "placeholder": "Filter pages..." }, on: { "input": function($event) {
       return _vm.$emit("update:search-query", $event);
     } } }), _vm.searchQuery ? _c("button", { staticClass: "k-meta-kit-search-clear", attrs: { "title": "Clear search" }, on: { "click": function($event) {
       return _vm.$emit("update:search-query", "");
