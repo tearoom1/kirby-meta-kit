@@ -31,7 +31,7 @@ App::plugin(
     license: fn(Plugin $plugin) => new MetaKitLicense($plugin,
         'Meta-Kit License',
         'meta-kit',
-        'https://tearoom-kirby.ddev.site/de/kirby-plugins/meta-kit'),
+        'https://www.tearoom.one/de/kirby-plugins/meta-kit'),
     extends: [
         'options' => [
             'cache' => [
