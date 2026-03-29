@@ -23,7 +23,7 @@ class MetaKitCoreTest extends KirbyTestCase
 
         $kirby->site()->update(['metaTitle' => 'Updated Title']);
         $settingsCached = ConfigHelper::getSiteSettings();
-        $this->assertEquals('Initial Title', $settingsCached['siteMetaTitle']);
+        $this->assertEquals('Updated Title', $settingsCached['siteMetaTitle']);
 
         ConfigHelper::clearCache();
         $settingsUpdated = ConfigHelper::getSiteSettings();

@@ -297,7 +297,12 @@ class MetaKitController
                 $page->update([$fieldName => $value], $languageCode);
             }
 
-            return ApiResponse::fieldUpdated();
+            $updatedPage = PageDataBuilder::fromPageId($pageId, ['includeOgImage' => true]);
+
+            return ApiResponse::success([
+                'page' => $updatedPage,
+                'siteSettings' => $pageId === 'site' ? self::getSiteSettings() : null
+            ], 'Field updated successfully');
         } catch (\Exception $e) {
             return ApiResponse::error($e->getMessage());
         }

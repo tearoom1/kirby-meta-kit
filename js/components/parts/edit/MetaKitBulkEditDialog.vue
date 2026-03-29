@@ -227,6 +227,8 @@ export default {
       if (!this.hasAnyChanges) return;
 
       let totalSaved = 0;
+      const updatedPages = new Map();
+      let latestSiteSettings = null;
 
       for (const page of this.pages) {
         const edited = this.editedFields[page.id];
@@ -240,11 +242,17 @@ export default {
         for (const field of fields) {
           if (field.value !== field.original) {
             try {
-              await applySingleFieldUpdate(this.api, {
+              const response = await applySingleFieldUpdate(this.api, {
                 pageId: page.id,
                 fieldName: field.name,
                 value: field.value
               });
+              if (response?.data?.page) {
+                updatedPages.set(response.data.page.id, response.data.page);
+              }
+              if (response?.data?.siteSettings) {
+                latestSiteSettings = response.data.siteSettings;
+              }
               totalSaved++;
             } catch (error) {
               window.panel.notification.error(error?.message || `Failed to update ${field.name} for ${page.title}`);
@@ -255,7 +263,10 @@ export default {
 
       if (totalSaved > 0) {
         window.panel.notification.success(`Updated ${totalSaved} field${totalSaved > 1 ? 's' : ''} across ${this.pages.length} page${this.pages.length > 1 ? 's' : ''}`);
-        this.$emit('saved');
+        this.$emit('saved', {
+          pages: Array.from(updatedPages.values()),
+          siteSettings: latestSiteSettings
+        });
         this.close();
       }
     }

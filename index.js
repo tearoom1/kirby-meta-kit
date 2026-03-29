@@ -1628,44 +1628,49 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         }
       },
       async save() {
-        var _a, _b;
+        var _a, _b, _c;
         if (!this.page || !this.hasChanges) return;
         const changedFields = this.changedFields.map((name) => ({
           name,
           value: this.editedFields[name]
         }));
-        const results = await Promise.allSettled(
-          changedFields.map(async (field) => {
+        const successfulResponses = [];
+        const failedResults = [];
+        for (const field of changedFields) {
+          try {
             const response = await applySingleFieldUpdate(this.api, {
               pageId: this.page.id,
               fieldName: field.name,
               value: field.value
             });
-            return response;
-          })
-        );
-        const savedCount = results.filter((result) => result.status === "fulfilled").length;
-        const failedResults = results.filter((result) => result.status === "rejected");
+            successfulResponses.push(response);
+          } catch (error) {
+            failedResults.push(error);
+          }
+        }
+        const savedCount = successfulResponses.length;
         if (failedResults.length > 0) {
-          const firstError = (_b = (_a = failedResults[0]) == null ? void 0 : _a.reason) == null ? void 0 : _b.message;
+          const firstError = (_a = failedResults[0]) == null ? void 0 : _a.message;
           window.panel.notification.error(
             firstError || `Failed to update ${failedResults.length} field${failedResults.length > 1 ? "s" : ""}`
           );
         }
         if (savedCount > 0) {
+          const latestResponse = successfulResponses[successfulResponses.length - 1];
+          const latestPage = ((_b = latestResponse == null ? void 0 : latestResponse.data) == null ? void 0 : _b.page) || null;
+          const latestSiteSettings = ((_c = latestResponse == null ? void 0 : latestResponse.data) == null ? void 0 : _c.siteSettings) || null;
           window.panel.notification.success(`Updated ${savedCount} field${savedCount > 1 ? "s" : ""}`);
-          this.$emit("saved");
-          try {
-            const response = await this.api.get("meta-kit/single-page", { pageId: this.page.id });
-            if (response.status === "success") {
-              this.page = response.data;
-              this.editedFields.metaTitle = this.page.metaTitle || "";
-              this.editedFields.metaDescription = this.page.metaDescription || "";
-              this.editedFields.ogTitle = this.page.ogTitle || "";
-              this.editedFields.ogDescription = this.page.ogDescription || "";
-            }
-          } catch (error) {
+          if (latestPage) {
+            this.page = latestPage;
+            this.editedFields.metaTitle = this.page.metaTitle || "";
+            this.editedFields.metaDescription = this.page.metaDescription || "";
+            this.editedFields.ogTitle = this.page.ogTitle || "";
+            this.editedFields.ogDescription = this.page.ogDescription || "";
           }
+          this.$emit("saved", {
+            page: latestPage,
+            siteSettings: latestSiteSettings
+          });
         }
       },
       editInPanel() {
@@ -1903,8 +1908,11 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         }
       },
       async saveAll() {
+        var _a, _b;
         if (!this.hasAnyChanges) return;
         let totalSaved = 0;
+        const updatedPages = /* @__PURE__ */ new Map();
+        let latestSiteSettings = null;
         for (const page of this.pages) {
           const edited = this.editedFields[page.id];
           const fields = [
@@ -1916,11 +1924,17 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
           for (const field of fields) {
             if (field.value !== field.original) {
               try {
-                await applySingleFieldUpdate(this.api, {
+                const response = await applySingleFieldUpdate(this.api, {
                   pageId: page.id,
                   fieldName: field.name,
                   value: field.value
                 });
+                if ((_a = response == null ? void 0 : response.data) == null ? void 0 : _a.page) {
+                  updatedPages.set(response.data.page.id, response.data.page);
+                }
+                if ((_b = response == null ? void 0 : response.data) == null ? void 0 : _b.siteSettings) {
+                  latestSiteSettings = response.data.siteSettings;
+                }
                 totalSaved++;
               } catch (error) {
                 window.panel.notification.error((error == null ? void 0 : error.message) || `Failed to update ${field.name} for ${page.title}`);
@@ -1930,7 +1944,10 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         }
         if (totalSaved > 0) {
           window.panel.notification.success(`Updated ${totalSaved} field${totalSaved > 1 ? "s" : ""} across ${this.pages.length} page${this.pages.length > 1 ? "s" : ""}`);
-          this.$emit("saved");
+          this.$emit("saved", {
+            pages: Array.from(updatedPages.values()),
+            siteSettings: latestSiteSettings
+          });
           this.close();
         }
       }
@@ -2078,8 +2095,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
           this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyOgImage(page), "OG Image", {
             detailLines: [
               "Good = page-specific OG image",
-              "Review = inherited from site",
-              "Fix = missing OG image"
+              "Review = inherited from site"
             ]
           }),
           this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyNoindex(page), "Noindex Pages", {
@@ -2158,6 +2174,23 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
           lines.push("", `Overall split: ${total.good} good, ${total.review} review, ${total.fix} fix`);
         }
         return lines.join("\n");
+      },
+      mergeUpdatedPage(updatedPage) {
+        if (!updatedPage || !updatedPage.id) return;
+        const existingIndex = this.pagesData.findIndex((page) => page.id === updatedPage.id);
+        if (existingIndex === -1) return;
+        this.$set(this.pagesData, existingIndex, updatedPage);
+      },
+      handleSavedUpdates(payload = {}) {
+        if (payload.page) {
+          this.mergeUpdatedPage(payload.page);
+        }
+        if (Array.isArray(payload.pages)) {
+          payload.pages.forEach((page) => this.mergeUpdatedPage(page));
+        }
+        if (payload.siteSettings) {
+          this.siteSettingsData = payload.siteSettings;
+        }
       },
       classifyTitle(page) {
         const length = getTableTitleDisplay(page, this.siteSettingsData, "meta").charCount;
@@ -2335,7 +2368,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       return _vm.changePageSize($event.target.value);
     } } }, _vm._l(_vm.pageSizeOptions, function(option) {
       return _c("option", { key: option.value, domProps: { "value": option.value } }, [_vm._v(" " + _vm._s(option.text) + " ")]);
-    }), 0)])]), _c("meta-kit-bulk-edit-dialog", { ref: "allPagesDialog", attrs: { "api": _vm.$api, "site-settings": _vm.siteSettingsData, "ai-enabled": _vm.aiEnabled }, on: { "saved": _vm.refreshPages } }), _c("meta-kit-single-page-dialog", { ref: "singlePageDialog", attrs: { "api": _vm.$api, "site-settings": _vm.siteSettingsData, "ai-enabled": _vm.aiEnabled }, on: { "saved": _vm.refreshPages } }), _c("meta-kit-bulk-generate-dialog", { ref: "bulkGenerateDialog", attrs: { "selected-count": _vm.singleGeneratePageId ? 1 : _vm.selectedPages.length }, on: { "generate": _vm.performBulkGeneration } }), _vm.isGeneratingAll || _vm.isLoadingPages ? _c("div", { staticClass: "k-meta-kit-loading-overlay" }, [_c("div", { staticClass: "k-meta-kit-loading-content" }, [_c("div", { staticClass: "k-meta-kit-loading-spinner" }, [_c("k-icon", { attrs: { "type": "loader" } })], 1), _c("div", { staticClass: "k-meta-kit-loading-text" }, [_vm.isGeneratingAll ? [_vm._v("Generating metadata with AI...")] : _vm.isLoadingPages ? [_vm._v("Refreshing pages...")] : _vm._e()], 2), _vm.loadingProgress ? _c("div", { staticClass: "k-meta-kit-loading-progress" }, [_vm._v(" " + _vm._s(_vm.loadingProgress) + " ")]) : _vm._e()])]) : _vm._e()], 1);
+    }), 0)])]), _c("meta-kit-bulk-edit-dialog", { ref: "allPagesDialog", attrs: { "api": _vm.$api, "site-settings": _vm.siteSettingsData, "ai-enabled": _vm.aiEnabled }, on: { "saved": _vm.handleSavedUpdates } }), _c("meta-kit-single-page-dialog", { ref: "singlePageDialog", attrs: { "api": _vm.$api, "site-settings": _vm.siteSettingsData, "ai-enabled": _vm.aiEnabled }, on: { "saved": _vm.handleSavedUpdates } }), _c("meta-kit-bulk-generate-dialog", { ref: "bulkGenerateDialog", attrs: { "selected-count": _vm.singleGeneratePageId ? 1 : _vm.selectedPages.length }, on: { "generate": _vm.performBulkGeneration } }), _vm.isGeneratingAll ? _c("div", { staticClass: "k-meta-kit-loading-overlay" }, [_c("div", { staticClass: "k-meta-kit-loading-content" }, [_c("div", { staticClass: "k-meta-kit-loading-spinner" }, [_c("k-icon", { attrs: { "type": "loader" } })], 1), _c("div", { staticClass: "k-meta-kit-loading-text" }, [_vm.isGeneratingAll ? [_vm._v("Generating metadata with AI...")] : _vm._e()], 2), _vm.loadingProgress ? _c("div", { staticClass: "k-meta-kit-loading-progress" }, [_vm._v(" " + _vm._s(_vm.loadingProgress) + " ")]) : _vm._e()])]) : _vm._e()], 1);
   };
   var _sfc_staticRenderFns$3 = [];
   _sfc_render$3._withStripped = true;

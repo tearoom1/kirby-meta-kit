@@ -216,46 +216,49 @@ export default {
         name,
         value: this.editedFields[name]
       }));
+      const successfulResponses = [];
+      const failedResults = [];
 
-      const results = await Promise.allSettled(
-        changedFields.map(async (field) => {
+      for (const field of changedFields) {
+        try {
           const response = await applySingleFieldUpdate(this.api, {
             pageId: this.page.id,
             fieldName: field.name,
             value: field.value
           });
+          successfulResponses.push(response);
+        } catch (error) {
+          failedResults.push(error);
+        }
+      }
 
-          return response;
-        })
-      );
-
-      const savedCount = results.filter(result => result.status === 'fulfilled').length;
-      const failedResults = results.filter(result => result.status === 'rejected');
+      const savedCount = successfulResponses.length;
 
       if (failedResults.length > 0) {
-        const firstError = failedResults[0]?.reason?.message;
+        const firstError = failedResults[0]?.message;
         window.panel.notification.error(
           firstError || `Failed to update ${failedResults.length} field${failedResults.length > 1 ? 's' : ''}`
         );
       }
 
       if (savedCount > 0) {
-        window.panel.notification.success(`Updated ${savedCount} field${savedCount > 1 ? 's' : ''}`);
-        this.$emit('saved');
+        const latestResponse = successfulResponses[successfulResponses.length - 1];
+        const latestPage = latestResponse?.data?.page || null;
+        const latestSiteSettings = latestResponse?.data?.siteSettings || null;
 
-        // Reload page data
-        try {
-          const response = await this.api.get('meta-kit/single-page', { pageId: this.page.id });
-          if (response.status === 'success') {
-            this.page = response.data;
-            this.editedFields.metaTitle = this.page.metaTitle || '';
-            this.editedFields.metaDescription = this.page.metaDescription || '';
-            this.editedFields.ogTitle = this.page.ogTitle || '';
-            this.editedFields.ogDescription = this.page.ogDescription || '';
-          }
-        } catch (error) {
-          // Silent fail
+        window.panel.notification.success(`Updated ${savedCount} field${savedCount > 1 ? 's' : ''}`);
+        if (latestPage) {
+          this.page = latestPage;
+          this.editedFields.metaTitle = this.page.metaTitle || '';
+          this.editedFields.metaDescription = this.page.metaDescription || '';
+          this.editedFields.ogTitle = this.page.ogTitle || '';
+          this.editedFields.ogDescription = this.page.ogDescription || '';
         }
+
+        this.$emit('saved', {
+          page: latestPage,
+          siteSettings: latestSiteSettings
+        });
       }
     },
 

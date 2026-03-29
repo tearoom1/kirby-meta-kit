@@ -31,6 +31,7 @@ return function () {
                     "language" => $data["language"],
                     "languages" => $data["languages"],
                     "aiEnabled" => $data["aiEnabled"],
+                    "siteSettings" => $data["siteSettings"] ?? [],
                     "validationSettings" => $data["validationSettings"] ?? [],
                 ];
             },

@@ -121,7 +121,7 @@
       :api="$api"
       :site-settings="siteSettingsData"
       :ai-enabled="aiEnabled"
-      @saved="refreshPages"
+      @saved="handleSavedUpdates"
     />
 
     <!-- Single Page Edit Dialog -->
@@ -130,7 +130,7 @@
       :api="$api"
       :site-settings="siteSettingsData"
       :ai-enabled="aiEnabled"
-      @saved="refreshPages"
+      @saved="handleSavedUpdates"
     />
 
     <!-- Bulk Generation Dialog (used for both bulk and single-page AI generate) -->
@@ -141,14 +141,13 @@
     />
 
     <!-- Loading Overlay -->
-    <div v-if="isGeneratingAll || isLoadingPages" class="k-meta-kit-loading-overlay">
+    <div v-if="isGeneratingAll" class="k-meta-kit-loading-overlay">
       <div class="k-meta-kit-loading-content">
         <div class="k-meta-kit-loading-spinner">
           <k-icon type="loader" />
         </div>
         <div class="k-meta-kit-loading-text">
           <template v-if="isGeneratingAll">Generating metadata with AI...</template>
-          <template v-else-if="isLoadingPages">Refreshing pages...</template>
         </div>
         <div v-if="loadingProgress" class="k-meta-kit-loading-progress">
           {{ loadingProgress }}
@@ -291,8 +290,7 @@ export default {
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyOgImage(page), 'OG Image', {
           detailLines: [
             'Good = page-specific OG image',
-            'Review = inherited from site',
-            'Fix = missing OG image'
+            'Review = inherited from site'
           ]
         }),
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyNoindex(page), 'Noindex Pages', {
@@ -381,6 +379,29 @@ export default {
       }
 
       return lines.join('\n');
+    },
+
+    mergeUpdatedPage(updatedPage) {
+      if (!updatedPage || !updatedPage.id) return;
+
+      const existingIndex = this.pagesData.findIndex((page) => page.id === updatedPage.id);
+      if (existingIndex === -1) return;
+
+      this.$set(this.pagesData, existingIndex, updatedPage);
+    },
+
+    handleSavedUpdates(payload = {}) {
+      if (payload.page) {
+        this.mergeUpdatedPage(payload.page);
+      }
+
+      if (Array.isArray(payload.pages)) {
+        payload.pages.forEach((page) => this.mergeUpdatedPage(page));
+      }
+
+      if (payload.siteSettings) {
+        this.siteSettingsData = payload.siteSettings;
+      }
     },
 
     classifyTitle(page) {

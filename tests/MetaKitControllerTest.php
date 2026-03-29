@@ -78,6 +78,8 @@ class MetaKitControllerTest extends TestCase
 
         $this->assertEquals('success', $result['status'], 'Should return success status');
         $this->assertEquals('Field updated successfully', $result['message']);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertSame('test-page', $result['data']['page']['id']);
 
         // Verify the flat field was updated
         $page = $this->kirby->page('test-page');
@@ -99,6 +101,8 @@ class MetaKitControllerTest extends TestCase
         );
 
         $this->assertEquals('success', $result['status']);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertSame('test-page', $result['data']['page']['id']);
 
         // Verify the flat field was updated
         $page = $this->kirby->page('test-page');
@@ -113,6 +117,10 @@ class MetaKitControllerTest extends TestCase
         $result = MetaKitController::applySingleField('site', 'metaTitle', 'Site Meta Title');
 
         $this->assertEquals('success', $result['status']);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertSame('site', $result['data']['page']['id']);
+        $this->assertIsArray($result['data']['siteSettings']);
+        $this->assertArrayHasKey('siteMetaTitle', $result['data']['siteSettings']);
 
         // Verify the site flat field was updated
         $site = $this->kirby->site();
