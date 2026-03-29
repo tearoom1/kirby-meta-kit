@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" size="huge" cancelButton="Close" submitButton="">
+  <k-dialog ref="dialog" size="huge" cancelButton="Close" submitButton="" @submit.prevent="saveAll">
     <k-headline>Edit Selected Pages ({{ pages.length }})</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -113,6 +113,7 @@
 import MetaKitTitleField from '../field/MetaKitTitleField.vue';
 import MetaKitDescriptionField from '../field/MetaKitDescriptionField.vue';
 import { hasAnyBulkChanges } from '../../../composables/panelState.js';
+import { applySingleFieldUpdate } from '../../../composables/saveFields.js';
 
 export default {
   components: {
@@ -233,14 +234,14 @@ export default {
         for (const field of fields) {
           if (field.value !== field.original) {
             try {
-              await this.api.post('meta-kit/apply-single-field', {
+              await applySingleFieldUpdate(this.api, {
                 pageId: page.id,
                 fieldName: field.name,
                 value: field.value
               });
               totalSaved++;
             } catch (error) {
-              window.panel.notification.error(`Failed to update ${field.name} for ${page.title}`);
+              window.panel.notification.error(error?.message || `Failed to update ${field.name} for ${page.title}`);
             }
           }
         }

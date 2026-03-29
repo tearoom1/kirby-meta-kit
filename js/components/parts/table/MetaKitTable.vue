@@ -13,19 +13,23 @@
         <th>#</th>
         <th>Page</th>
         <th v-if="!showPreview">Slug</th>
-        <th v-if="showPreview">{{ previewMode === 'og' ? 'OG Title' : 'Title' }}</th>
-        <th v-if="showPreview">{{ previewMode === 'og' ? 'OG Description' : 'Description' }}</th>
-        <th v-if="!showPreview">Title</th>
-        <th v-if="!showPreview">Desc.</th>
+        <th v-if="showPreview">{{ previewMode === 'og' ? 'OG Title' : 'Meta Title' }}</th>
+        <th v-if="showPreview">{{ previewMode === 'og' ? 'OG Desc.' : 'Meta Desc.' }}</th>
+        <th v-if="!showPreview">Meta Title</th>
+        <th v-if="!showPreview">Meta Desc.</th>
         <th v-if="!showPreview">OG Title</th>
         <th v-if="!showPreview">OG Desc.</th>
-        <th>OG Img</th>
+        <th>OG Image</th>
         <th v-if="!showPreview && previewMode === 'meta'">Robots</th>
         <th>Actions</th>
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(page, index) in pages" :key="page.id">
+      <tr
+        v-for="(page, index) in pages"
+        :key="page.id"
+        :class="{ 'k-meta-kit-row-selected': isPageSelected(page.id) }"
+      >
         <td class="k-meta-kit-table-checkbox">
           <input
             type="checkbox"
@@ -140,6 +144,7 @@
           <Tooltip :content="getTitleTooltip(page)">
               <span :class="[
                 getTableTitleStatusClass(page),
+                getTableTitleStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
                 isTitleInherited(page) ? 'k-meta-kit-inherited' : '',
                 'k-meta-kit-table-tooltip'
               ]">
@@ -154,6 +159,7 @@
               <span
                 :class="[
                   getDescriptionStatusClass(page),
+                  getDescriptionStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
                   isDescriptionInherited(page) ? 'k-meta-kit-inherited' : '',
                   'k-meta-kit-table-tooltip'
                 ]">
@@ -167,6 +173,7 @@
           <Tooltip :content="getOgTitleTooltip(page)">
               <span :class="[
                 getTableOgTitleStatusClass(page),
+                getTableOgTitleStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
                 isOgTitleInherited(page) ? 'k-meta-kit-inherited' : '',
                 'k-meta-kit-table-tooltip'
                 ]">
@@ -181,6 +188,7 @@
               <span
                 :class="[
                   getOgDescriptionStatusClass(page),
+                  getOgDescriptionStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
                   isOgDescriptionInherited(page) ? 'k-meta-kit-inherited' : '',
                   'k-meta-kit-table-tooltip'
                 ]">

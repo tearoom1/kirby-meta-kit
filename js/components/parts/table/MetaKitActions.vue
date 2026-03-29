@@ -6,7 +6,7 @@
         :disabled="selectedCount === 0"
         @click="$emit('edit-selected')"
       >
-        Edit Selected ({{ selectedCount }})
+        Edit Selected<span v-if="selectedCount > 0"> ({{ selectedCount }})</span>
       </k-button>
       <k-button
         v-if="aiEnabled"
@@ -15,7 +15,7 @@
         :progress="isGenerating"
         @click="$emit('generate-missing')"
       >
-        Generate Missing ({{ selectedCount }})
+        Generate Missing<span v-if="selectedCount > 0"> ({{ selectedCount }})</span>
       </k-button>
       <k-button icon="refresh" @click="$emit('refresh')"></k-button>
     </k-button-group>

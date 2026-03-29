@@ -35,12 +35,22 @@
     <meta-kit-stats
       :filtered-count="filteredPages.length"
       :total-count="pagesData.length"
-      :filtered-with-title="filteredPagesWithTitle"
-      :total-with-title="pagesWithTitle"
+      :filtered-custom-title="filteredPagesWithCustomTitle"
+      :total-custom-title="pagesWithCustomTitle"
+      :filtered-page-fallback="filteredPagesWithPageFallback"
+      :total-page-fallback="pagesWithPageFallback"
       :filtered-with-description="filteredPagesWithDescription"
       :total-with-description="pagesWithDescription"
+      :filtered-description-from-site="filteredPagesDescriptionFromSite"
+      :total-description-from-site="pagesDescriptionFromSite"
+      :filtered-missing-description="filteredPagesMissingDescription"
+      :total-missing-description="pagesMissingDescription"
       :filtered-with-image="filteredPagesWithOgImage"
       :total-with-image="pagesWithOgImage"
+      :filtered-image-from-site="filteredPagesOgImageFromSite"
+      :total-image-from-site="pagesOgImageFromSite"
+      :filtered-missing-image="filteredPagesMissingOgImage"
+      :total-missing-image="pagesMissingOgImage"
       :filtered-no-index="filteredPagesNoIndex"
       :total-no-index="pagesNoIndex"
       :search-active="!!(searchQuery || activeFilters.length)"
@@ -263,26 +273,70 @@ export default {
     isAllCurrentPageSelected() {
       return isAllSelectedOnPage(this.paginatedPages, this.selectedPages);
     },
-    pagesWithTitle() {
-      return this.pagesData.filter(p => p.hasMetaTitle).length;
+    // Title: custom = explicitly set for this language; pageFallback = no meta title (page.title used)
+    pagesWithCustomTitle() {
+      return this.pagesData.filter(p => p.hasMetaTitle && !p.metaTitleInheritance?.inherited).length;
     },
+    pagesWithPageFallback() {
+      return this.pagesData.filter(p => !p.hasMetaTitle).length;
+    },
+    filteredPagesWithCustomTitle() {
+      return this.filteredPages.filter(p => p.hasMetaTitle && !p.metaTitleInheritance?.inherited).length;
+    },
+    filteredPagesWithPageFallback() {
+      return this.filteredPages.filter(p => !p.hasMetaTitle).length;
+    },
+
+    // Description tiers: custom (hasMetaDescription) | from site | truly missing
     pagesWithDescription() {
       return this.pagesData.filter(p => p.hasMetaDescription).length;
     },
-    pagesWithOgImage() {
-      return this.pagesData.filter(p => p.hasOgImage).length;
+    pagesDescriptionFromSite() {
+      if (!this.siteSettings?.siteMetaDescription) return 0;
+      return this.pagesData.filter(p => !p.hasMetaDescription).length;
     },
-    pagesNoIndex() {
-      return this.pagesData.filter(p => p.robots && p.robots.includes('noindex')).length;
-    },
-    filteredPagesWithTitle() {
-      return this.filteredPages.filter(p => p.hasMetaTitle).length;
+    pagesMissingDescription() {
+      if (this.siteSettings?.siteMetaDescription) return 0;
+      return this.pagesData.filter(p => !p.hasMetaDescription).length;
     },
     filteredPagesWithDescription() {
       return this.filteredPages.filter(p => p.hasMetaDescription).length;
     },
+    filteredPagesDescriptionFromSite() {
+      if (!this.siteSettings?.siteMetaDescription) return 0;
+      return this.filteredPages.filter(p => !p.hasMetaDescription).length;
+    },
+    filteredPagesMissingDescription() {
+      if (this.siteSettings?.siteMetaDescription) return 0;
+      return this.filteredPages.filter(p => !p.hasMetaDescription).length;
+    },
+
+    // OG image tiers: page image | from site | truly missing
+    pagesWithOgImage() {
+      return this.pagesData.filter(p => p.hasOgImage).length;
+    },
+    pagesOgImageFromSite() {
+      if (!this.siteSettings?.siteHasOgImage) return 0;
+      return this.pagesData.filter(p => !p.hasOgImage).length;
+    },
+    pagesMissingOgImage() {
+      if (this.siteSettings?.siteHasOgImage) return 0;
+      return this.pagesData.filter(p => !p.hasOgImage).length;
+    },
     filteredPagesWithOgImage() {
       return this.filteredPages.filter(p => p.hasOgImage).length;
+    },
+    filteredPagesOgImageFromSite() {
+      if (!this.siteSettings?.siteHasOgImage) return 0;
+      return this.filteredPages.filter(p => !p.hasOgImage).length;
+    },
+    filteredPagesMissingOgImage() {
+      if (this.siteSettings?.siteHasOgImage) return 0;
+      return this.filteredPages.filter(p => !p.hasOgImage).length;
+    },
+
+    pagesNoIndex() {
+      return this.pagesData.filter(p => p.robots && p.robots.includes('noindex')).length;
     },
     filteredPagesNoIndex() {
       return this.filteredPages.filter(p => p.robots && p.robots.includes('noindex')).length;

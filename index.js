@@ -355,12 +355,22 @@
     props: {
       filteredCount: { type: Number, required: true },
       totalCount: { type: Number, required: true },
-      filteredWithTitle: { type: Number, required: true },
-      totalWithTitle: { type: Number, required: true },
+      filteredCustomTitle: { type: Number, required: true },
+      totalCustomTitle: { type: Number, required: true },
+      filteredPageFallback: { type: Number, required: true },
+      totalPageFallback: { type: Number, required: true },
       filteredWithDescription: { type: Number, required: true },
       totalWithDescription: { type: Number, required: true },
+      filteredDescriptionFromSite: { type: Number, required: true },
+      totalDescriptionFromSite: { type: Number, required: true },
+      filteredMissingDescription: { type: Number, required: true },
+      totalMissingDescription: { type: Number, required: true },
       filteredWithImage: { type: Number, required: true },
       totalWithImage: { type: Number, required: true },
+      filteredImageFromSite: { type: Number, required: true },
+      totalImageFromSite: { type: Number, required: true },
+      filteredMissingImage: { type: Number, required: true },
+      totalMissingImage: { type: Number, required: true },
       filteredNoIndex: { type: Number, required: true },
       totalNoIndex: { type: Number, required: true },
       searchActive: { type: Boolean, default: false }
@@ -377,19 +387,19 @@
       },
       getPercentClass(count, total) {
         const p = this.percent(count, total);
-        if (p >= 80) return "k-meta-kit-stats-percent-high";
-        if (p >= 50) return "k-meta-kit-stats-percent-mid";
-        return "k-meta-kit-stats-percent-low";
+        if (p >= 80) return "k-meta-kit-stats-green";
+        if (p >= 50) return "k-meta-kit-stats-amber";
+        return "k-meta-kit-stats-red";
       }
     }
   };
   var _sfc_render$d = function render() {
     var _vm = this, _c = _vm._self._c;
-    return _c("div", { staticClass: "k-meta-kit-stats" }, [_c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("Total Pages")]), _c("div", { staticClass: "k-meta-kit-stats-number" }, [_vm._v(" " + _vm._s(_vm.filteredCount)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.totalCount))]) : _vm._e()]), _vm._m(0)]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With Title")]), _c("div", { staticClass: "k-meta-kit-stats-number" }, [_vm._v(" " + _vm._s(_vm.filteredWithTitle)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.totalWithTitle))]) : _vm._e(), _vm.denominator > 0 ? _c("span", { staticClass: "k-meta-kit-stats-pct" }, [_vm._v(_vm._s(_vm.percent(_vm.filteredWithTitle, _vm.denominator)) + "%")]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-stats-bar-track" }, [_c("div", { staticClass: "k-meta-kit-stats-bar-fill", class: _vm.getPercentClass(_vm.filteredWithTitle, _vm.denominator), style: { width: _vm.percent(_vm.filteredWithTitle, _vm.denominator) + "%" } })])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With Description")]), _c("div", { staticClass: "k-meta-kit-stats-number" }, [_vm._v(" " + _vm._s(_vm.filteredWithDescription)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.totalWithDescription))]) : _vm._e(), _vm.denominator > 0 ? _c("span", { staticClass: "k-meta-kit-stats-pct" }, [_vm._v(_vm._s(_vm.percent(_vm.filteredWithDescription, _vm.denominator)) + "%")]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-stats-bar-track" }, [_c("div", { staticClass: "k-meta-kit-stats-bar-fill", class: _vm.getPercentClass(_vm.filteredWithDescription, _vm.denominator), style: { width: _vm.percent(_vm.filteredWithDescription, _vm.denominator) + "%" } })])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("With OG Image")]), _c("div", { staticClass: "k-meta-kit-stats-number" }, [_vm._v(" " + _vm._s(_vm.filteredWithImage)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.totalWithImage))]) : _vm._e(), _vm.denominator > 0 ? _c("span", { staticClass: "k-meta-kit-stats-pct" }, [_vm._v(_vm._s(_vm.percent(_vm.filteredWithImage, _vm.denominator)) + "%")]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-stats-bar-track" }, [_c("div", { staticClass: "k-meta-kit-stats-bar-fill", class: _vm.getPercentClass(_vm.filteredWithImage, _vm.denominator), style: { width: _vm.percent(_vm.filteredWithImage, _vm.denominator) + "%" } })])]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("h3", [_vm._v("Noindex")]), _c("div", { staticClass: "k-meta-kit-stats-number" }, [_vm._v(" " + _vm._s(_vm.filteredNoIndex)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-total" }, [_vm._v(" / " + _vm._s(_vm.totalNoIndex))]) : _vm._e(), _vm.denominator > 0 && _vm.filteredNoIndex > 0 ? _c("span", { staticClass: "k-meta-kit-stats-pct" }, [_vm._v(_vm._s(_vm.percent(_vm.filteredNoIndex, _vm.denominator)) + "%")]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-stats-bar-track" }, [_c("div", { staticClass: "k-meta-kit-stats-bar-fill k-meta-kit-stats-percent-noindex", style: { width: _vm.percent(_vm.filteredNoIndex, _vm.denominator) + "%" } })])])]);
+    return _c("div", { staticClass: "k-meta-kit-stats" }, [_c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("div", { staticClass: "k-meta-kit-stats-label" }, [_vm._v("Total Pages")]), _c("div", { staticClass: "k-meta-kit-stats-row" }, [_c("span", { staticClass: "k-meta-kit-stats-value" }, [_vm._v(" " + _vm._s(_vm.filteredCount)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-sub" }, [_vm._v(" / " + _vm._s(_vm.totalCount))]) : _vm._e()])]), _vm._m(0)]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("div", { staticClass: "k-meta-kit-stats-label" }, [_vm._v("Meta Title")]), _c("div", { staticClass: "k-meta-kit-stats-row" }, [_c("span", { staticClass: "k-meta-kit-stats-value" }, [_vm._v(" " + _vm._s(_vm.filteredCustomTitle)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-sub" }, [_vm._v(" / " + _vm._s(_vm.totalCustomTitle))]) : _vm._e()]), _vm.denominator > 0 ? _c("span", { staticClass: "k-meta-kit-stats-pct", class: _vm.getPercentClass(_vm.filteredCustomTitle, _vm.denominator) }, [_vm._v(" " + _vm._s(_vm.percent(_vm.filteredCustomTitle, _vm.denominator)) + "% ")]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-stats-bar-track" }, [_c("div", { staticClass: "k-meta-kit-stats-bar-fill k-meta-kit-stats-green", style: { width: _vm.percent(_vm.filteredCustomTitle, _vm.denominator) + "%" } }), _vm.filteredPageFallback > 0 ? _c("div", { staticClass: "k-meta-kit-stats-bar-fill k-meta-kit-stats-amber", style: { width: _vm.percent(_vm.filteredPageFallback, _vm.denominator) + "%" } }) : _vm._e()]), _vm.filteredPageFallback > 0 ? _c("div", { staticClass: "k-meta-kit-stats-hint" }, [_c("span", { staticClass: "k-meta-kit-stats-amber" }, [_vm._v(_vm._s(_vm.filteredPageFallback) + " from page title")])]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("div", { staticClass: "k-meta-kit-stats-label" }, [_vm._v("Meta Description")]), _c("div", { staticClass: "k-meta-kit-stats-row" }, [_c("span", { staticClass: "k-meta-kit-stats-value" }, [_vm._v(" " + _vm._s(_vm.filteredWithDescription)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-sub" }, [_vm._v(" / " + _vm._s(_vm.totalWithDescription))]) : _vm._e()]), _vm.denominator > 0 ? _c("span", { staticClass: "k-meta-kit-stats-pct", class: _vm.getPercentClass(_vm.filteredWithDescription, _vm.denominator) }, [_vm._v(" " + _vm._s(_vm.percent(_vm.filteredWithDescription, _vm.denominator)) + "% ")]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-stats-bar-track" }, [_c("div", { staticClass: "k-meta-kit-stats-bar-fill k-meta-kit-stats-green", style: { width: _vm.percent(_vm.filteredWithDescription, _vm.denominator) + "%" } }), _vm.filteredDescriptionFromSite > 0 ? _c("div", { staticClass: "k-meta-kit-stats-bar-fill k-meta-kit-stats-amber", style: { width: _vm.percent(_vm.filteredDescriptionFromSite, _vm.denominator) + "%" } }) : _vm._e(), _vm.filteredMissingDescription > 0 ? _c("div", { staticClass: "k-meta-kit-stats-bar-fill k-meta-kit-stats-red", style: { width: _vm.percent(_vm.filteredMissingDescription, _vm.denominator) + "%" } }) : _vm._e()]), _vm.filteredDescriptionFromSite > 0 || _vm.filteredMissingDescription > 0 ? _c("div", { staticClass: "k-meta-kit-stats-hint" }, [_vm.filteredDescriptionFromSite > 0 ? _c("span", { staticClass: "k-meta-kit-stats-amber" }, [_vm._v(_vm._s(_vm.filteredDescriptionFromSite) + " from site")]) : _vm._e(), _vm.filteredDescriptionFromSite > 0 && _vm.filteredMissingDescription > 0 ? _c("span", [_vm._v(" · ")]) : _vm._e(), _vm.filteredMissingDescription > 0 ? _c("span", { staticClass: "k-meta-kit-stats-red" }, [_vm._v(_vm._s(_vm.filteredMissingDescription) + " missing")]) : _vm._e()]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("div", { staticClass: "k-meta-kit-stats-label" }, [_vm._v("OG Image")]), _c("div", { staticClass: "k-meta-kit-stats-row" }, [_c("span", { staticClass: "k-meta-kit-stats-value" }, [_vm._v(" " + _vm._s(_vm.filteredWithImage)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-sub" }, [_vm._v(" / " + _vm._s(_vm.totalWithImage))]) : _vm._e()]), _vm.denominator > 0 ? _c("span", { staticClass: "k-meta-kit-stats-pct", class: _vm.getPercentClass(_vm.filteredWithImage, _vm.denominator) }, [_vm._v(" " + _vm._s(_vm.percent(_vm.filteredWithImage, _vm.denominator)) + "% ")]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-stats-bar-track" }, [_c("div", { staticClass: "k-meta-kit-stats-bar-fill k-meta-kit-stats-green", style: { width: _vm.percent(_vm.filteredWithImage, _vm.denominator) + "%" } }), _vm.filteredImageFromSite > 0 ? _c("div", { staticClass: "k-meta-kit-stats-bar-fill k-meta-kit-stats-amber", style: { width: _vm.percent(_vm.filteredImageFromSite, _vm.denominator) + "%" } }) : _vm._e(), _vm.filteredMissingImage > 0 ? _c("div", { staticClass: "k-meta-kit-stats-bar-fill k-meta-kit-stats-red", style: { width: _vm.percent(_vm.filteredMissingImage, _vm.denominator) + "%" } }) : _vm._e()]), _vm.filteredImageFromSite > 0 || _vm.filteredMissingImage > 0 ? _c("div", { staticClass: "k-meta-kit-stats-hint" }, [_vm.filteredImageFromSite > 0 ? _c("span", { staticClass: "k-meta-kit-stats-amber" }, [_vm._v(_vm._s(_vm.filteredImageFromSite) + " from site")]) : _vm._e(), _vm.filteredImageFromSite > 0 && _vm.filteredMissingImage > 0 ? _c("span", [_vm._v(" · ")]) : _vm._e(), _vm.filteredMissingImage > 0 ? _c("span", { staticClass: "k-meta-kit-stats-red" }, [_vm._v(_vm._s(_vm.filteredMissingImage) + " missing")]) : _vm._e()]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-stats-card" }, [_c("div", { staticClass: "k-meta-kit-stats-label" }, [_vm._v("Noindex Pages")]), _c("div", { staticClass: "k-meta-kit-stats-row" }, [_c("span", { staticClass: "k-meta-kit-stats-value" }, [_vm._v(" " + _vm._s(_vm.filteredNoIndex)), _vm.searchActive ? _c("span", { staticClass: "k-meta-kit-stats-sub" }, [_vm._v(" / " + _vm._s(_vm.totalNoIndex))]) : _vm._e()]), _vm.denominator > 0 && _vm.filteredNoIndex > 0 ? _c("span", { staticClass: "k-meta-kit-stats-pct k-meta-kit-stats-amber" }, [_vm._v(" " + _vm._s(_vm.percent(_vm.filteredNoIndex, _vm.denominator)) + "% ")]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-stats-bar-track" }, [_c("div", { staticClass: "k-meta-kit-stats-bar-fill k-meta-kit-stats-amber", style: { width: _vm.percent(_vm.filteredNoIndex, _vm.denominator) + "%" } })])])]);
   };
   var _sfc_staticRenderFns$d = [function() {
     var _vm = this, _c = _vm._self._c;
-    return _c("div", { staticClass: "k-meta-kit-stats-bar-track" }, [_c("div", { staticClass: "k-meta-kit-stats-bar-fill k-meta-kit-stats-percent-neutral", staticStyle: { "width": "100%" } })]);
+    return _c("div", { staticClass: "k-meta-kit-stats-bar-track" }, [_c("div", { staticClass: "k-meta-kit-stats-bar-fill k-meta-kit-stats-neutral", staticStyle: { "width": "100%" } })]);
   }];
   _sfc_render$d._withStripped = true;
   var __component__$d = /* @__PURE__ */ normalizeComponent(
@@ -521,9 +531,9 @@
     var _vm = this, _c = _vm._self._c;
     return _c("div", { staticClass: "k-meta-kit-actions" }, [_c("k-button-group", [_c("k-button", { attrs: { "icon": "edit", "disabled": _vm.selectedCount === 0 }, on: { "click": function($event) {
       return _vm.$emit("edit-selected");
-    } } }, [_vm._v(" Edit Selected (" + _vm._s(_vm.selectedCount) + ") ")]), _vm.aiEnabled ? _c("k-button", { attrs: { "icon": "sparkling", "disabled": _vm.isGenerating || _vm.selectedCount === 0, "progress": _vm.isGenerating }, on: { "click": function($event) {
+    } } }, [_vm._v(" Edit Selected"), _vm.selectedCount > 0 ? _c("span", [_vm._v(" (" + _vm._s(_vm.selectedCount) + ")")]) : _vm._e()]), _vm.aiEnabled ? _c("k-button", { attrs: { "icon": "sparkling", "disabled": _vm.isGenerating || _vm.selectedCount === 0, "progress": _vm.isGenerating }, on: { "click": function($event) {
       return _vm.$emit("generate-missing");
-    } } }, [_vm._v(" Generate Missing (" + _vm._s(_vm.selectedCount) + ") ")]) : _vm._e(), _c("k-button", { attrs: { "icon": "refresh" }, on: { "click": function($event) {
+    } } }, [_vm._v(" Generate Missing"), _vm.selectedCount > 0 ? _c("span", [_vm._v(" (" + _vm._s(_vm.selectedCount) + ")")]) : _vm._e()]) : _vm._e(), _c("k-button", { attrs: { "icon": "refresh" }, on: { "click": function($event) {
       return _vm.$emit("refresh");
     } } })], 1), _vm._t("filters")], 2);
   };
@@ -1141,8 +1151,8 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
     var _vm = this, _c = _vm._self._c;
     return _c("div", { staticClass: "k-meta-kit-table", class: { "k-meta-kit-table-preview": _vm.showPreview } }, [_c("table", [_c("thead", [_c("tr", [_c("th", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isAllSelected }, on: { "change": function($event) {
       return _vm.$emit("toggle-select-all");
-    } } })]), _c("th", [_vm._v("#")]), _c("th", [_vm._v("Page")]), !_vm.showPreview ? _c("th", [_vm._v("Slug")]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Title" : "Title"))]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Description" : "Description"))]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Desc.")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Desc.")]) : _vm._e(), _c("th", [_vm._v("OG Img")]), !_vm.showPreview && _vm.previewMode === "meta" ? _c("th", [_vm._v("Robots")]) : _vm._e(), _c("th", [_vm._v("Actions")])])]), _c("tbody", _vm._l(_vm.pages, function(page, index) {
-      return _c("tr", { key: page.id }, [_c("td", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isPageSelected(page.id) }, on: { "change": function($event) {
+    } } })]), _c("th", [_vm._v("#")]), _c("th", [_vm._v("Page")]), !_vm.showPreview ? _c("th", [_vm._v("Slug")]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Title" : "Meta Title"))]) : _vm._e(), _vm.showPreview ? _c("th", [_vm._v(_vm._s(_vm.previewMode === "og" ? "OG Desc." : "Meta Desc."))]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Meta Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("Meta Desc.")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Title")]) : _vm._e(), !_vm.showPreview ? _c("th", [_vm._v("OG Desc.")]) : _vm._e(), _c("th", [_vm._v("OG Image")]), !_vm.showPreview && _vm.previewMode === "meta" ? _c("th", [_vm._v("Robots")]) : _vm._e(), _c("th", [_vm._v("Actions")])])]), _c("tbody", _vm._l(_vm.pages, function(page, index) {
+      return _c("tr", { key: page.id, class: { "k-meta-kit-row-selected": _vm.isPageSelected(page.id) } }, [_c("td", { staticClass: "k-meta-kit-table-checkbox" }, [_c("input", { attrs: { "type": "checkbox" }, domProps: { "checked": _vm.isPageSelected(page.id) }, on: { "change": function($event) {
         return _vm.$emit("toggle-page", page.id);
       } } })]), _c("td", [_vm._v(_vm._s(_vm.startIndex + index + 1))]), _c("td", [_c("div", { staticClass: "k-meta-kit-table-page" }, [_c("a", { staticClass: "k-link", attrs: { "href": page.panelUrl } }, [_vm._v(_vm._s(page.title))]), _c("div", { staticClass: "k-meta-kit-page-title-wrapper" }, [_c("span", { staticClass: "k-meta-kit-table-page-id" }, [_vm._v(_vm._s(page.template))]), _c("span", { class: ["k-meta-kit-status-dot", _vm.getStatusDotClass(page)], attrs: { "title": _vm.getStatusLabel(page) } })])])]), !_vm.showPreview ? _c("td", [_c("Tooltip", { attrs: { "content": _vm.getSlugTooltip(page) } }, [_c("span", { class: [_vm.getSlugStatusClass(page), "k-meta-kit-table-tooltip"] }, [_vm._v(" " + _vm._s(page.id) + " ")])])], 1) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("Tooltip", { attrs: { "content": _vm.getTitleTooltip(page, false) } }, [_c("span", { class: [
         "k-meta-kit-table-preview-indicator",
@@ -1154,18 +1164,22 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         _vm.isOgTitleInherited(page) ? "k-meta-kit-inherited-preview" : ""
       ], attrs: { "data-status": _vm.getStatusValue(_vm.getTableOgTitleStatusClass(page)) } }, [page.hasOgTitle ? [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")] : [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(_vm.getFullTitlePreview(page, "og")) + " ")])]], 2)])]], 2) : _vm._e(), _vm.showPreview ? _c("td", [_vm.previewMode === "meta" ? [_c("Tooltip", { attrs: { "content": _vm.getDescriptionTooltip(page, false) } }, [_c("span", { staticClass: "k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip", attrs: { "data-status": _vm.getStatusValue(_vm.getDescriptionStatusClass(page)) } }, [page.hasMetaDescription ? [_vm._v(" " + _vm._s(page.metaDescription) + " ")] : _vm.siteSettings.siteMetaDescription ? [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(_vm.siteSettings.siteMetaDescription) + " ")])] : [_vm._v(" — ")]], 2)])] : [_c("Tooltip", { attrs: { "content": _vm.getOgDescriptionTooltip(page, false) } }, [_c("span", { staticClass: "k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip", attrs: { "data-status": _vm.getStatusValue(_vm.getOgDescriptionStatusClass(page)) } }, [page.hasOgDescription ? [_vm._v(" " + _vm._s(page.ogDescription) + " ")] : page.hasMetaDescription ? [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(page.metaDescription) + " ")])] : _vm.siteSettings.siteMetaDescription ? [_c("span", { staticClass: "k-meta-kit-table-preview-fallback" }, [_vm._v(" " + _vm._s(_vm.siteSettings.siteMetaDescription) + " ")])] : [_vm._v(" — ")]], 2)])]], 2) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("Tooltip", { attrs: { "content": _vm.getTitleTooltip(page) } }, [_c("span", { class: [
         _vm.getTableTitleStatusClass(page),
+        _vm.getTableTitleStatusClass(page) === "k-meta-kit-status-optimal" ? "k-meta-kit-table-value-muted" : "",
         _vm.isTitleInherited(page) ? "k-meta-kit-inherited" : "",
         "k-meta-kit-table-tooltip"
       ] }, [_vm._v(" " + _vm._s(_vm.getTitleDisplay(page)) + " ")])])], 1) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("Tooltip", { attrs: { "content": _vm.getDescriptionTooltip(page) } }, [_c("span", { class: [
         _vm.getDescriptionStatusClass(page),
+        _vm.getDescriptionStatusClass(page) === "k-meta-kit-status-optimal" ? "k-meta-kit-table-value-muted" : "",
         _vm.isDescriptionInherited(page) ? "k-meta-kit-inherited" : "",
         "k-meta-kit-table-tooltip"
       ] }, [_vm._v(" " + _vm._s(_vm.getDescriptionDisplay(page)) + " ")])])], 1) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("Tooltip", { attrs: { "content": _vm.getOgTitleTooltip(page) } }, [_c("span", { class: [
         _vm.getTableOgTitleStatusClass(page),
+        _vm.getTableOgTitleStatusClass(page) === "k-meta-kit-status-optimal" ? "k-meta-kit-table-value-muted" : "",
         _vm.isOgTitleInherited(page) ? "k-meta-kit-inherited" : "",
         "k-meta-kit-table-tooltip"
       ] }, [_vm._v(" " + _vm._s(_vm.getOgTitleDisplay(page)) + " ")])])], 1) : _vm._e(), !_vm.showPreview ? _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("Tooltip", { attrs: { "content": _vm.getOgDescriptionTooltip(page) } }, [_c("span", { class: [
         _vm.getOgDescriptionStatusClass(page),
+        _vm.getOgDescriptionStatusClass(page) === "k-meta-kit-status-optimal" ? "k-meta-kit-table-value-muted" : "",
         _vm.isOgDescriptionInherited(page) ? "k-meta-kit-inherited" : "",
         "k-meta-kit-table-tooltip"
       ] }, [_vm._v(" " + _vm._s(_vm.getOgDescriptionDisplay(page)) + " ")])])], 1) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [page.hasOgImage ? [_c("Tooltip", { attrs: { "content": "Has OG image" } }, [_c("span", { staticClass: "k-meta-kit-og-image-indicator" }, [_c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } })], 1)])] : !page.hasOgImage && _vm.siteSettings.siteHasOgImage ? [_c("Tooltip", { attrs: { "content": "OG image inherited from site" } }, [_c("span", { staticClass: "k-meta-kit-og-image-indicator k-meta-kit-inherited" }, [_c("k-icon", { staticClass: "k-meta-kit-icon-success", attrs: { "type": "check" } })], 1)])] : [_c("Tooltip", { attrs: { "content": "No OG image" } }, [_c("span", [_vm._v("—")])])]], 2), !_vm.showPreview && _vm.previewMode === "meta" ? _c("td", { staticClass: "k-meta-kit-table-center" }, [page.robots && page.robots.includes("noindex") ? _c("span", { staticClass: "k-meta-kit-robots-noindex" }, [_vm._v("noindex")]) : _c("span", [_vm._v("—")])]) : _vm._e(), _c("td", { staticClass: "k-meta-kit-table-center" }, [_c("div", { staticClass: "k-meta-kit-table-actions" }, [_c("k-button", { attrs: { "icon": "edit", "size": "sm", "title": "Edit Metadata" }, on: { "click": function($event) {
@@ -1499,6 +1513,17 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
   );
   __component__$6.options.__file = "/Users/mathis/Work/Basic/kirby-basic/site/plugins/meta-kit/js/components/parts/field/MetaKitDescriptionField.vue";
   const MetaKitDescriptionField = __component__$6.exports;
+  async function applySingleFieldUpdate(api, { pageId, fieldName, value }) {
+    const response = await api.post("meta-kit/apply-single-field", {
+      pageId,
+      fieldName,
+      value
+    });
+    if ((response == null ? void 0 : response.status) !== "success") {
+      throw new Error((response == null ? void 0 : response.message) || `Failed to update ${fieldName}`);
+    }
+    return response;
+  }
   const _sfc_main$5 = {
     components: {
       MetaKitTitleField,
@@ -1593,24 +1618,29 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         }
       },
       async save() {
+        var _a, _b;
         if (!this.page || !this.hasChanges) return;
         const changedFields = this.changedFields.map((name) => ({
           name,
           value: this.editedFields[name]
         }));
         const results = await Promise.allSettled(
-          changedFields.map(
-            (field) => this.api.post("meta-kit/apply-single-field", {
+          changedFields.map(async (field) => {
+            const response = await applySingleFieldUpdate(this.api, {
               pageId: this.page.id,
               fieldName: field.name,
               value: field.value
-            })
-          )
+            });
+            return response;
+          })
         );
-        const savedCount = results.filter((r) => r.status === "fulfilled").length;
-        const failedCount = results.filter((r) => r.status === "rejected").length;
-        if (failedCount > 0) {
-          window.panel.notification.error(`Failed to update ${failedCount} field${failedCount > 1 ? "s" : ""}`);
+        const savedCount = results.filter((result) => result.status === "fulfilled").length;
+        const failedResults = results.filter((result) => result.status === "rejected");
+        if (failedResults.length > 0) {
+          const firstError = (_b = (_a = failedResults[0]) == null ? void 0 : _a.reason) == null ? void 0 : _b.message;
+          window.panel.notification.error(
+            firstError || `Failed to update ${failedResults.length} field${failedResults.length > 1 ? "s" : ""}`
+          );
         }
         if (savedCount > 0) {
           window.panel.notification.success(`Updated ${savedCount} field${savedCount > 1 ? "s" : ""}`);
@@ -1638,7 +1668,10 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
   };
   var _sfc_render$5 = function render() {
     var _vm = this, _c = _vm._self._c;
-    return _c("k-dialog", { ref: "dialog", attrs: { "size": "large", "cancelButton": "Close", "submitButton": "" } }, [_vm.page ? _c("k-headline", [_vm._v("Edit: " + _vm._s(_vm.page.title))]) : _vm._e(), _vm.isLoading ? _c("div", { staticClass: "k-meta-kit-loading" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Loading page...")])], 1) : _vm.page ? _c("div", { staticClass: "k-meta-kit-single-edit" }, [_c("div", { staticClass: "k-meta-kit-single-field" }, [_c("label", { staticClass: "k-meta-kit-single-field-label" }, [_vm._v("Meta Title")]), _c("meta-kit-title-field", { attrs: { "value": _vm.editedFields.metaTitle, "page-id": _vm.page.id, "page-title": _vm.page.title, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating.metaTitle, "placeholder": _vm.page.metaTitle || _vm.page.title || "No meta title set", "button-size": "sm", "field-class": "k-meta-kit-single-field-content" }, on: { "input": function($event) {
+    return _c("k-dialog", { ref: "dialog", attrs: { "size": "large", "cancelButton": "Close", "submitButton": "" }, on: { "submit": function($event) {
+      $event.preventDefault();
+      return _vm.save.apply(null, arguments);
+    } } }, [_vm.page ? _c("k-headline", [_vm._v("Edit: " + _vm._s(_vm.page.title))]) : _vm._e(), _vm.isLoading ? _c("div", { staticClass: "k-meta-kit-loading" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Loading page...")])], 1) : _vm.page ? _c("div", { staticClass: "k-meta-kit-single-edit" }, [_c("div", { staticClass: "k-meta-kit-single-field" }, [_c("label", { staticClass: "k-meta-kit-single-field-label" }, [_vm._v("Meta Title")]), _c("meta-kit-title-field", { attrs: { "value": _vm.editedFields.metaTitle, "page-id": _vm.page.id, "page-title": _vm.page.title, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating.metaTitle, "placeholder": _vm.page.metaTitle || _vm.page.title || "No meta title set", "button-size": "sm", "field-class": "k-meta-kit-single-field-content" }, on: { "input": function($event) {
       _vm.editedFields.metaTitle = $event;
     }, "generate": function($event) {
       return _vm.generate("metaTitle");
@@ -1873,14 +1906,14 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
           for (const field of fields) {
             if (field.value !== field.original) {
               try {
-                await this.api.post("meta-kit/apply-single-field", {
+                await applySingleFieldUpdate(this.api, {
                   pageId: page.id,
                   fieldName: field.name,
                   value: field.value
                 });
                 totalSaved++;
               } catch (error) {
-                window.panel.notification.error(`Failed to update ${field.name} for ${page.title}`);
+                window.panel.notification.error((error == null ? void 0 : error.message) || `Failed to update ${field.name} for ${page.title}`);
               }
             }
           }
@@ -1895,7 +1928,10 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
   };
   var _sfc_render$4 = function render() {
     var _vm = this, _c = _vm._self._c;
-    return _c("k-dialog", { ref: "dialog", attrs: { "size": "huge", "cancelButton": "Close", "submitButton": "" } }, [_c("k-headline", [_vm._v("Edit Selected Pages (" + _vm._s(_vm.pages.length) + ")")]), _vm.isLoading ? _c("div", { staticClass: "k-meta-kit-loading" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Loading pages...")])], 1) : _vm.pages.length > 0 ? _c("div", [_c("div", { staticClass: "k-meta-kit-tabs" }, [_c("k-button", { attrs: { "theme": _vm.activeTab === "meta" ? "positive" : "", "size": "sm" }, on: { "click": function($event) {
+    return _c("k-dialog", { ref: "dialog", attrs: { "size": "huge", "cancelButton": "Close", "submitButton": "" }, on: { "submit": function($event) {
+      $event.preventDefault();
+      return _vm.saveAll.apply(null, arguments);
+    } } }, [_c("k-headline", [_vm._v("Edit Selected Pages (" + _vm._s(_vm.pages.length) + ")")]), _vm.isLoading ? _c("div", { staticClass: "k-meta-kit-loading" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Loading pages...")])], 1) : _vm.pages.length > 0 ? _c("div", [_c("div", { staticClass: "k-meta-kit-tabs" }, [_c("k-button", { attrs: { "theme": _vm.activeTab === "meta" ? "positive" : "", "size": "sm" }, on: { "click": function($event) {
       _vm.activeTab = "meta";
     } } }, [_vm._v(" Meta Tags ")]), _c("k-button", { attrs: { "theme": _vm.activeTab === "og" ? "positive" : "", "size": "sm" }, on: { "click": function($event) {
       _vm.activeTab = "og";
@@ -2008,26 +2044,81 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       isAllCurrentPageSelected() {
         return isAllCurrentPageSelected(this.paginatedPages, this.selectedPages);
       },
-      pagesWithTitle() {
-        return this.pagesData.filter((p) => p.hasMetaTitle).length;
+      // Title: custom = explicitly set for this language; pageFallback = no meta title (page.title used)
+      pagesWithCustomTitle() {
+        return this.pagesData.filter((p) => {
+          var _a;
+          return p.hasMetaTitle && !((_a = p.metaTitleInheritance) == null ? void 0 : _a.inherited);
+        }).length;
       },
+      pagesWithPageFallback() {
+        return this.pagesData.filter((p) => !p.hasMetaTitle).length;
+      },
+      filteredPagesWithCustomTitle() {
+        return this.filteredPages.filter((p) => {
+          var _a;
+          return p.hasMetaTitle && !((_a = p.metaTitleInheritance) == null ? void 0 : _a.inherited);
+        }).length;
+      },
+      filteredPagesWithPageFallback() {
+        return this.filteredPages.filter((p) => !p.hasMetaTitle).length;
+      },
+      // Description tiers: custom (hasMetaDescription) | from site | truly missing
       pagesWithDescription() {
         return this.pagesData.filter((p) => p.hasMetaDescription).length;
       },
-      pagesWithOgImage() {
-        return this.pagesData.filter((p) => p.hasOgImage).length;
+      pagesDescriptionFromSite() {
+        var _a;
+        if (!((_a = this.siteSettings) == null ? void 0 : _a.siteMetaDescription)) return 0;
+        return this.pagesData.filter((p) => !p.hasMetaDescription).length;
       },
-      pagesNoIndex() {
-        return this.pagesData.filter((p) => p.robots && p.robots.includes("noindex")).length;
-      },
-      filteredPagesWithTitle() {
-        return this.filteredPages.filter((p) => p.hasMetaTitle).length;
+      pagesMissingDescription() {
+        var _a;
+        if ((_a = this.siteSettings) == null ? void 0 : _a.siteMetaDescription) return 0;
+        return this.pagesData.filter((p) => !p.hasMetaDescription).length;
       },
       filteredPagesWithDescription() {
         return this.filteredPages.filter((p) => p.hasMetaDescription).length;
       },
+      filteredPagesDescriptionFromSite() {
+        var _a;
+        if (!((_a = this.siteSettings) == null ? void 0 : _a.siteMetaDescription)) return 0;
+        return this.filteredPages.filter((p) => !p.hasMetaDescription).length;
+      },
+      filteredPagesMissingDescription() {
+        var _a;
+        if ((_a = this.siteSettings) == null ? void 0 : _a.siteMetaDescription) return 0;
+        return this.filteredPages.filter((p) => !p.hasMetaDescription).length;
+      },
+      // OG image tiers: page image | from site | truly missing
+      pagesWithOgImage() {
+        return this.pagesData.filter((p) => p.hasOgImage).length;
+      },
+      pagesOgImageFromSite() {
+        var _a;
+        if (!((_a = this.siteSettings) == null ? void 0 : _a.siteHasOgImage)) return 0;
+        return this.pagesData.filter((p) => !p.hasOgImage).length;
+      },
+      pagesMissingOgImage() {
+        var _a;
+        if ((_a = this.siteSettings) == null ? void 0 : _a.siteHasOgImage) return 0;
+        return this.pagesData.filter((p) => !p.hasOgImage).length;
+      },
       filteredPagesWithOgImage() {
         return this.filteredPages.filter((p) => p.hasOgImage).length;
+      },
+      filteredPagesOgImageFromSite() {
+        var _a;
+        if (!((_a = this.siteSettings) == null ? void 0 : _a.siteHasOgImage)) return 0;
+        return this.filteredPages.filter((p) => !p.hasOgImage).length;
+      },
+      filteredPagesMissingOgImage() {
+        var _a;
+        if ((_a = this.siteSettings) == null ? void 0 : _a.siteHasOgImage) return 0;
+        return this.filteredPages.filter((p) => !p.hasOgImage).length;
+      },
+      pagesNoIndex() {
+        return this.pagesData.filter((p) => p.robots && p.robots.includes("noindex")).length;
       },
       filteredPagesNoIndex() {
         return this.filteredPages.filter((p) => p.robots && p.robots.includes("noindex")).length;
@@ -2153,7 +2244,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       return _c("k-button", { key: lang.code, attrs: { "aria-current": lang.code === _vm.language ? "true" : void 0, "aria-label": lang.code, "title": lang.name, "theme": lang.code === _vm.language ? "dark" : "empty", "variant": "filled", "size": "sm", "responsive": "true" }, on: { "click": function($event) {
         return _vm.goToLanguage(lang.code);
       } } }, [_vm._v(" " + _vm._s(lang.code) + " ")]);
-    }), 1) : _vm._e(), _c("meta-kit-stats", { attrs: { "filtered-count": _vm.filteredPages.length, "total-count": _vm.pagesData.length, "filtered-with-title": _vm.filteredPagesWithTitle, "total-with-title": _vm.pagesWithTitle, "filtered-with-description": _vm.filteredPagesWithDescription, "total-with-description": _vm.pagesWithDescription, "filtered-with-image": _vm.filteredPagesWithOgImage, "total-with-image": _vm.pagesWithOgImage, "filtered-no-index": _vm.filteredPagesNoIndex, "total-no-index": _vm.pagesNoIndex, "search-active": !!(_vm.searchQuery || _vm.activeFilters.length) } }), _c("meta-kit-actions", { attrs: { "selected-count": _vm.selectedPages.length, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.isGeneratingAll }, on: { "edit-selected": _vm.showSelectedPagesDialog, "generate-missing": _vm.generateAllDescriptions, "refresh": _vm.refreshPages }, scopedSlots: _vm._u([{ key: "filters", fn: function() {
+    }), 1) : _vm._e(), _c("meta-kit-stats", { attrs: { "filtered-count": _vm.filteredPages.length, "total-count": _vm.pagesData.length, "filtered-custom-title": _vm.filteredPagesWithCustomTitle, "total-custom-title": _vm.pagesWithCustomTitle, "filtered-page-fallback": _vm.filteredPagesWithPageFallback, "total-page-fallback": _vm.pagesWithPageFallback, "filtered-with-description": _vm.filteredPagesWithDescription, "total-with-description": _vm.pagesWithDescription, "filtered-description-from-site": _vm.filteredPagesDescriptionFromSite, "total-description-from-site": _vm.pagesDescriptionFromSite, "filtered-missing-description": _vm.filteredPagesMissingDescription, "total-missing-description": _vm.pagesMissingDescription, "filtered-with-image": _vm.filteredPagesWithOgImage, "total-with-image": _vm.pagesWithOgImage, "filtered-image-from-site": _vm.filteredPagesOgImageFromSite, "total-image-from-site": _vm.pagesOgImageFromSite, "filtered-missing-image": _vm.filteredPagesMissingOgImage, "total-missing-image": _vm.pagesMissingOgImage, "filtered-no-index": _vm.filteredPagesNoIndex, "total-no-index": _vm.pagesNoIndex, "search-active": !!(_vm.searchQuery || _vm.activeFilters.length) } }), _c("meta-kit-actions", { attrs: { "selected-count": _vm.selectedPages.length, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.isGeneratingAll }, on: { "edit-selected": _vm.showSelectedPagesDialog, "generate-missing": _vm.generateAllDescriptions, "refresh": _vm.refreshPages }, scopedSlots: _vm._u([{ key: "filters", fn: function() {
       return [_c("meta-kit-filters", { attrs: { "show-preview": _vm.showPreviewInTable, "preview-mode": _vm.previewMode, "search-query": _vm.searchQuery, "active-filters": _vm.activeFilters }, on: { "update:showPreview": function($event) {
         _vm.showPreviewInTable = $event;
       }, "update:show-preview": function($event) {

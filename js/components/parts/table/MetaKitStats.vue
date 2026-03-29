@@ -2,69 +2,122 @@
   <div class="k-meta-kit-stats">
 
     <div class="k-meta-kit-stats-card">
-      <h3>Total Pages</h3>
-      <div class="k-meta-kit-stats-number">
-        {{ filteredCount }}<span v-if="searchActive" class="k-meta-kit-stats-total"> / {{ totalCount }}</span>
+      <div class="k-meta-kit-stats-label">Total Pages</div>
+      <div class="k-meta-kit-stats-row">
+        <span class="k-meta-kit-stats-value">
+          {{ filteredCount }}<span v-if="searchActive" class="k-meta-kit-stats-sub"> / {{ totalCount }}</span>
+        </span>
       </div>
       <div class="k-meta-kit-stats-bar-track">
-        <div class="k-meta-kit-stats-bar-fill k-meta-kit-stats-percent-neutral" style="width: 100%"></div>
+        <div class="k-meta-kit-stats-bar-fill k-meta-kit-stats-neutral" style="width: 100%"></div>
       </div>
     </div>
 
     <div class="k-meta-kit-stats-card">
-      <h3>With Title</h3>
-      <div class="k-meta-kit-stats-number">
-        {{ filteredWithTitle }}<span v-if="searchActive" class="k-meta-kit-stats-total"> / {{ totalWithTitle }}</span>
-        <span v-if="denominator > 0" class="k-meta-kit-stats-pct">{{ percent(filteredWithTitle, denominator) }}%</span>
+      <div class="k-meta-kit-stats-label">Meta Title</div>
+      <div class="k-meta-kit-stats-row">
+        <span class="k-meta-kit-stats-value">
+          {{ filteredCustomTitle }}<span v-if="searchActive" class="k-meta-kit-stats-sub"> / {{ totalCustomTitle }}</span>
+        </span>
+        <span v-if="denominator > 0" class="k-meta-kit-stats-pct" :class="getPercentClass(filteredCustomTitle, denominator)">
+          {{ percent(filteredCustomTitle, denominator) }}%
+        </span>
       </div>
       <div class="k-meta-kit-stats-bar-track">
         <div
-          class="k-meta-kit-stats-bar-fill"
-          :class="getPercentClass(filteredWithTitle, denominator)"
-          :style="{ width: percent(filteredWithTitle, denominator) + '%' }"
+          class="k-meta-kit-stats-bar-fill k-meta-kit-stats-green"
+          :style="{ width: percent(filteredCustomTitle, denominator) + '%' }"
+        ></div>
+        <div
+          v-if="filteredPageFallback > 0"
+          class="k-meta-kit-stats-bar-fill k-meta-kit-stats-amber"
+          :style="{ width: percent(filteredPageFallback, denominator) + '%' }"
         ></div>
       </div>
+      <div v-if="filteredPageFallback > 0" class="k-meta-kit-stats-hint">
+        <span class="k-meta-kit-stats-amber">{{ filteredPageFallback }} from page title</span>
+      </div>
     </div>
 
     <div class="k-meta-kit-stats-card">
-      <h3>With Description</h3>
-      <div class="k-meta-kit-stats-number">
-        {{ filteredWithDescription }}<span v-if="searchActive" class="k-meta-kit-stats-total"> / {{ totalWithDescription }}</span>
-        <span v-if="denominator > 0" class="k-meta-kit-stats-pct">{{ percent(filteredWithDescription, denominator) }}%</span>
+      <div class="k-meta-kit-stats-label">Meta Description</div>
+      <div class="k-meta-kit-stats-row">
+        <span class="k-meta-kit-stats-value">
+          {{ filteredWithDescription }}<span v-if="searchActive" class="k-meta-kit-stats-sub"> / {{ totalWithDescription }}</span>
+        </span>
+        <span v-if="denominator > 0" class="k-meta-kit-stats-pct" :class="getPercentClass(filteredWithDescription, denominator)">
+          {{ percent(filteredWithDescription, denominator) }}%
+        </span>
       </div>
       <div class="k-meta-kit-stats-bar-track">
         <div
-          class="k-meta-kit-stats-bar-fill"
-          :class="getPercentClass(filteredWithDescription, denominator)"
+          class="k-meta-kit-stats-bar-fill k-meta-kit-stats-green"
           :style="{ width: percent(filteredWithDescription, denominator) + '%' }"
         ></div>
-      </div>
-    </div>
-
-    <div class="k-meta-kit-stats-card">
-      <h3>With OG Image</h3>
-      <div class="k-meta-kit-stats-number">
-        {{ filteredWithImage }}<span v-if="searchActive" class="k-meta-kit-stats-total"> / {{ totalWithImage }}</span>
-        <span v-if="denominator > 0" class="k-meta-kit-stats-pct">{{ percent(filteredWithImage, denominator) }}%</span>
-      </div>
-      <div class="k-meta-kit-stats-bar-track">
         <div
-          class="k-meta-kit-stats-bar-fill"
-          :class="getPercentClass(filteredWithImage, denominator)"
-          :style="{ width: percent(filteredWithImage, denominator) + '%' }"
+          v-if="filteredDescriptionFromSite > 0"
+          class="k-meta-kit-stats-bar-fill k-meta-kit-stats-amber"
+          :style="{ width: percent(filteredDescriptionFromSite, denominator) + '%' }"
+        ></div>
+        <div
+          v-if="filteredMissingDescription > 0"
+          class="k-meta-kit-stats-bar-fill k-meta-kit-stats-red"
+          :style="{ width: percent(filteredMissingDescription, denominator) + '%' }"
         ></div>
       </div>
+      <div v-if="filteredDescriptionFromSite > 0 || filteredMissingDescription > 0" class="k-meta-kit-stats-hint">
+        <span v-if="filteredDescriptionFromSite > 0" class="k-meta-kit-stats-amber">{{ filteredDescriptionFromSite }} from site</span>
+        <span v-if="filteredDescriptionFromSite > 0 && filteredMissingDescription > 0"> · </span>
+        <span v-if="filteredMissingDescription > 0" class="k-meta-kit-stats-red">{{ filteredMissingDescription }} missing</span>
+      </div>
     </div>
 
     <div class="k-meta-kit-stats-card">
-      <h3>Noindex</h3>
-      <div class="k-meta-kit-stats-number">
-        {{ filteredNoIndex }}<span v-if="searchActive" class="k-meta-kit-stats-total"> / {{ totalNoIndex }}</span>
-        <span v-if="denominator > 0 && filteredNoIndex > 0" class="k-meta-kit-stats-pct">{{ percent(filteredNoIndex, denominator) }}%</span>
+      <div class="k-meta-kit-stats-label">OG Image</div>
+      <div class="k-meta-kit-stats-row">
+        <span class="k-meta-kit-stats-value">
+          {{ filteredWithImage }}<span v-if="searchActive" class="k-meta-kit-stats-sub"> / {{ totalWithImage }}</span>
+        </span>
+        <span v-if="denominator > 0" class="k-meta-kit-stats-pct" :class="getPercentClass(filteredWithImage, denominator)">
+          {{ percent(filteredWithImage, denominator) }}%
+        </span>
       </div>
       <div class="k-meta-kit-stats-bar-track">
         <div
-          class="k-meta-kit-stats-bar-fill k-meta-kit-stats-percent-noindex"
+          class="k-meta-kit-stats-bar-fill k-meta-kit-stats-green"
+          :style="{ width: percent(filteredWithImage, denominator) + '%' }"
+        ></div>
+        <div
+          v-if="filteredImageFromSite > 0"
+          class="k-meta-kit-stats-bar-fill k-meta-kit-stats-amber"
+          :style="{ width: percent(filteredImageFromSite, denominator) + '%' }"
+        ></div>
+        <div
+          v-if="filteredMissingImage > 0"
+          class="k-meta-kit-stats-bar-fill k-meta-kit-stats-red"
+          :style="{ width: percent(filteredMissingImage, denominator) + '%' }"
+        ></div>
+      </div>
+      <div v-if="filteredImageFromSite > 0 || filteredMissingImage > 0" class="k-meta-kit-stats-hint">
+        <span v-if="filteredImageFromSite > 0" class="k-meta-kit-stats-amber">{{ filteredImageFromSite }} from site</span>
+        <span v-if="filteredImageFromSite > 0 && filteredMissingImage > 0"> · </span>
+        <span v-if="filteredMissingImage > 0" class="k-meta-kit-stats-red">{{ filteredMissingImage }} missing</span>
+      </div>
+    </div>
+
+    <div class="k-meta-kit-stats-card">
+      <div class="k-meta-kit-stats-label">Noindex Pages</div>
+      <div class="k-meta-kit-stats-row">
+        <span class="k-meta-kit-stats-value">
+          {{ filteredNoIndex }}<span v-if="searchActive" class="k-meta-kit-stats-sub"> / {{ totalNoIndex }}</span>
+        </span>
+        <span v-if="denominator > 0 && filteredNoIndex > 0" class="k-meta-kit-stats-pct k-meta-kit-stats-amber">
+          {{ percent(filteredNoIndex, denominator) }}%
+        </span>
+      </div>
+      <div class="k-meta-kit-stats-bar-track">
+        <div
+          class="k-meta-kit-stats-bar-fill k-meta-kit-stats-amber"
           :style="{ width: percent(filteredNoIndex, denominator) + '%' }"
         ></div>
       </div>
@@ -78,12 +131,22 @@ export default {
   props: {
     filteredCount: { type: Number, required: true },
     totalCount: { type: Number, required: true },
-    filteredWithTitle: { type: Number, required: true },
-    totalWithTitle: { type: Number, required: true },
+    filteredCustomTitle: { type: Number, required: true },
+    totalCustomTitle: { type: Number, required: true },
+    filteredPageFallback: { type: Number, required: true },
+    totalPageFallback: { type: Number, required: true },
     filteredWithDescription: { type: Number, required: true },
     totalWithDescription: { type: Number, required: true },
+    filteredDescriptionFromSite: { type: Number, required: true },
+    totalDescriptionFromSite: { type: Number, required: true },
+    filteredMissingDescription: { type: Number, required: true },
+    totalMissingDescription: { type: Number, required: true },
     filteredWithImage: { type: Number, required: true },
     totalWithImage: { type: Number, required: true },
+    filteredImageFromSite: { type: Number, required: true },
+    totalImageFromSite: { type: Number, required: true },
+    filteredMissingImage: { type: Number, required: true },
+    totalMissingImage: { type: Number, required: true },
     filteredNoIndex: { type: Number, required: true },
     totalNoIndex: { type: Number, required: true },
     searchActive: { type: Boolean, default: false }
@@ -100,39 +163,10 @@ export default {
     },
     getPercentClass(count, total) {
       const p = this.percent(count, total);
-      if (p >= 80) return 'k-meta-kit-stats-percent-high';
-      if (p >= 50) return 'k-meta-kit-stats-percent-mid';
-      return 'k-meta-kit-stats-percent-low';
+      if (p >= 80) return 'k-meta-kit-stats-green';
+      if (p >= 50) return 'k-meta-kit-stats-amber';
+      return 'k-meta-kit-stats-red';
     }
   }
 };
 </script>
-
-<style>
-.k-meta-kit-stats-bar-track {
-  margin-top: 0.5rem;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--color-gray-200, #e8e8e8);
-  overflow: hidden;
-}
-
-.k-meta-kit-stats-bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 0.4s ease;
-}
-
-.k-meta-kit-stats-percent-high   { background: var(--color-green-400, #52b788); }
-.k-meta-kit-stats-percent-mid    { background: var(--color-orange-400, #f4a261); }
-.k-meta-kit-stats-percent-low    { background: var(--color-red-400, #e63946); }
-.k-meta-kit-stats-percent-neutral { background: var(--color-gray-400, #aaa); }
-.k-meta-kit-stats-percent-noindex { background: var(--color-orange-400, #f4a261); }
-
-.k-meta-kit-stats-pct {
-  margin-left: 0.4rem;
-  font-size: 0.75rem;
-  opacity: 0.6;
-  font-weight: normal;
-}
-</style>

@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" size="large" cancelButton="Close" submitButton="">
+  <k-dialog ref="dialog" size="large" cancelButton="Close" submitButton="" @submit.prevent="save">
     <k-headline v-if="page">Edit: {{ page.title }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -109,6 +109,7 @@
 <script>
 import MetaKitTitleField from '../field/MetaKitTitleField.vue';
 import MetaKitDescriptionField from '../field/MetaKitDescriptionField.vue';
+import { applySingleFieldUpdate } from '../../../composables/saveFields.js';
 
 export default {
   components: {
@@ -217,20 +218,25 @@ export default {
       }));
 
       const results = await Promise.allSettled(
-        changedFields.map(field =>
-          this.api.post('meta-kit/apply-single-field', {
+        changedFields.map(async (field) => {
+          const response = await applySingleFieldUpdate(this.api, {
             pageId: this.page.id,
             fieldName: field.name,
             value: field.value
-          })
-        )
+          });
+
+          return response;
+        })
       );
 
-      const savedCount = results.filter(r => r.status === 'fulfilled').length;
-      const failedCount = results.filter(r => r.status === 'rejected').length;
+      const savedCount = results.filter(result => result.status === 'fulfilled').length;
+      const failedResults = results.filter(result => result.status === 'rejected');
 
-      if (failedCount > 0) {
-        window.panel.notification.error(`Failed to update ${failedCount} field${failedCount > 1 ? 's' : ''}`);
+      if (failedResults.length > 0) {
+        const firstError = failedResults[0]?.reason?.message;
+        window.panel.notification.error(
+          firstError || `Failed to update ${failedResults.length} field${failedResults.length > 1 ? 's' : ''}`
+        );
       }
 
       if (savedCount > 0) {

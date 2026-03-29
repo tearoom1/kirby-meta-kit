@@ -39,7 +39,7 @@ return function () {
             "pattern" => "meta-kit/apply-single-field",
             "method" => "POST",
             "auth" => true,
-            "action" => function () {
+            "action" => function () use ($licenseGuard) {
                 if ($error = $licenseGuard()) {
                     $error['message'] = 'A valid license is required to save changes. Please activate your license.';
                     return $error;
@@ -86,7 +86,7 @@ return function () {
             "pattern" => "meta-kit/generate-description",
             "method" => "POST",
             "auth" => true,
-            "action" => function () {
+            "action" => function () use ($licenseGuard) {
                 if ($error = $licenseGuard()) {
                     return $error;
                 }
@@ -101,7 +101,7 @@ return function () {
             "pattern" => "meta-kit/generate-all",
             "method" => "POST",
             "auth" => true,
-            "action" => function () {
+            "action" => function () use ($licenseGuard) {
                 if ($error = $licenseGuard()) {
                     return $error;
                 }
@@ -125,7 +125,7 @@ return function () {
             "pattern" => "meta-kit/generate-field",
             "method" => "POST",
             "auth" => true,
-            "action" => function () {
+            "action" => function () use ($licenseGuard) {
                 if ($error = $licenseGuard()) {
                     return $error;
                 }
