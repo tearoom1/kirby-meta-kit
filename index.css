@@ -41,6 +41,11 @@
     margin-bottom: 1.5rem;
   }
 
+  .k-meta-kit-stats-tooltip {
+    display: block;
+    width: 100%;
+  }
+
   .k-meta-kit-stats-card {
     background: var(--color-back);
     border: 1px solid var(--color-border);
@@ -80,12 +85,6 @@
     color: var(--color-text-dimmed);
   }
 
-  .k-meta-kit-stats-pct {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    flex-shrink: 0;
-  }
-
   .k-meta-kit-stats-bar-track {
     display: flex;
     height: 5px;
@@ -112,17 +111,13 @@
     line-height: 1;
   }
 
-  .k-meta-kit-stats-green { color: var(--color-green-600); background-color: var(--color-green-600); }
-  .k-meta-kit-stats-amber { color: var(--color-orange-600); background-color: var(--color-orange-600); }
-  .k-meta-kit-stats-red   { color: var(--color-red-600);    background-color: var(--color-red-600); }
+  .k-meta-kit-stats-green { color: var(--color-green-600); }
+  .k-meta-kit-stats-amber { color: var(--color-orange-600); }
+  .k-meta-kit-stats-red   { color: var(--color-red-600); }
+  .k-meta-kit-stats-fill-green { background-color: var(--color-green-600); }
+  .k-meta-kit-stats-fill-amber { background-color: var(--color-orange-600); }
+  .k-meta-kit-stats-fill-red   { background-color: var(--color-red-600); }
   .k-meta-kit-stats-neutral { background-color: var(--color-gray-300); }
-
-  .k-meta-kit-stats-pct.k-meta-kit-stats-green { background-color: transparent; }
-  .k-meta-kit-stats-pct.k-meta-kit-stats-amber { background-color: transparent; }
-  .k-meta-kit-stats-pct.k-meta-kit-stats-red   { background-color: transparent; }
-  .k-meta-kit-stats-hint .k-meta-kit-stats-green { background-color: transparent; }
-  .k-meta-kit-stats-hint .k-meta-kit-stats-amber { background-color: transparent; }
-  .k-meta-kit-stats-hint .k-meta-kit-stats-red   { background-color: transparent; }
 
   .k-panel[data-color-scheme="dark"] .k-meta-kit-stats-label {
     color: var(--color-gray-400);

@@ -35,24 +35,7 @@
     <meta-kit-stats
       :filtered-count="filteredPages.length"
       :total-count="pagesData.length"
-      :filtered-custom-title="filteredPagesWithCustomTitle"
-      :total-custom-title="pagesWithCustomTitle"
-      :filtered-page-fallback="filteredPagesWithPageFallback"
-      :total-page-fallback="pagesWithPageFallback"
-      :filtered-with-description="filteredPagesWithDescription"
-      :total-with-description="pagesWithDescription"
-      :filtered-description-from-site="filteredPagesDescriptionFromSite"
-      :total-description-from-site="pagesDescriptionFromSite"
-      :filtered-missing-description="filteredPagesMissingDescription"
-      :total-missing-description="pagesMissingDescription"
-      :filtered-with-image="filteredPagesWithOgImage"
-      :total-with-image="pagesWithOgImage"
-      :filtered-image-from-site="filteredPagesOgImageFromSite"
-      :total-image-from-site="pagesOgImageFromSite"
-      :filtered-missing-image="filteredPagesMissingOgImage"
-      :total-missing-image="pagesMissingOgImage"
-      :filtered-no-index="filteredPagesNoIndex"
-      :total-no-index="pagesNoIndex"
+      :cards="statsCards"
       :search-active="!!(searchQuery || activeFilters.length)"
     />
 
@@ -193,6 +176,16 @@ import {
   isAllCurrentPageSelected as isAllSelectedOnPage,
   toggleSelectAllCurrentPage as toggleSelectAllOnPage
 } from '../composables/panelState.js';
+import {
+  getStatusClass,
+  getSlugValidationConfig,
+  getSlugValidationIssues
+} from '../composables/useValidation.js';
+import {
+  getEffectiveDescription,
+  isInheritedFromSite
+} from '../composables/useInheritance.js';
+import { getTableTitleDisplay } from '../composables/panelDisplay.js';
 
 export default {
   components: {
@@ -271,73 +264,50 @@ export default {
     isAllCurrentPageSelected() {
       return isAllSelectedOnPage(this.paginatedPages, this.selectedPages);
     },
-    // Title: custom = explicitly set for this language; pageFallback = no meta title (page.title used)
-    pagesWithCustomTitle() {
-      return this.pagesData.filter(p => p.hasMetaTitle && !p.metaTitleInheritance?.inherited).length;
-    },
-    pagesWithPageFallback() {
-      return this.pagesData.filter(p => !p.hasMetaTitle).length;
-    },
-    filteredPagesWithCustomTitle() {
-      return this.filteredPages.filter(p => p.hasMetaTitle && !p.metaTitleInheritance?.inherited).length;
-    },
-    filteredPagesWithPageFallback() {
-      return this.filteredPages.filter(p => !p.hasMetaTitle).length;
-    },
-
-    // Description tiers: custom (hasMetaDescription) | from site | truly missing
-    pagesWithDescription() {
-      return this.pagesData.filter(p => p.hasMetaDescription).length;
-    },
-    pagesDescriptionFromSite() {
-      if (!this.siteSettings?.siteMetaDescription) return 0;
-      return this.pagesData.filter(p => !p.hasMetaDescription).length;
-    },
-    pagesMissingDescription() {
-      if (this.siteSettings?.siteMetaDescription) return 0;
-      return this.pagesData.filter(p => !p.hasMetaDescription).length;
-    },
-    filteredPagesWithDescription() {
-      return this.filteredPages.filter(p => p.hasMetaDescription).length;
-    },
-    filteredPagesDescriptionFromSite() {
-      if (!this.siteSettings?.siteMetaDescription) return 0;
-      return this.filteredPages.filter(p => !p.hasMetaDescription).length;
-    },
-    filteredPagesMissingDescription() {
-      if (this.siteSettings?.siteMetaDescription) return 0;
-      return this.filteredPages.filter(p => !p.hasMetaDescription).length;
-    },
-
-    // OG image tiers: page image | from site | truly missing
-    pagesWithOgImage() {
-      return this.pagesData.filter(p => p.hasOgImage).length;
-    },
-    pagesOgImageFromSite() {
-      if (!this.siteSettings?.siteHasOgImage) return 0;
-      return this.pagesData.filter(p => !p.hasOgImage).length;
-    },
-    pagesMissingOgImage() {
-      if (this.siteSettings?.siteHasOgImage) return 0;
-      return this.pagesData.filter(p => !p.hasOgImage).length;
-    },
-    filteredPagesWithOgImage() {
-      return this.filteredPages.filter(p => p.hasOgImage).length;
-    },
-    filteredPagesOgImageFromSite() {
-      if (!this.siteSettings?.siteHasOgImage) return 0;
-      return this.filteredPages.filter(p => !p.hasOgImage).length;
-    },
-    filteredPagesMissingOgImage() {
-      if (this.siteSettings?.siteHasOgImage) return 0;
-      return this.filteredPages.filter(p => !p.hasOgImage).length;
-    },
-
-    pagesNoIndex() {
-      return this.pagesData.filter(p => p.robots && p.robots.includes('noindex')).length;
-    },
-    filteredPagesNoIndex() {
-      return this.filteredPages.filter(p => p.robots && p.robots.includes('noindex')).length;
+    statsCards() {
+      return [
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifySlug(page), 'Slug', {
+          detailLines: [
+            'Good = slug is valid',
+            'Review = slug has warnings',
+            'Fix = slug has errors'
+          ]
+        }),
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyTitle(page), 'Meta Title', {
+          attentionStatuses: ['fix'],
+          detailLines: [
+            'Good = valid title, including page-title fallback',
+            'Review = title length warning only',
+            'Fix = missing or invalid title'
+          ]
+        }),
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyDescription(page), 'Meta Description', {
+          detailLines: [
+            'Good = valid unique description',
+            'Review = inherited from site or length warning',
+            'Fix = missing or invalid description'
+          ]
+        }),
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyOgImage(page), 'OG Image', {
+          detailLines: [
+            'Good = page-specific OG image',
+            'Review = inherited from site',
+            'Fix = missing OG image'
+          ]
+        }),
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyNoindex(page), 'Noindex Pages', {
+          attentionStatuses: ['review'],
+          detailLines: [
+            'Good = indexable page',
+            'Review = page is set to noindex'
+          ]
+        })
+      ].map((card) => ({
+        ...card,
+        attentionClass: card.filteredFix > 0
+          ? 'k-meta-kit-stats-red'
+          : (card.filteredAttention > 0 ? 'k-meta-kit-stats-amber' : 'k-meta-kit-stats-green')
+      }));
     }
   },
   watch: {
@@ -349,6 +319,115 @@ export default {
     }
   },
   methods: {
+    buildStatusBuckets(allPages, filteredPages, classify, label, options = {}) {
+      const attentionStatuses = options.attentionStatuses || ['review', 'fix'];
+      const summarize = (pages) => pages.reduce((acc, page) => {
+        const status = classify(page);
+        acc[status]++;
+        return acc;
+      }, { good: 0, review: 0, fix: 0 });
+
+      const total = summarize(allPages);
+      const filtered = summarize(filteredPages);
+      const filteredAttention = attentionStatuses.reduce((sum, status) => sum + filtered[status], 0);
+      const totalAttention = attentionStatuses.reduce((sum, status) => sum + total[status], 0);
+
+      return {
+        key: label.toLowerCase().replace(/\s+/g, '-'),
+        label,
+        filteredGood: filtered.good,
+        filteredReview: filtered.review,
+        filteredFix: filtered.fix,
+        totalGood: total.good,
+        totalReview: total.review,
+        totalFix: total.fix,
+        filteredAttention,
+        totalAttention,
+        tooltip: this.buildStatsTooltip({
+          label,
+          filtered,
+          total,
+          filteredAttention,
+          totalAttention,
+          detailLines: options.detailLines || []
+        })
+      };
+    },
+
+    buildStatsTooltip({ label, filtered, total, filteredAttention, totalAttention, detailLines }) {
+      const hasScopedView = !!(this.searchQuery || this.activeFilters.length);
+      const lines = [label];
+
+      if (hasScopedView) {
+        lines.push(`Visible pages: ${this.filteredPages.length} of ${this.pagesData.length}`);
+        lines.push(`Needs attention here: ${filteredAttention}`);
+        lines.push(`Needs attention overall: ${totalAttention}`);
+      } else {
+        lines.push(`Needs attention: ${filteredAttention} of ${this.pagesData.length}`);
+      }
+
+      lines.push(
+        `Good: ${filtered.good}`,
+        `Review: ${filtered.review}`,
+        `Fix: ${filtered.fix}`
+      );
+
+      if (detailLines.length > 0) {
+        lines.push('', ...detailLines);
+      }
+
+      if (hasScopedView) {
+        lines.push('', `Overall split: ${total.good} good, ${total.review} review, ${total.fix} fix`);
+      }
+
+      return lines.join('\n');
+    },
+
+    classifyTitle(page) {
+      const length = getTableTitleDisplay(page, this.siteSettingsData, 'meta').charCount;
+      const status = getStatusClass(page, length, 'title', this.validationSettingsData);
+      if (status === 'k-meta-kit-status-error' || !status) return 'fix';
+      if (status === 'k-meta-kit-status-warning') return 'review';
+      return 'good';
+    },
+
+    classifyDescription(page) {
+      const desc = getEffectiveDescription(page, 'meta', this.siteSettingsData);
+      if (!desc) return 'fix';
+      if (isInheritedFromSite(page, 'metaDescription', this.siteSettingsData)) return 'review';
+
+      const status = getStatusClass(page, desc.length, 'description', this.validationSettingsData);
+      if (status === 'k-meta-kit-status-error' || !status) return 'fix';
+      if (status === 'k-meta-kit-status-warning') return 'review';
+      return 'good';
+    },
+
+    classifyOgImage(page) {
+      if (page.hasOgImage) return 'good';
+      if (this.siteSettingsData?.siteHasOgImage) return 'review';
+      return 'fix';
+    },
+
+    classifyNoindex(page) {
+      return page.robots && page.robots.includes('noindex') ? 'review' : 'good';
+    },
+
+    classifySlug(page) {
+      if (page.id === 'site') return 'good';
+
+      const slug = page.id.split('/').pop() || '';
+      const wordCount = slug.split(/[-_]/).filter(Boolean).length;
+      const length = slug.length;
+      const numSlashes = page.id.split('/').length - 1;
+      const cfg = getSlugValidationConfig(page, this.validationSettingsData);
+      const avgWordLength = wordCount > 0 ? Math.ceil(length / wordCount) : length;
+      const issues = getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg });
+
+      if (issues.some(issue => issue.severity === 'error')) return 'fix';
+      if (issues.some(issue => issue.severity === 'warning')) return 'review';
+      return 'good';
+    },
+
     async refreshPages() {
       this.isLoadingPages = true;
       try {
