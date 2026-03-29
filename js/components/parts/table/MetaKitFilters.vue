@@ -62,20 +62,20 @@
           <label class="k-meta-kit-filter-option">
             <input
               type="checkbox"
-              value="attention"
-              :checked="isFilterActive('attention')"
-              @change="toggleFilter('attention')"
-            />
-            <span>Needs Attention</span>
-          </label>
-          <label class="k-meta-kit-filter-option">
-            <input
-              type="checkbox"
               value="good"
               :checked="isFilterActive('good')"
               @change="toggleFilter('good')"
             />
             <span>Good</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="attention"
+              :checked="isFilterActive('attention')"
+              @change="toggleFilter('attention')"
+            />
+            <span>Needs Attention</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -102,11 +102,11 @@
           <label class="k-meta-kit-filter-option">
             <input
               type="checkbox"
-              value="type-description"
-              :checked="isFilterActive('type-description')"
-              @change="toggleFilter('type-description')"
+              value="type-slug"
+              :checked="isFilterActive('type-slug')"
+              @change="toggleFilter('type-slug')"
             />
-            <span>Meta Description</span>
+            <span>Slug</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -120,11 +120,11 @@
           <label class="k-meta-kit-filter-option">
             <input
               type="checkbox"
-              value="type-og-description"
-              :checked="isFilterActive('type-og-description')"
-              @change="toggleFilter('type-og-description')"
+              value="type-description"
+              :checked="isFilterActive('type-description')"
+              @change="toggleFilter('type-description')"
             />
-            <span>OG Description</span>
+            <span>Meta Description</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -138,20 +138,20 @@
           <label class="k-meta-kit-filter-option">
             <input
               type="checkbox"
+              value="type-og-description"
+              :checked="isFilterActive('type-og-description')"
+              @change="toggleFilter('type-og-description')"
+            />
+            <span>OG Description</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
               value="type-og-image"
               :checked="isFilterActive('type-og-image')"
               @change="toggleFilter('type-og-image')"
             />
             <span>OG Image</span>
-          </label>
-          <label class="k-meta-kit-filter-option">
-            <input
-              type="checkbox"
-              value="type-slug"
-              :checked="isFilterActive('type-slug')"
-              @change="toggleFilter('type-slug')"
-            />
-            <span>Slug</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -261,26 +261,39 @@ export default {
       this.isDropdownOpen = !this.isDropdownOpen;
     },
     isFilterActive(filter) {
+      if (filter === 'attention') {
+        return this.activeFilters.includes('warning') && this.activeFilters.includes('error');
+      }
       return this.activeFilters.includes(filter);
     },
     toggleFilter(filter) {
-      const filters = [...this.activeFilters];
-      const index = filters.indexOf(filter);
+      const filters = new Set(this.activeFilters.filter((activeFilter) => activeFilter !== 'attention'));
 
-      if (index > -1) {
-        filters.splice(index, 1);
+      if (filter === 'attention') {
+        if (filters.has('warning') && filters.has('error')) {
+          filters.delete('warning');
+          filters.delete('error');
+        } else {
+          filters.add('warning');
+          filters.add('error');
+        }
       } else {
-        filters.push(filter);
+        if (filters.has(filter)) {
+          filters.delete(filter);
+        } else {
+          filters.add(filter);
+        }
       }
 
-      const hasStateFilter = filters.some((activeFilter) => STATE_FILTERS.has(activeFilter));
-      const typeFilterCount = filters.filter((activeFilter) => TYPE_FILTERS.has(activeFilter)).length;
+      const nextFilters = Array.from(filters);
+      const hasStateFilter = nextFilters.some((activeFilter) => STATE_FILTERS.has(activeFilter));
+      const typeFilterCount = nextFilters.filter((activeFilter) => TYPE_FILTERS.has(activeFilter)).length;
 
       if (hasStateFilter && typeFilterCount === 0) {
-        filters.push('type-description');
+        nextFilters.push('type-description');
       }
 
-      this.$emit('update:active-filters', filters);
+      this.$emit('update:active-filters', nextFilters);
     },
     clearFilters() {
       this.$emit('update:active-filters', []);

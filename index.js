@@ -498,22 +498,35 @@
         this.isDropdownOpen = !this.isDropdownOpen;
       },
       isFilterActive(filter) {
+        if (filter === "attention") {
+          return this.activeFilters.includes("warning") && this.activeFilters.includes("error");
+        }
         return this.activeFilters.includes(filter);
       },
       toggleFilter(filter) {
-        const filters = [...this.activeFilters];
-        const index = filters.indexOf(filter);
-        if (index > -1) {
-          filters.splice(index, 1);
+        const filters = new Set(this.activeFilters.filter((activeFilter) => activeFilter !== "attention"));
+        if (filter === "attention") {
+          if (filters.has("warning") && filters.has("error")) {
+            filters.delete("warning");
+            filters.delete("error");
+          } else {
+            filters.add("warning");
+            filters.add("error");
+          }
         } else {
-          filters.push(filter);
+          if (filters.has(filter)) {
+            filters.delete(filter);
+          } else {
+            filters.add(filter);
+          }
         }
-        const hasStateFilter = filters.some((activeFilter) => STATE_FILTERS.has(activeFilter));
-        const typeFilterCount = filters.filter((activeFilter) => TYPE_FILTERS$1.has(activeFilter)).length;
+        const nextFilters = Array.from(filters);
+        const hasStateFilter = nextFilters.some((activeFilter) => STATE_FILTERS.has(activeFilter));
+        const typeFilterCount = nextFilters.filter((activeFilter) => TYPE_FILTERS$1.has(activeFilter)).length;
         if (hasStateFilter && typeFilterCount === 0) {
-          filters.push("type-description");
+          nextFilters.push("type-description");
         }
-        this.$emit("update:active-filters", filters);
+        this.$emit("update:active-filters", nextFilters);
       },
       clearFilters() {
         this.$emit("update:active-filters", []);
@@ -544,27 +557,27 @@
       return _vm.$emit("update:search-query", $event);
     } } }), _vm.searchQuery ? _c("button", { staticClass: "k-meta-kit-search-clear", attrs: { "title": "Clear search" }, on: { "click": function($event) {
       return _vm.$emit("update:search-query", "");
-    } } }, [_c("k-icon", { attrs: { "type": "cancel" } })], 1) : _vm._e()], 1), _c("div", { staticClass: "k-meta-kit-filter-dropdown" }, [_c("button", { staticClass: "k-meta-kit-filter-button", class: { "active": _vm.isDropdownOpen || _vm.activeFilters.length > 0 }, on: { "click": _vm.toggleFilterDropdown } }, [_c("k-icon", { attrs: { "type": "filter" } }), _c("span", [_vm._v("Filters")]), _vm.activeFilters.length > 0 ? _c("span", { staticClass: "k-meta-kit-filter-count" }, [_vm._v(_vm._s(_vm.activeFilters.length))]) : _vm._e(), _c("k-icon", { attrs: { "type": _vm.isDropdownOpen ? "angle-up" : "angle-down" } })], 1), _vm.isDropdownOpen ? _c("div", { staticClass: "k-meta-kit-filter-dropdown-content" }, [_c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("State")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "attention" }, domProps: { "checked": _vm.isFilterActive("attention") }, on: { "change": function($event) {
-      return _vm.toggleFilter("attention");
-    } } }), _c("span", [_vm._v("Needs Attention")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "good" }, domProps: { "checked": _vm.isFilterActive("good") }, on: { "change": function($event) {
+    } } }, [_c("k-icon", { attrs: { "type": "cancel" } })], 1) : _vm._e()], 1), _c("div", { staticClass: "k-meta-kit-filter-dropdown" }, [_c("button", { staticClass: "k-meta-kit-filter-button", class: { "active": _vm.isDropdownOpen || _vm.activeFilters.length > 0 }, on: { "click": _vm.toggleFilterDropdown } }, [_c("k-icon", { attrs: { "type": "filter" } }), _c("span", [_vm._v("Filters")]), _vm.activeFilters.length > 0 ? _c("span", { staticClass: "k-meta-kit-filter-count" }, [_vm._v(_vm._s(_vm.activeFilters.length))]) : _vm._e(), _c("k-icon", { attrs: { "type": _vm.isDropdownOpen ? "angle-up" : "angle-down" } })], 1), _vm.isDropdownOpen ? _c("div", { staticClass: "k-meta-kit-filter-dropdown-content" }, [_c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("State")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "good" }, domProps: { "checked": _vm.isFilterActive("good") }, on: { "change": function($event) {
       return _vm.toggleFilter("good");
-    } } }), _c("span", [_vm._v("Good")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "warning" }, domProps: { "checked": _vm.isFilterActive("warning") }, on: { "change": function($event) {
+    } } }), _c("span", [_vm._v("Good")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "attention" }, domProps: { "checked": _vm.isFilterActive("attention") }, on: { "change": function($event) {
+      return _vm.toggleFilter("attention");
+    } } }), _c("span", [_vm._v("Needs Attention")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "warning" }, domProps: { "checked": _vm.isFilterActive("warning") }, on: { "change": function($event) {
       return _vm.toggleFilter("warning");
     } } }), _c("span", [_vm._v("Warnings")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "error" }, domProps: { "checked": _vm.isFilterActive("error") }, on: { "change": function($event) {
       return _vm.toggleFilter("error");
-    } } }), _c("span", [_vm._v("Fixes")])])]), _c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("Fields")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-description" }, domProps: { "checked": _vm.isFilterActive("type-description") }, on: { "change": function($event) {
-      return _vm.toggleFilter("type-description");
-    } } }), _c("span", [_vm._v("Meta Description")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-title" }, domProps: { "checked": _vm.isFilterActive("type-title") }, on: { "change": function($event) {
-      return _vm.toggleFilter("type-title");
-    } } }), _c("span", [_vm._v("Meta Title")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-description" }, domProps: { "checked": _vm.isFilterActive("type-og-description") }, on: { "change": function($event) {
-      return _vm.toggleFilter("type-og-description");
-    } } }), _c("span", [_vm._v("OG Description")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-title" }, domProps: { "checked": _vm.isFilterActive("type-og-title") }, on: { "change": function($event) {
-      return _vm.toggleFilter("type-og-title");
-    } } }), _c("span", [_vm._v("OG Title")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-image" }, domProps: { "checked": _vm.isFilterActive("type-og-image") }, on: { "change": function($event) {
-      return _vm.toggleFilter("type-og-image");
-    } } }), _c("span", [_vm._v("OG Image")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-slug" }, domProps: { "checked": _vm.isFilterActive("type-slug") }, on: { "change": function($event) {
+    } } }), _c("span", [_vm._v("Fixes")])])]), _c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("Fields")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-slug" }, domProps: { "checked": _vm.isFilterActive("type-slug") }, on: { "change": function($event) {
       return _vm.toggleFilter("type-slug");
-    } } }), _c("span", [_vm._v("Slug")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-noindex" }, domProps: { "checked": _vm.isFilterActive("type-noindex") }, on: { "change": function($event) {
+    } } }), _c("span", [_vm._v("Slug")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-title" }, domProps: { "checked": _vm.isFilterActive("type-title") }, on: { "change": function($event) {
+      return _vm.toggleFilter("type-title");
+    } } }), _c("span", [_vm._v("Meta Title")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-description" }, domProps: { "checked": _vm.isFilterActive("type-description") }, on: { "change": function($event) {
+      return _vm.toggleFilter("type-description");
+    } } }), _c("span", [_vm._v("Meta Description")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-title" }, domProps: { "checked": _vm.isFilterActive("type-og-title") }, on: { "change": function($event) {
+      return _vm.toggleFilter("type-og-title");
+    } } }), _c("span", [_vm._v("OG Title")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-description" }, domProps: { "checked": _vm.isFilterActive("type-og-description") }, on: { "change": function($event) {
+      return _vm.toggleFilter("type-og-description");
+    } } }), _c("span", [_vm._v("OG Description")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-og-image" }, domProps: { "checked": _vm.isFilterActive("type-og-image") }, on: { "change": function($event) {
+      return _vm.toggleFilter("type-og-image");
+    } } }), _c("span", [_vm._v("OG Image")])]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "type-noindex" }, domProps: { "checked": _vm.isFilterActive("type-noindex") }, on: { "change": function($event) {
       return _vm.toggleFilter("type-noindex");
     } } }), _c("span", [_vm._v("Noindex")])])]), _c("div", { staticClass: "k-meta-kit-filter-group" }, [_c("div", { staticClass: "k-meta-kit-filter-group-title" }, [_vm._v("Metadata")]), _c("label", { staticClass: "k-meta-kit-filter-option" }, [_c("input", { attrs: { "type": "checkbox", "value": "complete" }, domProps: { "checked": _vm.isFilterActive("complete") }, on: { "change": function($event) {
       return _vm.toggleFilter("complete");
@@ -1915,7 +1928,14 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       filtered = filtered.filter((page) => {
         const matchesMetadata = metadataFilters.length === 0 || metadataFilters.every((filter) => matchesMetadataFilter(page, filter));
         const typeStatuses = typeFilters.map((filter) => getTypeStatus(page, filter, context));
-        const matchesType = typeFilters.length === 0 || (attentionFilters.length > 0 || typeStatuses.some((status) => status !== "good"));
+        const matchesType = typeFilters.length === 0 || attentionFilters.length === 0 || typeStatuses.some((status) => {
+          return attentionFilters.some((filter) => {
+            if (filter === "attention") {
+              return status === "warning" || status === "error";
+            }
+            return status === filter;
+          });
+        });
         const matchesAttention = (() => {
           if (attentionFilters.length === 0) {
             return true;

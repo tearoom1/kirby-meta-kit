@@ -206,6 +206,11 @@ test('filterPages supports attention, warning and error filters', () => {
     filterPages(attentionPages, ['good', 'type-description'], '', context).map((p) => p.id),
     ['gamma', 'one/two/three/four/five']
   );
+
+  assert.deepEqual(
+    filterPages(attentionPages, ['type-description'], '', context).map((p) => p.id),
+    ['alpha', 'beta', 'gamma', 'one/two/three/four/five']
+  );
 });
 
 test('pagination helpers compute slices and total pages', () => {

@@ -218,7 +218,15 @@ export function filterPages(pages = [], activeFilters = [], searchQuery = '', co
       const typeStatuses = typeFilters.map((filter) => getTypeStatus(page, filter, context));
       const matchesType =
         typeFilters.length === 0 ||
-        (attentionFilters.length > 0 || typeStatuses.some((status) => status !== 'good'));
+        attentionFilters.length === 0 ||
+        typeStatuses.some((status) => {
+          return attentionFilters.some((filter) => {
+            if (filter === 'attention') {
+              return status === 'warning' || status === 'error';
+            }
+            return status === filter;
+          });
+        });
 
       const matchesAttention = (() => {
         if (attentionFilters.length === 0) {
