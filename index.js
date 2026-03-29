@@ -1717,7 +1717,12 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
           metaDescription: false,
           ogTitle: false,
           ogDescription: false
-        }
+        },
+        saveFeedback: {
+          type: "",
+          text: ""
+        },
+        saveFeedbackTimer: null
       };
     },
     computed: {
@@ -1736,6 +1741,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
     methods: {
       async open(pageId) {
         this.isLoading = true;
+        this.resetSaveFeedback();
         this.$refs.dialog.open();
         try {
           const response = await this.api.get("meta-kit/single-page", { pageId });
@@ -1753,8 +1759,24 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         }
       },
       close() {
+        this.resetSaveFeedback();
         this.$refs.dialog.close();
         this.page = null;
+      },
+      resetSaveFeedback() {
+        if (this.saveFeedbackTimer) {
+          clearTimeout(this.saveFeedbackTimer);
+          this.saveFeedbackTimer = null;
+        }
+        this.saveFeedback = { type: "", text: "" };
+      },
+      setSaveFeedback(type, text) {
+        this.resetSaveFeedback();
+        this.saveFeedback = { type, text };
+        this.saveFeedbackTimer = setTimeout(() => {
+          this.saveFeedback = { type: "", text: "" };
+          this.saveFeedbackTimer = null;
+        }, 3200);
       },
       async generate(fieldName) {
         if (!this.page) return;
@@ -1800,6 +1822,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         const savedCount = successfulResponses.length;
         if (failedResults.length > 0) {
           const firstError = (_a = failedResults[0]) == null ? void 0 : _a.message;
+          this.setSaveFeedback("error", firstError || `Failed to update ${failedResults.length} field${failedResults.length > 1 ? "s" : ""}`);
           window.panel.notification.error(
             firstError || `Failed to update ${failedResults.length} field${failedResults.length > 1 ? "s" : ""}`
           );
@@ -1808,7 +1831,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
           const latestResponse = successfulResponses[successfulResponses.length - 1];
           const latestPage = ((_b = latestResponse == null ? void 0 : latestResponse.data) == null ? void 0 : _b.page) || null;
           const latestSiteSettings = ((_c = latestResponse == null ? void 0 : latestResponse.data) == null ? void 0 : _c.siteSettings) || null;
-          window.panel.notification.success(`Updated ${savedCount} field${savedCount > 1 ? "s" : ""}`);
+          this.setSaveFeedback("success", `Saved ${savedCount} field${savedCount > 1 ? "s" : ""}`);
           if (latestPage) {
             this.page = latestPage;
             this.editedFields.metaTitle = this.page.metaTitle || "";
@@ -1828,11 +1851,14 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
           window.panel.view.open(this.page.panelUrl);
         }
       }
+    },
+    beforeDestroy() {
+      this.resetSaveFeedback();
     }
   };
   var _sfc_render$5 = function render() {
     var _vm = this, _c = _vm._self._c;
-    return _c("k-dialog", { ref: "dialog", attrs: { "size": "large", "cancelButton": "Close", "submitButton": "" }, on: { "submit": function($event) {
+    return _c("k-dialog", { ref: "dialog", attrs: { "size": "large", "cancel-button": false, "submitButton": "" }, on: { "submit": function($event) {
       $event.preventDefault();
       return _vm.save.apply(null, arguments);
     } } }, [_vm.page ? _c("k-headline", [_vm._v("Edit: " + _vm._s(_vm.page.title))]) : _vm._e(), _vm.isLoading ? _c("div", { staticClass: "k-meta-kit-loading" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Loading page...")])], 1) : _vm.page ? _c("div", { staticClass: "k-meta-kit-single-edit" }, [_c("div", { staticClass: "k-meta-kit-single-field" }, [_c("meta-kit-title-field", { attrs: { "label": "Meta Title", "value": _vm.editedFields.metaTitle, "page-id": _vm.page.id, "page-title": _vm.page.title, "site-settings": _vm.siteSettings, "ai-enabled": _vm.aiEnabled, "is-generating": _vm.generating.metaTitle, "placeholder": _vm.page.metaTitle || _vm.page.title || "No meta title set", "button-size": "sm", "field-class": "k-meta-kit-single-field-content" }, on: { "input": function($event) {
@@ -1851,7 +1877,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       _vm.editedFields.ogDescription = $event;
     }, "generate": function($event) {
       return _vm.generate("ogDescription");
-    } } })], 1), _c("div", { staticClass: "k-meta-kit-single-field" }, [_c("label", { staticClass: "k-meta-kit-dialog-field-label" }, [_vm._v("OG Image")]), _c("div", { staticClass: "k-meta-kit-single-field-content" }, [_vm.page.ogImage ? _c("div", { staticClass: "k-meta-kit-og-image-current" }, [_c("img", { attrs: { "src": _vm.page.ogImage.url, "alt": _vm.page.ogImage.filename } }), _c("span", { staticClass: "k-meta-kit-og-image-filename" }, [_vm._v(_vm._s(_vm.page.ogImage.filename))])]) : _c("div", { staticClass: "k-meta-kit-og-image-empty" }, [_vm._v(" No OG image set ")])])]), _c("div", { staticClass: "k-meta-kit-single-actions" }, [_c("k-button", { attrs: { "icon": "open" }, on: { "click": _vm.editInPanel } }, [_vm._v("Edit in Panel")]), _vm.hasChanges ? _c("k-button", { attrs: { "icon": "check", "theme": "positive" }, on: { "click": _vm.save } }, [_vm._v(" Save " + _vm._s(_vm.changedFieldCount) + " " + _vm._s(_vm.changedFieldCount === 1 ? "Field" : "Fields") + " ")]) : _vm._e()], 1)]) : _vm._e()], 1);
+    } } })], 1), _c("div", { staticClass: "k-meta-kit-single-field" }, [_c("label", { staticClass: "k-meta-kit-dialog-field-label" }, [_vm._v("OG Image")]), _c("div", { staticClass: "k-meta-kit-single-field-content" }, [_vm.page.ogImage ? _c("div", { staticClass: "k-meta-kit-og-image-current" }, [_c("img", { attrs: { "src": _vm.page.ogImage.url, "alt": _vm.page.ogImage.filename } }), _c("span", { staticClass: "k-meta-kit-og-image-filename" }, [_vm._v(_vm._s(_vm.page.ogImage.filename))])]) : _c("div", { staticClass: "k-meta-kit-og-image-empty" }, [_vm._v(" No OG image set ")])])]), _c("div", { staticClass: "k-meta-kit-dialog-footer" }, [_c("div", { staticClass: "k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-start" }, [_c("k-button", { attrs: { "icon": "open" }, on: { "click": _vm.editInPanel } }, [_vm._v("Edit in Panel")])], 1), _c("div", { staticClass: "k-meta-kit-dialog-footer-meta" }, [_vm.saveFeedback.text ? _c("span", { class: ["k-meta-kit-dialog-feedback", `k-meta-kit-dialog-feedback-${_vm.saveFeedback.type}`] }, [_vm._v(" " + _vm._s(_vm.saveFeedback.text) + " ")]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-end" }, [_c("k-button", { on: { "click": _vm.close } }, [_vm._v("Close")]), _vm.hasChanges ? _c("k-button", { attrs: { "icon": "check", "theme": "positive" }, on: { "click": _vm.save } }, [_vm._v(" Save " + _vm._s(_vm.changedFieldCount) + " " + _vm._s(_vm.changedFieldCount === 1 ? "Field" : "Fields") + " ")]) : _vm._e()], 1)])]) : _vm._e()], 1);
   };
   var _sfc_staticRenderFns$5 = [];
   _sfc_render$5._withStripped = true;
@@ -2195,7 +2221,12 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         isLoading: false,
         activeTab: "meta",
         editedFields: {},
-        generating: {}
+        generating: {},
+        saveFeedback: {
+          type: "",
+          text: ""
+        },
+        saveFeedbackTimer: null
       };
     },
     computed: {
@@ -2207,6 +2238,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       async open(pageIds) {
         this.isLoading = true;
         this.activeTab = "meta";
+        this.resetSaveFeedback();
         this.$refs.dialog.open();
         try {
           const response = await this.api.get("meta-kit/pages-with-content", {
@@ -2238,10 +2270,26 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
         }
       },
       close() {
+        this.resetSaveFeedback();
         this.$refs.dialog.close();
         this.pages = [];
         this.editedFields = {};
         this.generating = {};
+      },
+      resetSaveFeedback() {
+        if (this.saveFeedbackTimer) {
+          clearTimeout(this.saveFeedbackTimer);
+          this.saveFeedbackTimer = null;
+        }
+        this.saveFeedback = { type: "", text: "" };
+      },
+      setSaveFeedback(type, text) {
+        this.resetSaveFeedback();
+        this.saveFeedback = { type, text };
+        this.saveFeedbackTimer = setTimeout(() => {
+          this.saveFeedback = { type: "", text: "" };
+          this.saveFeedbackTimer = null;
+        }, 3200);
       },
       async generate(pageId, fieldName) {
         if (!this.generating[pageId]) return;
@@ -2293,25 +2341,28 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
                 }
                 totalSaved++;
               } catch (error) {
+                this.setSaveFeedback("error", (error == null ? void 0 : error.message) || `Failed to update ${field.name} for ${page.title}`);
                 window.panel.notification.error((error == null ? void 0 : error.message) || `Failed to update ${field.name} for ${page.title}`);
               }
             }
           }
         }
         if (totalSaved > 0) {
-          window.panel.notification.success(`Updated ${totalSaved} field${totalSaved > 1 ? "s" : ""} across ${this.pages.length} page${this.pages.length > 1 ? "s" : ""}`);
+          this.setSaveFeedback("success", `Saved ${totalSaved} field${totalSaved > 1 ? "s" : ""} across ${this.pages.length} page${this.pages.length > 1 ? "s" : ""}`);
           this.$emit("saved", {
             pages: Array.from(updatedPages.values()),
             siteSettings: latestSiteSettings
           });
-          this.close();
         }
       }
+    },
+    beforeDestroy() {
+      this.resetSaveFeedback();
     }
   };
   var _sfc_render$4 = function render() {
     var _vm = this, _c = _vm._self._c;
-    return _c("k-dialog", { ref: "dialog", attrs: { "size": "huge", "cancelButton": "Close", "submitButton": "" }, on: { "submit": function($event) {
+    return _c("k-dialog", { ref: "dialog", attrs: { "size": "huge", "cancel-button": false, "submitButton": "" }, on: { "submit": function($event) {
       $event.preventDefault();
       return _vm.saveAll.apply(null, arguments);
     } } }, [_c("k-headline", [_vm._v("Edit Selected Pages (" + _vm._s(_vm.pages.length) + ")")]), _vm.isLoading ? _c("div", { staticClass: "k-meta-kit-loading" }, [_c("k-icon", { staticClass: "k-meta-kit-spinner", attrs: { "type": "loader" } }), _c("span", [_vm._v("Loading pages...")])], 1) : _vm.pages.length > 0 ? _c("div", [_c("div", { staticClass: "k-meta-kit-tabs" }, [_c("k-button", { attrs: { "theme": _vm.activeTab === "meta" ? "positive" : "", "size": "sm" }, on: { "click": function($event) {
@@ -2338,7 +2389,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       }, "generate": function($event) {
         return _vm.generate(page.id, "ogDescription");
       } } })], 1);
-    }), 0) : _vm._e(), _vm.hasAnyChanges ? _c("div", { staticClass: "k-meta-kit-single-actions" }, [_c("k-button", { attrs: { "icon": "check", "theme": "positive" }, on: { "click": _vm.saveAll } }, [_vm._v("Apply All Changes")])], 1) : _vm._e()]) : _c("div", { staticClass: "k-meta-kit-empty" }, [_c("k-icon", { attrs: { "type": "check" } }), _c("p", [_vm._v("No pages selected!")])], 1)], 1);
+    }), 0) : _vm._e(), _c("div", { staticClass: "k-meta-kit-dialog-footer" }, [_c("div", { staticClass: "k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-start" }), _c("div", { staticClass: "k-meta-kit-dialog-footer-meta" }, [_vm.saveFeedback.text ? _c("span", { class: ["k-meta-kit-dialog-feedback", `k-meta-kit-dialog-feedback-${_vm.saveFeedback.type}`] }, [_vm._v(" " + _vm._s(_vm.saveFeedback.text) + " ")]) : _vm._e()]), _c("div", { staticClass: "k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-end" }, [_c("k-button", { on: { "click": _vm.close } }, [_vm._v("Close")]), _vm.hasAnyChanges ? _c("k-button", { attrs: { "icon": "check", "theme": "positive" }, on: { "click": _vm.saveAll } }, [_vm._v("Apply All Changes")]) : _vm._e()], 1)])]) : _c("div", { staticClass: "k-meta-kit-empty" }, [_c("k-icon", { attrs: { "type": "check" } }), _c("p", [_vm._v("No pages selected!")])], 1)], 1);
   };
   var _sfc_staticRenderFns$4 = [];
   _sfc_render$4._withStripped = true;
@@ -2550,9 +2601,10 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
       handleSavedUpdates(payload = {}) {
         if (payload.page) {
           this.mergeUpdatedPage(payload.page);
-        }
-        if (Array.isArray(payload.pages)) {
+        } else if (Array.isArray(payload.pages)) {
           payload.pages.forEach((page) => this.mergeUpdatedPage(page));
+        } else {
+          this.refreshPages();
         }
         if (payload.siteSettings) {
           this.siteSettingsData = payload.siteSettings;

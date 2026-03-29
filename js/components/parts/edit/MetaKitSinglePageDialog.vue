@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" size="large" cancelButton="Close" submitButton="" @submit.prevent="save">
+  <k-dialog ref="dialog" size="large" :cancel-button="false" submitButton="" @submit.prevent="save">
     <k-headline v-if="page">Edit: {{ page.title }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -96,11 +96,24 @@
       </div>
 
       <!-- Actions -->
-      <div class="k-meta-kit-single-actions">
-        <k-button icon="open" @click="editInPanel">Edit in Panel</k-button>
-        <k-button v-if="hasChanges" icon="check" theme="positive" @click="save">
-          Save {{ changedFieldCount }} {{ changedFieldCount === 1 ? 'Field' : 'Fields' }}
-        </k-button>
+      <div class="k-meta-kit-dialog-footer">
+        <div class="k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-start">
+          <k-button icon="open" @click="editInPanel">Edit in Panel</k-button>
+        </div>
+        <div class="k-meta-kit-dialog-footer-meta">
+          <span
+            v-if="saveFeedback.text"
+            :class="['k-meta-kit-dialog-feedback', `k-meta-kit-dialog-feedback-${saveFeedback.type}`]"
+          >
+            {{ saveFeedback.text }}
+          </span>
+        </div>
+        <div class="k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-end">
+          <k-button @click="close">Close</k-button>
+          <k-button v-if="hasChanges" icon="check" theme="positive" @click="save">
+            Save {{ changedFieldCount }} {{ changedFieldCount === 1 ? 'Field' : 'Fields' }}
+          </k-button>
+        </div>
       </div>
     </div>
   </k-dialog>
@@ -145,7 +158,12 @@ export default {
         metaDescription: false,
         ogTitle: false,
         ogDescription: false
-      }
+      },
+      saveFeedback: {
+        type: '',
+        text: ''
+      },
+      saveFeedbackTimer: null
     };
   },
   computed: {
@@ -164,6 +182,7 @@ export default {
   methods: {
     async open(pageId) {
       this.isLoading = true;
+      this.resetSaveFeedback();
       this.$refs.dialog.open();
 
       try {
@@ -183,8 +202,27 @@ export default {
     },
 
     close() {
+      this.resetSaveFeedback();
       this.$refs.dialog.close();
       this.page = null;
+    },
+
+    resetSaveFeedback() {
+      if (this.saveFeedbackTimer) {
+        clearTimeout(this.saveFeedbackTimer);
+        this.saveFeedbackTimer = null;
+      }
+
+      this.saveFeedback = { type: '', text: '' };
+    },
+
+    setSaveFeedback(type, text) {
+      this.resetSaveFeedback();
+      this.saveFeedback = { type, text };
+      this.saveFeedbackTimer = setTimeout(() => {
+        this.saveFeedback = { type: '', text: '' };
+        this.saveFeedbackTimer = null;
+      }, 3200);
     },
 
     async generate(fieldName) {
@@ -236,6 +274,7 @@ export default {
 
       if (failedResults.length > 0) {
         const firstError = failedResults[0]?.message;
+        this.setSaveFeedback('error', firstError || `Failed to update ${failedResults.length} field${failedResults.length > 1 ? 's' : ''}`);
         window.panel.notification.error(
           firstError || `Failed to update ${failedResults.length} field${failedResults.length > 1 ? 's' : ''}`
         );
@@ -246,7 +285,7 @@ export default {
         const latestPage = latestResponse?.data?.page || null;
         const latestSiteSettings = latestResponse?.data?.siteSettings || null;
 
-        window.panel.notification.success(`Updated ${savedCount} field${savedCount > 1 ? 's' : ''}`);
+        this.setSaveFeedback('success', `Saved ${savedCount} field${savedCount > 1 ? 's' : ''}`);
         if (latestPage) {
           this.page = latestPage;
           this.editedFields.metaTitle = this.page.metaTitle || '';
@@ -268,6 +307,9 @@ export default {
         window.panel.view.open(this.page.panelUrl);
       }
     }
+  },
+  beforeDestroy() {
+    this.resetSaveFeedback();
   }
 };
 </script>

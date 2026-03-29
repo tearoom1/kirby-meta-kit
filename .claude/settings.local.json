@@ -12,7 +12,8 @@
       "Bash(grep:*)",
       "Bash(wc:*)",
       "Bash(tree:*)",
-      "Bash(composer test:*)"
+      "Bash(composer test:*)",
+      "Bash(php:*)"
     ]
   }
 }

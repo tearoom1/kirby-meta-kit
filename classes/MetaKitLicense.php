@@ -89,7 +89,7 @@ class MetaKitLicense extends KirbyLicense
     {
         return $this->license['status'] === 'active' &&
             ($this->license['expires_at'] === null
-                || $this->license['expires_at'] < date(DATE_ISO8601_EXPANDED));
+                || $this->license['expires_at'] > date('c'));
     }
 
     /**
