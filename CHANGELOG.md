@@ -1,24 +1,16 @@
+## [1.3.1](https://github.com/tearoom1/kirby-meta-kit/compare/v1.3.0...v1.3.1) (2026-03-30)
+
+
+### Bug Fixes
+
+* updated changelog and fixed minor issues ([9d49a20](https://github.com/tearoom1/kirby-meta-kit/commit/9d49a20edd15a3b9cd15bdc7b76e79c450f20c85))
+
 ## [1.3.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.2.0...v1.3.0) (2026-03-30)
 
 
 ### Features
 
-* Flat SEO fields — meta fields now live directly on the page content file for better compatibility with Kirby's language system and Git-based workflows
-* Language inheritance — table shows when a field is inherited from another language, with a warning indicator and the ability to generate missing translations directly
-* Segmented stats bars — overview cards now break down counts into custom values, site-level fallbacks, and missing fields so you can see at a glance where action is needed
-* Table filters — filter pages by SEO status, template, and field type
-* Table sorting — sort by any column
-* Sitemap changefreq and priority settings — configurable per template and per slug
-* Edit dialog saves update the table in place without a full page reload
-* UI scales down to 1366px wide screens
-* Improved tooltips throughout the panel view
-
-
-### Bug Fixes
-
-* AI-generated values are now clamped to the configured character limits before saving
-* Fixed language fallback detection for site-level OG image and description
-* Fixed title prompt producing results outside the target length range
+* make UI work down to 1366px ([669256a](https://github.com/tearoom1/kirby-meta-kit/commit/669256af3bf194d6136c6ccb1057093467d78aec))
 
 ## [1.2.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.1.1...v1.2.0) (2025-12-17)
 
