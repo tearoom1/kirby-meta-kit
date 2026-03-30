@@ -13,7 +13,13 @@
       "Bash(wc:*)",
       "Bash(tree:*)",
       "Bash(composer test:*)",
-      "Bash(php:*)"
+      "Bash(php:*)",
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(/tmp/meta-kit-venv/bin/pip install:*)",
+      "Bash(/tmp/meta-kit-venv/bin/python3 make_cover.py)",
+      "Bash(/tmp/meta-kit-venv/bin/python3 -c \"from PIL import Image; img = Image.open\\('screenshot.jpg'\\); print\\(img.size\\)\")",
+      "Bash(/tmp/meta-kit-venv/bin/python3 make_cover_variants.py)"
     ]
   }
 }
