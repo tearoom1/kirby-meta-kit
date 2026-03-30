@@ -1725,7 +1725,9 @@
 
 .k-seo-previews {
   display: grid;
+  grid-template-columns: 1fr;
   gap: 1.5rem;
+  max-width: 400px;
 }
 
 .k-seo-preview {
@@ -1947,14 +1949,6 @@
   line-height: 1.5;
   user-select: all;
   cursor: text;
-}
-
-/* Responsive adjustments */
-
-@media (min-width: 65rem) {
-  .k-seo-previews {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  }
 }
 
 /* Dark mode support */
