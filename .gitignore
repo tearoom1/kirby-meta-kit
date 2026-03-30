@@ -3,3 +3,5 @@
 *.log
 .phpunit.result.cache
 composer.lock
+/make_cover_variants.py
+/make_cover.py

@@ -11,11 +11,14 @@
 package.json export-ignore
 package-lock.json export-ignore
 node_modules/ export-ignore
+vendor/ export-ignore
 composer.lock export-ignore
+.claude export-ignore
 
 # Documentation
 CHANGELOG.md export-ignore
 .docs/ export-ignore
+cover.png export-ignore
 
 # Source files (if you use build process)
 /js/ export-ignore
@@ -23,4 +26,5 @@ CHANGELOG.md export-ignore
 
 # Tests
 /tests/ export-ignore
+/tests-js/ export-ignore
 phpunit.xml export-ignore
