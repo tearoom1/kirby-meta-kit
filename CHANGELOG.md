@@ -1,3 +1,10 @@
+## [1.3.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.2.0...v1.3.0) (2026-03-30)
+
+
+### Features
+
+* make UI work down to 1366px ([669256a](https://github.com/tearoom1/kirby-meta-kit/commit/669256af3bf194d6136c6ccb1057093467d78aec))
+
 ## [1.2.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.1.1...v1.2.0) (2025-12-17)
 
 
