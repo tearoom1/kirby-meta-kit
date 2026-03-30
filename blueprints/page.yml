@@ -7,15 +7,8 @@ columns:
     sticky: true
     type: fields
     fields:
-
-      metaKitSeo:
-        label: Metadata
-        type: blocks
-        fieldsets:
-          - mk-page-seo
-        max: 1
-        empty: false
-        pretty: true
+      seo:
+        extends: fields/seo-group
 
   preview:
     width: 1/3

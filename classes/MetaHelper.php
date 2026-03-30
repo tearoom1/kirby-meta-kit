@@ -4,114 +4,81 @@ namespace TearoomOne;
 
 use Kirby\Cms\Page;
 use Kirby\Cms\Site;
+use Kirby\Content\Field;
 
 class MetaHelper
 {
     /**
-     * Get SEO data from blocks or object field
+     * Extract the settings object from a blocks field, falling back to a plain object field.
+     * Returns null if the field is empty.
      */
-    public static function getSeoData($field)
+    public static function getSeoData(Field $field): ?object
     {
-        if (!$field || $field->isEmpty()) {
+        if ($field->isEmpty()) {
             return null;
         }
 
         // Try blocks format first
         $blocks = $field->toBlocks();
-        if ($blocks && $blocks->count() > 0) {
+        if ($blocks->count() > 0) {
             return $blocks->first()->content();
         }
 
-        // Fallback to object format (legacy)
         return $field->toObject();
     }
 
-    public static function buildTitle(Page $page, Site $site, $seoData, $type): string
+    public static function buildTitle(Page $page, Site $site, $type): string
     {
-
         $title = $page->title()->value();
 
-        if (!$seoData) {
+        // For flat fields, read directly from page
+        if ($type === 'og' && $page->ogTitle()->isNotEmpty()) {
+            $title = $page->ogTitle()->value();
+        } else if ($page->metaTitle()->isNotEmpty()) {
+            $title = $page->metaTitle()->value();
+        }
+
+        $settings = ConfigHelper::getSiteSettings();
+
+        if (!$settings['appendSiteName']) {
             return $title;
         }
 
-        // Get page title
-        if ($type === 'og' && $seoData->ogTitle()->isNotEmpty()) {
-            $title = $seoData->ogTitle()->value();
-        } else if ($seoData->metaTitle()->isNotEmpty()) {
-            $title = $seoData->metaTitle()->value();
-        }
-
-        // Get site SEO settings
-        $siteSeo = self::getSeoData($site->metaKitSeo());
-        if (!$siteSeo) {
-            return $title;
-        }
-
-
-        // Check if site name should be appended based on type and settings
-        $appendSiteName = $siteSeo->appendSiteName()->isNotEmpty() && $siteSeo->appendSiteName()->toBool();
-
-        if ($appendSiteName) {
-
-            // Get site meta title (with fallback to site title)
-            if ($siteSeo->metaTitle()->isNotEmpty()) {
-                $siteMetaTitle = $siteSeo->metaTitle()->value();
-            } else {
-                $siteMetaTitle = $site->title()->value();
-            }
-
-            // Get site settings
-            $separator = $siteSeo->titleSeparator()->isNotEmpty()
-                ? $siteSeo->titleSeparator()->value()
-                : '|';
-
-            $appendSiteNameTo = $siteSeo->appendSiteNameTo()->isNotEmpty()
-                ? $siteSeo->appendSiteNameTo()->value()
-                : null;
-
-            if ($appendSiteNameTo && !empty($siteMetaTitle)) {
-                $types = array_map('trim', explode(',', $appendSiteNameTo));
-                $appendSiteName = in_array($type, $types);
-
-                // Append site name if enabled and not already included
-                if ($appendSiteName) {
-                    $title = $title . ' ' . $separator . ' ' . $siteMetaTitle;
-                }
-            }
+        $appendToTypes = !empty($settings['appendSiteNameTo'])
+            ? array_map('trim', explode(',', $settings['appendSiteNameTo']))
+            : [];
+        if (in_array($type, $appendToTypes) && !empty($settings['siteMetaTitle'])) {
+            $title = $title . ' ' . $settings['titleSeparator'] . ' ' . $settings['siteMetaTitle'];
         }
 
         return $title;
     }
 
-    public static function buildDescription(Page $page, Site $site, $seoData = null, int $maxLength = 160): string
+    public static function buildDescription(Page $page, Site $site, int $maxLength = 160): string
     {
-        // Check page SEO data first
-        if ($seoData && $seoData->metaDescription()->isNotEmpty()) {
-            return $seoData->metaDescription()->excerpt($maxLength);
+        // Check page SEO field directly (flat field)
+        if ($page->metaDescription()->isNotEmpty()) {
+            return $page->metaDescription()->excerpt($maxLength);
         }
 
-        // Get site SEO settings
-        $siteSeo = self::getSeoData($site->metaKitSeo());
-
-        // Fall back to site default description
-        if ($siteSeo && $siteSeo->metaDescription()->isNotEmpty()) {
-            return $siteSeo->metaDescription()->excerpt($maxLength);
+        // Fall back to site default description (flat field)
+        if ($site->metaDescription()->isNotEmpty()) {
+            return $site->metaDescription()->excerpt($maxLength);
         }
 
         return '';
     }
 
-    public static function buildOgDescription(Page $page, Site $site, $seoData = null, ?string $metaDescription = null, int $maxLength = 160): string
+    public static function buildOgDescription(Page $page, Site $site, ?string $metaDescription = null, int $maxLength = 160): string
     {
-        // Check OG-specific description first
-        if ($seoData && method_exists($seoData, 'ogDescription') && $seoData->ogDescription()->isNotEmpty()) {
-            return $seoData->ogDescription()->excerpt($maxLength);
+        // Check OG-specific description first (flat field)
+        if ($page->ogDescription()->isNotEmpty()) {
+            return $page->ogDescription()->excerpt($maxLength);
         }
 
-        // Fall back to meta description (passed or generated)
-        if ($seoData && method_exists($seoData, 'metaDescription') && $seoData->metaDescription()->isNotEmpty()) {
-            return $seoData->metaDescription()->excerpt($maxLength);
+        // Fall back to meta description (flat field)
+        if ($page->metaDescription()->isNotEmpty()) {
+            return $page->metaDescription()->excerpt($maxLength);
         }
 
         // Use provided meta description
@@ -119,12 +86,9 @@ class MetaHelper
             return $metaDescription;
         }
 
-        // Get site SEO settings
-        $siteSeo = self::getSeoData($site->metaKitSeo());
-
-        // Fall back to site OG description
-        if ($siteSeo && $siteSeo->ogDescription()->isNotEmpty()) {
-            return $siteSeo->ogDescription()->excerpt($maxLength);
+        // Fall back to site default description (flat field)
+        if ($site->metaDescription()->isNotEmpty()) {
+            return $site->metaDescription()->excerpt($maxLength);
         }
 
         return '';

@@ -1,6 +1,5 @@
-name: SEO Metadata
-preview: fields
-wysiwyg: true
+type: group
+label: SEO
 fields:
   slugInfo:
     label: Slug Validation
@@ -42,7 +41,7 @@ fields:
     width: 1/2
     translate: false
 
-  separator1:
+  seoSocialSeparator:
     label:
     type: info
     text: Social Media Settings
@@ -72,3 +71,36 @@ fields:
     size: medium
     query: page.images
     help: "Recommended: 1200×630px for Facebook/WhatsApp. Twitter prefers 2:1 (800×400px), but 1200×630 works well for both."
+
+  sitemapSeparator:
+    label:
+    type: info
+    text: Sitemap Settings
+    theme: positive
+
+  sitemapPriority:
+    label: Sitemap Priority
+    type: number
+    min: 0.0
+    max: 1.0
+    step: 0.1
+    width: 1/2
+    placeholder: Default
+    help: Override default priority for this page (0.0 - 1.0). Leave empty to use default.
+    translate: false
+
+  sitemapChangefreq:
+    label: Sitemap Change Frequency
+    type: select
+    options:
+      '': Default
+      always: Always
+      hourly: Hourly
+      daily: Daily
+      weekly: Weekly
+      monthly: Monthly
+      yearly: Yearly
+      never: Never
+    width: 1/2
+    help: Override default change frequency for this page. Leave empty to use default.
+    translate: false

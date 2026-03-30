@@ -1,6 +1,6 @@
 <?php
 
-use Kirby\Cms\App;
+use TearoomOne\ConfigHelper;
 
 return [
     'extends' => 'text',
@@ -17,56 +17,25 @@ return [
     ],
     'computed' => [
         'validationRanges' => function () {
-            $fieldType = $this->fieldType();
-            $validation = option('tearoom1.meta-kit.validation', []);
-            $ranges = $validation['ranges'] ?? [];
-            $templates = $validation['templates'] ?? [];
-
-            // Get template-specific ranges if available
-            $template = $this->model()->intendedTemplate()->name();
-            $fieldKey = $fieldType === 'og' ? 'ogTitle' : 'title';
-
-            // Check for template-specific ranges
-            if (isset($templates[$template][$fieldKey])) {
-                return $templates[$template][$fieldKey];
-            }
-
-            // Fall back to default ranges
-            if ($fieldType === 'og' && isset($ranges['ogTitle'])) {
-                return $ranges['ogTitle'];
-            }
-
-            return $ranges['title'] ?? [
-                'optimal' => ['min' => 20, 'max' => 60],
-                'warning' => ['min' => 15, 'max' => 75]
-            ];
+            $fieldType = $this->fieldType() === 'og' ? 'ogTitle' : 'title';
+            $model = $this->model();
+            $template = method_exists($model, 'intendedTemplate') ? $model->intendedTemplate()->name() : null;
+            return ConfigHelper::getValidationRanges($fieldType, $template);
         },
         'validationSettings' => function () {
-            $site = kirby()->site();
-            $siteSeo = $site->content()->get('metakitseo')->toBlocks()->first();
-
-            // Get site settings
-            $appendSiteName = false;
-            $appendSiteNameTo = '';
-            $siteMetaTitle = '';
-            $titleSeparator = '|';
-
-            if ($siteSeo) {
-                $appendSiteName = $siteSeo->appendSiteName()->toBool();
-                $appendSiteNameTo = $siteSeo->appendSiteNameTo()->value();
-                $siteMetaTitle = $siteSeo->metaTitle()->value();
-                $titleSeparator = $siteSeo->titleSeparator()->or('|')->value();
-            }
+            $model = $this->model();
+            $template = method_exists($model, 'intendedTemplate') ? $model->intendedTemplate()->name() : 'site';
+            $siteSettings = ConfigHelper::getSiteSettings();
 
             return [
                 'ranges' => $this->validationRanges(),
-                'appendSiteName' => $appendSiteName,
-                'appendSiteNameTo' => $appendSiteNameTo,
-                'siteMetaTitle' => $siteMetaTitle,
-                'titleSeparator' => $titleSeparator,
+                'appendSiteName' => $siteSettings['appendSiteName'],
+                'appendSiteNameTo' => $siteSettings['appendSiteNameTo'],
+                'siteMetaTitle' => $siteSettings['siteMetaTitle'],
+                'titleSeparator' => $siteSettings['titleSeparator'],
                 'fieldType' => $this->fieldType(),
-                'pageId' => $this->pageId() ?? $this->model()->id(),
-                'template' => $this->model()->intendedTemplate()->name()
+                'pageId' => $this->pageId() ?? $model->id(),
+                'template' => $template
             ];
         }
     ]

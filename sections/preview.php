@@ -11,44 +11,40 @@ return [
     'computed' => [
         'meta' => function () {
             $page = $this->model();
+            $site = site();
 
             try {
                 // Get the changes version if it exists (unsaved changes)
                 $changesVersion = $page->version('changes');
-                if ($changesVersion->exists('current')) {
-                    $page = $page->clone(['content' => $changesVersion->content()->toArray()]);
+                if ($changesVersion->exists(kirby()->language()?->code() ?? 'current')) {
+                    $page = $page->clone([
+                        'content' => $changesVersion->content(kirby()->language()?->code())->toArray()
+                    ]);
                 }
 
-                // Get SEO data from blocks or object field
-                $seoData = MetaHelper::getSeoData($page->metaKitSeo());
+                // Build title and descriptions using helper (reads from flat page fields)
+                $title = MetaHelper::buildTitle($page, $site, 'meta');
+                $description = MetaHelper::buildDescription($page, $site);
 
-                // Build title and descriptions using helper
-                $title = MetaHelper::buildTitle($page, site(), $seoData, 'meta');
-                $description = MetaHelper::buildDescription($page, site(), $seoData);
+                $ogTitle = MetaHelper::buildTitle($page, $site, 'og');
+                $ogDescription = MetaHelper::buildOgDescription($page, $site, $description);
 
-                $ogTitle = MetaHelper::buildTitle($page, site(), $seoData, 'og');
-                $ogDescription = MetaHelper::buildOgDescription($page, site(), $seoData, $description);
-
+                // Get OG image from flat page field
                 $ogImage = null;
-                if ($seoData && $seoData->ogImage()->isNotEmpty()) {
-                    // Get the first file from the files field
-                    $files = $seoData->ogImage()->toFiles();
+                if ($page->ogImage()->isNotEmpty()) {
+                    $files = $page->ogImage()->toFiles();
                     if ($files && $files->count() > 0) {
                         $image = $files->first();
-                        // Resize to OG dimensions (1200x630)
                         $ogImage = $image ? $image->crop(1200, 630)->url() : null;
                     }
                 }
 
-                // Fallback to site default OG image
-                if (!$ogImage) {
-                    $siteSeo = MetaHelper::getSeoData(site()->metaKitSeo());
-                    if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
-                        $siteFiles = $siteSeo->ogImage()->toFiles();
-                        if ($siteFiles && $siteFiles->count() > 0) {
-                            $siteImage = $siteFiles->first();
-                            $ogImage = $siteImage ? $siteImage->crop(1200, 630)->url() : null;
-                        }
+                // Fallback to site default OG image (flat field)
+                if (!$ogImage && $site->ogImage()->isNotEmpty()) {
+                    $siteFiles = $site->ogImage()->toFiles();
+                    if ($siteFiles && $siteFiles->count() > 0) {
+                        $siteImage = $siteFiles->first();
+                        $ogImage = $siteImage ? $siteImage->crop(1200, 630)->url() : null;
                     }
                 }
 
@@ -64,7 +60,7 @@ return [
                 // Return fallback data if error
                 return [
                     'url' => $page->url(),
-                    'title' => $page->title()->value() . ' | ' . site()->title()->value(),
+                    'title' => $page->title()->value() . ' | ' . $site->title()->value(),
                     'description' => 'Error loading SEO data: ' . $e->getMessage(),
                     'ogTitle' => $page->title()->value(),
                     'ogDescription' => '',

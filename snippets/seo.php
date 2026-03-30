@@ -1,10 +1,10 @@
 <?php
 /**
  * Unified SEO snippet - Meta tags, OpenGraph, and Schema.org
+ * All fields are now flat fields on both pages and site
  */
 
 use TearoomOne\MetaHelper;
-use TearoomOne\MetaKit;
 
 $site = $site ?? site();
 $page = $page ?? page();
@@ -14,69 +14,43 @@ $enableMeta = option('tearoom1.meta-kit.meta.enabled', true);
 $enableOpengraph = option('tearoom1.meta-kit.opengraph.enabled', true);
 $enableSchema = option('tearoom1.meta-kit.schema.enabled', true);
 
-// Get SEO data from object field
-$seoData = $page->metaKitSeo()->toBlocks()->first()?->content();
-$siteSeo = $site->metaKitSeo()->toBlocks()->first()?->content();
-
-// Check license status
-$hasValidLicense = true; // no limit for demo //MetaKit::hasValidLicense();
-$charLimit = $hasValidLicense ? null : 20;
-
 // ==============================================================
 // Build Common Data
 // ==============================================================
 
-// Build meta title and description using helper
-$metaTitle = MetaHelper::buildTitle($page, $site, $seoData, 'meta');
-$metaDescription = MetaHelper::buildDescription($page, $site, $seoData);
+// Build meta title and description using helper (reads from flat page fields)
+$metaTitle = MetaHelper::buildTitle($page, $site, 'meta');
+$metaDescription = MetaHelper::buildDescription($page, $site);
 
-// Limit output if unlicensed
-if ($charLimit && mb_strlen($metaTitle) > $charLimit) {
-    $metaTitle = mb_substr($metaTitle, 0, $charLimit) . '...';
-}
-if ($charLimit && mb_strlen($metaDescription) > $charLimit) {
-    $metaDescription = mb_substr($metaDescription, 0, $charLimit) . '...';
-}
-
-// Get canonical URL
-if ($seoData && $seoData->canonicalUrl()->isNotEmpty()) {
-    $canonical = $seoData->canonicalUrl()->value();
+// Get canonical URL (flat field on page)
+if ($page->canonicalUrl()->isNotEmpty()) {
+    $canonical = $page->canonicalUrl()->value();
 } else {
     $canonical = $page->url();
 }
 
-// Get robots directive
-$robots = $seoData && $seoData->robots()->isNotEmpty() ? $seoData->robots() : $siteSeo?->robots() ;
-$keywords = $seoData && $seoData->metaKeywords()->isNotEmpty() ? $seoData->metaKeywords() : $siteSeo?->metaKeywords() ;
-$author = $seoData && $seoData->metaAuthor()->isNotEmpty() ? $seoData->metaAuthor() : $siteSeo?->metaAuthor() ;
+// Get robots directive (flat field on page, fallback to site flat field)
+$robots = $page->robots()->isNotEmpty() ? $page->robots()->value() : $site->robots()->value();
+$keywords = $page->metaKeywords()->isNotEmpty() ? $page->metaKeywords() : null;
+$author = $page->metaAuthor()->isNotEmpty() ? $page->metaAuthor() : ($site->metaAuthor()->isNotEmpty() ? $site->metaAuthor() : null);
 
 // Get OG title (use custom OG title or fall back to meta title)
-$ogTitle = MetaHelper::buildTitle($page, $site, $seoData, 'og');
+$ogTitle = MetaHelper::buildTitle($page, $site, 'og');
 
 // Get OG description using helper
-$ogDescription = MetaHelper::buildOgDescription($page, $site, $seoData, $metaDescription);
+$ogDescription = MetaHelper::buildOgDescription($page, $site, $metaDescription);
 
-// Limit OG content if unlicensed
-if ($charLimit && mb_strlen($ogTitle) > $charLimit) {
-    $ogTitle = mb_substr($ogTitle, 0, $charLimit) . '...';
-}
-if ($charLimit && mb_strlen($ogDescription) > $charLimit) {
-    $ogDescription = mb_substr($ogDescription, 0, $charLimit) . '...';
-}
-
-// Get OG image
+// Get OG image (flat field on page, fallback to site flat field)
 $ogImage = null;
-if ($seoData && $seoData->ogImage()->isNotEmpty()) {
-    $ogImageFile = $seoData->ogImage()->toFile();
+if ($page->ogImage()->isNotEmpty()) {
+    $ogImageFile = $page->ogImage()->toFile();
     if ($ogImageFile) {
         $ogImage = $ogImageFile->resize(1200, 630);
     }
-} else {
-    if ($siteSeo && $siteSeo->ogImage()->isNotEmpty()) {
-        $ogImageFile = $siteSeo->ogImage()->toFile();
-        if ($ogImageFile) {
-            $ogImage = $ogImageFile->resize(1200, 630);
-        }
+} elseif ($site->ogImage()->isNotEmpty()) {
+    $ogImageFile = $site->ogImage()->toFile();
+    if ($ogImageFile) {
+        $ogImage = $ogImageFile->resize(1200, 630);
     }
 }
 ?>
@@ -200,7 +174,7 @@ $websiteSchema['potentialAction'] = [
 // WebPage Schema
 $webPageSchema = [
     '@context' => 'https://schema.org',
-    '@type' => $page->isHomePage() ? 'WebPage' : 'WebPage',
+    '@type' => 'WebPage',
     'name' => $metaTitle,
     'description' => $metaDescription,
     'url' => $page->url(),

@@ -12,18 +12,16 @@ if (!option('tearoom1.meta-kit.enabled', true)) {
 @include_once __DIR__ . '/vendor/autoload.php';
 
 $classes = [
+    'TearoomOne\ConfigHelper' => 'classes/ConfigHelper.php',
+    'TearoomOne\MetaHelper' => 'classes/MetaHelper.php',
     'TearoomOne\MetaKit' => 'classes/MetaKit.php',
     'TearoomOne\Sitemap' => 'classes/Sitemap.php',
     'TearoomOne\Robots' => 'classes/Robots.php',
-    'TearoomOne\MetaHelper' => 'classes/MetaHelper.php',
     'TearoomOne\MetaKitController' => 'classes/MetaKitController.php',
     'TearoomOne\MetaKitLicense' => 'classes/MetaKitLicense.php',
+    'TearoomOne\PageDataBuilder' => 'classes/PageDataBuilder.php',
+    'TearoomOne\ApiResponse' => 'classes/ApiResponse.php',
 ];
-
-// Only load LegacyMigration if enabled
-if (option('tearoom1.meta-kit.legacyMigration', false)) {
-    $classes['TearoomOne\LegacyMigration'] = 'classes/LegacyMigration.php';
-}
 
 load($classes, __DIR__);
 
@@ -33,7 +31,7 @@ App::plugin(
     license: fn(Plugin $plugin) => new MetaKitLicense($plugin,
         'Meta-Kit License',
         'meta-kit',
-        'https://tearoom-kirby.ddev.site/de/kirby-plugins/meta-kit'),
+        'https://www.tearoom.one/de/kirby-plugins/meta-kit'),
     extends: [
         'options' => [
             'cache' => [
@@ -80,14 +78,16 @@ App::plugin(
             'sitemap.include' => 'all',
             'sitemap.exclude' => ['error'],
             'autoGenerate' => false,
-            'legacyMigration' => false,
         ],
         'blueprints' => [
             'meta-kit/site' => __DIR__ . '/blueprints/site.yml',
             'meta-kit/page' => __DIR__ . '/blueprints/page.yml',
+            // Flat field groups for SEO
+            'fields/meta-group' => __DIR__ . '/blueprints/fields/meta-group.yml',
+            'fields/seo-group' => __DIR__ . '/blueprints/fields/seo-group.yml',
+            'fields/site-seo-group' => __DIR__ . '/blueprints/fields/site-seo-group.yml',
             'meta-kit/fields/og-image' => __DIR__ . '/blueprints/fields/og-image.php',
-            'blocks/mk-page-seo' => __DIR__ . '/blueprints/blocks/mk-page-seo.yml',
-            'blocks/mk-site-seo' => __DIR__ . '/blueprints/blocks/mk-site-seo.yml',
+            // Blocks for other settings (OpenRouter, Sitemap, Robots)
             'blocks/mk-openrouter' => __DIR__ . '/blueprints/blocks/mk-openrouter.yml',
             'blocks/mk-sitemap' => __DIR__ . '/blueprints/blocks/mk-sitemap.yml',
             'blocks/mk-robots' => __DIR__ . '/blueprints/blocks/mk-robots.yml',

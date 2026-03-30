@@ -25,7 +25,7 @@ Added a **migration flag** to prevent hooks from running during migration:
 2. **`index.php`** - Hook modification
    - Added check at start of `page.update:after` hook:
    ```php
-   if (\TearoomOne\LegacyMigration::isMigrating()) {
+   if (\TearoomOne\LegacyCleanup::isMigrating()) {
        return; // Skip hook during migration
    }
    ```

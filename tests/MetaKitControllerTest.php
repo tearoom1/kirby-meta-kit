@@ -78,19 +78,16 @@ class MetaKitControllerTest extends TestCase
 
         $this->assertEquals('success', $result['status'], 'Should return success status');
         $this->assertEquals('Field updated successfully', $result['message']);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertSame('test-page', $result['data']['page']['id']);
 
-        // Verify the field was updated
+        // Verify the flat field was updated
         $page = $this->kirby->page('test-page');
-        $seoData = MetaKitController::getSeoData($page->metaKitSeo());
-
-        $this->assertNotNull($seoData, 'SEO data should exist after update');
-        $this->assertEquals('Updated Meta Title', $seoData->metaTitle()->value());
-        // Should also update ogTitle
-        $this->assertEquals('Updated Meta Title', $seoData->ogTitle()->value());
+        $this->assertEquals('Updated Meta Title', $page->metaTitle()->value());
     }
 
     /**
-     * Test applySingleField updates metaDescription and ogDescription
+     * Test applySingleField updates metaDescription
      */
     public function testApplySingleFieldMetaDescription()
     {
@@ -104,13 +101,12 @@ class MetaKitControllerTest extends TestCase
         );
 
         $this->assertEquals('success', $result['status']);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertSame('test-page', $result['data']['page']['id']);
 
-        // Verify both metaDescription and ogDescription were updated
+        // Verify the flat field was updated
         $page = $this->kirby->page('test-page');
-        $seoData = MetaKitController::getSeoData($page->metaKitSeo());
-
-        $this->assertEquals('This is an updated meta description.', $seoData->metaDescription()->value());
-        $this->assertEquals('This is an updated meta description.', $seoData->ogDescription()->value());
+        $this->assertEquals('This is an updated meta description.', $page->metaDescription()->value());
     }
 
     /**
@@ -121,13 +117,14 @@ class MetaKitControllerTest extends TestCase
         $result = MetaKitController::applySingleField('site', 'metaTitle', 'Site Meta Title');
 
         $this->assertEquals('success', $result['status']);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertSame('site', $result['data']['page']['id']);
+        $this->assertIsArray($result['data']['siteSettings']);
+        $this->assertArrayHasKey('siteMetaTitle', $result['data']['siteSettings']);
 
-        // Verify the site field was updated
+        // Verify the site flat field was updated
         $site = $this->kirby->site();
-        $seoData = MetaKitController::getSeoData($site->metaKitSeo());
-
-        $this->assertNotNull($seoData);
-        $this->assertEquals('Site Meta Title', $seoData->metaTitle()->value());
+        $this->assertEquals('Site Meta Title', $site->metaTitle()->value());
     }
 
     /**
@@ -191,8 +188,8 @@ class MetaKitControllerTest extends TestCase
         // Set some SEO data
         MetaKitController::applySingleField('test-page', 'metaTitle', 'Page Title');
 
-        // Mock the get() function for pageIds filter
-        $_GET['pageIds'] = ['test-page'];
+        // Mock the get() function for pageIds filter (comma-separated string)
+        $_GET['pageIds'] = 'test-page';
 
         $result = MetaKitController::getPagesWithContent();
 
@@ -214,32 +211,39 @@ class MetaKitControllerTest extends TestCase
     }
 
     /**
-     * Test getSeoData and seoDataToArray helper methods
+     * Test seoDataToArray helper method (for legacy support)
      */
-    public function testSeoDataHelpers()
+    public function testSeoDataToArray()
+    {
+        // Test with null input
+        $result = MetaKitController::seoDataToArray(null);
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+
+        // Test with array input
+        $input = ['metaTitle' => 'Test', 'metaDescription' => 'Desc'];
+        $result = MetaKitController::seoDataToArray($input);
+        $this->assertEquals($input, $result);
+    }
+
+    /**
+     * Test flat field updates work correctly
+     */
+    public function testFlatFieldUpdates()
     {
         $page = $this->kirby->page('test-page');
 
         // Initially empty
-        $seoData = MetaKitController::getSeoData($page->metaKitSeo());
-        $this->assertNull($seoData, 'Should be null for empty field');
+        $this->assertTrue($page->metaTitle()->isEmpty(), 'metaTitle should be initially empty');
+        $this->assertTrue($page->metaDescription()->isEmpty(), 'metaDescription should be initially empty');
 
         // After setting data
         MetaKitController::applySingleField('test-page', 'metaTitle', 'Test Title');
+        MetaKitController::applySingleField('test-page', 'metaDescription', 'Test Description');
 
         $page = $this->kirby->page('test-page');
-        $seoData = MetaKitController::getSeoData($page->metaKitSeo());
-        $this->assertNotNull($seoData, 'Should have data after update');
-
-        $seoArray = MetaKitController::seoDataToArray($seoData);
-        $this->assertIsArray($seoArray, 'seoDataToArray should return an array');
-
-        // Kirby stores field names in lowercase
-        $this->assertArrayHasKey('metatitle', $seoArray);
-        $this->assertEquals('Test Title', $seoArray['metatitle']);
-        // Should also have ogTitle set
-        $this->assertArrayHasKey('ogtitle', $seoArray);
-        $this->assertEquals('Test Title', $seoArray['ogtitle']);
+        $this->assertEquals('Test Title', $page->metaTitle()->value());
+        $this->assertEquals('Test Description', $page->metaDescription()->value());
     }
 
     /**
@@ -324,7 +328,7 @@ class MetaKitControllerTest extends TestCase
         // Create a page with legacy fields
         file_put_contents(
             $this->testDir . '/content/test-page/default.txt',
-            "Title: Test Page\n----\nText: Test content\n----\nMetatitle: Legacy Meta Title\n----\nMetadescription: Legacy meta description"
+            "Title: Test Page\n----\nText: Test content\n----\nCustomtitle: Legacy Meta Title\n----\nSeodescription: Legacy meta description"
         );
 
         // Reload Kirby to pick up new content
@@ -342,6 +346,8 @@ class MetaKitControllerTest extends TestCase
         $this->assertNotNull($result['data']['legacy']);
         $this->assertArrayHasKey('metaTitle', $result['data']['legacy']);
         $this->assertEquals('Legacy Meta Title', $result['data']['legacy']['metaTitle']);
+        $this->assertArrayHasKey('metaDescription', $result['data']['legacy']);
+        $this->assertEquals('Legacy meta description', $result['data']['legacy']['metaDescription']);
     }
 
     /**

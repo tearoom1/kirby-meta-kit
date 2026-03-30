@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" size="large" cancelButton="Close" submitButton="">
+  <k-dialog ref="dialog" size="large" :cancel-button="false" submitButton="" @submit.prevent="save">
     <k-headline v-if="page">Edit: {{ page.title }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -10,8 +10,8 @@
     <div v-else-if="page" class="k-meta-kit-single-edit">
       <!-- Meta Title -->
       <div class="k-meta-kit-single-field">
-        <label class="k-meta-kit-single-field-label">Meta Title</label>
         <meta-kit-title-field
+          label="Meta Title"
           :value="editedFields.metaTitle"
           @input="editedFields.metaTitle = $event"
           :page-id="page.id"
@@ -28,8 +28,8 @@
 
       <!-- Meta Description -->
       <div class="k-meta-kit-single-field">
-        <label class="k-meta-kit-single-field-label">Meta Description</label>
         <meta-kit-description-field
+          label="Meta Description"
           :value="editedFields.metaDescription"
           @input="editedFields.metaDescription = $event"
           :ai-enabled="aiEnabled"
@@ -37,7 +37,7 @@
           @generate="generate('metaDescription')"
           :placeholder="page.metaDescription || siteSettings.siteMetaDescription || 'No meta description set'"
           button-size="sm"
-          :rows="4"
+          :rows="3"
           buttons="false"
           field-class="k-meta-kit-single-field-content"
         />
@@ -45,8 +45,8 @@
 
       <!-- OG Title -->
       <div class="k-meta-kit-single-field">
-        <label class="k-meta-kit-single-field-label">OG Title</label>
         <meta-kit-title-field
+          label="OG Title"
           :value="editedFields.ogTitle"
           @input="editedFields.ogTitle = $event"
           :page-id="page.id"
@@ -65,8 +65,8 @@
 
       <!-- OG Description -->
       <div class="k-meta-kit-single-field">
-        <label class="k-meta-kit-single-field-label">OG Description</label>
         <meta-kit-description-field
+          label="OG Description"
           :value="editedFields.ogDescription"
           @input="editedFields.ogDescription = $event"
           :ai-enabled="aiEnabled"
@@ -75,7 +75,7 @@
           :placeholder="page.ogDescription || page.metaDescription || siteSettings.siteMetaDescription || 'No OG description'"
           type="og"
           button-size="sm"
-          :rows="4"
+          :rows="3"
           buttons="false"
           field-class="k-meta-kit-single-field-content"
         />
@@ -83,7 +83,7 @@
 
       <!-- OG Image -->
       <div class="k-meta-kit-single-field">
-        <label class="k-meta-kit-single-field-label">OG Image</label>
+        <label class="k-meta-kit-dialog-field-label">OG Image</label>
         <div class="k-meta-kit-single-field-content">
           <div v-if="page.ogImage" class="k-meta-kit-og-image-current">
             <img :src="page.ogImage.url" :alt="page.ogImage.filename"/>
@@ -96,9 +96,30 @@
       </div>
 
       <!-- Actions -->
-      <div class="k-meta-kit-single-actions">
-        <k-button icon="open" @click="editInPanel">Edit in Panel</k-button>
-        <k-button v-if="hasChanges" icon="check" theme="positive" @click="save">Apply Changes</k-button>
+      <div class="k-meta-kit-dialog-footer">
+        <div class="k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-start">
+          <a
+            v-if="page && page.panelUrl"
+            :href="page.panelUrl"
+            class="k-link k-meta-kit-dialog-panel-link"
+          >
+            Edit in Panel
+          </a>
+        </div>
+        <div class="k-meta-kit-dialog-footer-meta">
+          <span
+            v-if="saveFeedback.text"
+            :class="['k-meta-kit-dialog-feedback', `k-meta-kit-dialog-feedback-${saveFeedback.type}`]"
+          >
+            {{ saveFeedback.text }}
+          </span>
+        </div>
+        <div class="k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-end">
+          <k-button @click="close">Close</k-button>
+          <k-button v-if="hasChanges" icon="check" theme="positive" @click="save">
+            Save {{ changedFieldCount }} {{ changedFieldCount === 1 ? 'Field' : 'Fields' }}
+          </k-button>
+        </div>
       </div>
     </div>
   </k-dialog>
@@ -107,6 +128,7 @@
 <script>
 import MetaKitTitleField from '../field/MetaKitTitleField.vue';
 import MetaKitDescriptionField from '../field/MetaKitDescriptionField.vue';
+import { applySingleFieldUpdate } from '../../../composables/saveFields.js';
 
 export default {
   components: {
@@ -142,22 +164,33 @@ export default {
         metaDescription: false,
         ogTitle: false,
         ogDescription: false
-      }
+      },
+      saveFeedback: {
+        type: '',
+        text: ''
+      },
+      saveFeedbackTimer: null
     };
   },
   computed: {
+    changedFields() {
+      if (!this.page) return [];
+      const fields = ['metaTitle', 'metaDescription', 'ogTitle', 'ogDescription'];
+      return fields.filter(f => this.editedFields[f] !== (this.page[f] || ''));
+    },
+    changedFieldCount() {
+      return this.changedFields.length;
+    },
     hasChanges() {
-      if (!this.page) return false;
-      return this.editedFields.metaTitle !== (this.page.metaTitle || '') ||
-        this.editedFields.metaDescription !== (this.page.metaDescription || '') ||
-        this.editedFields.ogTitle !== (this.page.ogTitle || '') ||
-        this.editedFields.ogDescription !== (this.page.ogDescription || '');
+      return this.changedFieldCount > 0;
     }
   },
   methods: {
     async open(pageId) {
       this.isLoading = true;
+      this.resetSaveFeedback();
       this.$refs.dialog.open();
+      document.addEventListener('keydown', this.handleKeydown);
 
       try {
         const response = await this.api.get('meta-kit/single-page', { pageId });
@@ -176,8 +209,40 @@ export default {
     },
 
     close() {
+      document.removeEventListener('keydown', this.handleKeydown);
+      this.resetSaveFeedback();
       this.$refs.dialog.close();
       this.page = null;
+    },
+
+    resetSaveFeedback() {
+      if (this.saveFeedbackTimer) {
+        clearTimeout(this.saveFeedbackTimer);
+        this.saveFeedbackTimer = null;
+      }
+
+      this.saveFeedback = { type: '', text: '' };
+    },
+
+    setSaveFeedback(type, text) {
+      this.resetSaveFeedback();
+      this.saveFeedback = { type, text };
+      this.saveFeedbackTimer = setTimeout(() => {
+        this.saveFeedback = { type: '', text: '' };
+        this.saveFeedbackTimer = null;
+      }, 3200);
+    },
+
+    handleKeydown(event) {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 's') {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (this.page && this.hasChanges) {
+        this.save();
+      }
     },
 
     async generate(fieldName) {
@@ -205,55 +270,60 @@ export default {
     async save() {
       if (!this.page || !this.hasChanges) return;
 
-      const fields = [
-        { name: 'metaTitle', value: this.editedFields.metaTitle, original: this.page.metaTitle || '' },
-        { name: 'metaDescription', value: this.editedFields.metaDescription, original: this.page.metaDescription || '' },
-        { name: 'ogTitle', value: this.editedFields.ogTitle, original: this.page.ogTitle || '' },
-        { name: 'ogDescription', value: this.editedFields.ogDescription, original: this.page.ogDescription || '' }
-      ];
+      const changedFields = this.changedFields.map(name => ({
+        name,
+        value: this.editedFields[name]
+      }));
+      const successfulResponses = [];
+      const failedResults = [];
 
-      let savedCount = 0;
-      for (const field of fields) {
-        if (field.value !== field.original) {
-          try {
-            await this.api.post('meta-kit/apply-single-field', {
-              pageId: this.page.id,
-              fieldName: field.name,
-              value: field.value
-            });
-            savedCount++;
-          } catch (error) {
-            window.panel.notification.error(`Failed to update ${field.name}`);
-          }
+      for (const field of changedFields) {
+        try {
+          const response = await applySingleFieldUpdate(this.api, {
+            pageId: this.page.id,
+            fieldName: field.name,
+            value: field.value
+          });
+          successfulResponses.push(response);
+        } catch (error) {
+          failedResults.push(error);
         }
+      }
+
+      const savedCount = successfulResponses.length;
+
+      if (failedResults.length > 0) {
+        const firstError = failedResults[0]?.message;
+        this.setSaveFeedback('error', firstError || `Failed to update ${failedResults.length} field${failedResults.length > 1 ? 's' : ''}`);
+        window.panel.notification.error(
+          firstError || `Failed to update ${failedResults.length} field${failedResults.length > 1 ? 's' : ''}`
+        );
       }
 
       if (savedCount > 0) {
-        window.panel.notification.success(`Updated ${savedCount} field${savedCount > 1 ? 's' : ''}`);
-        this.$emit('saved');
+        const latestResponse = successfulResponses[successfulResponses.length - 1];
+        const latestPage = latestResponse?.data?.page || null;
+        const latestSiteSettings = latestResponse?.data?.siteSettings || null;
 
-        // Reload page data
-        try {
-          const response = await this.api.get('meta-kit/single-page', { pageId: this.page.id });
-          if (response.status === 'success') {
-            this.page = response.data;
-            this.editedFields.metaTitle = this.page.metaTitle || '';
-            this.editedFields.metaDescription = this.page.metaDescription || '';
-            this.editedFields.ogTitle = this.page.ogTitle || '';
-            this.editedFields.ogDescription = this.page.ogDescription || '';
-          }
-        } catch (error) {
-          // Silent fail
+        this.setSaveFeedback('success', `Saved ${savedCount} field${savedCount > 1 ? 's' : ''}`);
+        if (latestPage) {
+          this.page = latestPage;
+          this.editedFields.metaTitle = this.page.metaTitle || '';
+          this.editedFields.metaDescription = this.page.metaDescription || '';
+          this.editedFields.ogTitle = this.page.ogTitle || '';
+          this.editedFields.ogDescription = this.page.ogDescription || '';
         }
+
+        this.$emit('saved', {
+          page: latestPage,
+          siteSettings: latestSiteSettings
+        });
       }
     },
-
-    editInPanel() {
-      if (this.page && this.page.panelUrl) {
-        this.close();
-        window.panel.view.open(this.page.panelUrl);
-      }
-    }
+  },
+  beforeDestroy() {
+    document.removeEventListener('keydown', this.handleKeydown);
+    this.resetSaveFeedback();
   }
 };
 </script>

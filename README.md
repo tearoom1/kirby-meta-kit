@@ -6,6 +6,8 @@ The complete SEO solution for Kirby CMS with AI-powered content generation, real
 
 Get a license: [www.tearoom.one/kirby-plugins/meta-kit](https://www.tearoom.one/kirby-plugins/meta-kit)
 
+Frontend SEO output, `sitemap.xml`, and `robots.txt` work without license activation. A license is only required for AI generation and saving changes from the dedicated Meta Kit Panel area.
+
 ## Why Meta Kit?
 
 ### For Content Editors
@@ -65,7 +67,6 @@ Get a license: [www.tearoom.one/kirby-plugins/meta-kit](https://www.tearoom.one/
 - 🏗️ **Schema.org** - JSON-LD structured data
 - 📱 **Social Media** - OpenGraph & Twitter Cards (1200×630px)
 - 🌍 **Multilanguage** - Full support with hreflang tags
-- 🔄 **Legacy Migration** - Convert old SEO fields to Meta Kit format
 - ⚡ **Kirby 5** - Fully compatible with latest version
 
 ---
@@ -194,8 +195,6 @@ This is where developers set technical defaults, validation rules, and AI integr
         'includeSitemap' => true,
     ],
 
-    // Legacy migration (old SEO fields)
-    'legacyMigration' => false,
 ];
 ```
 
@@ -493,7 +492,7 @@ Access via the main menu (wand icon):
 #### Dashboard
 - **Statistics**: Coverage percentage for meta titles, descriptions, OG data
 - **Page Overview**: List all pages with metadata status
-- **Quick Actions**: Bulk generate, bulk edit, legacy migration
+- **Quick Actions**: Bulk generate, bulk edit
 
 #### Bulk Editor
 - **Table View**: See multiple pages at once
@@ -552,12 +551,58 @@ XML sitemap available at `/sitemap.xml` with:
 ```php
 'sitemap.enabled' => true,
 'sitemap.exclude' => ['error', 'drafts', 'admin'],  // Page IDs to exclude
+'sitemap.includeUnlisted' => false,  // Include unlisted pages (default: false)
+
+// Change frequency configuration
+'sitemap.changefreq.default' => 'monthly',  // Default for all pages
+'sitemap.changefreq.templates' => [
+    'home' => 'daily',
+    'news' => 'weekly',
+    'article' => 'weekly',
+    'blog' => 'weekly',
+    'imprint' => 'yearly',
+    'privacy' => 'yearly',
+],
+'sitemap.changefreq.slugs' => [
+    'impressum' => 'yearly',
+    'datenschutz' => 'yearly',
+    'contact' => 'monthly',
+],
+
+// Priority configuration
+'sitemap.priority.templates' => [
+    'home' => 1.0,
+    'news' => 0.9,
+    'article' => 0.8,
+    'blog' => 0.9,
+    'imprint' => 0.3,
+    'privacy' => 0.3,
+],
+'sitemap.priority.slugs' => [
+    'impressum' => 0.3,
+    'datenschutz' => 0.3,
+    'contact' => 0.5,
+],
 ```
 
-**Panel Settings:**
+**Priority & Change Frequency Logic:**
+- **Page-level override** (most specific) - Set in page SEO tab
+- **Slug-based rules** - Matches page slug
+- **Template-based rules** - Matches page template
+- **Site defaults** - Set in panel or config
+- **Fallback** - Built-in defaults
+
+**Panel Settings (Site):**
 - Visual page selector for exclusions
+- Include unlisted pages toggle
+- Default change frequency dropdown
 - Homepage priority (0.1 - 1.0)
-- Default page priority
+- Default page priority (0.0 - 1.0)
+
+**Panel Settings (Per Page):**
+- Sitemap Priority field - Override default for specific page
+- Sitemap Change Frequency field - Override default for specific page
+- Both fields optional - leave empty to use defaults
 
 ### Robots.txt Management
 
@@ -612,31 +657,6 @@ robots.txt available at `/robots.txt` with:
 'schema.enabled' => true,
 ```
 
-### Legacy Field Migration
-
-**Purpose:**
-Convert old SEO plugin fields to Meta Kit format across all languages.
-
-**Supported Fields:**
-- `metatitle`, `customtitle`, `seotitle` → `metaTitle`
-- `metadescription`, `seodescription` → `metaDescription`
-- Multiple field naming conventions
-
-**How to Use:**
-
-1. Enable in config:
-```php
-'legacyMigration' => true,
-```
-
-2. Go to Meta Kit area in Panel
-3. Click "Legacy Migration"
-4. Review summary of found fields
-5. Click "Migrate All Languages"
-
-**Important:** Backup your content before running migration. Old fields will be removed.
-
----
 
 ## Best Practices
 
@@ -699,7 +719,6 @@ Convert old SEO plugin fields to Meta Kit format across all languages.
 - Add meta-kit tabs to all main page blueprints
 - Hide SEO tab from admin/system pages if needed
 - Use excludeTemplates to hide utility pages from table
-- Enable legacy migration only when needed (for security)
 
 ---
 
@@ -749,12 +768,14 @@ Access metadata in your templates:
 
 ```php
 <?php
-$seo = $page->metaKitSeo()->toBlocks()->first();
-if ($seo) {
-    $metaTitle = $seo->metaTitle();
-    $metaDesc = $seo->metaDescription();
-    $ogImage = $seo->ogImage()->toFile();
-}
+// Access SEO flat fields directly
+$metaTitle = $page->metaTitle()->value();
+$metaDesc = $page->metaDescription()->value();
+$ogTitle = $page->ogTitle()->value();
+$ogDesc = $page->ogDescription()->value();
+
+// Get OG image file
+$ogImage = $page->ogImage()->toFile();
 ?>
 ```
 
@@ -806,6 +827,9 @@ if ($seo) {
 
 This plugin is licensed under a commercial [LICENSE](LICENSE).
 
+License activation is required for AI generation and saving changes from the Meta Kit Panel area.
+The frontend SEO snippet, sitemap, and robots.txt remain fully functional without activation.
+
 ---
 
 ## Credits
@@ -826,4 +850,3 @@ This plugin is licensed under a commercial [LICENSE](LICENSE).
 - **Kirby Forum**: [forum.getkirby.com](https://forum.getkirby.com)
 
 [![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://coff.ee/tearoom1)
-

@@ -13,34 +13,7 @@ class Sitemap
     public function __construct(Kirby $kirby)
     {
         $this->kirby = $kirby;
-
-        // Default options (lowest priority)
-        $defaults = [
-            'sitemap.include' => 'all',
-            'sitemap.exclude' => ['error'],
-        ];
-
-        // Site settings from panel (middle priority)
-        $siteSettings = [];
-        $siteSitemap = \TearoomOne\MetaHelper::getSeoData($kirby->site()->metaKitSitemap());
-        if ($siteSitemap) {
-            if ($siteSitemap->exclude()->isNotEmpty()) {
-                // Store page IDs for later checking
-                $siteSettings['sitemap.exclude.pages'] = $siteSitemap->exclude()->toPages();
-            }
-            if ($siteSitemap->priorityHome()->isNotEmpty()) {
-                $siteSettings['sitemap.priorityHome'] = $siteSitemap->priorityHome()->toFloat();
-            }
-            if ($siteSitemap->priorityDefault()->isNotEmpty()) {
-                $siteSettings['sitemap.priorityDefault'] = $siteSitemap->priorityDefault()->toFloat();
-            }
-        }
-
-        // Config.php settings (highest priority)
-        $configSettings = $kirby->option('tearoom1.meta-kit', []);
-
-        // Merge: defaults < site settings < config
-        $this->options = array_merge($defaults, $siteSettings, $configSettings);
+        $this->options = ConfigHelper::getSitemapSettings();
     }
 
     public function generate(): array
@@ -92,15 +65,20 @@ class Sitemap
 
     protected function shouldInclude(Page $page): bool
     {
-        // Skip unlisted and draft pages
-        if ($page->isDraft() || $page->isUnlisted()) {
+        // Always skip draft pages
+        if ($page->isDraft()) {
+            return false;
+        }
+        
+        // Skip unlisted pages unless configured to include them
+        $includeUnlisted = $this->options['sitemap.includeUnlisted'] ?? false;
+        if ($page->isUnlisted() && !$includeUnlisted) {
             return false;
         }
 
-        // Check page's robots directive
-        $seoData = $page->metaKitSeo()->toObject();
-        if ($seoData && $seoData->robots()->isNotEmpty()) {
-            $robots = $seoData->robots()->value();
+        // Check page's robots directive (flat field)
+        if ($page->robots()->isNotEmpty()) {
+            $robots = $page->robots()->value();
             if (str_contains($robots, 'noindex')) {
                 return false;
             }
@@ -130,16 +108,52 @@ class Sitemap
 
     protected function getChangeFrequency(Page $page): string
     {
-        // Default change frequency based on page depth
-        $depth = $page->depth();
-
-        if ($depth <= 1) return 'weekly';
-        if ($depth === 2) return 'monthly';
-        return 'yearly';
+        // Check page-level override first (most specific)
+        if ($page->sitemapChangefreq()->isNotEmpty()) {
+            return $page->sitemapChangefreq()->value();
+        }
+        
+        $template = $page->intendedTemplate()->name();
+        $slug = $page->slug();
+        
+        // Check slug-based rules
+        $slugRules = $this->options['sitemap.changefreq.slugs'] ?? [];
+        if (isset($slugRules[$slug])) {
+            return $slugRules[$slug];
+        }
+        
+        // Check template-based rules
+        $templateRules = $this->options['sitemap.changefreq.templates'] ?? [];
+        if (isset($templateRules[$template])) {
+            return $templateRules[$template];
+        }
+        
+        // Fall back to default
+        return $this->options['sitemap.changefreq.default'] ?? 'monthly';
     }
 
     protected function getPriority(Page $page): float
     {
+        // Check page-level override first (most specific)
+        if ($page->sitemapPriority()->isNotEmpty()) {
+            return $page->sitemapPriority()->toFloat();
+        }
+        
+        $template = $page->intendedTemplate()->name();
+        $slug = $page->slug();
+        
+        // Check slug-based rules
+        $slugRules = $this->options['sitemap.priority.slugs'] ?? [];
+        if (isset($slugRules[$slug])) {
+            return $slugRules[$slug];
+        }
+        
+        // Check template-based rules
+        $templateRules = $this->options['sitemap.priority.templates'] ?? [];
+        if (isset($templateRules[$template])) {
+            return $templateRules[$template];
+        }
+        
         // Homepage gets priority from settings
         if ($page->isHomePage()) {
             return $this->options['sitemap.priorityHome'] ?? 1.0;

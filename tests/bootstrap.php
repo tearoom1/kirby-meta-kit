@@ -1,7 +1,32 @@
 <?php
 
-// Load Composer autoloader from the plugin
-require_once __DIR__ . '/../vendor/autoload.php';
+/** @var \Composer\Autoload\ClassLoader $pluginAutoloader */
+$pluginAutoloader = require __DIR__ . '/../vendor/autoload.php';
+
+// Force PHPUnit and its companion packages to resolve from this plugin's
+// vendor directory even if other local plugins register their own test
+// autoloaders during the run.
+$phpunitNamespaces = [
+    'PHPUnit\\',
+    'SebastianBergmann\\',
+    'Theseer\\Tokenizer\\',
+    'PharIo\\',
+    'DeepCopy\\',
+    'myclabs\\DeepCopy\\'
+];
+
+spl_autoload_register(
+    static function (string $class) use ($pluginAutoloader, $phpunitNamespaces): void {
+        foreach ($phpunitNamespaces as $namespace) {
+            if (str_starts_with($class, $namespace)) {
+                $pluginAutoloader->loadClass($class);
+                return;
+            }
+        }
+    },
+    true,
+    true
+);
 
 // Load Kirby's autoloader directly (bypassing version check for tests)
 // Path: tests -> meta-kit -> plugins -> site -> project root -> vendor

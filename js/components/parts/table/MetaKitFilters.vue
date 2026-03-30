@@ -1,30 +1,39 @@
 <template>
   <div class="k-meta-kit-controls">
-    <k-button-group>
-      <k-button v-if="showPreview"
-        size="sm"
-        :theme="previewMode === 'meta' ? 'positive' : ''"
-        @click="$emit('update:preview-mode', 'meta')"
-        title="Show meta title and description"
+    <div class="k-meta-kit-view-select">
+      <label class="k-meta-kit-view-select-label" for="k-meta-kit-view-mode">View</label>
+      <select
+        id="k-meta-kit-view-mode"
+        class="k-meta-kit-view-select-input"
+        :value="viewMode"
+        @change="updateViewMode($event.target.value)"
+        title="Choose table view"
       >
-        Meta
-      </k-button>
-      <k-button v-if="showPreview"
-        size="sm"
-        :theme="previewMode === 'og' ? 'positive' : ''"
-        @click="$emit('update:preview-mode', 'og')"
-        title="Show OG title and description"
+        <option value="count">Count</option>
+        <option value="meta">Meta content</option>
+        <option value="og">OG content</option>
+      </select>
+    </div>
+
+    <div class="k-meta-kit-view-select k-meta-kit-sort-select">
+      <label class="k-meta-kit-view-select-label" for="k-meta-kit-sort-mode">Sort</label>
+      <select
+        id="k-meta-kit-sort-mode"
+        class="k-meta-kit-view-select-input"
+        :value="sortBy"
+        @change="$emit('update:sort-by', $event.target.value)"
+        title="Choose table sort order"
       >
-        OG
-      </k-button>
-      <k-button
-        size="sm"
-        @click="$emit('update:show-preview', !showPreview)"
-        :title="showPreview ? 'Show character counts' : 'Show preview text'"
-      >
-        {{ showPreview ? 'Overview' : 'Preview' }}
-      </k-button>
-    </k-button-group>
+        <option value="default">Default</option>
+        <option value="attention">Needs attention</option>
+        <option value="name-asc">Name A-Z</option>
+        <option value="name-desc">Name Z-A</option>
+        <option value="level-asc">Level low-high</option>
+        <option value="level-desc">Level high-low</option>
+        <option value="status">Status</option>
+        <option value="template">Template</option>
+      </select>
+    </div>
 
     <div class="k-meta-kit-search-wrapper">
       <k-search-input
@@ -57,53 +66,115 @@
       </button>
 
       <div v-if="isDropdownOpen" class="k-meta-kit-filter-dropdown-content">
+        <div class="k-meta-kit-filter-group k-meta-kit-filter-group-grid">
+          <div class="k-meta-kit-filter-group-title">State</div>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="good"
+              :checked="isFilterActive('good')"
+              @change="toggleFilter('good')"
+            />
+            <span>Good</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="attention"
+              :checked="isFilterActive('attention')"
+              @change="toggleFilter('attention')"
+            />
+            <span>Needs Attention</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="warning"
+              :checked="isFilterActive('warning')"
+              @change="toggleFilter('warning')"
+            />
+            <span>Warnings</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="error"
+              :checked="isFilterActive('error')"
+              @change="toggleFilter('error')"
+            />
+            <span>Fixes</span>
+          </label>
+        </div>
+
+        <div class="k-meta-kit-filter-group k-meta-kit-filter-group-grid">
+          <div class="k-meta-kit-filter-group-title">Fields</div>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-slug"
+              :checked="isFilterActive('type-slug')"
+              @change="toggleFilter('type-slug')"
+            />
+            <span>Slug</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-title"
+              :checked="isFilterActive('type-title')"
+              @change="toggleFilter('type-title')"
+            />
+            <span>Meta Title</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-description"
+              :checked="isFilterActive('type-description')"
+              @change="toggleFilter('type-description')"
+            />
+            <span>Meta Desc.</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-og-title"
+              :checked="isFilterActive('type-og-title')"
+              @change="toggleFilter('type-og-title')"
+            />
+            <span>OG Title</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-og-description"
+              :checked="isFilterActive('type-og-description')"
+              @change="toggleFilter('type-og-description')"
+            />
+            <span>OG Desc.</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-og-image"
+              :checked="isFilterActive('type-og-image')"
+              @change="toggleFilter('type-og-image')"
+            />
+            <span>OG Img.</span>
+          </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-noindex"
+              :checked="isFilterActive('type-noindex')"
+              @change="toggleFilter('type-noindex')"
+            />
+            <span>Noidx</span>
+          </label>
+        </div>
+
         <div class="k-meta-kit-filter-group">
           <div class="k-meta-kit-filter-group-title">Metadata</div>
-          <label class="k-meta-kit-filter-option">
-            <input
-              type="checkbox"
-              value="missing-title"
-              :checked="isFilterActive('missing-title')"
-              @change="toggleFilter('missing-title')"
-            />
-            <span>Missing Title</span>
-          </label>
-          <label class="k-meta-kit-filter-option">
-            <input
-              type="checkbox"
-              value="missing-description"
-              :checked="isFilterActive('missing-description')"
-              @change="toggleFilter('missing-description')"
-            />
-            <span>Missing Description</span>
-          </label>
-          <label class="k-meta-kit-filter-option">
-            <input
-              type="checkbox"
-              value="missing-og-title"
-              :checked="isFilterActive('missing-og-title')"
-              @change="toggleFilter('missing-og-title')"
-            />
-            <span>Missing OG Title</span>
-          </label>
-          <label class="k-meta-kit-filter-option">
-            <input
-              type="checkbox"
-              value="missing-og-description"
-              :checked="isFilterActive('missing-og-description')"
-              @change="toggleFilter('missing-og-description')"
-            />
-            <span>Missing OG Description</span>
-          </label>
-          <label class="k-meta-kit-filter-option">
-            <input
-              type="checkbox"
-              value="missing-og-image"
-              :checked="isFilterActive('missing-og-image')"
-              @change="toggleFilter('missing-og-image')"
-            />
-            <span>Missing OG Image</span>
-          </label>
           <label class="k-meta-kit-filter-option">
             <input
               type="checkbox"
@@ -154,15 +225,6 @@
       </div>
     </div>
 
-    <select
-      class="k-meta-kit-pagesize-select"
-      :value="pageSize"
-      @change="$emit('change-page-size', $event.target.value)"
-    >
-      <option v-for="option in pageSizeOptions" :key="option.value" :value="option.value">
-        {{ option.text }}
-      </option>
-    </select>
   </div>
 </template>
 
@@ -186,18 +248,9 @@ export default {
       type: Array,
       default: () => []
     },
-    pageSize: {
-      type: Number,
-      default: 25
-    },
-    pageSizeOptions: {
-      type: Array,
-      default: () => [
-        {value: 25, text: '25/page'},
-        {value: 50, text: '50/page'},
-        {value: 100, text: '100/page'},
-        {value: 99999, text: 'All'}
-      ]
+    sortBy: {
+      type: String,
+      default: 'default'
     }
   },
   data() {
@@ -205,24 +258,54 @@ export default {
       isDropdownOpen: false
     };
   },
+  computed: {
+    viewMode() {
+      if (!this.showPreview) {
+        return 'count';
+      }
+
+      return this.previewMode === 'og' ? 'og' : 'meta';
+    }
+  },
   methods: {
+    updateViewMode(mode) {
+      if (mode === 'count') {
+        this.$emit('update:show-preview', false);
+        return;
+      }
+
+      this.$emit('update:preview-mode', mode);
+      this.$emit('update:show-preview', true);
+    },
     toggleFilterDropdown() {
       this.isDropdownOpen = !this.isDropdownOpen;
     },
     isFilterActive(filter) {
+      if (filter === 'attention') {
+        return this.activeFilters.includes('warning') && this.activeFilters.includes('error');
+      }
       return this.activeFilters.includes(filter);
     },
     toggleFilter(filter) {
-      const filters = [...this.activeFilters];
-      const index = filters.indexOf(filter);
+      const filters = new Set(this.activeFilters.filter((activeFilter) => activeFilter !== 'attention'));
 
-      if (index > -1) {
-        filters.splice(index, 1);
+      if (filter === 'attention') {
+        if (filters.has('warning') && filters.has('error')) {
+          filters.delete('warning');
+          filters.delete('error');
+        } else {
+          filters.add('warning');
+          filters.add('error');
+        }
       } else {
-        filters.push(filter);
+        if (filters.has(filter)) {
+          filters.delete(filter);
+        } else {
+          filters.add(filter);
+        }
       }
 
-      this.$emit('update:active-filters', filters);
+      this.$emit('update:active-filters', Array.from(filters));
     },
     clearFilters() {
       this.$emit('update:active-filters', []);
@@ -230,12 +313,15 @@ export default {
     }
   },
   mounted() {
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
+    this._outsideClickHandler = (e) => {
       if (!this.$el.contains(e.target)) {
         this.isDropdownOpen = false;
       }
-    });
+    };
+    document.addEventListener('click', this._outsideClickHandler);
+  },
+  beforeDestroy() {
+    document.removeEventListener('click', this._outsideClickHandler);
   }
 };
 </script>

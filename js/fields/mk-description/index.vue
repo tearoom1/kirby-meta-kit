@@ -11,6 +11,7 @@
                :buttons="false"
                :maxlength="maxlength"
                :counter="false"
+               :name="fieldType === 'og' ? 'ogDescription' : 'metaDescription'"
       />
     <template #footer>
       <k-text>
@@ -39,6 +40,9 @@
 </template>
 
 <script>
+import { getFieldName, generateAiContent } from '../../composables/useAiGeneration.js';
+import { getDescriptionValidation } from '../../composables/useFieldValidation.js';
+
 export default {
   inheritAttrs: false,
   props: {
@@ -69,95 +73,34 @@ export default {
       return this.value ? this.value.length : 0;
     },
     validation() {
-      if (!this.value) {
-        return {
-          status: '',
-          theme: '',
-          message: ''
-        };
-      }
-
-      const length = this.charCount;
-      const ranges = this.validationSettings.ranges || {};
-      const optimal = ranges.optimal || {min: 140, max: 160};
-      const warning = ranges.warning || {min: 126, max: 176};
-
-      if (length >= optimal.min && length <= optimal.max) {
-        return {
-          status: 'optimal',
-          theme: 'positive',
-          message: `Optimal length (${optimal.min}-${optimal.max} characters recommended)`
-        };
-      }
-
-      if (length >= warning.min && length <= warning.max) {
-        if (length < optimal.min) {
-          return {
-            status: 'warning',
-            theme: 'notice',
-            message: `Too short. Add ${optimal.min - length} more characters for optimal length (${optimal.min}-${optimal.max} recommended)`
-          };
-        } else {
-          return {
-            status: 'warning',
-            theme: 'notice',
-            message: `Slightly too long. Remove ${length - optimal.max} characters for optimal length (${optimal.min}-${optimal.max} recommended)`
-          };
-        }
-      }
-
-      if (length < warning.min) {
-        return {
-          status: 'error',
-          theme: 'negative',
-          message: `Much too short! Add at least ${warning.min - length} more characters (${optimal.min}-${optimal.max} recommended)`
-        };
-      }
-
-      return {
-        status: 'error',
-        theme: 'negative',
-        message: `Too long! Reduce by ${length - warning.max} characters (${optimal.min}-${optimal.max} recommended)`
-      };
+      return getDescriptionValidation(this.charCount, this.validationSettings);
     }
   },
   methods: {
     onInput(value) {
       this.$emit('input', value);
-    },
-    getLanguageCode() {
-      return (
-        this.$language?.code ||
-        window.panel?.view?.props?.language ||
-        window.panel?.language?.code ||
-        'en'
-      );
+      this.$nextTick(() => {
+        document.dispatchEvent(new CustomEvent('meta-kit-field-change', {
+          detail: { field: getFieldName(this.fieldType, 'description'), value }
+        }));
+      });
     },
     async generateWithAi() {
       this.isGenerating = true;
       this.aiError = null;
 
-      try {
-        const pageId = this.pageId || this.validationSettings.pageId;
-        const fieldName = this.fieldType === 'og' ? 'ogDescription' : 'metaDescription';
-        const language = this.getLanguageCode();
+      const pageId = this.pageId || this.validationSettings.pageId;
+      const fieldName = getFieldName(this.fieldType, 'description');
 
-        const response = await this.$api.post('meta-kit/generate-field', {
-          pageId,
-          fieldName,
-          language
-        });
+      const result = await generateAiContent(this.$api, pageId, fieldName);
 
-        if (response.status !== 'success' || !response.content) {
-          throw new Error(response.message || 'Failed to generate');
-        }
-
-        this.$emit('input', response.content);
-      } catch (e) {
-        this.aiError = e.message || 'AI generation failed';
-      } finally {
-        this.isGenerating = false;
+      if (result.success) {
+        this.$emit('input', result.content);
+      } else {
+        this.aiError = result.error;
       }
+
+      this.isGenerating = false;
     }
   }
 };

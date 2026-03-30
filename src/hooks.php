@@ -8,30 +8,12 @@
 
 return [
     "system.loadPlugins:after" => function () {
-        // Initialize site SEO objects on first load if they don't exist
+        // Initialize site SEO block fields on first load if they don't exist
         $site = site();
         $needsUpdate = false;
         $updates = [];
 
-        // Check if objects need initialization
-        if ($site->metaKitSeo()->isEmpty()) {
-            $updates["metaKitSeo"] = [
-                [
-                    "content" => [
-                        "appendSiteName" => true,
-                        "titleSeparator" => "|",
-                        "metaTitle" => "",
-                        "metaDescription" => "",
-                        "metaKeywords" => "",
-                        "ogImage" => [],
-                    ],
-                    "id" => "site-seo-settings",
-                    "isHidden" => false,
-                    "type" => "mk-site-seo",
-                ],
-            ];
-            $needsUpdate = true;
-        }
+        // Site SEO settings are now flat fields, no initialization needed
 
         if ($site->metaKitOpenrouter()->isEmpty()) {
             $updates["metaKitOpenrouter"] = [
@@ -109,9 +91,8 @@ return [
         }
 
         try {
-            // Check if SEO object exists and if metadescription is empty
-            $seoData = $newPage->metaKitSeo()->toObject();
-            if (!$seoData || $seoData->metadescription()->isNotEmpty()) {
+            // Check if metaDescription is empty (flat field)
+            if ($newPage->metaDescription()->isNotEmpty()) {
                 return;
             }
 
@@ -124,13 +105,10 @@ return [
                 ]);
 
                 if ($description) {
-                    // Get existing SEO data and update metadescription
-                    $existingSeo = $newPage->metaKitSeo()->yaml();
-                    $existingSeo["metadescription"] = $description;
-
+                    // Update flat field directly
                     $newPage->update(
                         [
-                            "metaKitSeo" => $existingSeo,
+                            "metaDescription" => $description,
                         ],
                         kirby()->language()?->code(),
                     );
@@ -140,5 +118,8 @@ return [
             // Silently fail - don't break the save operation
             kirbylog("Meta Kit auto-generate error: " . $e->getMessage());
         }
+    },
+    "site.update:after" => function () {
+        TearoomOne\ConfigHelper::clearCache();
     },
 ];

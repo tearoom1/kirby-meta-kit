@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" size="huge" cancelButton="Close" submitButton="">
+  <k-dialog ref="dialog" size="huge" :cancel-button="false" submitButton="" @submit.prevent="saveAll">
     <k-headline>Edit Selected Pages ({{ pages.length }})</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -36,6 +36,7 @@
 
           <!-- Meta Title -->
           <meta-kit-title-field
+            label="Meta Title"
             :value="editedFields[page.id].metaTitle"
             @input="editedFields[page.id].metaTitle = $event"
             :page-id="page.id"
@@ -50,12 +51,14 @@
 
           <!-- Meta Description -->
           <meta-kit-description-field
+            label="Meta Description"
             :value="editedFields[page.id].metaDescription"
             @input="editedFields[page.id].metaDescription = $event"
             :ai-enabled="aiEnabled"
             :is-generating="generating[page.id].metaDescription"
             @generate="generate(page.id, 'metaDescription')"
             :placeholder="page.metaDescription || siteSettings.siteMetaDescription || 'No meta description'"
+            :rows="3"
           />
         </div>
       </div>
@@ -70,6 +73,7 @@
 
           <!-- OG Title -->
           <meta-kit-title-field
+            label="OG Title"
             :value="editedFields[page.id].ogTitle"
             @input="editedFields[page.id].ogTitle = $event"
             :page-id="page.id"
@@ -85,6 +89,7 @@
 
           <!-- OG Description -->
           <meta-kit-description-field
+            label="OG Description"
             :value="editedFields[page.id].ogDescription"
             @input="editedFields[page.id].ogDescription = $event"
             :ai-enabled="aiEnabled"
@@ -92,13 +97,26 @@
             @generate="generate(page.id, 'ogDescription')"
             :placeholder="page.ogDescription || page.metaDescription || siteSettings.siteMetaDescription || 'No OG description'"
             type="og"
+            :rows="3"
           />
         </div>
       </div>
 
       <!-- Actions -->
-      <div v-if="hasAnyChanges" class="k-meta-kit-single-actions">
-        <k-button icon="check" theme="positive" @click="saveAll">Apply All Changes</k-button>
+      <div class="k-meta-kit-dialog-footer">
+        <div class="k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-start"></div>
+        <div class="k-meta-kit-dialog-footer-meta">
+          <span
+            v-if="saveFeedback.text"
+            :class="['k-meta-kit-dialog-feedback', `k-meta-kit-dialog-feedback-${saveFeedback.type}`]"
+          >
+            {{ saveFeedback.text }}
+          </span>
+        </div>
+        <div class="k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-end">
+          <k-button @click="close">Close</k-button>
+          <k-button v-if="hasAnyChanges" icon="check" theme="positive" @click="saveAll">Apply All Changes</k-button>
+        </div>
       </div>
     </div>
 
@@ -112,6 +130,8 @@
 <script>
 import MetaKitTitleField from '../field/MetaKitTitleField.vue';
 import MetaKitDescriptionField from '../field/MetaKitDescriptionField.vue';
+import { hasAnyBulkChanges } from '../../../composables/panelState.js';
+import { applySingleFieldUpdate } from '../../../composables/saveFields.js';
 
 export default {
   components: {
@@ -138,30 +158,31 @@ export default {
       isLoading: false,
       activeTab: 'meta',
       editedFields: {},
-      generating: {}
+      generating: {},
+      saveFeedback: {
+        type: '',
+        text: ''
+      },
+      saveFeedbackTimer: null
     };
   },
   computed: {
     hasAnyChanges() {
-      return this.pages.some(page => {
-        const edited = this.editedFields[page.id];
-        if (!edited) return false;
-
-        return edited.metaTitle !== (page.metaTitle || '') ||
-          edited.metaDescription !== (page.metaDescription || '') ||
-          edited.ogTitle !== (page.ogTitle || '') ||
-          edited.ogDescription !== (page.ogDescription || '');
-      });
+      return hasAnyBulkChanges(this.pages, this.editedFields);
     }
   },
   methods: {
     async open(pageIds) {
       this.isLoading = true;
       this.activeTab = 'meta';
+      this.resetSaveFeedback();
       this.$refs.dialog.open();
+      document.addEventListener('keydown', this.handleKeydown);
 
       try {
-        const response = await this.api.get('meta-kit/pages-with-content', { pageIds });
+        const response = await this.api.get('meta-kit/pages-with-content', {
+          pageIds: Array.isArray(pageIds) ? pageIds.join(',') : pageIds
+        });
         if (response.status === 'success' && response.data) {
           this.pages = response.data;
 
@@ -193,10 +214,42 @@ export default {
     },
 
     close() {
+      document.removeEventListener('keydown', this.handleKeydown);
+      this.resetSaveFeedback();
       this.$refs.dialog.close();
       this.pages = [];
       this.editedFields = {};
       this.generating = {};
+    },
+
+    resetSaveFeedback() {
+      if (this.saveFeedbackTimer) {
+        clearTimeout(this.saveFeedbackTimer);
+        this.saveFeedbackTimer = null;
+      }
+
+      this.saveFeedback = { type: '', text: '' };
+    },
+
+    setSaveFeedback(type, text) {
+      this.resetSaveFeedback();
+      this.saveFeedback = { type, text };
+      this.saveFeedbackTimer = setTimeout(() => {
+        this.saveFeedback = { type: '', text: '' };
+        this.saveFeedbackTimer = null;
+      }, 3200);
+    },
+
+    handleKeydown(event) {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 's') {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (this.pages.length > 0 && this.hasAnyChanges) {
+        this.saveAll();
+      }
     },
 
     async generate(pageId, fieldName) {
@@ -225,6 +278,8 @@ export default {
       if (!this.hasAnyChanges) return;
 
       let totalSaved = 0;
+      const updatedPages = new Map();
+      let latestSiteSettings = null;
 
       for (const page of this.pages) {
         const edited = this.editedFields[page.id];
@@ -238,25 +293,53 @@ export default {
         for (const field of fields) {
           if (field.value !== field.original) {
             try {
-              await this.api.post('meta-kit/apply-single-field', {
+              const response = await applySingleFieldUpdate(this.api, {
                 pageId: page.id,
                 fieldName: field.name,
                 value: field.value
               });
+              if (response?.data?.page) {
+                updatedPages.set(response.data.page.id, response.data.page);
+              }
+              if (response?.data?.siteSettings) {
+                latestSiteSettings = response.data.siteSettings;
+              }
               totalSaved++;
             } catch (error) {
-              window.panel.notification.error(`Failed to update ${field.name} for ${page.title}`);
+              this.setSaveFeedback('error', error?.message || `Failed to update ${field.name} for ${page.title}`);
+              window.panel.notification.error(error?.message || `Failed to update ${field.name} for ${page.title}`);
             }
           }
         }
       }
 
       if (totalSaved > 0) {
-        window.panel.notification.success(`Updated ${totalSaved} field${totalSaved > 1 ? 's' : ''} across ${this.pages.length} page${this.pages.length > 1 ? 's' : ''}`);
-        this.$emit('saved');
-        this.close();
+        this.pages = this.pages.map(page => updatedPages.get(page.id) || page);
+
+        this.pages.forEach(page => {
+          if (!this.editedFields[page.id]) {
+            return;
+          }
+
+          this.$set(this.editedFields, page.id, {
+            metaTitle: page.metaTitle || '',
+            metaDescription: page.metaDescription || '',
+            ogTitle: page.ogTitle || '',
+            ogDescription: page.ogDescription || ''
+          });
+        });
+
+        this.setSaveFeedback('success', `Saved ${totalSaved} field${totalSaved > 1 ? 's' : ''} across ${this.pages.length} page${this.pages.length > 1 ? 's' : ''}`);
+        this.$emit('saved', {
+          pages: this.pages,
+          siteSettings: latestSiteSettings
+        });
       }
     }
+  },
+  beforeDestroy() {
+    document.removeEventListener('keydown', this.handleKeydown);
+    this.resetSaveFeedback();
   }
 };
 </script>

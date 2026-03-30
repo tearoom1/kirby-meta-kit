@@ -1,0 +1,73 @@
+type: group
+label: SEO
+fields:
+  slugInfo:
+    label: Slug Validation
+    type: mk-slug-info
+
+  metaTitle:
+    label: Meta Title
+    type: mk-title
+    fieldType: meta
+    help: Title for search engines. Defaults to the page title. See also the site settings for additional options.
+
+  metaDescription:
+    label: Meta Description
+    type: mk-description
+    fieldType: meta
+    maxlength: 180
+    help: Description for search engines. Include primary keyword and a call-to-action.
+
+  metaAuthor:
+    label: Author
+    type: text
+    help: Author of the page. This field has no influence on SEO.
+    width: 1/2
+
+  canonicalUrl:
+    label: Canonical URL
+    type: url
+    help: Custom canonical URL
+    width: 1/2
+
+  robots:
+    label: Set a robots directive
+    type: select
+    options:
+      - { value: 'index, follow', text: 'Index, Follow' }
+      - { value: 'noindex, follow', text: 'No Index, Follow' }
+      - { value: 'index, nofollow', text: 'Index, No Follow' }
+      - { value: 'noindex, nofollow', text: 'No Index, No Follow' }
+    width: 1/2
+    translate: false
+
+  seoSocialSeparator:
+    label:
+    type: info
+    text: Social Media Settings
+    theme: positive
+
+  ogTitle:
+    label: Social Media Title
+    type: mk-title
+    fieldType: og
+    help: Title for social media shares. Uses the meta title if empty.
+
+  ogDescription:
+    label: Social Media Description
+    type: mk-description
+    fieldType: og
+    maxlength: 310
+    help: Description for social media. Uses the meta description if empty.
+
+  ogImage:
+    label: Social Media Image
+    type: files
+    max: 1
+    layout: cards
+    image:
+      ratio: 120/63
+      cover: true
+    size: medium
+    query: page.images
+    help: "Recommended: 1200×630px for Facebook/WhatsApp. Twitter prefers 2:1 (800×400px), but 1200×630 works well for both."
