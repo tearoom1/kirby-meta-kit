@@ -15,7 +15,7 @@
       </select>
     </div>
 
-    <div class="k-meta-kit-view-select">
+    <div class="k-meta-kit-view-select k-meta-kit-sort-select">
       <label class="k-meta-kit-view-select-label" for="k-meta-kit-sort-mode">Sort</label>
       <select
         id="k-meta-kit-sort-mode"

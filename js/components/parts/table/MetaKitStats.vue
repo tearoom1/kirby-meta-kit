@@ -1,6 +1,6 @@
 <template>
   <div class="k-meta-kit-stats">
-    <div class="k-meta-kit-stats-card">
+    <div class="k-meta-kit-stats-card k-meta-kit-stats-card-total">
       <div class="k-meta-kit-stats-label">Total Pages</div>
       <div class="k-meta-kit-stats-row">
         <span class="k-meta-kit-stats-value">

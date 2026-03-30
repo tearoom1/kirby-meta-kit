@@ -45,6 +45,7 @@
   .k-meta-kit-stats-tooltip {
     display: block;
     width: 100%;
+    min-width: 0;
   }
 
   .k-meta-kit-stats-card {
@@ -55,6 +56,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
+    min-width: 0;
   }
 
   .k-meta-kit-stats-label {
@@ -110,6 +112,10 @@
     font-weight: 500;
     margin-top: 0.25rem;
     line-height: 1;
+  }
+
+  .k-meta-kit-stats-card-total {
+    min-width: 0;
   }
 
   .k-meta-kit-stats-green { color: var(--color-green-600); }
@@ -1096,6 +1102,21 @@
 
   .k-meta-kit-pagesize-select {
     width: 110px;
+  }
+
+  @media (max-width: 1420px) {
+    .k-meta-kit-stats {
+      grid-template-columns: minmax(136px, 0.82fr) repeat(5, minmax(0, 1fr));
+      gap: 0.875rem;
+    }
+
+    .k-meta-kit-stats-card-total {
+      padding-inline: 1rem;
+    }
+
+    .k-meta-kit-sort-select {
+      display: none;
+    }
   }
 
   /* Filter Dropdown */
