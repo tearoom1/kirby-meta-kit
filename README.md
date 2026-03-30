@@ -1,12 +1,12 @@
 # Kirby Meta Kit
 
-The complete SEO solution for Kirby CMS with AI-powered content generation, real-time validation, and comprehensive metadata management.
+An SEO workflow plugin for Kirby CMS with AI-assisted content generation, validation, previews, and centralized metadata management.
 
 [![Screenshot](screenshot.jpg)](https://github.com/tearoom1/kirby-meta-kit)
 
 Get a license: [www.tearoom.one/kirby-plugins/meta-kit](https://www.tearoom.one/kirby-plugins/meta-kit)
 
-Frontend SEO output, `sitemap.xml`, and `robots.txt` work without license activation. A license is only required for AI generation and saving changes from the dedicated Meta Kit Panel area.
+Frontend SEO output, `sitemap.xml`, and `robots.txt` work without license activation. A license is only required for AI generation and for saving changes from the dedicated Meta Kit Panel area.
 
 ## Why Meta Kit?
 
@@ -14,7 +14,7 @@ Frontend SEO output, `sitemap.xml`, and `robots.txt` work without license activa
 - **Single Point of Overview**: Meta Kit provides a unified interface for managing metadata, making it easier to keep track of your SEO efforts
 - **Clear Guidelines**: Visual validation shows exactly what's optimal (green), acceptable (orange), or needs fixing (red)
 - **AI Assistant**: Generate SEO-optimized content with one click, automatically matching your configured character limits
-- **Live Previews**: See exactly how your content appears on Google, Twitter, and Facebook before publishing
+- **Preview Support**: Review Google and social preview output directly in the Panel
 - **Bulk Operations**: Edit metadata for multiple pages simultaneously with an efficient table interface
 - **Template-Specific Rules**: Different page types can have different SEO requirements (blog posts vs. product pages)
 
@@ -40,8 +40,8 @@ Frontend SEO output, `sitemap.xml`, and `robots.txt` work without license activa
    - Multilingual: Generates content in the current language with appropriate formality
 
 3. **Professional Panel Interface**
-   - Dedicated Meta Kit area in main menu with dashboard and statistics
-   - Bulk editor: Edit multiple pages in a table view with inline AI generation
+   - Dedicated Meta Kit area in main menu with action-focused dashboard cards
+   - Bulk editor: Review multiple pages in one table and edit them in focused dialogs
    - Real-time character counters with validation feedback
    - Slug validation: Check URL structure, depth, and keyword usage
 
@@ -58,7 +58,7 @@ Frontend SEO output, `sitemap.xml`, and `robots.txt` work without license activa
 
 - 🎯 **Smart Validation** - Template-specific character limits with visual feedback
 - 🤖 **AI Generation** - Auto-generates SEO content matching your validation rules
-- 🎛️ **Panel Dashboard** - Dedicated area for metadata management
+- 🎛️ **Panel Dashboard** - Dedicated area for metadata management with action-focused stats
 - 👁️ **Live Previews** - See Google, Twitter, Facebook appearance in real-time
 - ⚡ **Bulk Operations** - Edit multiple pages simultaneously
 - 📊 **Slug Validation** - Checks URL depth, word count, and length
@@ -490,23 +490,23 @@ When disabled:
 Access via the main menu (wand icon):
 
 #### Dashboard
-- **Statistics**: Coverage percentage for meta titles, descriptions, OG data
-- **Page Overview**: List all pages with metadata status
-- **Quick Actions**: Bulk generate, bulk edit
+- **Action-Focused Stats**: See which areas need review or fixes first
+- **Page Overview**: List all pages with validation and inheritance status
+- **Quick Actions**: Bulk edit, bulk generate, filter, search, and refresh
 
 #### Bulk Editor
-- **Table View**: See multiple pages at once
-- **Inline Editing**: Edit titles and descriptions directly
+- **Table View**: See multiple pages at once in count, meta-content, or OG-content mode
+- **Focused Editing**: Edit a single page or multiple selected pages in dedicated dialogs
 - **AI Generation**: Generate button for each field
 - **Character Counters**: Real-time validation with color indicators
-- **Filter & Search**: Find pages quickly
+- **Filter & Search**: Combine field filters with state filters like good, warning, and fix
 - **Batch Operations**: Apply changes to selected pages
 
 #### Features
 - **Live Validation**: Green/orange/red indicators as you type
 - **Template Awareness**: Different validation for different page types
 - **Language Support**: Works with multilingual sites
-- **Inheritance Display**: See which pages inherit from site defaults
+- **Inheritance Display**: See when values come from site defaults, the main language, or other fallbacks
 - **Quick Navigation**: Jump to page editor from table
 
 ### Page Editor
@@ -529,7 +529,7 @@ When you add the `meta-kit/page` tab to a page blueprint:
 **Real-time Feedback:**
 - Character counters update as you type
 - Validation messages show what's optimal
-- Title preview shows final appearance (with site name if applicable)
+- Title preview shows the final title including site name if applicable
 - Color-coded indicators: green (optimal), orange (acceptable), red (fix needed)
 
 ---
@@ -783,7 +783,7 @@ $ogImage = $page->ogImage()->toFile();
 
 ## Requirements
 
-- **PHP**: 8.0 or higher
+- **PHP**: 8.1 or higher
 - **Kirby**: 5.0+
 - **Composer**: For dependency management
 - **OpenRouter API Key**: Optional, only needed for AI features (free tier available)
@@ -827,8 +827,8 @@ $ogImage = $page->ogImage()->toFile();
 
 This plugin is licensed under a commercial [LICENSE](LICENSE).
 
-License activation is required for AI generation and saving changes from the Meta Kit Panel area.
-The frontend SEO snippet, sitemap, and robots.txt remain fully functional without activation.
+Without activation, the frontend SEO snippet, sitemap, and robots.txt remain fully functional.
+License activation is only required for AI generation and saving changes from the Meta Kit Panel area.
 
 ---
 
