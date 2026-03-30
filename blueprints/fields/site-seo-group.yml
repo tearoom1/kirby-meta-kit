@@ -1,6 +1,10 @@
 label: SEO Settings
 type: group
 fields:
+  seoReview:
+    label: AI SEO Review
+    type: mk-review
+
   appendSiteName:
     label: Append Site Name to Titles
     type: toggle

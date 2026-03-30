@@ -368,6 +368,53 @@ class MetaKitController
         return ApiResponse::success($data);
     }
 
+    public static function getContentPreviewForReview(string $pageId, int $maxLength = 8000): string
+    {
+        $page = self::getPageOrSite($pageId);
+        if (!$page) {
+            return '';
+        }
+
+        $content = self::getContentForGeneration($page, $pageId === 'site');
+        return mb_substr(trim($content), 0, $maxLength);
+    }
+
+    public static function getReviewContext(string $pageId, int $contentMaxLength = 8000): ?array
+    {
+        $data = PageDataBuilder::fromPageId($pageId, ['includeOgImage' => true]);
+        if ($data === null) {
+            return null;
+        }
+
+        return [
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'template' => $data['template'],
+            'panelUrl' => $data['panelUrl'],
+            'language' => $data['language'] ?? null,
+            'metaTitle' => $data['metaTitle'] ?? null,
+            'metaDescription' => $data['metaDescription'] ?? null,
+            'ogTitle' => $data['ogTitle'] ?? null,
+            'ogDescription' => $data['ogDescription'] ?? null,
+            'robots' => $data['robots'] ?? null,
+            'content' => self::getContentPreviewForReview($pageId, $contentMaxLength),
+        ];
+    }
+
+    public static function getReviewContexts(array $pageIds, int $maxPages = 20, int $perPageLength = 1200): array
+    {
+        $contexts = [];
+
+        foreach (array_slice($pageIds, 0, $maxPages) as $pageId) {
+            $context = self::getReviewContext($pageId, $perPageLength);
+            if ($context) {
+                $contexts[] = $context;
+            }
+        }
+
+        return $contexts;
+    }
+
     /**
      * Get page or site object from pageId
      */

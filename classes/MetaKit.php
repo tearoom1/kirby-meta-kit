@@ -185,6 +185,112 @@ class MetaKit
         return $data['choices'][0]['message']['content'];
     }
 
+    protected function decodeJsonResponse(string $response): ?array
+    {
+        $trimmed = trim($response);
+        $decoded = json_decode($trimmed, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded;
+        }
+
+        if (preg_match('/```(?:json)?\s*(\{.*\})\s*```/sU', $trimmed, $matches)) {
+            $decoded = json_decode($matches[1], true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        if (preg_match('/(\{.*\})/sU', $trimmed, $matches)) {
+            $decoded = json_decode($matches[1], true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return null;
+    }
+
+    public function generateSeoReview(array $payload): array
+    {
+        $scope = $payload['scope'] ?? 'page';
+        $page = $payload['page'] ?? null;
+        $pages = $payload['pages'] ?? [];
+
+        if ($scope === 'page' && $page) {
+            $prompt = "You are an experienced SEO content strategist.\n" .
+                "Analyze the full page content and current metadata. Focus on content quality, topical clarity, search intent, and keyphrase opportunities.\n" .
+                "Do not focus on character-count validation.\n" .
+                "Return valid JSON only.\n\n" .
+                "Return this exact JSON shape:\n" .
+                "{\n" .
+                '  "summary": "short paragraph",'. "\n" .
+                '  "overallQuality": "High|Medium|Low",'. "\n" .
+                '  "searchIntent": "short description",'. "\n" .
+                '  "keyphrases": [' . "\n" .
+                '    { "phrase": "keyphrase", "reason": "why it fits" }'. "\n" .
+                '  ],'. "\n" .
+                '  "strengths": ["strength 1", "strength 2"],'. "\n" .
+                '  "improvements": ["improvement 1", "improvement 2", "improvement 3"],'. "\n" .
+                '  "metadataFit": ["short note about title/description fit"],'. "\n" .
+                '  "nextSteps": ["next step 1", "next step 2"]'. "\n" .
+                "}\n\n" .
+                "Page context:\n" . json_encode($page, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        } else {
+            $prompt = "You are an experienced SEO content strategist.\n" .
+                "Analyze this multi-page website content set. Focus on overall content quality, theme clarity, likely keyphrase opportunities, overlap risks, weak areas, and strongest pages.\n" .
+                "Do not focus on character-count validation.\n" .
+                "Return valid JSON only.\n\n" .
+                "Return this exact JSON shape:\n" .
+                "{\n" .
+                '  "summary": "short paragraph",'. "\n" .
+                '  "overallQuality": "High|Medium|Low",'. "\n" .
+                '  "siteFocus": ["focus area 1", "focus area 2"],'. "\n" .
+                '  "contentGaps": ["gap 1", "gap 2"],'. "\n" .
+                '  "keyphraseOpportunities": [' . "\n" .
+                '    { "phrase": "keyphrase", "reason": "why it matters" }'. "\n" .
+                '  ],'. "\n" .
+                '  "priorityPages": [' . "\n" .
+                '    { "page": "page title", "reason": "why review it first" }'. "\n" .
+                '  ],'. "\n" .
+                '  "nextSteps": ["next step 1", "next step 2", "next step 3"]'. "\n" .
+                "}\n\n" .
+                "Pages:\n" . json_encode($pages, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+
+        try {
+            $response = $this->callApi($prompt, 700);
+            $decoded = $this->decodeJsonResponse($response);
+
+            if ($decoded) {
+                return [
+                    'summary' => trim((string)($decoded['summary'] ?? '')),
+                    'overallQuality' => trim((string)($decoded['overallQuality'] ?? '')),
+                    'searchIntent' => trim((string)($decoded['searchIntent'] ?? '')),
+                    'keyphrases' => array_values(array_filter($decoded['keyphrases'] ?? $decoded['keyphraseOpportunities'] ?? [], 'is_array')),
+                    'strengths' => array_values(array_filter($decoded['strengths'] ?? $decoded['siteFocus'] ?? [], 'is_string')),
+                    'improvements' => array_values(array_filter($decoded['improvements'] ?? $decoded['contentGaps'] ?? [], 'is_string')),
+                    'metadataFit' => array_values(array_filter($decoded['metadataFit'] ?? [], 'is_string')),
+                    'priorityPages' => array_values(array_filter($decoded['priorityPages'] ?? [], 'is_array')),
+                    'nextSteps' => array_values(array_filter($decoded['nextSteps'] ?? [], 'is_string')),
+                ];
+            }
+        } catch (\Throwable $e) {
+            kirbylog('Meta Kit Review Error: ' . $e->getMessage());
+        }
+
+        return [
+            'summary' => 'This content needs a manual SEO review. Focus on the page topic, search intent, and whether the metadata supports the real content clearly.',
+            'overallQuality' => '',
+            'searchIntent' => '',
+            'keyphrases' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'metadataFit' => [],
+            'priorityPages' => [],
+            'nextSteps' => [],
+        ];
+    }
+
     public function generateTitle(string $content, array $context = []): ?string
     {
         $language = $context['language'] ?? 'en';

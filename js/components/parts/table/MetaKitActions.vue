@@ -17,6 +17,20 @@
       >
         Generate Missing<span v-if="selectedCount > 0"> ({{ selectedCount }})</span>
       </k-button>
+      <k-button
+        v-if="aiEnabled && selectedCount > 0"
+        icon="sparkling"
+        @click="$emit('review-selected')"
+      >
+        Review Selected
+      </k-button>
+      <k-button
+        v-if="aiEnabled"
+        icon="sparkling"
+        @click="$emit('review-site')"
+      >
+        Review Site
+      </k-button>
       <k-button icon="refresh" @click="$emit('refresh')"></k-button>
     </k-button-group>
 

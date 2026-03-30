@@ -1639,6 +1639,85 @@
     color: var(--color-red-600);
   }
 
+  .k-meta-kit-review-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .k-meta-kit-review-summary-card {
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--rounded-sm);
+    background: var(--color-back);
+  }
+
+  .k-meta-kit-review-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .k-meta-kit-review-block {
+    border: 1px solid var(--color-border);
+    border-radius: var(--rounded-sm);
+    background: var(--color-back);
+    padding: 0.875rem 1rem;
+  }
+
+  .k-meta-kit-review-block h3 {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .k-meta-kit-review-list {
+    margin: 0;
+    padding-left: 1rem;
+  }
+
+  .k-meta-kit-review-list li + li {
+    margin-top: 0.375rem;
+  }
+
+  .k-meta-kit-review-suggestion,
+  .k-meta-kit-review-issue,
+  .k-meta-kit-review-page {
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .k-meta-kit-review-suggestion:first-of-type,
+  .k-meta-kit-review-issue:first-of-type,
+  .k-meta-kit-review-page:first-of-type {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .k-meta-kit-review-suggestion p,
+  .k-meta-kit-review-issue p,
+  .k-meta-kit-review-page p {
+    margin: 0.25rem 0 0;
+  }
+
+  .k-meta-kit-review-recommendation,
+  .k-meta-kit-review-count {
+    color: var(--color-text-dimmed);
+    font-size: 0.875rem;
+  }
+
+  .k-meta-kit-review-issue[data-status="fix"] strong {
+    color: var(--color-red-600);
+  }
+
+  .k-meta-kit-review-issue[data-status="review"] strong {
+    color: var(--color-orange-600);
+  }
+
+  .k-meta-kit-review-empty,
+  .k-meta-kit-review-error {
+    color: var(--color-text-dimmed);
+  }
+
   .k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-empty {
     background: var(--color-black);
   }
@@ -2221,4 +2300,55 @@
 }
 .k-panel[data-color-scheme="dark"] .k-mk-slug-guidelines summary:hover {
   color: var(--color-text);
+}
+
+.k-mk-review-field {
+.k-mk-review-box {
+    border: 1px solid var(--color-border);
+    border-radius: var(--rounded-sm);
+    padding: 0.875rem 1rem;
+    background: var(--color-back);
+}
+.k-mk-review-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+}
+.k-mk-review-help {
+    margin: 0.35rem 0 0;
+    color: var(--color-text-dimmed);
+    font-size: 0.875rem;
+}
+.k-mk-review-result {
+    margin-top: 0.875rem;
+}
+.k-mk-review-summary {
+    margin: 0 0 0.75rem;
+}
+.k-mk-review-quality {
+    margin: 0.35rem 0 0;
+    color: var(--color-text-dimmed);
+    font-size: 0.875rem;
+}
+.k-mk-review-subsection {
+    margin-top: 0.75rem;
+}
+.k-mk-review-list {
+    margin: 0;
+    padding-left: 1rem;
+}
+.k-mk-review-list li + li {
+    margin-top: 0.375rem;
+}
+.k-mk-review-error {
+    margin-top: 0.75rem;
+    color: var(--color-red-600);
+    font-size: 0.875rem;
+}
+.k-mk-review-empty {
+    margin-top: 0.5rem;
+    color: var(--color-text-dimmed);
+    font-size: 0.875rem;
+}
 }

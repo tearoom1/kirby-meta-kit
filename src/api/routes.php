@@ -78,6 +78,44 @@ return function () {
     // Add AI-related routes only if AI is enabled
     if (TearoomOne\MetaKit::isAiEnabled()) {
         $routes[] = [
+            "pattern" => "meta-kit/review-page",
+            "method" => "POST",
+            "auth" => true,
+            "action" => function () use ($licenseGuard) {
+                if ($error = $licenseGuard()) {
+                    return $error;
+                }
+
+                $pageId = get("pageId");
+                return TearoomOne\SeoReview::reviewPage($pageId);
+            },
+        ];
+        $routes[] = [
+            "pattern" => "meta-kit/review-pages",
+            "method" => "POST",
+            "auth" => true,
+            "action" => function () use ($licenseGuard) {
+                if ($error = $licenseGuard()) {
+                    return $error;
+                }
+
+                $pageIds = get("pageIds", []);
+                return TearoomOne\SeoReview::reviewPageIds($pageIds);
+            },
+        ];
+        $routes[] = [
+            "pattern" => "meta-kit/review-site",
+            "method" => "POST",
+            "auth" => true,
+            "action" => function () use ($licenseGuard) {
+                if ($error = $licenseGuard()) {
+                    return $error;
+                }
+
+                return TearoomOne\SeoReview::reviewSite();
+            },
+        ];
+        $routes[] = [
             "pattern" => "meta-kit/generate",
             "method" => "POST",
             "auth" => true,

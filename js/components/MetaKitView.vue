@@ -46,6 +46,8 @@
       :is-generating="isGeneratingAll"
       @edit-selected="showSelectedPagesDialog"
       @generate-missing="generateAllDescriptions"
+      @review-selected="reviewSelectedPages"
+      @review-site="reviewSite"
       @refresh="refreshPages"
     >
       <template #filters>
@@ -131,7 +133,13 @@
       :api="$api"
       :site-settings="siteSettingsData"
       :ai-enabled="aiEnabled"
+      @review-page="reviewSinglePage"
       @saved="handleSavedUpdates"
+    />
+
+    <meta-kit-review-dialog
+      ref="reviewDialog"
+      :api="$api"
     />
 
     <!-- Bulk Generation Dialog (used for both bulk and single-page AI generate) -->
@@ -169,6 +177,7 @@ import MetaKitTable from './parts/table/MetaKitTable.vue';
 import MetaKitBulkGenerateDialog from './parts/edit/MetaKitBulkGenerateDialog.vue';
 import MetaKitSinglePageDialog from './parts/edit/MetaKitSinglePageDialog.vue';
 import MetaKitBulkEditDialog from './parts/edit/MetaKitBulkEditDialog.vue';
+import MetaKitReviewDialog from './parts/edit/MetaKitReviewDialog.vue';
 import {
   filterPages,
   sortPages,
@@ -195,6 +204,7 @@ export default {
     MetaKitBulkGenerateDialog,
     MetaKitSinglePageDialog,
     MetaKitBulkEditDialog,
+    MetaKitReviewDialog,
     MetaKitStats,
     MetaKitFilters,
     MetaKitActions
@@ -552,6 +562,22 @@ export default {
 
     async editSinglePageMetadata(pageId) {
       this.$refs.singlePageDialog.open(pageId);
+    },
+
+    reviewSinglePage(pageId, title = 'Page SEO Review') {
+      this.$refs.reviewDialog.openPage(pageId, title);
+    },
+
+    reviewSelectedPages() {
+      if (!this.selectedPages.length) return;
+      this.$refs.reviewDialog.openSelection(
+        this.selectedPages,
+        `SEO Review for ${this.selectedPages.length} Selected Page${this.selectedPages.length > 1 ? 's' : ''}`
+      );
+    },
+
+    reviewSite() {
+      this.$refs.reviewDialog.openSite('Site SEO Review');
     },
 
     goToLanguage(langCode) {

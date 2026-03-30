@@ -21,6 +21,8 @@ $classes = [
     'TearoomOne\MetaKitLicense' => 'classes/MetaKitLicense.php',
     'TearoomOne\PageDataBuilder' => 'classes/PageDataBuilder.php',
     'TearoomOne\ApiResponse' => 'classes/ApiResponse.php',
+    'TearoomOne\SeoAudit' => 'classes/SeoAudit.php',
+    'TearoomOne\SeoReview' => 'classes/SeoReview.php',
 ];
 
 load($classes, __DIR__);
@@ -99,6 +101,7 @@ App::plugin(
             'mk-title' => __DIR__ . '/fields/mk-title/index.php',
             'mk-description' => __DIR__ . '/fields/mk-description/index.php',
             'mk-slug-info' => __DIR__ . '/fields/mk-slug-info/index.php',
+            'mk-review' => __DIR__ . '/fields/mk-review/index.php',
         ],
         'snippets' => [
             'meta-kit/seo' => __DIR__ . '/snippets/seo.php',
