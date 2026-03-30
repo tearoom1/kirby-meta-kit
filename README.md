@@ -389,28 +389,26 @@ Get a free API key from [OpenRouter.ai](https://openrouter.ai/):
 
 ```php
 'api.key' => 'sk-or-v1-YOUR-KEY',
-'api.model' => 'google/gemini-2.0-flash-exp:free',
+'api.model' => 'stepfun/step-3.5-flash:free',
 ```
 
-#### Available Models
+#### Sample of available Models as of March 2026
 
 **Free Tier (No cost):**
-- `google/gemini-2.0-flash-exp:free` (Recommended - fast & good quality)
-- `google/gemma-2-9b-it:free`
-- `deepseek/deepseek-chat:free`
-- `mistralai/mistral-7b-instruct:free`
-- `meta-llama/llama-3.2-3b-instruct:free`
-- `meta-llama/llama-3.1-8b-instruct:free`
-- `microsoft/phi-3-medium-128k-instruct:free`
-- `qwen/qwen-2.5-7b-instruct:free`
+- `stepfun/step-3.5-flash:free`
+- `nvidia/nemotron-3-super-120b-a12b:free`
+- `google/gemma-3-27b-it:free`
+- `meta-llama/llama-3.3-70b-instruct:free`
+- `deepseek/deepseek-r1-0528-qwen3-8b:free`
+- Many more available [here](https://openrouter.ai/collections/free-models)
 
 **Paid Models (Higher quality):**
-- `openai/gpt-5` or `gpt-5-mini`
-- `anthropic/claude-sonnet-4.5`
-- `google/gemini-pro-1.5`
-- `meta-llama/llama-3.3-70b-instruct`
-- Many more available
-
+- `openai/gpt-5.4` or `openai/gpt-5-mini`
+- `anthropic/claude-sonnet-4.6`
+- `google/gemini-2.5-pro`
+- `xiaomi/mimo-v2-pro`
+- `meta-llama/llama-4-maverick`
+- Find more on OpenRouter. See also the [rankings](https://openrouter.ai/rankings)
 #### AI Behavior Settings
 
 **Temperature** (0.1 - 1.0):
