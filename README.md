@@ -845,6 +845,6 @@ License activation is only required for AI generation and saving changes from th
 
 - **Issues**: [GitHub Issues](https://github.com/tearoom1/kirby-meta-kit/issues)
 - **Documentation**: This README and inline code comments
-- **Kirby Forum**: [forum.getkirby.com](https://forum.getkirby.com)
+- **Support Policy**: Support is limited to public GitHub Issues. Email support, consulting, and guaranteed response times are not included.
 
 [![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://coff.ee/tearoom1)
