@@ -4,7 +4,7 @@ An SEO workflow plugin for Kirby CMS with AI-assisted content generation, experi
 
 [![Screenshot](screenshot.jpg)](https://github.com/tearoom1/kirby-meta-kit)
 
-Get a license: [www.tearoom.one/kirby-plugins/meta-kit](https://www.tearoom.one/kirby-plugins/meta-kit)
+Get a license here: [tearoom.one/kirby-plugins/meta-kit](https://www.tearoom.one/kirby-plugins/meta-kit)
 
 Frontend SEO output, `sitemap.xml`, and `robots.txt` work without license activation. A license is required for full AI generation and full experimental AI content review. Without a license, experimental review can still be used for root-level pages if AI is configured and review is explicitly enabled.
 
@@ -848,6 +848,8 @@ This plugin is licensed under a commercial [LICENSE](LICENSE).
 
 Without activation, the frontend SEO snippet, sitemap, and robots.txt remain fully functional.
 License activation is required for AI generation and for full access to experimental AI content review. If AI is configured and `'review.enabled'` is explicitly enabled, unlicensed installs can still use content review for root-level pages only.
+
+Please visit the plugin website to [purchase a license](https://www.tearoom.one/de/kirby-plugins/meta-kit).
 
 ---
 
