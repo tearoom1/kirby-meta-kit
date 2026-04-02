@@ -142,7 +142,7 @@ export default {
   },
   computed: {
     fallbackSummary() {
-      return 'Review the page topic, search intent, and whether the content clearly supports a strong SEO angle.';
+      return 'Something went wrong.';
     }
   },
   methods: {

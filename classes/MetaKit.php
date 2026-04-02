@@ -271,17 +271,7 @@ class MetaKit
         $page = $payload['page'] ?? null;
         if (!$page) {
             return [
-                'summary' => 'This content needs a manual SEO review. Focus on the page topic, search intent, and whether the metadata supports the real content clearly.',
-                'overallQuality' => '',
-                'verdict' => '',
-                'searchIntent' => '',
-                'needsRewrite' => false,
-                'keyphrases' => [],
-                'strengths' => [],
-                'contentProblems' => [],
-                'improvements' => [],
-                'metadataFit' => [],
-                'nextSteps' => [],
+                'summary' => 'Error: No page provided',
             ];
         }
 
@@ -338,20 +328,12 @@ class MetaKit
             }
         } catch (\Throwable $e) {
             kirbylog('Meta Kit Review Error: ' . $e->getMessage());
+            return [
+                'summary' => 'Error: ' . $e->getMessage()
+            ];
         }
-
         return [
-            'summary' => 'This content needs a manual SEO review. Focus on the page topic, search intent, and whether the metadata supports the real content clearly.',
-            'overallQuality' => '',
-            'verdict' => '',
-            'searchIntent' => '',
-            'needsRewrite' => false,
-            'keyphrases' => [],
-            'strengths' => [],
-            'contentProblems' => [],
-            'improvements' => [],
-            'metadataFit' => [],
-            'nextSteps' => [],
+            'summary' => 'Error: Something went wrong.'
         ];
     }
 
