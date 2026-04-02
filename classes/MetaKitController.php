@@ -67,6 +67,7 @@ class MetaKitController
             'languages' => self::getLanguages(),
             'pages' => $result,
             'aiEnabled' => \TearoomOne\MetaKit::isAiEnabled(),
+            'reviewEnabled' => \TearoomOne\MetaKit::isReviewEnabled(),
             'hasValidLicense' => \TearoomOne\MetaKit::hasValidLicense(),
             'validationSettings' => option('tearoom1.meta-kit.validation', []),
             'siteSettings' => self::getSiteSettings()

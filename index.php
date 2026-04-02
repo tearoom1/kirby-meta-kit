@@ -42,6 +42,7 @@ App::plugin(
                 ]
             ],
             'ai.enabled' => true,
+            'review.enabled' => false,
             'ai.tone' => 'formal',
             'api.key' => null,
             'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',

@@ -105,13 +105,6 @@
           >
             Edit in Panel
           </a>
-          <k-button
-            v-if="aiEnabled && page"
-            icon="sparkling"
-            @click="$emit('review-page', page.id, `SEO Review: ${page.title}`)"
-          >
-            Review SEO
-          </k-button>
         </div>
         <div class="k-meta-kit-dialog-footer-meta">
           <span

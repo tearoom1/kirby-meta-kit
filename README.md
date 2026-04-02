@@ -1,12 +1,12 @@
 # Kirby Meta Kit
 
-An SEO workflow plugin for Kirby CMS with AI-assisted content generation, validation, previews, and centralized metadata management.
+An SEO workflow plugin for Kirby CMS with AI-assisted content generation, experimental content review, validation, previews, and centralized metadata management.
 
 [![Screenshot](screenshot.jpg)](https://github.com/tearoom1/kirby-meta-kit)
 
 Get a license: [www.tearoom.one/kirby-plugins/meta-kit](https://www.tearoom.one/kirby-plugins/meta-kit)
 
-Frontend SEO output, `sitemap.xml`, and `robots.txt` work without license activation. A license is only required for AI generation and for saving changes from the dedicated Meta Kit Panel area.
+Frontend SEO output, `sitemap.xml`, and `robots.txt` work without license activation. A license is required for full AI generation and full experimental AI content review. Without a license, experimental review can still be used for root-level pages if AI is configured and review is explicitly enabled.
 
 ## Why Meta Kit?
 
@@ -58,6 +58,7 @@ Frontend SEO output, `sitemap.xml`, and `robots.txt` work without license activa
 
 - 🎯 **Smart Validation** - Template-specific character limits with visual feedback
 - 🤖 **AI Generation** - Auto-generates SEO content matching your validation rules
+- 🧪 **AI Content Review** - Experimental page review with keyphrase suggestions and editorial feedback
 - 🎛️ **Panel Dashboard** - Dedicated area for metadata management with action-focused stats
 - 👁️ **Live Previews** - See Google, Twitter, Facebook appearance in real-time
 - ⚡ **Bulk Operations** - Edit multiple pages simultaneously
@@ -160,11 +161,12 @@ This is where developers set technical defaults, validation rules, and AI integr
     // AI INTEGRATION
     // ====================================
 
-    'ai.enabled' => true,  // Master toggle for AI features
+    'ai.enabled' => true,       // Master toggle for AI generation
+    'review.enabled' => false,  // Opt-in: show experimental AI content review in the Panel
 
     // OpenRouter API Configuration
     'api.key' => 'sk-or-v1-YOUR-KEY',  // Get free key at openrouter.ai
-    'api.model' => 'google/gemini-2.0-flash-exp:free',  // See available models below
+    'api.model' => 'google/gemma-3-27b-it:free',  // See available models below
     'api.temperature' => 0.7,  // 0.1 (focused) to 1.0 (creative)
 
     // AI Behavior
@@ -467,12 +469,31 @@ Tailor AI generation to your specific needs:
 - Respects language settings (de, en, fr, es, it)
 - Accounts for site name appending in title length
 
+### Experimental AI Content Review
+
+Meta Kit also includes an experimental AI content review for single pages.
+
+- It is meant as a fast editorial aid, not a final SEO verdict
+- Use it to spot weak positioning, vague copy, thin content, and possible keyphrases
+- Treat its output with care and review suggestions manually before making content decisions
+- Review is disabled by default and only appears when `'review.enabled' => true`
+- With a valid license, review is available for all pages
+- Without a license, review is limited to root-level pages
+
 ### Disabling AI
 
 AI features are automatically disabled if:
 - No API key is configured
 - No model is selected
 - `ai.enabled` is set to `false`
+
+To hide only the experimental content review from the Panel while keeping AI generation available, set:
+
+```php
+'tearoom1.meta-kit' => [
+    'review.enabled' => false
+]
+```
 
 When disabled:
 - Generate buttons are hidden
@@ -826,7 +847,7 @@ $ogImage = $page->ogImage()->toFile();
 This plugin is licensed under a commercial [LICENSE](LICENSE).
 
 Without activation, the frontend SEO snippet, sitemap, and robots.txt remain fully functional.
-License activation is only required for AI generation and saving changes from the Meta Kit Panel area.
+License activation is required for AI generation and for full access to experimental AI content review. If AI is configured and `'review.enabled'` is explicitly enabled, unlicensed installs can still use content review for root-level pages only.
 
 ---
 

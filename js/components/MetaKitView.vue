@@ -4,7 +4,7 @@
     <div v-if="!hasValidLicense" class="k-meta-kit-warning">
       <k-box theme="negative">
         <k-icon type="alert"/>
-        <span><strong>No valid license:</strong> AI generation and saving changes are disabled. Meta tags are limited to 20 characters. Please activate your license to use all features.</span>
+        <span><strong>No valid license:</strong> AI generation and saving changes are disabled. Experimental AI content review is limited to root-level pages when it is enabled in the plugin options.</span>
       </k-box>
     </div>
 
@@ -43,11 +43,10 @@
     <meta-kit-actions
       :selected-count="selectedPages.length"
       :ai-enabled="aiEnabled"
+      :review-enabled="reviewEnabled"
       :is-generating="isGeneratingAll"
       @edit-selected="showSelectedPagesDialog"
       @generate-missing="generateAllDescriptions"
-      @review-selected="reviewSelectedPages"
-      @review-site="reviewSite"
       @refresh="refreshPages"
     >
       <template #filters>
@@ -70,10 +69,13 @@
       :show-preview="showPreviewInTable"
       :preview-mode="previewMode"
       :ai-enabled="aiEnabled"
+      :review-enabled="reviewEnabled"
+      :has-valid-license="hasValidLicense"
       :site-settings="siteSettingsData"
       :validation-settings="validationSettingsData"
       @toggle-select-all="toggleSelectAllCurrentPage"
       @toggle-page="togglePageSelection"
+      @review-page="reviewSinglePage"
       @edit-page="editSinglePageMetadata"
       @generate-page="openSinglePageGenerate"
     />
@@ -133,7 +135,6 @@
       :api="$api"
       :site-settings="siteSettingsData"
       :ai-enabled="aiEnabled"
-      @review-page="reviewSinglePage"
       @saved="handleSavedUpdates"
     />
 
@@ -220,6 +221,10 @@ export default {
     aiEnabled: {
       type: Boolean,
       default: true
+    },
+    reviewEnabled: {
+      type: Boolean,
+      default: false
     },
     hasValidLicense: {
       type: Boolean,
@@ -564,20 +569,8 @@ export default {
       this.$refs.singlePageDialog.open(pageId);
     },
 
-    reviewSinglePage(pageId, title = 'Page SEO Review') {
+    reviewSinglePage(pageId, title = 'Page Content Review') {
       this.$refs.reviewDialog.openPage(pageId, title);
-    },
-
-    reviewSelectedPages() {
-      if (!this.selectedPages.length) return;
-      this.$refs.reviewDialog.openSelection(
-        this.selectedPages,
-        `SEO Review for ${this.selectedPages.length} Selected Page${this.selectedPages.length > 1 ? 's' : ''}`
-      );
-    },
-
-    reviewSite() {
-      this.$refs.reviewDialog.openSite('Site SEO Review');
     },
 
     goToLanguage(langCode) {

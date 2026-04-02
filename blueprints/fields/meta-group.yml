@@ -6,7 +6,7 @@ fields:
     type: mk-slug-info
 
   seoReview:
-    label: AI SEO Review
+    label: AI Content Review
     type: mk-review
 
   metaTitle:

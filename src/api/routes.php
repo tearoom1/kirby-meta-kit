@@ -18,6 +18,32 @@ return function () {
         return null;
     };
 
+    $reviewGuard = function () {
+        if (!TearoomOne\MetaKit::isReviewEnabled()) {
+            return [
+                'status' => 'error',
+                'message' => 'AI review is disabled. Enable it in the plugin options and make sure AI is configured.'
+            ];
+        }
+
+        return null;
+    };
+
+    $reviewPageGuard = function (string $pageId) use ($reviewGuard) {
+        if ($error = $reviewGuard()) {
+            return $error;
+        }
+
+        if (!TearoomOne\MetaKit::canReviewPage($pageId)) {
+            return [
+                'status' => 'error',
+                'message' => 'Without a valid license, AI content review is limited to root-level pages.'
+            ];
+        }
+
+        return null;
+    };
+
     $routes = [
         [
             "pattern" => "meta-kit/pages",
@@ -31,6 +57,7 @@ return function () {
                     "language" => $data["language"],
                     "languages" => $data["languages"],
                     "aiEnabled" => $data["aiEnabled"],
+                    "reviewEnabled" => $data["reviewEnabled"],
                     "siteSettings" => $data["siteSettings"] ?? [],
                     "validationSettings" => $data["validationSettings"] ?? [],
                 ];
@@ -76,45 +103,23 @@ return function () {
     ];
 
     // Add AI-related routes only if AI is enabled
-    if (TearoomOne\MetaKit::isAiEnabled()) {
+    if (TearoomOne\MetaKit::isReviewEnabled()) {
         $routes[] = [
             "pattern" => "meta-kit/review-page",
             "method" => "POST",
             "auth" => true,
-            "action" => function () use ($licenseGuard) {
-                if ($error = $licenseGuard()) {
+            "action" => function () use ($reviewPageGuard) {
+                $pageId = get("pageId");
+                if ($error = $reviewPageGuard($pageId)) {
                     return $error;
                 }
 
-                $pageId = get("pageId");
                 return TearoomOne\SeoReview::reviewPage($pageId);
             },
         ];
-        $routes[] = [
-            "pattern" => "meta-kit/review-pages",
-            "method" => "POST",
-            "auth" => true,
-            "action" => function () use ($licenseGuard) {
-                if ($error = $licenseGuard()) {
-                    return $error;
-                }
+    }
 
-                $pageIds = get("pageIds", []);
-                return TearoomOne\SeoReview::reviewPageIds($pageIds);
-            },
-        ];
-        $routes[] = [
-            "pattern" => "meta-kit/review-site",
-            "method" => "POST",
-            "auth" => true,
-            "action" => function () use ($licenseGuard) {
-                if ($error = $licenseGuard()) {
-                    return $error;
-                }
-
-                return TearoomOne\SeoReview::reviewSite();
-            },
-        ];
+    if (TearoomOne\MetaKit::isAiEnabled()) {
         $routes[] = [
             "pattern" => "meta-kit/generate",
             "method" => "POST",

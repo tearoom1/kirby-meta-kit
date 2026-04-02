@@ -261,6 +261,13 @@
               @click="$emit('generate-page', page.id)"
               title="Generate with AI"
             />
+            <k-button
+              v-if="canReviewPage(page)"
+              icon="preview"
+              size="sm"
+              @click="$emit('review-page', page.id, `Content Review: ${page.title}`)"
+              title="Review Content"
+            />
           </div>
         </td>
       </tr>
@@ -332,6 +339,14 @@ export default {
       type: Boolean,
       default: true
     },
+    reviewEnabled: {
+      type: Boolean,
+      default: false
+    },
+    hasValidLicense: {
+      type: Boolean,
+      default: false
+    },
     siteSettings: {
       type: Object,
       default: () => ({})
@@ -358,6 +373,12 @@ export default {
 
     isPageSelected(pageId) {
       return this.selectedPages.includes(pageId);
+    },
+
+    canReviewPage(page) {
+      if (!this.reviewEnabled) return false;
+      if (this.hasValidLicense) return true;
+      return page.id !== 'site' && !page.id.includes('/');
     },
 
     // Delegate to composables with proper context

@@ -6,7 +6,7 @@ use TearoomOne\MetaKit;
 return [
     'extends' => 'info',
     'props' => [
-        'label' => function ($label = 'AI SEO Review') {
+        'label' => function ($label = 'AI Content Review') {
             return $label;
         },
         'theme' => function ($theme = 'info') {
@@ -20,6 +20,12 @@ return [
         },
         'aiEnabled' => function () {
             return MetaKit::isAiEnabled();
+        },
+        'reviewEnabled' => function () {
+            return MetaKit::isReviewEnabled();
+        },
+        'hasValidLicense' => function () {
+            return MetaKit::hasValidLicense();
         }
     ]
 ];
