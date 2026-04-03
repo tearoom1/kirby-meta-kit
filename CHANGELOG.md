@@ -1,3 +1,20 @@
+## [1.4.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.3.1...v1.4.0) (2026-04-03)
+
+
+### Features
+
+* AI SEO review of pages ([6755794](https://github.com/tearoom1/kirby-meta-kit/commit/675579497a56ca13fb0e8fa83caf6ea07d2d4303))
+* review button ([c6032d2](https://github.com/tearoom1/kirby-meta-kit/commit/c6032d2aa60cf8b6807a730d572b0774cf5ba0e7))
+
+
+### Bug Fixes
+
+* cleanup code ([be156e5](https://github.com/tearoom1/kirby-meta-kit/commit/be156e5e5063bd99e459ff704c2f93b6143f50d7))
+* cleanup styles ([267d13f](https://github.com/tearoom1/kirby-meta-kit/commit/267d13f6ac9fb0f85629e37c6f2f80cab64703bf))
+* styles ([9f7f70b](https://github.com/tearoom1/kirby-meta-kit/commit/9f7f70b441967d5d0e822690a7f471e9588e07db))
+* styles ([fba04aa](https://github.com/tearoom1/kirby-meta-kit/commit/fba04aaf642c3cc3f74e848ecb565321f4acf6cb))
+* styles ([20bad0c](https://github.com/tearoom1/kirby-meta-kit/commit/20bad0ce09ca6efbcdea56635c159793b494b964))
+
 ## [1.3.1](https://github.com/tearoom1/kirby-meta-kit/compare/v1.3.0...v1.3.1) (2026-03-30)
 
 
@@ -25,11 +42,4 @@
 ### Bug Fixes
 
 * do not update og from meta automatically ([61be79d](https://github.com/tearoom1/kirby-meta-kit/commit/61be79def712e9fc37f6fb3f838d02a05286977f))
-
-## [1.1.0](https://github.com/tearoom1/kirby-meta-kit/compare/d3142fee73b6f8a015234a45411d4d06a1c63411...v1.1.0) (2025-11-24)
-
-
-### Features
-
-* added AI tone ([d3142fe](https://github.com/tearoom1/kirby-meta-kit/commit/d3142fee73b6f8a015234a45411d4d06a1c63411))
 
