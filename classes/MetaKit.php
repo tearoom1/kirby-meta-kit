@@ -60,6 +60,37 @@ class MetaKit
         return self::$aiEnabledCache = $hasModel && $hasKey;
     }
 
+    public static function isReviewEnabled(): bool
+    {
+        if (!option('tearoom1.meta-kit.review.enabled', false)) {
+            return false;
+        }
+
+        return self::isAiEnabled();
+    }
+
+    public static function canReviewPage(string $pageId): bool
+    {
+        if (!self::isReviewEnabled()) {
+            return false;
+        }
+
+        if (self::hasValidLicense()) {
+            return true;
+        }
+
+        if ($pageId === 'site') {
+            return false;
+        }
+
+        $page = kirby()->page($pageId);
+        if (!$page) {
+            return false;
+        }
+
+        return $page->depth() === 1;
+    }
+
     public function __construct(Kirby $kirby)
     {
         $this->kirby = $kirby;
@@ -183,6 +214,127 @@ class MetaKit
         }
 
         return $data['choices'][0]['message']['content'];
+    }
+
+    protected function decodeJsonResponse(string $response): ?array
+    {
+        $trimmed = trim($response);
+        $decoded = json_decode($trimmed, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded;
+        }
+
+        if (preg_match('/```(?:json)?\s*(\{.*\})\s*```/sU', $trimmed, $matches)) {
+            $decoded = json_decode($matches[1], true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        if (preg_match('/(\{.*\})/sU', $trimmed, $matches)) {
+            $decoded = json_decode($matches[1], true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return null;
+    }
+
+    protected function normalizeStringList($value): array
+    {
+        if (is_string($value)) {
+            $value = preg_split('/\r\n|\r|\n/', $value) ?: [$value];
+        }
+
+        if (!is_array($value)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map(
+            static fn ($item) => is_string($item) ? trim($item) : '',
+            $value
+        )));
+    }
+
+    protected function normalizeObjectList($value): array
+    {
+        if (!is_array($value)) {
+            return [];
+        }
+
+        return array_values(array_filter($value, 'is_array'));
+    }
+
+    public function generateSeoReview(array $payload): array
+    {
+        $page = $payload['page'] ?? null;
+        if (!$page) {
+            return [
+                'summary' => 'Error: No page provided',
+            ];
+        }
+
+        $prompt = "You are an experienced SEO content strategist and content critic.\n" .
+            "Analyze the full page content and current metadata. Be candid, not polite.\n" .
+            "Judge the page according to its actual page type and purpose.\n" .
+            "A demo page, landing page, product page, feature page, or workflow page does not need to read like a long editorial article to be good.\n" .
+            "Do not call content placeholder-like just because it is concise, branded, or focused on explaining a product feature.\n" .
+            "Only call content weak if it is genuinely vague, incoherent, repetitive, empty, generic, or lacking a clear audience benefit.\n" .
+            "If the page clearly explains a focused topic, intended audience, and practical benefit, treat that as a real strength.\n" .
+            "If the content is weak, generic, placeholder-like, mixed-topic, incoherent, repetitive, or not SEO-ready, say so clearly.\n" .
+            "Treat lorem ipsum, filler copy, test content, generic headings, and off-topic pasted text as serious quality problems.\n" .
+            "Do not focus on character-count validation.\n" .
+            "Do not invent strengths if the page is poor. It is acceptable to say there are few real strengths.\n" .
+            "When evaluating depth, consider whether the content is sufficient for the page's purpose, not whether it is long.\n" .
+            "Only suggest keyphrases that are actually supported by the page content. If the content is too weak, say the page needs rewriting before keyword targeting.\n" .
+            "Return valid JSON only.\n\n" .
+            "Return this exact JSON shape:\n" .
+            "{\n" .
+            '  "summary": "short paragraph",'. "\n" .
+            '  "overallQuality": "High|Medium|Low",'. "\n" .
+            '  "verdict": "clear blunt verdict",'. "\n" .
+            '  "searchIntent": "short description",'. "\n" .
+            '  "needsRewrite": true,'. "\n" .
+            '  "keyphrases": [' . "\n" .
+            '    { "phrase": "keyphrase", "fit": "strong|medium|weak", "reason": "why it fits or why it is weak" }'. "\n" .
+            '  ],'. "\n" .
+            '  "strengths": ["strength 1", "strength 2"],'. "\n" .
+            '  "contentProblems": ["problem 1", "problem 2", "problem 3"],'. "\n" .
+            '  "improvements": ["improvement 1", "improvement 2", "improvement 3"],'. "\n" .
+            '  "metadataFit": ["short note about title/description fit"],'. "\n" .
+            '  "nextSteps": ["next step 1", "next step 2"]'. "\n" .
+            "}\n\n" .
+            "Page context:\n" . json_encode($page, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        try {
+            $response = $this->callApi($prompt, 700);
+            $decoded = $this->decodeJsonResponse($response);
+
+            if ($decoded) {
+                return [
+                    'summary' => trim((string)($decoded['summary'] ?? '')),
+                    'overallQuality' => trim((string)($decoded['overallQuality'] ?? '')),
+                    'verdict' => trim((string)($decoded['verdict'] ?? '')),
+                    'searchIntent' => trim((string)($decoded['searchIntent'] ?? '')),
+                    'needsRewrite' => (bool)($decoded['needsRewrite'] ?? false),
+                    'keyphrases' => $this->normalizeObjectList($decoded['keyphrases'] ?? []),
+                    'strengths' => $this->normalizeStringList($decoded['strengths'] ?? []),
+                    'contentProblems' => $this->normalizeStringList($decoded['contentProblems'] ?? []),
+                    'improvements' => $this->normalizeStringList($decoded['improvements'] ?? []),
+                    'metadataFit' => $this->normalizeStringList($decoded['metadataFit'] ?? []),
+                    'nextSteps' => $this->normalizeStringList($decoded['nextSteps'] ?? []),
+                ];
+            }
+        } catch (\Throwable $e) {
+            kirbylog('Meta Kit Review Error: ' . $e->getMessage());
+            return [
+                'summary' => 'Error: ' . $e->getMessage()
+            ];
+        }
+        return [
+            'summary' => 'Error: Something went wrong.'
+        ];
     }
 
     public function generateTitle(string $content, array $context = []): ?string

@@ -5,6 +5,7 @@
       <k-button
         v-if="aiEnabled"
         icon="sparkling"
+        class="k-meta-kit-button-ai-generate"
         :size="buttonSize"
         :disabled="isGenerating"
         @click="$emit('generate')"

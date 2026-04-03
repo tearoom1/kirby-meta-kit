@@ -11,6 +11,7 @@
       <k-button
         v-if="aiEnabled"
         icon="sparkling"
+        class="k-meta-kit-button-ai-generate"
         :disabled="isGenerating || selectedCount === 0"
         :progress="isGenerating"
         @click="$emit('generate-missing')"
@@ -34,6 +35,10 @@ export default {
     aiEnabled: {
       type: Boolean,
       default: true
+    },
+    reviewEnabled: {
+      type: Boolean,
+      default: false
     },
     isGenerating: {
       type: Boolean,

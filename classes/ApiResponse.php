@@ -86,11 +86,4 @@ class ApiResponse
         return self::error("{$entity} not found");
     }
 
-    /**
-     * Create a field updated response
-     */
-    public static function fieldUpdated(): array
-    {
-        return self::success(null, 'Field updated successfully');
-    }
 }
