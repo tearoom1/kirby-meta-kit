@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" size="large" :cancel-button="false" submitButton="" @submit.prevent="save">
+  <k-dialog ref="dialog" size="large" class="k-meta-kit-dialog" :cancel-button="false"  :submit-button="false" @submit.prevent="save">
     <k-headline v-if="page">Edit: {{ page.title }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -21,7 +21,6 @@
           :is-generating="generating.metaTitle"
           @generate="generate('metaTitle')"
           :placeholder="page.metaTitle || page.title || 'No meta title set'"
-          button-size="sm"
           field-class="k-meta-kit-single-field-content"
         />
       </div>
@@ -36,7 +35,6 @@
           :is-generating="generating.metaDescription"
           @generate="generate('metaDescription')"
           :placeholder="page.metaDescription || siteSettings.siteMetaDescription || 'No meta description set'"
-          button-size="sm"
           :rows="3"
           buttons="false"
           field-class="k-meta-kit-single-field-content"
@@ -58,7 +56,6 @@
           @generate="generate('ogTitle')"
           :placeholder="page.ogTitle || page.metaTitle || page.title || 'No OG title'"
           type="og"
-          button-size="sm"
           field-class="k-meta-kit-single-field-content"
         />
       </div>
@@ -74,7 +71,6 @@
           @generate="generate('ogDescription')"
           :placeholder="page.ogDescription || page.metaDescription || siteSettings.siteMetaDescription || 'No OG description'"
           type="og"
-          button-size="sm"
           :rows="3"
           buttons="false"
           field-class="k-meta-kit-single-field-content"

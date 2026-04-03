@@ -257,6 +257,7 @@
             <k-button
               v-if="aiEnabled"
               icon="sparkling"
+              class="k-meta-kit-button-ai-generate"
               size="sm"
               @click="$emit('generate-page', page.id)"
               title="Generate with AI"

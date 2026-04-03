@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" size="medium">
+  <k-dialog ref="dialog" class="k-meta-kit-dialog" size="medium">
     <k-headline>Generate Missing Metadata</k-headline>
     <k-text>Select which fields to generate for {{ selectedCount }} selected page(s):</k-text>
 
@@ -51,7 +51,7 @@
         <k-button @click="close()">Cancel</k-button>
         <k-button
           icon="sparkling"
-          theme="positive"
+          class="k-meta-kit-button-ai-generate"
           :disabled="!hasAnySelected"
           @click="generate"
         >

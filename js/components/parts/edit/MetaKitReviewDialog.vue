@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" size="huge" :cancel-button="false" submitButton="">
+  <k-dialog ref="dialog" class="k-meta-kit-dialog k-meta-kit-view" size="huge" :cancel-button="false" :submit-button="false">
     <k-headline>{{ headline }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -7,11 +7,11 @@
       <span>Reviewing content…</span>
     </div>
 
-    <div v-else-if="error" class="k-meta-kit-review-dialog">
+    <div v-else-if="error" class="k-meta-kit-review-div">
       <p class="k-meta-kit-review-error">{{ error }}</p>
     </div>
 
-    <div v-else-if="reviewData" class="k-meta-kit-review-dialog">
+    <div v-else-if="reviewData" class="k-meta-kit-review-div">
 
       <!-- Summary card -->
       <div class="k-meta-kit-review-summary-card">

@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" size="huge" :cancel-button="false" submitButton="" @submit.prevent="saveAll">
+  <k-dialog ref="dialog" class="k-meta-kit-dialog k-meta-kit-dialog-bulk" size="huge" :cancel-button="false" :submit-button="false" @submit.prevent="saveAll">
     <k-headline>Edit Selected Pages ({{ pages.length }})</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -11,14 +11,14 @@
       <!-- Tabs -->
       <div class="k-meta-kit-tabs">
         <k-button
-          :theme="activeTab === 'meta' ? 'positive' : ''"
+          :class="activeTab === 'meta' ? 'active' : ''"
           @click="activeTab = 'meta'"
           size="sm"
         >
           Meta Tags
         </k-button>
         <k-button
-          :theme="activeTab === 'og' ? 'positive' : ''"
+          :class="activeTab === 'og' ? 'active' : ''"
           @click="activeTab = 'og'"
           size="sm"
         >
@@ -30,8 +30,8 @@
       <div v-if="activeTab === 'meta'" class="k-meta-kit-dialog-table-wrapper">
         <div v-for="page in pages" :key="`meta-${page.id}`" class="k-meta-kit-dialog-table-page">
           <div class="k-meta-kit-dialog-page-info">
-            <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
-            <a :href="page.panelUrl" class="k-link k-meta-kit-page-id">{{ page.id }}</a>
+            <h2><a :href="page.panelUrl" class="k-meta-kit-page-id">{{ page.title }}</a></h2>
+            <a :href="page.panelUrl" class="k-meta-kit-page-id">{{ page.id }}</a>
           </div>
 
           <!-- Meta Title -->
@@ -67,8 +67,8 @@
       <div v-if="activeTab === 'og'" class="k-meta-kit-dialog-table-wrapper">
         <div v-for="page in pages" :key="`og-${page.id}`" class="k-meta-kit-dialog-table-page">
           <div class="k-meta-kit-dialog-page-info">
-            <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
-            <a :href="page.panelUrl" class="k-link k-meta-kit-page-id">{{ page.id }}</a>
+            <h2><a :href="page.panelUrl" class="k-meta-kit-page-id">{{ page.title }}</a></h2>
+            <a :href="page.panelUrl" class="k-meta-kit-page-id">{{ page.id }}</a>
           </div>
 
           <!-- OG Title -->

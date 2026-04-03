@@ -480,6 +480,28 @@ Meta Kit also includes an experimental AI content review for single pages.
 - With a valid license, review is available for all pages
 - Without a license, review is limited to root-level pages
 
+#### Adding the review button to a page blueprint
+
+Add the `mk-review` field anywhere in your page blueprint. It renders as a single right-aligned button that opens the full review dialog. All state (AI enabled, review enabled, license) is computed server-side — no extra options are required:
+
+```yaml
+# site/blueprints/pages/default.yml
+tabs:
+  seo:
+    label: SEO
+    sections:
+      seo:
+        type: fields
+        fields:
+          review:
+            type: mk-review
+          metaTitle:
+            type: mk-title
+            # ...
+```
+
+A good place is directly above the `seo-preview` section so the button appears right before the live preview. The button is automatically hidden when AI is not configured or `review.enabled` is `false`.
+
 ### Disabling AI
 
 AI features are automatically disabled if:

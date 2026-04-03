@@ -11,6 +11,7 @@
       <k-button
         v-if="aiEnabled"
         icon="sparkling"
+        class="k-meta-kit-button-ai-generate"
         :disabled="isGenerating || selectedCount === 0"
         :progress="isGenerating"
         @click="$emit('generate-missing')"
