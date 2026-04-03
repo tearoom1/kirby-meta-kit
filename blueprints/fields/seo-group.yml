@@ -5,10 +5,6 @@ fields:
     label: Slug Validation
     type: mk-slug-info
 
-  seoReview:
-    label: AI Content Review
-    type: mk-review
-
   metaTitle:
     label: Meta Title
     type: mk-title

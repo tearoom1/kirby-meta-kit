@@ -3488,7 +3488,7 @@ Avg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / $
   };
   var _sfc_render = function render() {
     var _vm = this, _c = _vm._self._c;
-    return _c("k-field", _vm._b({ staticClass: "k-mk-review-field" }, "k-field", _vm.$props, false), [_c("div", { staticClass: "k-mk-review-bar" }, [_vm.statusText ? _c("span", { staticClass: "k-mk-review-status" }, [_vm._v(_vm._s(_vm.statusText))]) : _vm._e(), _c("k-button", { attrs: { "icon": "sparkling", "size": "sm", "disabled": _vm.disabled || !_vm.canReview, "text": "Review Content" }, on: { "click": _vm.reviewSeo } })], 1), _c("meta-kit-review-dialog", { ref: "dialog", attrs: { "api": _vm.$api } })], 1);
+    return _c("k-field", _vm._b({ staticClass: "k-mk-review-field" }, "k-field", _vm.$props, false), [_c("div", { staticClass: "k-mk-review-bar" }, [_vm.statusText ? _c("span", { staticClass: "k-mk-review-status" }, [_vm._v(_vm._s(_vm.statusText))]) : _vm._e(), _c("k-button", { attrs: { "icon": "preview", "size": "sm", "disabled": _vm.disabled || !_vm.canReview, "text": "Review Content" }, on: { "click": _vm.reviewSeo } })], 1), _c("meta-kit-review-dialog", { ref: "dialog", attrs: { "api": _vm.$api } })], 1);
   };
   var _sfc_staticRenderFns = [];
   _sfc_render._withStripped = true;

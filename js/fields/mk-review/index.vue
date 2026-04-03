@@ -3,7 +3,7 @@
     <div class="k-mk-review-bar">
       <span v-if="statusText" class="k-mk-review-status">{{ statusText }}</span>
       <k-button
-        icon="sparkling"
+        icon="preview"
         size="sm"
         :disabled="disabled || !canReview"
         text="Review Content"
@@ -60,23 +60,3 @@ export default {
   }
 };
 </script>
-
-<style>
-.k-mk-review-field {
-  .k-field-header {
-    display: none;
-  }
-
-  .k-mk-review-bar {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 0.75rem;
-  }
-
-  .k-mk-review-status {
-    font-size: 0.8125rem;
-    color: var(--color-text-dimmed);
-  }
-}
-</style>

@@ -469,3 +469,12 @@ export default {
   }
 }
 </script>
+
+<style>
+.k-seo-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+</style>
