@@ -12,19 +12,12 @@
     height: var(--button-height);
     width: var(--button-width);
     align-content: center;
-    animation: background-color 0.3s ease;
   }
   .k-button:hover, .k-link:hover {
     background: var(--color-blue-700);
   }
 }
 
-
-.k-meta-kit-button-ai-generate {
-  /*color: var(--color-purple-400);*/
-  /*border-color: var(--color-purple-400);*/
-  /*padding: 0.4rem 0.8rem;*/
-}
 
 
 .k-meta-kit-view {
@@ -595,18 +588,6 @@
     color: var(--color-gray-600);
   }
 
-  .k-meta-kit-spinner {
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
 
   .k-meta-kit-legacy-list {
     padding: 1rem;
