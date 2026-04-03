@@ -9,28 +9,6 @@ class MetaKitController
      */
     const int MIN_TEXT_LENGTH = 25;
 
-    /**
-     * Convert SEO data to array for saving (legacy support)
-     */
-    public static function seoDataToArray($seoData)
-    {
-        if (!$seoData) {
-            return [];
-        }
-
-        // If it's already an array, return it
-        if (is_array($seoData)) {
-            return $seoData;
-        }
-
-        // Convert object to array
-        if (method_exists($seoData, 'toArray')) {
-            return $seoData->toArray();
-        }
-
-        return [];
-    }
-
     public static function getPages(): array
     {
         $kirby = kirby();

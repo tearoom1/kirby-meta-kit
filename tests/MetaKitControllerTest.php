@@ -211,22 +211,6 @@ class MetaKitControllerTest extends TestCase
     }
 
     /**
-     * Test seoDataToArray helper method (for legacy support)
-     */
-    public function testSeoDataToArray()
-    {
-        // Test with null input
-        $result = MetaKitController::seoDataToArray(null);
-        $this->assertIsArray($result);
-        $this->assertEmpty($result);
-
-        // Test with array input
-        $input = ['metaTitle' => 'Test', 'metaDescription' => 'Desc'];
-        $result = MetaKitController::seoDataToArray($input);
-        $this->assertEquals($input, $result);
-    }
-
-    /**
      * Test flat field updates work correctly
      */
     public function testFlatFieldUpdates()

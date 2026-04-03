@@ -268,9 +268,6 @@ class MetaKit
 
     public function generateSeoReview(array $payload): array
     {
-//        return [
-//            'summary' => 'Error: No page provided',
-//        ];
         $page = $payload['page'] ?? null;
         if (!$page) {
             return [
