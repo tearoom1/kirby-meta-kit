@@ -411,6 +411,7 @@ Get a free API key from [OpenRouter.ai](https://openrouter.ai/):
 - `xiaomi/mimo-v2-pro`
 - `meta-llama/llama-4-maverick`
 - Find more on OpenRouter. See also the [rankings](https://openrouter.ai/rankings)
+
 #### AI Behavior Settings
 
 **Temperature** (0.1 - 1.0):
@@ -698,6 +699,7 @@ robots.txt available at `/robots.txt` with:
 'schema.enabled' => true,
 ```
 
+---
 
 ## Best Practices
 
@@ -799,7 +801,7 @@ Response:
 ```json
 {
   "status": "success",
-  "description": "AI-generated description matching validation rules..."
+  "content": "AI-generated content matching validation rules..."
 }
 ```
 

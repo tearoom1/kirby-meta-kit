@@ -156,7 +156,6 @@ class ConfigHelper
     public static function getSitemapSettings(): array
     {
         $defaults = [
-            'sitemap.include' => 'all',
             'sitemap.exclude' => ['error'],
             'sitemap.includeUnlisted' => false,
             'sitemap.changefreq.default' => 'monthly',
