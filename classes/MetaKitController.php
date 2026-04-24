@@ -251,9 +251,23 @@ class MetaKitController
     {
         $kirby = kirby();
         $page = self::getPageOrSite($pageId);
+        $allowedFields = [
+            'metaTitle',
+            'metaDescription',
+            'ogTitle',
+            'ogDescription',
+            'ogImage',
+            'robots',
+            'canonicalUrl',
+            'metaAuthor',
+        ];
 
         if (!$page) {
             return ApiResponse::notFound();
+        }
+
+        if (!in_array($fieldName, $allowedFields, true)) {
+            return ApiResponse::error('Unsupported field name');
         }
 
         try {

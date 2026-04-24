@@ -19,13 +19,4 @@ return [
         "pattern" => "robots.txt",
         "action" => require __DIR__ . "/robots.txt.php",
     ],
-    [
-        "pattern" => "meta-kit/license/activate",
-        "method" => "POST",
-        "auth" => true,
-        "action" => function () {
-            $plugin = kirby()->plugin("tearoom1/meta-kit");
-            return $plugin->license()->activate();
-        },
-    ],
 ];

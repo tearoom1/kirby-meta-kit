@@ -124,7 +124,14 @@ return function () {
             "pattern" => "meta-kit/generate",
             "method" => "POST",
             "auth" => true,
-            "action" => require __DIR__ . "/generate.php",
+            "action" => function () use ($licenseGuard) {
+                if ($error = $licenseGuard()) {
+                    return $error;
+                }
+
+                $action = require __DIR__ . "/generate.php";
+                return $action();
+            },
         ];
         $routes[] = [
             "pattern" => "meta-kit/generate-description",
