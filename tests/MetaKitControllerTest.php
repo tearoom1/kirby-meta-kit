@@ -138,6 +138,15 @@ class MetaKitControllerTest extends TestCase
         $this->assertEquals('Page not found', $result['message']);
     }
 
+    public function testApplySingleFieldRejectsUnsupportedFields()
+    {
+        $result = MetaKitController::applySingleField('test-page', 'title', 'Changed Title');
+
+        $this->assertEquals('error', $result['status']);
+        $this->assertEquals('Unsupported field name', $result['message']);
+        $this->assertEquals('Test Page', $this->kirby->page('test-page')->title()->value());
+    }
+
     /**
      * Test getSinglePage returns correct data structure
      */

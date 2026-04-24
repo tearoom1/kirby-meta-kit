@@ -34,6 +34,8 @@ abstract class KirbyTestCase extends TestCase
 
         // Reset ConfigHelper site settings cache
         ConfigHelper::clearCache();
+
+        parent::tearDown();
     }
 
     /**
@@ -52,6 +54,7 @@ abstract class KirbyTestCase extends TestCase
         $this->tempDirs[] = $testDir;
         mkdir($testDir, 0777, true);
         mkdir($testDir . '/content', 0777, true);
+        mkdir($testDir . '/site/plugins', 0777, true);
 
         foreach ($contentFiles as $relativePath => $content) {
             $fullPath = $testDir . '/content/' . $relativePath;
@@ -66,6 +69,8 @@ abstract class KirbyTestCase extends TestCase
             'roots' => [
                 'index'   => $testDir,
                 'content' => $testDir . '/content',
+                'site'    => $testDir . '/site',
+                'plugins' => $testDir . '/site/plugins',
             ],
             'options' => $options,
             'users' => [

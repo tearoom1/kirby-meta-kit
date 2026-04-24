@@ -162,7 +162,7 @@ class MetaKit
         }
 
         // Calculate space taken by site name (including spaces around separator)
-        $siteNameLength = mb_strlen($settings['siteMetaTitle']) + mb_strlen($settings['titleSeparator']) + 2;
+        $siteNameLength = mb_strlen((string)($settings['siteMetaTitle'] ?? '')) + mb_strlen((string)($settings['titleSeparator'] ?? '')) + 2;
 
         // Reserve space for site name
         $minTarget = max(25, $optimalMin - $siteNameLength);
