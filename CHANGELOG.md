@@ -1,3 +1,10 @@
+## [1.5.4](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.3...v1.5.4) (2026-06-08)
+
+
+### Bug Fixes
+
+* preserve batch notification context ([460a270](https://github.com/tearoom1/kirby-meta-kit/commit/460a270c41ca7d3b60d85042669c48e1ac133c9c))
+
 ## [1.5.3](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.2...v1.5.3) (2026-06-08)
 
 
@@ -25,21 +32,4 @@
 ### Features
 
 * require license for non-allowlisted AI models ([a5edd18](https://github.com/tearoom1/kirby-meta-kit/commit/a5edd1894794f4864e13276e183dcd0caec5ded4))
-
-## [1.4.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.3.1...v1.4.0) (2026-04-03)
-
-
-### Features
-
-* AI SEO review of pages ([6755794](https://github.com/tearoom1/kirby-meta-kit/commit/675579497a56ca13fb0e8fa83caf6ea07d2d4303))
-* review button ([c6032d2](https://github.com/tearoom1/kirby-meta-kit/commit/c6032d2aa60cf8b6807a730d572b0774cf5ba0e7))
-
-
-### Bug Fixes
-
-* cleanup code ([be156e5](https://github.com/tearoom1/kirby-meta-kit/commit/be156e5e5063bd99e459ff704c2f93b6143f50d7))
-* cleanup styles ([267d13f](https://github.com/tearoom1/kirby-meta-kit/commit/267d13f6ac9fb0f85629e37c6f2f80cab64703bf))
-* styles ([9f7f70b](https://github.com/tearoom1/kirby-meta-kit/commit/9f7f70b441967d5d0e822690a7f471e9588e07db))
-* styles ([fba04aa](https://github.com/tearoom1/kirby-meta-kit/commit/fba04aaf642c3cc3f74e848ecb565321f4acf6cb))
-* styles ([20bad0c](https://github.com/tearoom1/kirby-meta-kit/commit/20bad0ce09ca6efbcdea56635c159793b494b964))
 
