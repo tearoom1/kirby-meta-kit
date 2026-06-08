@@ -48,7 +48,7 @@ return function () {
         ];
     } catch (Exception $e) {
         // Log the error
-        kirbylog('Meta Kit API Error: ' . $e->getMessage());
+        MetaKit::log('Meta Kit API Error: ' . $e->getMessage());
 
         return [
             'status' => 'error',

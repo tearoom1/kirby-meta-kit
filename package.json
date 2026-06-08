@@ -1,6 +1,6 @@
 {
   "name": "@tearoom1/meta-kit",
-  "version": "1.2.0",
+  "version": "1.5.5",
   "type": "module",
   "description": "AI-powered SEO plugin for Kirby with meta descriptions, previews, and Schema.org",
   "scripts": {

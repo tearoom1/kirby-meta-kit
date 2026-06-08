@@ -20,7 +20,7 @@ return [
                 [
                     "content" => [
                         "apiKey" => "",
-                        "model" => "google/gemini-2.0-flash-exp:free",
+                        "model" => "google/gemma-4-31b-it:free",
                         "temperature" => 0.7,
                     ],
                     "id" => "openrouter-settings",
@@ -116,7 +116,7 @@ return [
             }
         } catch (Exception $e) {
             // Silently fail - don't break the save operation
-            kirbylog("Meta Kit auto-generate error: " . $e->getMessage());
+            TearoomOne\MetaKit::log("Meta Kit auto-generate error: " . $e->getMessage());
         }
     },
     "site.update:after" => function () {

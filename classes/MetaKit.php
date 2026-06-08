@@ -47,6 +47,13 @@ class MetaKit
         return self::canUseConfiguredAiModel();
     }
 
+    public static function log(string $message): void
+    {
+        if (function_exists('kirbylog')) {
+            kirbylog($message);
+        }
+    }
+
     public static function getUsableAiModel(): ?string
     {
         $configuredModel = self::getConfiguredAiModel();
@@ -68,8 +75,8 @@ class MetaKit
     {
         $settings = ConfigHelper::getOpenRouterSettings();
         $freeModels = $settings['license.freeAiModels'] ?? [
-            'meta-llama/llama-3.2-3b-instruct:free',
             'google/gemma-4-31b-it:free',
+            'meta-llama/llama-3.2-3b-instruct:free',
             'nvidia/nemotron-3-nano-30b-a3b:free',
         ];
 
@@ -263,9 +270,20 @@ class MetaKit
     protected function callApi(string $prompt, int $maxTokens): string
     {
         $apiKey = $this->options['api.key'] ?? null;
+        $model = is_string($this->options['api.model'] ?? null)
+            ? trim($this->options['api.model'])
+            : null;
 
         if (empty($apiKey)) {
             throw new Exception('OpenRouter API key is not configured');
+        }
+
+        if ($model === null || $model === '') {
+            throw new Exception('OpenRouter model is not configured');
+        }
+
+        if (!self::canUseAiModel($model)) {
+            throw new Exception(self::getAiAccessErrorMessage());
         }
 
         $response = $this->httpClient->post($this->options['api.endpoint'], [
@@ -276,7 +294,7 @@ class MetaKit
                 'HTTP-Referer' => $this->kirby->url(),
             ],
             'json' => [
-                'model' => $this->options['api.model'],
+                'model' => $model,
                 'messages' => [
                     ['role' => 'user', 'content' => $prompt]
                 ],
@@ -288,17 +306,15 @@ class MetaKit
         $body = $response->getBody()->getContents();
         $data = json_decode($body, true);
 
-        kirbylog('OpenRouter Response: ' . substr($body, 0, 500));
-
         if ($response->getStatusCode() >= 400) {
-            $errorMsg = $this->formatOpenRouterError($data, $body, $this->options['api.model'] ?? null);
-            kirbylog('OpenRouter API Error: ' . $errorMsg);
+            $errorMsg = $this->formatOpenRouterError($data, $body, $model);
+            self::log('OpenRouter API Error: ' . $errorMsg);
             throw new Exception('OpenRouter API error: ' . $errorMsg);
         }
 
         if (!isset($data['choices'][0]['message']['content'])) {
             $errorMsg = $data['error']['message'] ?? 'Unknown API error';
-            kirbylog('OpenRouter API Error: ' . $errorMsg);
+            self::log('OpenRouter API Error: ' . $errorMsg);
             throw new Exception('OpenRouter API error: ' . $errorMsg);
         }
 
@@ -487,7 +503,7 @@ class MetaKit
                 ];
             }
         } catch (\Throwable $e) {
-            kirbylog('Meta Kit Review Error: ' . $e->getMessage());
+            self::log('Meta Kit Review Error: ' . $e->getMessage());
             return [
                 'summary' => 'Error: ' . $e->getMessage()
             ];
@@ -522,7 +538,7 @@ class MetaKit
             $title = $this->callApi($prompt, 50);
             return $title ? $this->sanitizeTitle($title, $fieldType, $template) : null;
         } catch (\Throwable $e) {
-            kirbylog('Meta Kit Error: ' . $e->getMessage());
+            self::log('Meta Kit Error: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -583,7 +599,7 @@ class MetaKit
 
             return $this->sanitizeDescription($normalizedDescription, $fieldType, $template);
         } catch (\Throwable $e) {
-            kirbylog('Meta Kit Error: ' . $e->getMessage());
+            self::log('Meta Kit Error: ' . $e->getMessage());
             throw $e;
         }
     }

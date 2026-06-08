@@ -86,7 +86,7 @@ class MetaKitCoreTest extends KirbyTestCase
             ['site.txt' => "Title: Test Site"],
             [
                 'tearoom1.meta-kit.api.key' => 'test-key',
-                'tearoom1.meta-kit.api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
+                'tearoom1.meta-kit.api.model' => 'google/gemma-4-31b-it:free',
             ]
         );
 
@@ -98,9 +98,10 @@ class MetaKitCoreTest extends KirbyTestCase
         $this->resetAiEnabledCache();
         $this->makeKirby(['site.txt' => "Title: Test Site"]);
 
-        $this->assertContains('meta-llama/llama-3.2-3b-instruct:free', MetaKit::getFreeAiModels());
         $this->assertContains('google/gemma-4-31b-it:free', MetaKit::getFreeAiModels());
+        $this->assertContains('meta-llama/llama-3.2-3b-instruct:free', MetaKit::getFreeAiModels());
         $this->assertContains('nvidia/nemotron-3-nano-30b-a3b:free', MetaKit::getFreeAiModels());
+        $this->assertSame('google/gemma-4-31b-it:free', MetaKit::getFallbackFreeAiModel());
     }
 
     public function testConfiguredPaidAiModelRequiresLicense(): void
@@ -112,7 +113,7 @@ class MetaKitCoreTest extends KirbyTestCase
                 'tearoom1.meta-kit.api.key' => 'test-key',
                 'tearoom1.meta-kit.api.model' => 'openai/gpt-5-mini',
                 'tearoom1.meta-kit.license.freeAiModels' => [
-                    'meta-llama/llama-3.2-3b-instruct:free',
+                    'google/gemma-4-31b-it:free',
                 ],
             ]
         );
@@ -126,7 +127,7 @@ class MetaKitCoreTest extends KirbyTestCase
             MetaKit::getAiAccessErrorMessage()
         );
         $this->assertStringContainsString(
-            'meta-llama/llama-3.2-3b-instruct:free',
+            'google/gemma-4-31b-it:free',
             MetaKit::getAiAccessErrorMessage()
         );
     }
@@ -146,6 +147,34 @@ class MetaKitCoreTest extends KirbyTestCase
         );
 
         $this->assertTrue(MetaKit::canUseConfiguredAiModel());
+    }
+
+    public function testPaidAiModelIsBlockedBeforeOpenRouterRequest(): void
+    {
+        $this->resetAiEnabledCache();
+        $kirby = $this->makeKirby(
+            ['site.txt' => "Title: Test Site"],
+            [
+                'tearoom1.meta-kit.api.key' => 'test-key',
+                'tearoom1.meta-kit.api.model' => 'openai/gpt-5-mini',
+                'tearoom1.meta-kit.license.freeAiModels' => [
+                    'google/gemma-4-31b-it:free',
+                ],
+            ]
+        );
+
+        $metaKit = new class($kirby) extends MetaKit
+        {
+            public function callApiForTest(): string
+            {
+                return $this->callApi('Generate metadata', 20);
+            }
+        };
+
+        $this->expectException(\Kirby\Exception\Exception::class);
+        $this->expectExceptionMessage('does not allow the configured AI model "openai/gpt-5-mini"');
+
+        $metaKit->callApiForTest();
     }
 
     public function testGetPagesWithContentDefaultIncludesSite(): void
@@ -288,10 +317,10 @@ class MetaKitCoreTest extends KirbyTestCase
                     'raw' => '{"error":{"message":"The upstream model is temporarily unavailable"}}',
                 ],
             ],
-        ], '', 'meta-llama/llama-3.2-3b-instruct:free');
+        ], '', 'google/gemma-4-31b-it:free');
 
         $this->assertStringContainsString('Provider returned error', $message);
-        $this->assertStringContainsString('model: meta-llama/llama-3.2-3b-instruct:free', $message);
+        $this->assertStringContainsString('model: google/gemma-4-31b-it:free', $message);
         $this->assertStringContainsString('provider: OpenAI', $message);
         $this->assertStringContainsString('code: 502', $message);
         $this->assertStringContainsString('The upstream model is temporarily unavailable', $message);

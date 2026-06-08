@@ -67,9 +67,19 @@ class MetaKitLicense extends KirbyLicense
             return false;
         }
 
+        $currentLicenseKey = $this->license['key'] ?? null;
+
         if ($licenseCache->exists('license')) {
-            $this->license = $licenseCache->get('license');
-            return $this->isValidLicenseKey();
+            $cachedLicense = $licenseCache->get('license');
+            if (
+                is_array($cachedLicense) &&
+                ($cachedLicense['key'] ?? null) === $currentLicenseKey
+            ) {
+                $this->license = $cachedLicense;
+                return $this->isValidLicenseKey();
+            }
+
+            $licenseCache->remove('license');
         }
 
         $license = $this->validate();
@@ -142,6 +152,7 @@ class MetaKitLicense extends KirbyLicense
 
         if (($data['license_key']['status'] ?? null) === 'active') {
             file_put_contents(self::getLicenseFile(), json_encode($data['license_key']));
+            App::instance()->cache('tearoom1.meta-kit.performer')->remove('license');
             return [
                 'success' => true,
                 'message' => 'License valid',

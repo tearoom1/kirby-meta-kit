@@ -127,7 +127,7 @@ return [
     'tearoom1.meta-kit' => [
         // Optional: Add AI features
         'api.key' => 'sk-or-v1-YOUR-KEY',
-        'api.model' => 'google/gemini-2.0-flash-exp:free',
+        'api.model' => 'google/gemma-4-31b-it:free',
     ]
 ];
 ```
@@ -162,7 +162,7 @@ This is where developers set technical defaults, validation rules, and AI integr
 
     // OpenRouter API Configuration
     'api.key' => 'sk-or-v1-YOUR-KEY',  // Get free key at openrouter.ai
-    'api.model' => 'google/gemma-3-27b-it:free',  // See available models below
+    'api.model' => 'google/gemma-4-31b-it:free',  // See available models below
     'api.temperature' => 0.7,  // 0.1 (focused) to 1.0 (creative)
 
     // AI Behavior
@@ -387,24 +387,24 @@ Get a free API key from [OpenRouter.ai](https://openrouter.ai/):
 
 ```php
 'api.key' => 'sk-or-v1-YOUR-KEY',
-'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
+'api.model' => 'google/gemma-4-31b-it:free',
 ```
 
 The default model is allowlisted for simple tests without a Meta Kit license. All models outside that allowlist require a valid Meta Kit license unless you explicitly add them to `license.freeAiModels`. If an unlicensed install is configured with another model, AI generation is blocked with a license message:
 
 ```php
 'license.freeAiModels' => [
-    'meta-llama/llama-3.2-3b-instruct:free',
     'google/gemma-4-31b-it:free',
+    'meta-llama/llama-3.2-3b-instruct:free',
     'nvidia/nemotron-3-nano-30b-a3b:free',
 ],
 ```
 
-#### Sample of available Models as of March 2026
+#### Sample of available Models as of June 2026
 
 **Free Tier (No cost):**
-- `meta-llama/llama-3.2-3b-instruct:free` (default test model, license-free)
-- `google/gemma-4-31b-it:free` (allowlisted test model, license-free)
+- `google/gemma-4-31b-it:free` (default test model, license-free)
+- `meta-llama/llama-3.2-3b-instruct:free` (allowlisted test model, license-free)
 - `nvidia/nemotron-3-nano-30b-a3b:free` (allowlisted test model, license-free)
 - `stepfun/step-3.5-flash:free`
 - `nvidia/nemotron-3-super-120b-a12b:free`

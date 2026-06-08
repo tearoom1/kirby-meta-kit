@@ -125,12 +125,12 @@ class ConfigHelper
     {
         $defaults = [
             'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
-            'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
+            'api.model' => 'google/gemma-4-31b-it:free',
             'api.temperature' => 0.7,
             'ai.tone' => 'formal',
             'license.freeAiModels' => [
-                'meta-llama/llama-3.2-3b-instruct:free',
                 'google/gemma-4-31b-it:free',
+                'meta-llama/llama-3.2-3b-instruct:free',
                 'nvidia/nemotron-3-nano-30b-a3b:free',
             ],
             'maxDescriptionLength' => 160,

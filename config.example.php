@@ -34,12 +34,12 @@ return [
         // The default free model is allowed without a Meta Kit license for testing.
         // Other models require a valid Meta Kit license unless added to license.freeAiModels.
         // Leave empty to disable AI features
-        'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
+        'api.model' => 'google/gemma-4-31b-it:free',
 
         // AI models that can be used without a Meta Kit license
         'license.freeAiModels' => [
-            'meta-llama/llama-3.2-3b-instruct:free',
             'google/gemma-4-31b-it:free',
+            'meta-llama/llama-3.2-3b-instruct:free',
             'nvidia/nemotron-3-nano-30b-a3b:free',
         ],
 
