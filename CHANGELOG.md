@@ -1,9 +1,16 @@
+## [1.5.1](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.0...v1.5.1) (2026-06-08)
+
+
+### Bug Fixes
+
+* allow unlicensed AI fallback model ([0737758](https://github.com/tearoom1/kirby-meta-kit/commit/0737758bc50a744e4d7260e2e0bee3bcc4a5cffe))
+
 ## [1.5.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.4.0...v1.5.0) (2026-06-08)
 
 
 ### Features
 
-* require license for non-allowlisted AI models ([a5edd18](https://github.com/tearoom1/kirby-meta-kit/commit/a5edd18))
+* require license for non-allowlisted AI models ([a5edd18](https://github.com/tearoom1/kirby-meta-kit/commit/a5edd1894794f4864e13276e183dcd0caec5ded4))
 
 ## [1.4.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.3.1...v1.4.0) (2026-04-03)
 
@@ -36,16 +43,3 @@
 
 * make UI work down to 1366px ([669256a](https://github.com/tearoom1/kirby-meta-kit/commit/669256af3bf194d6136c6ccb1057093467d78aec))
 
-## [1.2.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.1.1...v1.2.0) (2025-12-17)
-
-
-### Features
-
-* release with new validation rules ([f41c3ac](https://github.com/tearoom1/kirby-meta-kit/commit/f41c3ac5700eb74051742bf3cc57c0eb9bf0fc2f))
-
-## [1.1.1](https://github.com/tearoom1/kirby-meta-kit/compare/v1.1.0...v1.1.1) (2025-12-13)
-
-
-### Bug Fixes
-
-* do not update og from meta automatically ([61be79d](https://github.com/tearoom1/kirby-meta-kit/commit/61be79def712e9fc37f6fb3f838d02a05286977f))
