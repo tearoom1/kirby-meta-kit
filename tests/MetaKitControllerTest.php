@@ -328,6 +328,19 @@ class MetaKitControllerTest extends TestCase
         $this->assertStringContainsString('First error:', $result['message']);
     }
 
+    public function testGenerateAllFieldsWithOnlySkippedPagesDoesNotRequireErrorsArray()
+    {
+        MetaKitController::applySingleField('test-page', 'metaTitle', 'Existing Meta Title');
+
+        $result = MetaKitController::generateAllFields(true, false, false, false, ['test-page']);
+
+        $this->assertSame('success', $result['status']);
+        $this->assertSame(0, $result['generated']);
+        $this->assertSame(0, $result['failed']);
+        $this->assertSame(1, $result['skipped']);
+        $this->assertArrayNotHasKey('errors', $result);
+    }
+
     /**
      * Test legacy field detection
      */

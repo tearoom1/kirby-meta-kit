@@ -150,6 +150,7 @@ class MetaKitController
         $generated = 0;
         $failed = 0;
         $skipped = 0;
+        $errors = [];
 
         foreach ($pages as $page) {
             $isSite = ($page instanceof \Kirby\Cms\Site);

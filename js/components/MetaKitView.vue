@@ -533,10 +533,14 @@ export default {
 
         if (response.status === 'success') {
           const details = `Generated: ${response.generated || 0}, Skipped: ${response.skipped || 0}, Failed: ${response.failed || 0}`;
-          const notify = (response.failed || 0) > 0
-            ? window.panel.notification.error
-            : window.panel.notification.success;
-          notify(`${response.message || 'Generation completed!'} ${details}`);
+          const message = `${response.message || 'Generation completed!'} ${details}`;
+
+          if ((response.failed || 0) > 0) {
+            window.panel.notification.error(message);
+          } else {
+            window.panel.notification.success(message);
+          }
+
           await this.refreshPages();
         } else {
           const firstError = Array.isArray(response.errors) && response.errors.length > 0
