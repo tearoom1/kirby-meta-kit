@@ -70,7 +70,7 @@ class ApiResponse
     public static function batch(int $generated, int $skipped, int $failed, ?string $message = null, array $errors = []): array
     {
         $response = [
-            'status' => $generated === 0 && $failed > 0 ? 'error' : 'success',
+            'status' => 'success',
             'message' => $message ?? "Generated {$generated}, skipped {$skipped}, failed {$failed}",
             'generated' => $generated,
             'skipped' => $skipped,

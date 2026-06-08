@@ -313,6 +313,21 @@ class MetaKitControllerTest extends TestCase
         }
     }
 
+    public function testGenerateAllFieldsReturnsBatchErrorsWithoutThrowingTransportError()
+    {
+        $result = MetaKitController::generateAllFields(true, false, false, false, ['test-page']);
+
+        $this->assertIsArray($result);
+        $this->assertSame('success', $result['status']);
+        $this->assertSame(0, $result['generated']);
+        $this->assertSame(1, $result['failed']);
+        $this->assertArrayHasKey('errors', $result);
+        $this->assertSame('test-page', $result['errors'][0]['pageId']);
+        $this->assertSame('metaTitle', $result['errors'][0]['field']);
+        $this->assertNotSame('', $result['errors'][0]['message']);
+        $this->assertStringContainsString('First error:', $result['message']);
+    }
+
     /**
      * Test legacy field detection
      */
