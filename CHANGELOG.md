@@ -1,3 +1,10 @@
+## [1.5.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.4.0...v1.5.0) (2026-06-08)
+
+
+### Features
+
+* require license for non-allowlisted AI models ([a5edd18](https://github.com/tearoom1/kirby-meta-kit/commit/a5edd18))
+
 ## [1.4.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.3.1...v1.4.0) (2026-04-03)
 
 
@@ -42,4 +49,3 @@
 ### Bug Fixes
 
 * do not update og from meta automatically ([61be79d](https://github.com/tearoom1/kirby-meta-kit/commit/61be79def712e9fc37f6fb3f838d02a05286977f))
-
