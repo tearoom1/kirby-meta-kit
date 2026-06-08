@@ -1,3 +1,10 @@
+## [1.5.5](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.4...v1.5.5) (2026-06-08)
+
+
+### Bug Fixes
+
+* block unlicensed ai models ([7247459](https://github.com/tearoom1/kirby-meta-kit/commit/7247459ff084fbf8137e1c19102be9bdec3a46e2))
+
 ## [1.5.4](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.3...v1.5.4) (2026-06-08)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * allow unlicensed AI fallback model ([0737758](https://github.com/tearoom1/kirby-meta-kit/commit/0737758bc50a744e4d7260e2e0bee3bcc4a5cffe))
-
-## [1.5.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.4.0...v1.5.0) (2026-06-08)
-
-
-### Features
-
-* require license for non-allowlisted AI models ([a5edd18](https://github.com/tearoom1/kirby-meta-kit/commit/a5edd1894794f4864e13276e183dcd0caec5ded4))
 
