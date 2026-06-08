@@ -390,7 +390,7 @@ Get a free API key from [OpenRouter.ai](https://openrouter.ai/):
 'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
 ```
 
-The default model is allowlisted for simple tests without a Meta Kit license. All other AI models require a valid Meta Kit license unless you explicitly add them to `license.freeAiModels`:
+The default model is allowlisted for simple tests without a Meta Kit license. If an unlicensed install is configured with another model, Meta Kit falls back to the first model in `license.freeAiModels` for AI generation. All models outside that allowlist require a valid Meta Kit license unless you explicitly add them to `license.freeAiModels`:
 
 ```php
 'license.freeAiModels' => [
@@ -417,7 +417,7 @@ The default model is allowlisted for simple tests without a Meta Kit license. Al
 - `meta-llama/llama-4-maverick`
 - Find more on OpenRouter. See also the [rankings](https://openrouter.ai/rankings)
 
-All models outside `license.freeAiModels` require a valid Meta Kit license. This keeps the plugin testable with one free model while reserving broader AI usage for licensed installs.
+All models outside `license.freeAiModels` require a valid Meta Kit license. Without a license, Meta Kit falls back to the allowlisted test model so the AI workflow remains visible and testable.
 
 #### AI Behavior Settings
 

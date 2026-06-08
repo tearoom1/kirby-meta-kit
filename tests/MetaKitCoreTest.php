@@ -108,6 +108,8 @@ class MetaKitCoreTest extends KirbyTestCase
         );
 
         $this->assertFalse(MetaKit::canUseConfiguredAiModel());
+        $this->assertTrue(MetaKit::canUseAiFeatures());
+        $this->assertSame('meta-llama/llama-3.2-3b-instruct:free', MetaKit::getUsableAiModel());
     }
 
     public function testConfiguredCustomFreeAiModelCanBeUsedWithoutLicense(): void

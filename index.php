@@ -48,7 +48,7 @@ App::plugin(
             'ai.tone' => 'formal',
             'api.key' => null,
             'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
-            'api.model' => '',
+            'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
             'api.temperature' => 0.7,
             'license.freeAiModels' => [
                 'meta-llama/llama-3.2-3b-instruct:free',
@@ -125,7 +125,7 @@ App::plugin(
         'routes' => require __DIR__ . '/src/routes/routes.php',
         'pageMethods' => [
             'generateSeoTitle' => function (?string $content = null, ?string $languageCode = null) {
-                if (!TearoomOne\MetaKit::isAiEnabled() || !TearoomOne\MetaKit::canUseConfiguredAiModel()) {
+                if (!TearoomOne\MetaKit::canUseAiFeatures()) {
                     return null;
                 }
 
@@ -140,7 +140,7 @@ App::plugin(
                 return $metaKit->generateTitle($content, ['language' => $languageCode]);
             },
             'generateSeoDescription' => function (?string $content = null, ?string $languageCode = null) {
-                if (!TearoomOne\MetaKit::isAiEnabled() || !TearoomOne\MetaKit::canUseConfiguredAiModel()) {
+                if (!TearoomOne\MetaKit::canUseAiFeatures()) {
                     return null;
                 }
 
@@ -157,7 +157,7 @@ App::plugin(
         ],
         'fieldMethods' => [
             'toSeoTitle' => function ($field) {
-                if (!TearoomOne\MetaKit::isAiEnabled() || !TearoomOne\MetaKit::canUseConfiguredAiModel()) {
+                if (!TearoomOne\MetaKit::canUseAiFeatures()) {
                     return null;
                 }
 
@@ -166,7 +166,7 @@ App::plugin(
                 return $metaKit->generateTitle($field->value(), ['language' => $languageCode]);
             },
             'toSeoDescription' => function ($field) {
-                if (!TearoomOne\MetaKit::isAiEnabled() || !TearoomOne\MetaKit::canUseConfiguredAiModel()) {
+                if (!TearoomOne\MetaKit::canUseAiFeatures()) {
                     return null;
                 }
 

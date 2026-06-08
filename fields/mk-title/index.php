@@ -40,7 +40,7 @@ return [
             ];
         },
         'aiEnabled' => function () {
-            return MetaKit::isAiEnabled() && MetaKit::canUseConfiguredAiModel();
+            return MetaKit::canUseAiFeatures();
         }
     ]
 ];

@@ -38,16 +38,34 @@ class MetaKit
         return self::canUseAiModel(self::getConfiguredAiModel());
     }
 
-    public static function canUseAiModel(?string $model): bool
+    public static function canUseAiFeatures(): bool
     {
-        if ($model === null || $model === '') {
+        if (!self::isAiEnabled()) {
             return false;
         }
 
-        if (self::hasValidLicense()) {
-            return true;
+        return self::getUsableAiModel() !== null;
+    }
+
+    public static function getUsableAiModel(): ?string
+    {
+        $configuredModel = self::getConfiguredAiModel();
+        if (self::canUseAiModel($configuredModel)) {
+            return $configuredModel;
         }
 
+        return self::getFallbackFreeAiModel();
+    }
+
+    public static function getFallbackFreeAiModel(): ?string
+    {
+        $freeModels = self::getFreeAiModels();
+
+        return $freeModels[0] ?? null;
+    }
+
+    public static function getFreeAiModels(): array
+    {
         $settings = ConfigHelper::getOpenRouterSettings();
         $freeModels = $settings['license.freeAiModels'] ?? [
             'meta-llama/llama-3.2-3b-instruct:free',
@@ -58,11 +76,27 @@ class MetaKit
         }
 
         if (!is_array($freeModels)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map(
+            fn($model) => trim((string)$model),
+            $freeModels
+        )));
+    }
+
+    public static function canUseAiModel(?string $model): bool
+    {
+        if ($model === null || $model === '') {
             return false;
         }
 
+        if (self::hasValidLicense()) {
+            return true;
+        }
+
         $model = strtolower(trim($model));
-        foreach ($freeModels as $freeModel) {
+        foreach (self::getFreeAiModels() as $freeModel) {
             if ($model === strtolower(trim((string)$freeModel))) {
                 return true;
             }
@@ -114,13 +148,17 @@ class MetaKit
 
     public static function canReviewPage(string $pageId): bool
     {
-        return self::isReviewEnabled() && self::canUseConfiguredAiModel();
+        return self::isReviewEnabled() && self::canUseAiFeatures();
     }
 
     public function __construct(Kirby $kirby)
     {
         $this->kirby = $kirby;
         $this->options = ConfigHelper::getOpenRouterSettings();
+        $usableModel = self::getUsableAiModel();
+        if ($usableModel !== null) {
+            $this->options['api.model'] = $usableModel;
+        }
         $this->httpClient = new Client([
             'timeout' => 30,
         ]);

@@ -44,7 +44,7 @@ class MetaKitController
             'language' => $languageCode,
             'languages' => self::getLanguages(),
             'pages' => $result,
-            'aiEnabled' => \TearoomOne\MetaKit::isAiEnabled() && \TearoomOne\MetaKit::canUseConfiguredAiModel(),
+            'aiEnabled' => \TearoomOne\MetaKit::canUseAiFeatures(),
             'reviewEnabled' => \TearoomOne\MetaKit::isReviewEnabled(),
             'validationSettings' => option('tearoom1.meta-kit.validation', []),
             'siteSettings' => self::getSiteSettings()

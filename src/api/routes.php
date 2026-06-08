@@ -8,10 +8,10 @@
 
 return function () {
     $licenseGuard = function () {
-        if (!TearoomOne\MetaKit::canUseConfiguredAiModel()) {
+        if (!TearoomOne\MetaKit::canUseAiFeatures()) {
             return [
                 'status' => 'error',
-                'message' => 'A valid Meta Kit license is required to use this AI model. Switch to an allowed free test model or activate your license.'
+                'message' => 'Configure an OpenRouter API key and an allowed free test model, or activate your Meta Kit license.'
             ];
         }
 
