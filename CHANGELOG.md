@@ -1,3 +1,10 @@
+## [1.5.6](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.5...v1.5.6) (2026-06-08)
+
+
+### Bug Fixes
+
+* add free ai model fallbacks ([4b969ad](https://github.com/tearoom1/kirby-meta-kit/commit/4b969ad4b6f1012b42bd601c0224cf301e3f78e9))
+
 ## [1.5.5](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.4...v1.5.5) (2026-06-08)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * show AI batch generation errors ([3831fad](https://github.com/tearoom1/kirby-meta-kit/commit/3831fad1f3f3c57d84c0c9271ecbfb629f55d090))
-
-## [1.5.1](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.0...v1.5.1) (2026-06-08)
-
-
-### Bug Fixes
-
-* allow unlicensed AI fallback model ([0737758](https://github.com/tearoom1/kirby-meta-kit/commit/0737758bc50a744e4d7260e2e0bee3bcc4a5cffe))
 
