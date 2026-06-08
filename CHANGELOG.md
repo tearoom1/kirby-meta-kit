@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.1...v1.5.2) (2026-06-08)
+
+
+### Bug Fixes
+
+* show AI batch generation errors ([3831fad](https://github.com/tearoom1/kirby-meta-kit/commit/3831fad1f3f3c57d84c0c9271ecbfb629f55d090))
+
 ## [1.5.1](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.0...v1.5.1) (2026-06-08)
 
 
@@ -35,11 +42,4 @@
 ### Bug Fixes
 
 * updated changelog and fixed minor issues ([9d49a20](https://github.com/tearoom1/kirby-meta-kit/commit/9d49a20edd15a3b9cd15bdc7b76e79c450f20c85))
-
-## [1.3.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.2.0...v1.3.0) (2026-03-30)
-
-
-### Features
-
-* make UI work down to 1366px ([669256a](https://github.com/tearoom1/kirby-meta-kit/commit/669256af3bf194d6136c6ccb1057093467d78aec))
 
