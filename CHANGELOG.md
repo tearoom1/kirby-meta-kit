@@ -1,3 +1,10 @@
+## [1.5.3](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.2...v1.5.3) (2026-06-08)
+
+
+### Bug Fixes
+
+* preserve AI batch error details ([588327a](https://github.com/tearoom1/kirby-meta-kit/commit/588327ab7b6e15aac7fcf6464c9ecd96fa1ae2ab))
+
 ## [1.5.2](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.1...v1.5.2) (2026-06-08)
 
 
@@ -35,11 +42,4 @@
 * styles ([9f7f70b](https://github.com/tearoom1/kirby-meta-kit/commit/9f7f70b441967d5d0e822690a7f471e9588e07db))
 * styles ([fba04aa](https://github.com/tearoom1/kirby-meta-kit/commit/fba04aaf642c3cc3f74e848ecb565321f4acf6cb))
 * styles ([20bad0c](https://github.com/tearoom1/kirby-meta-kit/commit/20bad0ce09ca6efbcdea56635c159793b494b964))
-
-## [1.3.1](https://github.com/tearoom1/kirby-meta-kit/compare/v1.3.0...v1.3.1) (2026-03-30)
-
-
-### Bug Fixes
-
-* updated changelog and fixed minor issues ([9d49a20](https://github.com/tearoom1/kirby-meta-kit/commit/9d49a20edd15a3b9cd15bdc7b76e79c450f20c85))
 
