@@ -251,6 +251,7 @@ class MetaKit
         }
 
         $response = $this->httpClient->post($this->options['api.endpoint'], [
+            'http_errors' => false,
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
@@ -270,6 +271,14 @@ class MetaKit
         $data = json_decode($body, true);
 
         kirbylog('OpenRouter Response: ' . substr($body, 0, 500));
+
+        if ($response->getStatusCode() >= 400) {
+            $errorMsg = is_array($data)
+                ? ($data['error']['message'] ?? $data['message'] ?? 'Unknown API error')
+                : trim(substr($body, 0, 500));
+            kirbylog('OpenRouter API Error: ' . $errorMsg);
+            throw new Exception('OpenRouter API error: ' . $errorMsg);
+        }
 
         if (!isset($data['choices'][0]['message']['content'])) {
             $errorMsg = $data['error']['message'] ?? 'Unknown API error';

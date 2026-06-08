@@ -101,6 +101,7 @@ class MetaKitController
         $generated = 0;
         $failed = 0;
         $skipped = 0;
+        $errors = [];
 
         foreach ($pages as $page) {
             if (self::hasFieldInCurrentLanguage($page, 'metaDescription')) {
@@ -168,6 +169,7 @@ class MetaKitController
                         $pageSkipped = false;
                     } else {
                         $failed++;
+                        $errors[] = self::formatGenerationError($page, 'metaTitle', $result);
                         $pageSkipped = false;
                     }
                 }
@@ -187,6 +189,7 @@ class MetaKitController
                         $pageSkipped = false;
                     } else {
                         $failed++;
+                        $errors[] = self::formatGenerationError($page, 'metaDescription', $result);
                         $pageSkipped = false;
                     }
                 }
@@ -205,6 +208,7 @@ class MetaKitController
                         $pageSkipped = false;
                     } else {
                         $failed++;
+                        $errors[] = self::formatGenerationError($page, 'ogTitle', $result);
                         $pageSkipped = false;
                     }
                 }
@@ -223,6 +227,7 @@ class MetaKitController
                         $pageSkipped = false;
                     } else {
                         $failed++;
+                        $errors[] = self::formatGenerationError($page, 'ogDescription', $result);
                         $pageSkipped = false;
                     }
                 }
@@ -241,8 +246,22 @@ class MetaKitController
         if ($generateOgDescription) $fields[] = 'OG descriptions';
         $fieldText = implode(', ', $fields);
 
-        return ApiResponse::batch($generated, $skipped, $failed,
-            "Generated {$generated} field(s) ({$fieldText}), skipped {$skipped}, failed {$failed}");
+        $message = "Generated {$generated} field(s) ({$fieldText}), skipped {$skipped}, failed {$failed}";
+        if ($errors !== []) {
+            $message .= '. First error: ' . $errors[0]['message'];
+        }
+
+        return ApiResponse::batch($generated, $skipped, $failed, $message, $errors);
+    }
+
+    private static function formatGenerationError($page, string $fieldName, array $result): array
+    {
+        return [
+            'pageId' => $page instanceof \Kirby\Cms\Site ? 'site' : $page->id(),
+            'pageTitle' => $page->title()->value(),
+            'field' => $fieldName,
+            'message' => $result['message'] ?? 'Unknown generation error',
+        ];
     }
 
 

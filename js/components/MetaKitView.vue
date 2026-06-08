@@ -533,10 +533,16 @@ export default {
 
         if (response.status === 'success') {
           const details = `Generated: ${response.generated || 0}, Skipped: ${response.skipped || 0}, Failed: ${response.failed || 0}`;
-          window.panel.notification.success(`${response.message || 'Generation completed!'} ${details}`);
+          const notify = (response.failed || 0) > 0
+            ? window.panel.notification.error
+            : window.panel.notification.success;
+          notify(`${response.message || 'Generation completed!'} ${details}`);
           await this.refreshPages();
         } else {
-          window.panel.notification.error(response.message || 'Generation failed');
+          const firstError = Array.isArray(response.errors) && response.errors.length > 0
+            ? response.errors[0].message
+            : null;
+          window.panel.notification.error(firstError || response.message || 'Generation failed');
         }
       } catch (error) {
         let errorMessage = 'Failed to generate metadata';
