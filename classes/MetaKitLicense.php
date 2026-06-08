@@ -62,6 +62,11 @@ class MetaKitLicense extends KirbyLicense
     public function isValid(): bool
     {
         $licenseCache = App::instance()->cache('tearoom1.meta-kit.performer');
+        if ($this->license === null) {
+            $licenseCache->remove('license');
+            return false;
+        }
+
         if ($licenseCache->exists('license')) {
             $this->license = $licenseCache->get('license');
             return $this->isValidLicenseKey();

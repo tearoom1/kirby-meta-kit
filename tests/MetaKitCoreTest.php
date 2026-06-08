@@ -108,8 +108,17 @@ class MetaKitCoreTest extends KirbyTestCase
         );
 
         $this->assertFalse(MetaKit::canUseConfiguredAiModel());
-        $this->assertTrue(MetaKit::canUseAiFeatures());
-        $this->assertSame('meta-llama/llama-3.2-3b-instruct:free', MetaKit::getUsableAiModel());
+        $this->assertTrue(MetaKit::isAiEnabled());
+        $this->assertFalse(MetaKit::canUseAiFeatures());
+        $this->assertNull(MetaKit::getUsableAiModel());
+        $this->assertStringContainsString(
+            'does not allow the configured AI model "openai/gpt-5-mini"',
+            MetaKit::getAiAccessErrorMessage()
+        );
+        $this->assertStringContainsString(
+            'meta-llama/llama-3.2-3b-instruct:free',
+            MetaKit::getAiAccessErrorMessage()
+        );
     }
 
     public function testConfiguredCustomFreeAiModelCanBeUsedWithoutLicense(): void
@@ -248,6 +257,34 @@ class MetaKitCoreTest extends KirbyTestCase
             'Clear summary of the page content with a tighter, properly sized description',
             $description
         );
+    }
+
+    public function testOpenRouterErrorsIncludeProviderMetadata(): void
+    {
+        $kirby = $this->makeKirby([
+            'site.txt' => "Title: Test Site",
+        ]);
+
+        $metaKit = new MetaKit($kirby);
+        $reflection = new \ReflectionClass(MetaKit::class);
+        $method = $reflection->getMethod('formatOpenRouterError');
+
+        $message = $method->invoke($metaKit, [
+            'error' => [
+                'message' => 'Provider returned error',
+                'code' => 502,
+                'metadata' => [
+                    'provider_name' => 'OpenAI',
+                    'raw' => '{"error":{"message":"The upstream model is temporarily unavailable"}}',
+                ],
+            ],
+        ], '', 'meta-llama/llama-3.2-3b-instruct:free');
+
+        $this->assertStringContainsString('Provider returned error', $message);
+        $this->assertStringContainsString('model: meta-llama/llama-3.2-3b-instruct:free', $message);
+        $this->assertStringContainsString('provider: OpenAI', $message);
+        $this->assertStringContainsString('code: 502', $message);
+        $this->assertStringContainsString('The upstream model is temporarily unavailable', $message);
     }
 
     private function resetAiEnabledCache(): void

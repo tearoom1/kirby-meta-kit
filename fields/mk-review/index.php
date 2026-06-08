@@ -19,7 +19,7 @@ return [
             return $model instanceof Site ? 'site' : $model->id();
         },
         'aiEnabled' => function () {
-            return MetaKit::canUseAiFeatures();
+            return MetaKit::isAiEnabled();
         },
         'reviewEnabled' => function () {
             return MetaKit::isReviewEnabled();

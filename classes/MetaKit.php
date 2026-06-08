@@ -44,7 +44,7 @@ class MetaKit
             return false;
         }
 
-        return self::getUsableAiModel() !== null;
+        return self::canUseConfiguredAiModel();
     }
 
     public static function getUsableAiModel(): ?string
@@ -54,7 +54,7 @@ class MetaKit
             return $configuredModel;
         }
 
-        return self::getFallbackFreeAiModel();
+        return null;
     }
 
     public static function getFallbackFreeAiModel(): ?string
@@ -103,6 +103,26 @@ class MetaKit
         }
 
         return false;
+    }
+
+    public static function getAiAccessErrorMessage(): string
+    {
+        if (!self::isAiEnabled()) {
+            return 'Configure an OpenRouter API key and model to use AI generation.';
+        }
+
+        $model = self::getConfiguredAiModel();
+        if ($model === null) {
+            return 'Configure an OpenRouter model to use AI generation.';
+        }
+
+        if (self::canUseAiModel($model)) {
+            return '';
+        }
+
+        $freeModels = implode(', ', self::getFreeAiModels());
+
+        return 'The current Meta Kit license does not allow the configured AI model "' . $model . '". Activate a Meta Kit license or switch to an allowlisted free test model' . ($freeModels ? ' (' . $freeModels . ')' : '') . '.';
     }
 
     /**
@@ -155,10 +175,6 @@ class MetaKit
     {
         $this->kirby = $kirby;
         $this->options = ConfigHelper::getOpenRouterSettings();
-        $usableModel = self::getUsableAiModel();
-        if ($usableModel !== null) {
-            $this->options['api.model'] = $usableModel;
-        }
         $this->httpClient = new Client([
             'timeout' => 30,
         ]);
@@ -273,9 +289,7 @@ class MetaKit
         kirbylog('OpenRouter Response: ' . substr($body, 0, 500));
 
         if ($response->getStatusCode() >= 400) {
-            $errorMsg = is_array($data)
-                ? ($data['error']['message'] ?? $data['message'] ?? 'Unknown API error')
-                : trim(substr($body, 0, 500));
+            $errorMsg = $this->formatOpenRouterError($data, $body, $this->options['api.model'] ?? null);
             kirbylog('OpenRouter API Error: ' . $errorMsg);
             throw new Exception('OpenRouter API error: ' . $errorMsg);
         }
@@ -287,6 +301,76 @@ class MetaKit
         }
 
         return $data['choices'][0]['message']['content'];
+    }
+
+    protected function formatOpenRouterError(?array $data, string $body, ?string $model = null): string
+    {
+        if (!is_array($data)) {
+            return $this->compactErrorText($body) ?: 'Unknown API error';
+        }
+
+        $error = is_array($data['error'] ?? null) ? $data['error'] : [];
+        $metadata = is_array($error['metadata'] ?? null) ? $error['metadata'] : [];
+
+        $message = $error['message'] ?? $data['message'] ?? 'Unknown API error';
+        $details = [];
+
+        if (!empty($model)) {
+            $details[] = 'model: ' . $model;
+        }
+
+        if (!empty($metadata['provider_name'])) {
+            $details[] = 'provider: ' . $metadata['provider_name'];
+        }
+
+        if (!empty($error['code'])) {
+            $details[] = 'code: ' . $error['code'];
+        }
+
+        $raw = $this->extractOpenRouterRawError($metadata['raw'] ?? null);
+        if ($raw && $raw !== $message) {
+            $details[] = $raw;
+        }
+
+        if ($details === []) {
+            return $this->compactErrorText($message);
+        }
+
+        return $this->compactErrorText($message . ' (' . implode('; ', $details) . ')');
+    }
+
+    protected function extractOpenRouterRawError($raw): ?string
+    {
+        if (!is_string($raw) || trim($raw) === '') {
+            return null;
+        }
+
+        $raw = trim($raw);
+        $decoded = json_decode($raw, true);
+
+        if (is_array($decoded)) {
+            $message = $decoded['error']['message']
+                ?? $decoded['message']
+                ?? $decoded['error']
+                ?? null;
+
+            if (is_string($message) && trim($message) !== '') {
+                return $this->compactErrorText($message);
+            }
+        }
+
+        return $this->compactErrorText($raw);
+    }
+
+    protected function compactErrorText(string $message, int $maxLength = 500): string
+    {
+        $message = trim(preg_replace('/\s+/', ' ', $message));
+
+        if (mb_strlen($message) <= $maxLength) {
+            return $message;
+        }
+
+        return mb_substr($message, 0, $maxLength - 1) . '…';
     }
 
     protected function decodeJsonResponse(string $response): ?array

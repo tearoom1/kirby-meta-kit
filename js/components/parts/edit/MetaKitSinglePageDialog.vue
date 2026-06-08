@@ -257,7 +257,7 @@ export default {
           window.panel.notification.error(response.message || 'Failed to generate content');
         }
       } catch (error) {
-        window.panel.notification.error('Failed to generate content');
+        window.panel.notification.error(error?.message || 'Failed to generate content');
       } finally {
         this.generating[fieldName] = false;
       }

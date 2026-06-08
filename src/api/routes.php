@@ -11,7 +11,7 @@ return function () {
         if (!TearoomOne\MetaKit::canUseAiFeatures()) {
             return [
                 'status' => 'error',
-                'message' => 'Configure an OpenRouter API key and an allowed free test model, or activate your Meta Kit license.'
+                'message' => TearoomOne\MetaKit::getAiAccessErrorMessage()
             ];
         }
 
