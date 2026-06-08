@@ -14,9 +14,6 @@ class MetaKit
 
     private static ?bool $aiEnabledCache = null;
 
-    /**
-     * Check if plugin has a valid license
-     */
     public static function hasValidLicense(): bool
     {
         $plugin = kirby()->plugin('tearoom1/meta-kit');
@@ -26,6 +23,52 @@ class MetaKit
 
         $license = $plugin->license();
         return $license && $license->isValid();
+    }
+
+    public static function getConfiguredAiModel(): ?string
+    {
+        $settings = ConfigHelper::getOpenRouterSettings();
+        $model = $settings['api.model'] ?? null;
+
+        return is_string($model) && trim($model) !== '' ? trim($model) : null;
+    }
+
+    public static function canUseConfiguredAiModel(): bool
+    {
+        return self::canUseAiModel(self::getConfiguredAiModel());
+    }
+
+    public static function canUseAiModel(?string $model): bool
+    {
+        if ($model === null || $model === '') {
+            return false;
+        }
+
+        if (self::hasValidLicense()) {
+            return true;
+        }
+
+        $settings = ConfigHelper::getOpenRouterSettings();
+        $freeModels = $settings['license.freeAiModels'] ?? [
+            'meta-llama/llama-3.2-3b-instruct:free',
+        ];
+
+        if (is_string($freeModels)) {
+            $freeModels = [$freeModels];
+        }
+
+        if (!is_array($freeModels)) {
+            return false;
+        }
+
+        $model = strtolower(trim($model));
+        foreach ($freeModels as $freeModel) {
+            if ($model === strtolower(trim((string)$freeModel))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -71,24 +114,7 @@ class MetaKit
 
     public static function canReviewPage(string $pageId): bool
     {
-        if (!self::isReviewEnabled()) {
-            return false;
-        }
-
-        if (self::hasValidLicense()) {
-            return true;
-        }
-
-        if ($pageId === 'site') {
-            return false;
-        }
-
-        $page = kirby()->page($pageId);
-        if (!$page) {
-            return false;
-        }
-
-        return $page->depth() === 1;
+        return self::isReviewEnabled() && self::canUseConfiguredAiModel();
     }
 
     public function __construct(Kirby $kirby)

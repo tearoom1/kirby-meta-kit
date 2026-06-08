@@ -79,6 +79,54 @@ class MetaKitCoreTest extends KirbyTestCase
         $this->assertTrue(MetaKit::isAiEnabled());
     }
 
+    public function testConfiguredFreeAiModelCanBeUsedWithoutLicense(): void
+    {
+        $this->resetAiEnabledCache();
+        $this->makeKirby(
+            ['site.txt' => "Title: Test Site"],
+            [
+                'tearoom1.meta-kit.api.key' => 'test-key',
+                'tearoom1.meta-kit.api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
+            ]
+        );
+
+        $this->assertTrue(MetaKit::canUseConfiguredAiModel());
+    }
+
+    public function testConfiguredPaidAiModelRequiresLicense(): void
+    {
+        $this->resetAiEnabledCache();
+        $this->makeKirby(
+            ['site.txt' => "Title: Test Site"],
+            [
+                'tearoom1.meta-kit.api.key' => 'test-key',
+                'tearoom1.meta-kit.api.model' => 'openai/gpt-5-mini',
+                'tearoom1.meta-kit.license.freeAiModels' => [
+                    'meta-llama/llama-3.2-3b-instruct:free',
+                ],
+            ]
+        );
+
+        $this->assertFalse(MetaKit::canUseConfiguredAiModel());
+    }
+
+    public function testConfiguredCustomFreeAiModelCanBeUsedWithoutLicense(): void
+    {
+        $this->resetAiEnabledCache();
+        $this->makeKirby(
+            ['site.txt' => "Title: Test Site"],
+            [
+                'tearoom1.meta-kit.api.key' => 'test-key',
+                'tearoom1.meta-kit.api.model' => 'custom/free-model',
+                'tearoom1.meta-kit.license.freeAiModels' => [
+                    'custom/free-model',
+                ],
+            ]
+        );
+
+        $this->assertTrue(MetaKit::canUseConfiguredAiModel());
+    }
+
     public function testGetPagesWithContentDefaultIncludesSite(): void
     {
         $this->makeKirby([

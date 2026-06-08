@@ -4,10 +4,6 @@ An SEO workflow plugin for Kirby CMS with AI-assisted content generation, experi
 
 [![Screenshot](screenshot.jpg)](https://github.com/tearoom1/kirby-meta-kit)
 
-Get a license here: [tearoom.one/kirby-plugins/meta-kit](https://www.tearoom.one/kirby-plugins/meta-kit)
-
-Frontend SEO output, `sitemap.xml`, and `robots.txt` work without license activation. A license is required for full AI generation and full experimental AI content review. Without a license, experimental review can still be used for root-level pages if AI is configured and review is explicitly enabled.
-
 ## Why Meta Kit?
 
 ### For Content Editors
@@ -391,12 +387,21 @@ Get a free API key from [OpenRouter.ai](https://openrouter.ai/):
 
 ```php
 'api.key' => 'sk-or-v1-YOUR-KEY',
-'api.model' => 'stepfun/step-3.5-flash:free',
+'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
+```
+
+The default model is allowlisted for simple tests without a Meta Kit license. All other AI models require a valid Meta Kit license unless you explicitly add them to `license.freeAiModels`:
+
+```php
+'license.freeAiModels' => [
+    'meta-llama/llama-3.2-3b-instruct:free',
+],
 ```
 
 #### Sample of available Models as of March 2026
 
 **Free Tier (No cost):**
+- `meta-llama/llama-3.2-3b-instruct:free` (default test model, license-free)
 - `stepfun/step-3.5-flash:free`
 - `nvidia/nemotron-3-super-120b-a12b:free`
 - `google/gemma-3-27b-it:free`
@@ -411,6 +416,8 @@ Get a free API key from [OpenRouter.ai](https://openrouter.ai/):
 - `xiaomi/mimo-v2-pro`
 - `meta-llama/llama-4-maverick`
 - Find more on OpenRouter. See also the [rankings](https://openrouter.ai/rankings)
+
+All models outside `license.freeAiModels` require a valid Meta Kit license. This keeps the plugin testable with one free model while reserving broader AI usage for licensed installs.
 
 #### AI Behavior Settings
 
@@ -478,12 +485,10 @@ Meta Kit also includes an experimental AI content review for single pages.
 - Use it to spot weak positioning, vague copy, thin content, and possible keyphrases
 - Treat its output with care and review suggestions manually before making content decisions
 - Review is disabled by default and only appears when `'review.enabled' => true`
-- With a valid license, review is available for all pages
-- Without a license, review is limited to root-level pages
 
 #### Adding the review button to a page blueprint
 
-Add the `mk-review` field anywhere in your page blueprint. It renders as a single right-aligned button that opens the full review dialog. All state (AI enabled, review enabled, license) is computed server-side — no extra options are required:
+Add the `mk-review` field anywhere in your page blueprint. It renders as a single right-aligned button that opens the full review dialog. All state (AI enabled and review enabled) is computed server-side, so no extra options are required:
 
 ```yaml
 # site/blueprints/pages/default.yml
@@ -868,12 +873,7 @@ $ogImage = $page->ogImage()->toFile();
 
 ## License
 
-This plugin is licensed under a commercial [LICENSE](LICENSE).
-
-Without activation, the frontend SEO snippet, sitemap, and robots.txt remain fully functional.
-License activation is required for AI generation and for full access to experimental AI content review. If AI is configured and `'review.enabled'` is explicitly enabled, unlicensed installs can still use content review for root-level pages only.
-
-Please visit the plugin website to [purchase a license](https://www.tearoom.one/de/kirby-plugins/meta-kit).
+This plugin is licensed under the [MIT License](LICENSE.md).
 
 ---
 

@@ -3,7 +3,7 @@
 /**
  * Meta Kit Frontend Routes
  *
- * Defines frontend routes (sitemap, license activation, etc.)
+ * Defines frontend routes (sitemap, robots.txt, etc.)
  */
 
 return [

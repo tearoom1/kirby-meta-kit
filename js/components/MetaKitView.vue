@@ -1,13 +1,5 @@
 <template>
   <k-panel-inside class="k-meta-kit-view">
-    <!-- License Warning -->
-    <div v-if="!hasValidLicense" class="k-meta-kit-warning">
-      <k-box theme="negative">
-        <k-icon type="alert"/>
-        <span><strong>No valid license:</strong> AI generation and saving changes are disabled. Experimental AI content review is limited to root-level pages when it is enabled in the plugin options.</span>
-      </k-box>
-    </div>
-
     <!-- Language Switcher -->
     <div
       v-if="languages && languages.length > 1"
@@ -70,7 +62,6 @@
       :preview-mode="previewMode"
       :ai-enabled="aiEnabled"
       :review-enabled="reviewEnabled"
-      :has-valid-license="hasValidLicense"
       :site-settings="siteSettingsData"
       :validation-settings="validationSettingsData"
       @toggle-select-all="toggleSelectAllCurrentPage"
@@ -223,10 +214,6 @@ export default {
       default: true
     },
     reviewEnabled: {
-      type: Boolean,
-      default: false
-    },
-    hasValidLicense: {
       type: Boolean,
       default: false
     },

@@ -344,10 +344,6 @@ export default {
       type: Boolean,
       default: false
     },
-    hasValidLicense: {
-      type: Boolean,
-      default: false
-    },
     siteSettings: {
       type: Object,
       default: () => ({})
@@ -377,9 +373,7 @@ export default {
     },
 
     canReviewPage(page) {
-      if (!this.reviewEnabled) return false;
-      if (this.hasValidLicense) return true;
-      return page.id !== 'site' && !page.id.includes('/');
+      return this.reviewEnabled;
     },
 
     // Delegate to composables with proper context

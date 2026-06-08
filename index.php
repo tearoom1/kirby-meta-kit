@@ -30,10 +30,12 @@ load($classes, __DIR__);
 
 App::plugin(
     name: 'tearoom1/meta-kit',
-    license: fn(Plugin $plugin) => new MetaKitLicense($plugin,
+    license: fn(Plugin $plugin) => new MetaKitLicense(
+        $plugin,
         'Meta-Kit License',
         'meta-kit',
-        'https://www.tearoom.one/de/kirby-plugins/meta-kit'),
+        'https://www.tearoom.one/de/kirby-plugins/meta-kit'
+    ),
     extends: [
         'options' => [
             'cache' => [
@@ -48,6 +50,9 @@ App::plugin(
             'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
             'api.model' => '',
             'api.temperature' => 0.7,
+            'license.freeAiModels' => [
+                'meta-llama/llama-3.2-3b-instruct:free',
+            ],
             'maxDescriptionLength' => 160,
             'validation' => [
                 'ranges' => [
@@ -120,7 +125,7 @@ App::plugin(
         'routes' => require __DIR__ . '/src/routes/routes.php',
         'pageMethods' => [
             'generateSeoTitle' => function (?string $content = null, ?string $languageCode = null) {
-                if (!TearoomOne\MetaKit::isAiEnabled()) {
+                if (!TearoomOne\MetaKit::isAiEnabled() || !TearoomOne\MetaKit::canUseConfiguredAiModel()) {
                     return null;
                 }
 
@@ -135,7 +140,7 @@ App::plugin(
                 return $metaKit->generateTitle($content, ['language' => $languageCode]);
             },
             'generateSeoDescription' => function (?string $content = null, ?string $languageCode = null) {
-                if (!TearoomOne\MetaKit::isAiEnabled()) {
+                if (!TearoomOne\MetaKit::isAiEnabled() || !TearoomOne\MetaKit::canUseConfiguredAiModel()) {
                     return null;
                 }
 
@@ -152,7 +157,7 @@ App::plugin(
         ],
         'fieldMethods' => [
             'toSeoTitle' => function ($field) {
-                if (!TearoomOne\MetaKit::isAiEnabled()) {
+                if (!TearoomOne\MetaKit::isAiEnabled() || !TearoomOne\MetaKit::canUseConfiguredAiModel()) {
                     return null;
                 }
 
@@ -161,7 +166,7 @@ App::plugin(
                 return $metaKit->generateTitle($field->value(), ['language' => $languageCode]);
             },
             'toSeoDescription' => function ($field) {
-                if (!TearoomOne\MetaKit::isAiEnabled()) {
+                if (!TearoomOne\MetaKit::isAiEnabled() || !TearoomOne\MetaKit::canUseConfiguredAiModel()) {
                     return null;
                 }
 

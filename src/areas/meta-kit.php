@@ -30,7 +30,6 @@ return [
                         'languages' => $data['languages'],
                         'aiEnabled' => $data['aiEnabled'],
                         'reviewEnabled' => $data['reviewEnabled'],
-                        'hasValidLicense' => $data['hasValidLicense'],
                         'siteSettings' => $data['siteSettings'],
                         'validationSettings' => $data['validationSettings'] ?? []
                     ]

@@ -19,13 +19,10 @@ return [
             return $model instanceof Site ? 'site' : $model->id();
         },
         'aiEnabled' => function () {
-            return MetaKit::isAiEnabled();
+            return MetaKit::isAiEnabled() && MetaKit::canUseConfiguredAiModel();
         },
         'reviewEnabled' => function () {
             return MetaKit::isReviewEnabled();
-        },
-        'hasValidLicense' => function () {
-            return MetaKit::hasValidLicense();
         }
     ]
 ];

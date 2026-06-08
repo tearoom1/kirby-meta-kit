@@ -1,6 +1,7 @@
 <?php
 
 use TearoomOne\ConfigHelper;
+use TearoomOne\MetaKit;
 
 return [
     'extends' => 'text',
@@ -37,6 +38,9 @@ return [
                 'pageId' => $this->pageId() ?? $model->id(),
                 'template' => $template
             ];
+        },
+        'aiEnabled' => function () {
+            return MetaKit::isAiEnabled() && MetaKit::canUseConfiguredAiModel();
         }
     ]
 ];

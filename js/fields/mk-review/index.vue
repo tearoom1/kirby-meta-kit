@@ -32,23 +32,15 @@ export default {
     reviewEnabled: {
       type: Boolean,
       default: false
-    },
-    hasValidLicense: {
-      type: Boolean,
-      default: false
     }
   },
   computed: {
-    isRootPage() {
-      return this.pageId && this.pageId !== 'site' && !this.pageId.includes('/');
-    },
     canReview() {
-      return this.reviewEnabled && this.aiEnabled && (this.hasValidLicense || this.isRootPage);
+      return this.reviewEnabled && this.aiEnabled;
     },
     statusText() {
       if (!this.aiEnabled) return 'Configure AI to enable reviews';
       if (!this.reviewEnabled) return 'Content review is disabled';
-      if (!this.hasValidLicense && !this.isRootPage) return 'License required for sub-pages';
       return null;
     }
   },

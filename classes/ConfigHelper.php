@@ -128,6 +128,9 @@ class ConfigHelper
             'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
             'api.temperature' => 0.7,
             'ai.tone' => 'formal',
+            'license.freeAiModels' => [
+                'meta-llama/llama-3.2-3b-instruct:free',
+            ],
             'maxDescriptionLength' => 160,
             'ai.prompt.title' => "Write a clear, direct meta title {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be specific and factual. Focus on what the page is actually about. {tone} Write ONLY the title, nothing else.\n\nTitle:",
             'ai.prompt.description' => "Write a clear, informative meta description {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be direct and specific. Describe what the page actually contains. {tone} Write ONLY the description, nothing else.\n\nDescription:",

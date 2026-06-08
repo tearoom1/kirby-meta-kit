@@ -26,6 +26,7 @@
           </span>
             </span>
           <k-button
+            v-if="aiEnabled"
             class="k-mk-ai-button"
             size="xs"
             icon="ai"
@@ -69,6 +70,10 @@ export default {
     validationSettings: {
       type: Object,
       default: () => ({})
+    },
+    aiEnabled: {
+      type: Boolean,
+      default: false
     }
   },
   data() {

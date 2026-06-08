@@ -31,9 +31,15 @@ return [
         'api.key' => env('OPENROUTER_API_KEY', 'your-api-key-here'),
 
         // AI model to use for description generation
-        // Options: mistralai/mistral-7b-instruct, openai/gpt-3.5-turbo, etc.
+        // The default free model is allowed without a Meta Kit license for testing.
+        // Other models require a valid Meta Kit license unless added to license.freeAiModels.
         // Leave empty to disable AI features
         'api.model' => 'meta-llama/llama-3.2-3b-instruct:free',
+
+        // AI models that can be used without a Meta Kit license
+        'license.freeAiModels' => [
+            'meta-llama/llama-3.2-3b-instruct:free',
+        ],
 
         // API endpoint (usually no need to change)
         'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',

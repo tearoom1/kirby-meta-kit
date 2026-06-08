@@ -8,10 +8,10 @@
 
 return function () {
     $licenseGuard = function () {
-        if (!TearoomOne\MetaKit::hasValidLicense()) {
+        if (!TearoomOne\MetaKit::canUseConfiguredAiModel()) {
             return [
                 'status' => 'error',
-                'message' => 'A valid license is required to use AI generation. Please activate your license.'
+                'message' => 'A valid Meta Kit license is required to use this AI model. Switch to an allowed free test model or activate your license.'
             ];
         }
 
@@ -29,15 +29,19 @@ return function () {
         return null;
     };
 
-    $reviewPageGuard = function (string $pageId) use ($reviewGuard) {
+    $reviewPageGuard = function (string $pageId) use ($reviewGuard, $licenseGuard) {
         if ($error = $reviewGuard()) {
+            return $error;
+        }
+
+        if ($error = $licenseGuard()) {
             return $error;
         }
 
         if (!TearoomOne\MetaKit::canReviewPage($pageId)) {
             return [
                 'status' => 'error',
-                'message' => 'Without a valid license, AI content review is limited to root-level pages.'
+                'message' => 'AI review is disabled. Enable it in the plugin options and make sure AI is configured.'
             ];
         }
 
@@ -67,12 +71,7 @@ return function () {
             "pattern" => "meta-kit/apply-single-field",
             "method" => "POST",
             "auth" => true,
-            "action" => function () use ($licenseGuard) {
-                if ($error = $licenseGuard()) {
-                    $error['message'] = 'A valid license is required to save changes. Please activate your license.';
-                    return $error;
-                }
-
+            "action" => function () {
                 $pageId = get("pageId");
                 $fieldName = get("fieldName");
                 $value = get("value");

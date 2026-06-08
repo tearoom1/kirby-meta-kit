@@ -8,12 +8,6 @@ use Kirby\Plugin\License as KirbyLicense;
 use Kirby\Plugin\LicenseStatus;
 use Kirby\Plugin\Plugin;
 
-/**
- * Meta-Kit License integration with Kirby 5
- *
- * This class extends Kirby's native License class to show
- * license status in the Panel's plugins table.
- */
 class MetaKitLicense extends KirbyLicense
 {
     private $license;
@@ -23,11 +17,11 @@ class MetaKitLicense extends KirbyLicense
         protected string $name,
         protected string $id,
         protected string $url
-    )
-    {
+    ) {
         $this->license = $this->getLicenseFromDisk();
 
-        parent::__construct($plugin,
+        parent::__construct(
+            $plugin,
             'Meta-Kit License',
             $url,
             $this->getLicenseStatus()
@@ -52,7 +46,7 @@ class MetaKitLicense extends KirbyLicense
         }
 
         if ($this->license !== null) {
-            return null; // invalid
+            return null;
         }
 
         $missing = LicenseStatus::from('missing');
@@ -71,43 +65,40 @@ class MetaKitLicense extends KirbyLicense
         if ($licenseCache->exists('license')) {
             $this->license = $licenseCache->get('license');
             return $this->isValidLicenseKey();
-        } else {
-            $license = $this->validate();
-            if ($license) {
-                $this->license = $license;
-                $licenseCache->set('license', $this->license, 60 * 24);
-                return $this->isValidLicenseKey();
-            }
         }
+
+        $license = $this->validate();
+        if ($license) {
+            $this->license = $license;
+            $licenseCache->set('license', $this->license, 60 * 24);
+            return $this->isValidLicenseKey();
+        }
+
         return false;
     }
 
-    /**
-     * @return bool
-     */
     public function isValidLicenseKey(): bool
     {
-        return $this->license['status'] === 'active' &&
-            ($this->license['expires_at'] === null
-                || $this->license['expires_at'] > date('c'));
+        return is_array($this->license) &&
+            ($this->license['status'] ?? null) === 'active' &&
+            (($this->license['expires_at'] ?? null) === null || $this->license['expires_at'] > date('c'));
     }
 
-    /**
-     * @param $key
-     * @return LicenseStatus
-     * @throws \Exception
-     */
     public function validate(): array|null
     {
         if ($this->license === null) {
             return null;
         }
-        $licenseKey = $this->license['key'];
 
-        $requestData = ['license_key' => $licenseKey];
+        $licenseKey = $this->license['key'] ?? null;
+        if (!$licenseKey) {
+            return null;
+        }
+
         $response = $this->postLicenseRequest(
             'https://api.lemonsqueezy.com/v1/licenses/validate',
-            $requestData);
+            ['license_key' => $licenseKey]
+        );
 
         if ($response->code() === 200) {
             $data = json_decode($response->content(), true);
@@ -115,83 +106,66 @@ class MetaKitLicense extends KirbyLicense
                 return $data['license_key'] ?? null;
             }
         }
+
         return null;
     }
 
     public function activate($licenseKey): array
     {
-        $uri = kirby()->url();
-        // get domain from uri
-        $domain = parse_url($uri, PHP_URL_HOST);
-        $instanceName = $domain;
-        $requestData = [
-            'license_key' => $licenseKey,
-            'instance_name' => $instanceName
-        ];
+        $domain = parse_url(kirby()->url(), PHP_URL_HOST);
         $response = $this->postLicenseRequest(
             'https://api.lemonsqueezy.com/v1/licenses/activate',
-            $requestData);
+            [
+                'license_key' => $licenseKey,
+                'instance_name' => $domain,
+            ]
+        );
 
         if ($response->code() >= 500) {
-            // server error
             throw new \Exception('Server error');
         }
 
         $data = json_decode($response->content(), true);
 
         if ($response->code() !== 200) {
-            $error = $data['error'];
+            $error = $data['error'] ?? 'License activation failed';
             if ($error === 'license_key not found.') {
                 $error = 'This license key is not valid';
             }
             throw new \Exception($error);
         }
 
-
-        if ($data['license_key']['status'] === 'active') {
+        if (($data['license_key']['status'] ?? null) === 'active') {
             file_put_contents(self::getLicenseFile(), json_encode($data['license_key']));
             return [
                 'success' => true,
-                'message' => 'License valid'
+                'message' => 'License valid',
             ];
         }
+
         throw new \Exception('License invalid');
     }
 
-    /**
-     * @param mixed $licenseKey
-     * @param string $url
-     * @return Remote
-     * @throws \Exception
-     */
     public function postLicenseRequest(string $url, array $requestData): Remote
     {
-        $options = [
+        return Remote::request($url . '?' . http_build_query($requestData), [
             'headers' => [
-                'Accept: application/json'
+                'Accept: application/json',
             ],
-            'method' => 'POST'
-        ];
-        // request data to get query string
-        $queryString = http_build_query($requestData);
-        $url .= '?' . $queryString;
-        $response = Remote::request($url, $options);
-        return $response;
+            'method' => 'POST',
+        ]);
     }
 
     public function activationDialog()
     {
-        // validate license
         $url = $this->url;
         return [
             'dialogs' => [
                 'meta-kit/license-activation' => [
                     'load' => function () use ($url) {
                         return [
-                            // what dialog component to use
                             'component' => 'k-form-dialog',
                             'props' => [
-                                // field definition for the form dialog
                                 'fields' => [
                                     'key' => [
                                         'type' => 'text',
@@ -200,27 +174,23 @@ class MetaKitLicense extends KirbyLicense
                                     ],
                                     'info' => [
                                         'type' => 'info',
-                                        'text' => 'You can purchase a license at<br><a target="_blank" href="' . $url . '">' . $url . '</a> ',
+                                        'text' => 'A license is required for AI models that are not on the free test allowlist.<br><a target="_blank" href="' . $url . '">' . $url . '</a>',
                                     ],
                                 ],
-                                // the prefilled model data
                                 'value' => [
                                     'key' => '',
                                 ],
-                            ]
+                            ],
                         ];
                     },
                     'submit' => function () {
-                        // custom dialog submitter action
-                        $key = get('key');
                         $plugin = kirby()->plugin('tearoom1/meta-kit');
-                        return $plugin->license()->activate($key);
-                    }
-                ]
-            ]
+                        return $plugin->license()->activate(get('key'));
+                    },
+                ],
+            ],
         ];
     }
-
 
     private function getLicenseFromDisk(): array|null
     {
@@ -228,12 +198,10 @@ class MetaKitLicense extends KirbyLicense
         if (!file_exists($licenseFile)) {
             return null;
         }
+
         return json_decode(file_get_contents($licenseFile), true);
     }
 
-    /**
-     * @return string
-     */
     public function getLicenseFile(): string
     {
         return kirby()->roots()->license() . '.' . $this->id;
