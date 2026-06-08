@@ -130,6 +130,8 @@ class ConfigHelper
             'ai.tone' => 'formal',
             'license.freeAiModels' => [
                 'meta-llama/llama-3.2-3b-instruct:free',
+                'google/gemma-4-31b-it:free',
+                'nvidia/nemotron-3-nano-30b-a3b:free',
             ],
             'maxDescriptionLength' => 160,
             'ai.prompt.title' => "Write a clear, direct meta title {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be specific and factual. Focus on what the page is actually about. {tone} Write ONLY the title, nothing else.\n\nTitle:",

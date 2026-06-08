@@ -69,6 +69,8 @@ class MetaKit
         $settings = ConfigHelper::getOpenRouterSettings();
         $freeModels = $settings['license.freeAiModels'] ?? [
             'meta-llama/llama-3.2-3b-instruct:free',
+            'google/gemma-4-31b-it:free',
+            'nvidia/nemotron-3-nano-30b-a3b:free',
         ];
 
         if (is_string($freeModels)) {
@@ -313,30 +315,31 @@ class MetaKit
         $metadata = is_array($error['metadata'] ?? null) ? $error['metadata'] : [];
 
         $message = $error['message'] ?? $data['message'] ?? 'Unknown API error';
-        $details = [];
+        $context = [];
 
         if (!empty($model)) {
-            $details[] = 'model: ' . $model;
+            $context[] = 'model: ' . $model;
         }
 
         if (!empty($metadata['provider_name'])) {
-            $details[] = 'provider: ' . $metadata['provider_name'];
+            $context[] = 'provider: ' . $metadata['provider_name'];
         }
 
         if (!empty($error['code'])) {
-            $details[] = 'code: ' . $error['code'];
+            $context[] = 'code: ' . $error['code'];
         }
 
         $raw = $this->extractOpenRouterRawError($metadata['raw'] ?? null);
+        $message = $this->compactErrorText($message);
         if ($raw && $raw !== $message) {
-            $details[] = $raw;
+            $message .= ': ' . $raw;
         }
 
-        if ($details === []) {
+        if ($context === []) {
             return $this->compactErrorText($message);
         }
 
-        return $this->compactErrorText($message . ' (' . implode('; ', $details) . ')');
+        return $this->compactErrorText($message . ' (' . implode(', ', $context) . ')');
     }
 
     protected function extractOpenRouterRawError($raw): ?string

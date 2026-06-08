@@ -52,6 +52,8 @@ App::plugin(
             'api.temperature' => 0.7,
             'license.freeAiModels' => [
                 'meta-llama/llama-3.2-3b-instruct:free',
+                'google/gemma-4-31b-it:free',
+                'nvidia/nemotron-3-nano-30b-a3b:free',
             ],
             'maxDescriptionLength' => 160,
             'validation' => [

@@ -395,6 +395,8 @@ The default model is allowlisted for simple tests without a Meta Kit license. Al
 ```php
 'license.freeAiModels' => [
     'meta-llama/llama-3.2-3b-instruct:free',
+    'google/gemma-4-31b-it:free',
+    'nvidia/nemotron-3-nano-30b-a3b:free',
 ],
 ```
 
@@ -402,6 +404,8 @@ The default model is allowlisted for simple tests without a Meta Kit license. Al
 
 **Free Tier (No cost):**
 - `meta-llama/llama-3.2-3b-instruct:free` (default test model, license-free)
+- `google/gemma-4-31b-it:free` (allowlisted test model, license-free)
+- `nvidia/nemotron-3-nano-30b-a3b:free` (allowlisted test model, license-free)
 - `stepfun/step-3.5-flash:free`
 - `nvidia/nemotron-3-super-120b-a12b:free`
 - `google/gemma-3-27b-it:free`

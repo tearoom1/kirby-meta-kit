@@ -93,6 +93,16 @@ class MetaKitCoreTest extends KirbyTestCase
         $this->assertTrue(MetaKit::canUseConfiguredAiModel());
     }
 
+    public function testDefaultFreeAiModelsAreAllowlisted(): void
+    {
+        $this->resetAiEnabledCache();
+        $this->makeKirby(['site.txt' => "Title: Test Site"]);
+
+        $this->assertContains('meta-llama/llama-3.2-3b-instruct:free', MetaKit::getFreeAiModels());
+        $this->assertContains('google/gemma-4-31b-it:free', MetaKit::getFreeAiModels());
+        $this->assertContains('nvidia/nemotron-3-nano-30b-a3b:free', MetaKit::getFreeAiModels());
+    }
+
     public function testConfiguredPaidAiModelRequiresLicense(): void
     {
         $this->resetAiEnabledCache();

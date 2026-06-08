@@ -532,12 +532,22 @@ export default {
         });
 
         if (response.status === 'success') {
-          const details = `Generated: ${response.generated || 0}, Skipped: ${response.skipped || 0}, Failed: ${response.failed || 0}`;
-          const message = `${response.message || 'Generation completed!'} ${details}`;
+          const generated = response.generated || 0;
+          const skipped = response.skipped || 0;
+          const failed = response.failed || 0;
+          const details = `Generated ${generated}, skipped ${skipped}, failed ${failed}`;
 
-          if ((response.failed || 0) > 0) {
+          if (failed > 0) {
+            const firstError = Array.isArray(response.errors) && response.errors.length > 0
+              ? response.errors[0].message
+              : null;
+            const failedLabel = failed === 1 ? '1 field failed' : `${failed} fields failed`;
+            const message = firstError
+              ? `${failedLabel}: ${firstError}\n${details}`
+              : `${failedLabel}. ${details}`;
             window.panel.notification.error(message);
           } else {
+            const message = `${response.message || 'Generation completed!'}\n${details}`;
             window.panel.notification.success(message);
           }
 
