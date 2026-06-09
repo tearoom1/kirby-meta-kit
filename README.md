@@ -894,8 +894,11 @@ This plugin is licensed under the [MIT License](LICENSE.md).
 
 ## Support & Feedback
 
-- **Issues**: [GitHub Issues](https://github.com/tearoom1/kirby-meta-kit/issues)
+- **Issues and Suggestions**: [GitHub Issues](https://github.com/tearoom1/kirby-meta-kit/issues)
 - **Documentation**: This README and inline code comments
 - **Support Policy**: Support is limited to public GitHub Issues. Email support, consulting, and guaranteed response times are not included.
+
+Although AI heavily supported the development of this plugin, it still took many days of dedicated work to get it to where it is now.
+Lots of testing, iterating and improving and so on. If you'd like to support me, I'd be very grateful.
 
 [![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://coff.ee/tearoom1)
