@@ -154,6 +154,12 @@ This is where developers set technical defaults, validation rules, and AI integr
 ```php
 'tearoom1.meta-kit' => [
     // ====================================
+    // ACCESS CONTROL
+    // ====================================
+
+    'allowedRoles' => [],  // Additional non-admin roles allowed to use Meta Kit. See Access Control below.
+
+    // ====================================
     // AI INTEGRATION
     // ====================================
 
@@ -241,6 +247,23 @@ Settings merge in this order (lowest to highest priority):
 - AI model set in Panel can be overridden in config.php
 - Validation ranges in config.php apply unless template-specific rules exist
 - Sitemap exclusions from Panel and config.php work together (combined)
+
+### Access Control
+
+By default, **only users with the `admin` role** can access Meta Kit — that includes the Meta Kit panel area, the menu entry, the bulk editor, and every Meta Kit API route (page listing, single-field apply, AI generation, and the experimental review). Non-admins will not see the menu item, and any direct API call returns `403 Forbidden`.
+
+To grant access to additional Kirby roles, list them in `allowedRoles`:
+
+```php
+'tearoom1.meta-kit' => [
+    'allowedRoles' => ['editor'],
+]
+```
+
+Notes:
+- Admins are **always** allowed; you do not need to include `'admin'` in the list.
+- Users with any of the listed roles can read SEO data for every page (including drafts) and trigger AI generation/review, which consumes your OpenRouter quota. Only grant this to roles you trust.
+- Saving generated values still goes through Kirby's normal page-update permissions, so a role allowed by `allowedRoles` cannot use Meta Kit to overwrite fields on pages they are not normally allowed to edit.
 
 ---
 
