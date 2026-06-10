@@ -42,7 +42,7 @@
       </div>
 
       <!-- OG Title -->
-      <div class="k-meta-kit-single-field">
+      <div v-if="!isSitePage" class="k-meta-kit-single-field">
         <meta-kit-title-field
           label="OG Title"
           :value="editedFields.ogTitle"
@@ -61,7 +61,7 @@
       </div>
 
       <!-- OG Description -->
-      <div class="k-meta-kit-single-field">
+      <div v-if="!isSitePage" class="k-meta-kit-single-field">
         <meta-kit-description-field
           label="OG Description"
           :value="editedFields.ogDescription"
@@ -78,7 +78,7 @@
       </div>
 
       <!-- OG Image -->
-      <div class="k-meta-kit-single-field">
+      <div v-if="!isSitePage" class="k-meta-kit-single-field">
         <label class="k-meta-kit-dialog-field-label">OG Image</label>
         <div class="k-meta-kit-single-field-content">
           <div v-if="page.ogImage" class="k-meta-kit-og-image-current">
@@ -179,6 +179,9 @@ export default {
     },
     hasChanges() {
       return this.changedFieldCount > 0;
+    },
+    isSitePage() {
+      return this.page?.id === 'site';
     }
   },
   methods: {

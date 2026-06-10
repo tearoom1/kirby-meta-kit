@@ -388,9 +388,17 @@ export function hasPageFieldChanges(page, edited) {
   if (!page || !edited) {
     return false;
   }
-  return (
+  const hasMetaChanges = (
     edited.metaTitle !== (page.metaTitle || '') ||
-    edited.metaDescription !== (page.metaDescription || '') ||
+    edited.metaDescription !== (page.metaDescription || '')
+  );
+
+  if (page.id === 'site') {
+    return hasMetaChanges;
+  }
+
+  return (
+    hasMetaChanges ||
     edited.ogTitle !== (page.ogTitle || '') ||
     edited.ogDescription !== (page.ogDescription || '')
   );

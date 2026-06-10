@@ -432,3 +432,33 @@ test('change detection helpers cover popup edit scenarios', () => {
 
   assert.equal(hasAnyBulkChanges(bulkPages, editedFields), true);
 });
+
+test('change detection ignores page-specific OG edits for the site row', () => {
+  const sitePage = {
+    id: 'site',
+    metaTitle: 'Site Title',
+    metaDescription: 'Site Desc',
+    ogTitle: null,
+    ogDescription: null
+  };
+
+  assert.equal(
+    hasPageFieldChanges(sitePage, {
+      metaTitle: 'Site Title',
+      metaDescription: 'Site Desc',
+      ogTitle: 'Generated OG Title',
+      ogDescription: 'Generated OG Desc'
+    }),
+    false
+  );
+
+  assert.equal(
+    hasPageFieldChanges(sitePage, {
+      metaTitle: 'Updated Site Title',
+      metaDescription: 'Site Desc',
+      ogTitle: '',
+      ogDescription: ''
+    }),
+    true
+  );
+});

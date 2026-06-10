@@ -65,7 +65,7 @@
 
       <!-- OG Tab -->
       <div v-if="activeTab === 'og'" class="k-meta-kit-dialog-table-wrapper">
-        <div v-for="page in pages" :key="`og-${page.id}`" class="k-meta-kit-dialog-table-page">
+        <div v-for="page in editableOgPages" :key="`og-${page.id}`" class="k-meta-kit-dialog-table-page">
           <div class="k-meta-kit-dialog-page-info">
             <h2><a :href="page.panelUrl" class="k-meta-kit-page-id">{{ page.title }}</a></h2>
             <a :href="page.panelUrl" class="k-meta-kit-page-id">{{ page.id }}</a>
@@ -99,6 +99,9 @@
             type="og"
             :rows="3"
           />
+        </div>
+        <div v-if="editableOgPages.length === 0" class="k-meta-kit-empty">
+          <p>No page-specific OG fields available.</p>
         </div>
       </div>
 
@@ -169,6 +172,9 @@ export default {
   computed: {
     hasAnyChanges() {
       return hasAnyBulkChanges(this.pages, this.editedFields);
+    },
+    editableOgPages() {
+      return this.pages.filter(page => page.id !== 'site');
     }
   },
   methods: {
@@ -285,10 +291,15 @@ export default {
         const edited = this.editedFields[page.id];
         const fields = [
           { name: 'metaTitle', value: edited.metaTitle, original: page.metaTitle || '' },
-          { name: 'metaDescription', value: edited.metaDescription, original: page.metaDescription || '' },
-          { name: 'ogTitle', value: edited.ogTitle, original: page.ogTitle || '' },
-          { name: 'ogDescription', value: edited.ogDescription, original: page.ogDescription || '' }
+          { name: 'metaDescription', value: edited.metaDescription, original: page.metaDescription || '' }
         ];
+
+        if (page.id !== 'site') {
+          fields.push(
+            { name: 'ogTitle', value: edited.ogTitle, original: page.ogTitle || '' },
+            { name: 'ogDescription', value: edited.ogDescription, original: page.ogDescription || '' }
+          );
+        }
 
         for (const field of fields) {
           if (field.value !== field.original) {
