@@ -5,12 +5,16 @@ use TearoomOne\MetaKitController;
 return [
     'label' => 'Meta Kit',
     'icon' => 'wand',
-    'menu' => true,
+    'menu' => fn () => MetaKitController::canAccess(),
     'link' => 'meta-kit',
     'views' => [
         [
             'pattern' => 'meta-kit',
             'action' => function () {
+                if (!MetaKitController::canAccess()) {
+                    throw new \Kirby\Exception\PermissionException('You are not allowed to access Meta Kit');
+                }
+
                 $kirby = kirby();
 
                 // Get language from query parameter

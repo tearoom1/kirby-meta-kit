@@ -9,6 +9,27 @@ class MetaKitController
      */
     const int MIN_TEXT_LENGTH = 25;
 
+    /**
+     * Check whether the current user may access the plugin
+     * (view SEO data, run generation/review). Admins always pass.
+     * Additional roles can be granted via the `allowedRoles` option.
+     */
+    public static function canAccess(): bool
+    {
+        $user = kirby()->user();
+        if (!$user) {
+            return false;
+        }
+        if ($user->isAdmin()) {
+            return true;
+        }
+        $allowed = option('tearoom1.meta-kit.allowedRoles', []);
+        if (!is_array($allowed) || empty($allowed)) {
+            return false;
+        }
+        return in_array($user->role()->name(), $allowed, true);
+    }
+
     public static function getPages(): array
     {
         $kirby = kirby();
@@ -287,6 +308,10 @@ class MetaKitController
 
         if (!in_array($fieldName, $allowedFields, true)) {
             return ApiResponse::error('Unsupported field name');
+        }
+
+        if ($pageId === 'site' && in_array($fieldName, ['ogTitle', 'ogDescription'], true)) {
+            return ApiResponse::error('Site does not support page-specific OG fields');
         }
 
         try {
@@ -595,6 +620,10 @@ class MetaKitController
 
             if (!isset($fieldTypeMap[$fieldName])) {
                 return ApiResponse::error('Unsupported field name');
+            }
+
+            if ($isSite && in_array($fieldName, ['ogTitle', 'ogDescription'], true)) {
+                return ApiResponse::error('Site does not support page-specific OG fields');
             }
 
             $context = [

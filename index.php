@@ -33,6 +33,7 @@ App::plugin(
                     'active' => true
                 ]
             ],
+            'allowedRoles' => [], // Additional Kirby roles allowed to use the plugin (admins always allowed). Example: ['editor', 'client']
             'ai.enabled' => true,
             'review.enabled' => false,
             'ai.tone' => 'formal',

@@ -7,6 +7,17 @@
  */
 
 return function () {
+    $accessGuard = function () {
+        if (!TearoomOne\MetaKitController::canAccess()) {
+            return \Kirby\Http\Response::json([
+                'status' => 'error',
+                'message' => 'Forbidden'
+            ], 403);
+        }
+
+        return null;
+    };
+
     $aiGuard = function () {
         if (!TearoomOne\MetaKit::isAiEnabled()) {
             return [
@@ -34,7 +45,11 @@ return function () {
             "pattern" => "meta-kit/pages",
             "method" => "GET",
             "auth" => true,
-            "action" => function () {
+            "action" => function () use ($accessGuard) {
+                if ($error = $accessGuard()) {
+                    return $error;
+                }
+
                 $data = TearoomOne\MetaKitController::getPages();
                 return [
                     "status" => "success",
@@ -52,7 +67,11 @@ return function () {
             "pattern" => "meta-kit/apply-single-field",
             "method" => "POST",
             "auth" => true,
-            "action" => function () {
+            "action" => function () use ($accessGuard) {
+                if ($error = $accessGuard()) {
+                    return $error;
+                }
+
                 $pageId = get("pageId");
                 $fieldName = get("fieldName");
                 $value = get("value");
@@ -67,7 +86,11 @@ return function () {
             "pattern" => "meta-kit/pages-with-content",
             "method" => "GET",
             "auth" => true,
-            "action" => function () {
+            "action" => function () use ($accessGuard) {
+                if ($error = $accessGuard()) {
+                    return $error;
+                }
+
                 return TearoomOne\MetaKitController::getPagesWithContent();
             },
         ],
@@ -75,7 +98,11 @@ return function () {
             "pattern" => "meta-kit/single-page",
             "method" => "GET",
             "auth" => true,
-            "action" => function () {
+            "action" => function () use ($accessGuard) {
+                if ($error = $accessGuard()) {
+                    return $error;
+                }
+
                 $pageId = get("pageId");
                 return TearoomOne\MetaKitController::getSinglePage($pageId);
             },
@@ -87,7 +114,10 @@ return function () {
             "pattern" => "meta-kit/review-page",
             "method" => "POST",
             "auth" => true,
-            "action" => function () use ($reviewGuard) {
+            "action" => function () use ($accessGuard, $reviewGuard) {
+                if ($error = $accessGuard()) {
+                    return $error;
+                }
                 if ($error = $reviewGuard()) {
                     return $error;
                 }
@@ -103,7 +133,10 @@ return function () {
             "pattern" => "meta-kit/generate",
             "method" => "POST",
             "auth" => true,
-            "action" => function () use ($aiGuard) {
+            "action" => function () use ($accessGuard, $aiGuard) {
+                if ($error = $accessGuard()) {
+                    return $error;
+                }
                 if ($error = $aiGuard()) {
                     return $error;
                 }
@@ -116,7 +149,10 @@ return function () {
             "pattern" => "meta-kit/generate-description",
             "method" => "POST",
             "auth" => true,
-            "action" => function () use ($aiGuard) {
+            "action" => function () use ($accessGuard, $aiGuard) {
+                if ($error = $accessGuard()) {
+                    return $error;
+                }
                 if ($error = $aiGuard()) {
                     return $error;
                 }
@@ -131,7 +167,10 @@ return function () {
             "pattern" => "meta-kit/generate-all",
             "method" => "POST",
             "auth" => true,
-            "action" => function () use ($aiGuard) {
+            "action" => function () use ($accessGuard, $aiGuard) {
+                if ($error = $accessGuard()) {
+                    return $error;
+                }
                 if ($error = $aiGuard()) {
                     return $error;
                 }
@@ -155,7 +194,10 @@ return function () {
             "pattern" => "meta-kit/generate-field",
             "method" => "POST",
             "auth" => true,
-            "action" => function () use ($aiGuard) {
+            "action" => function () use ($accessGuard, $aiGuard) {
+                if ($error = $accessGuard()) {
+                    return $error;
+                }
                 if ($error = $aiGuard()) {
                     return $error;
                 }

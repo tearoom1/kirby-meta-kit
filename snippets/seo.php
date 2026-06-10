@@ -71,7 +71,7 @@ if ($page->ogImage()->isNotEmpty()) {
 
     <!-- No index if needed -->
 <?php if ($robots !== null && $robots !== 'index, follow' && strlen($robots) > 1): ?>
-    <meta name="robots" content="<?= $robots ?>">
+    <meta name="robots" content="<?= esc($robots) ?>">
 <?php endif; ?>
 
     <!-- Additional meta tags -->
@@ -79,7 +79,7 @@ if ($page->ogImage()->isNotEmpty()) {
     <meta name="keywords" content="<?= $keywords->html() ?>">
 <?php endif; ?>
 <?php if ($author): ?>
-    <meta name="author" content="<?= $author ?>">
+    <meta name="author" content="<?= esc($author) ?>">
 <?php endif; ?>
 
 <?php endif; ?>

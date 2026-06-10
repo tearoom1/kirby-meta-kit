@@ -98,7 +98,9 @@ class Sitemap
         $id = $page->id();
 
         foreach ($excludePatterns as $pattern) {
-            if (preg_match("#{$pattern}#", $id)) {
+            // Use ~ delimiter so a `#` in patterns doesn't break the regex,
+            // and silence warnings on malformed user-supplied patterns.
+            if (@preg_match('~' . $pattern . '~', $id) === 1) {
                 return false;
             }
         }
