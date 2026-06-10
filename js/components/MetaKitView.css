@@ -56,6 +56,14 @@
     color: #b81d4d;
   }
 
+  .k-meta-kit-sponsor-text {
+    max-width: 17rem;
+    padding: .75rem .75rem .5rem;
+    color: var(--color-text-dimmed);
+    font-size: .8rem;
+    line-height: 1.35;
+  }
+
   .k-meta-kit-warning {
     margin-bottom: 1.5rem;
   }

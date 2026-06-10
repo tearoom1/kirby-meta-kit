@@ -39,6 +39,9 @@
           ref="sponsorDropdown"
           align-x="end"
         >
+          <div class="k-meta-kit-sponsor-text">
+            {{ sponsorText }}
+          </div>
           <k-dropdown-item
             icon="heart"
             link="https://github.com/sponsors/tearoom1"
@@ -291,6 +294,16 @@ export default {
     };
   },
   computed: {
+    sponsorText() {
+      const language = this.panelLanguage();
+
+      if (language.startsWith('de')) {
+        return 'Dieses Plugin entsteht mit viel Liebe und laufendem Aufwand. Wenn es dir Zeit spart, hilft eine kleine Spende, Wartung und Weiterentwicklung möglich zu machen.';
+      }
+
+      return 'This plugin is built with care and ongoing effort. If it saves you time, a small donation helps keep maintenance and future improvements going.';
+    },
+
     filteredPages() {
       const filtered = filterPages(this.pagesData, this.activeFilters, this.searchQuery, {
         siteSettings: this.siteSettingsData,
@@ -367,6 +380,15 @@ export default {
     }
   },
   methods: {
+    panelLanguage() {
+      const panel = window.panel || {};
+      const panelLanguage = panel.language && panel.language.code;
+      const viewLanguage = panel.view && panel.view.props && panel.view.props.language;
+      const browserLanguage = window.navigator && window.navigator.language;
+
+      return String(viewLanguage || panelLanguage || browserLanguage || 'en').toLowerCase();
+    },
+
     buildStatusBuckets(allPages, filteredPages, classify, label, options = {}) {
       const attentionStatuses = options.attentionStatuses || ['review', 'fix'];
       const summarize = (pages) => pages.reduce((acc, page) => {
