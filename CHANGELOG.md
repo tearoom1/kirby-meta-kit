@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/tearoom1/kirby-meta-kit/compare/v2.0.1...v2.0.2) (2026-06-10)
+
+
+### Bug Fixes
+
+* enforce model update permissions ([6689540](https://github.com/tearoom1/kirby-meta-kit/commit/6689540bcd5f77d05b3ed17751412fcbd3c6d5a5))
+
 ## [2.0.1](https://github.com/tearoom1/kirby-meta-kit/compare/v2.0.0...v2.0.1) (2026-06-10)
 
 
@@ -35,11 +42,4 @@ Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
 ### Bug Fixes
 
 * add free ai model fallbacks ([4b969ad](https://github.com/tearoom1/kirby-meta-kit/commit/4b969ad4b6f1012b42bd601c0224cf301e3f78e9))
-
-## [1.5.5](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.4...v1.5.5) (2026-06-08)
-
-
-### Bug Fixes
-
-* block unlicensed ai models ([7247459](https://github.com/tearoom1/kirby-meta-kit/commit/7247459ff084fbf8137e1c19102be9bdec3a46e2))
 
