@@ -390,22 +390,14 @@ Get a free API key from [OpenRouter.ai](https://openrouter.ai/):
 'api.model' => 'google/gemma-4-31b-it:free',
 ```
 
-The default model is allowlisted for simple tests without a Meta Kit license. All models outside that allowlist require a valid Meta Kit license unless you explicitly add them to `license.freeAiModels`. If an unlicensed install is configured with another model, AI generation is blocked with a license message:
-
-```php
-'license.freeAiModels' => [
-    'google/gemma-4-31b-it:free',
-    'meta-llama/llama-3.2-3b-instruct:free',
-    'nvidia/nemotron-3-nano-30b-a3b:free',
-],
-```
+Pick any model from OpenRouter — free or paid. The plugin sends the configured model name to OpenRouter as-is, so any model your API key can reach will work.
 
 #### Sample of available Models as of June 2026
 
 **Free Tier (No cost):**
-- `google/gemma-4-31b-it:free` (default test model, license-free)
-- `meta-llama/llama-3.2-3b-instruct:free` (allowlisted test model, license-free)
-- `nvidia/nemotron-3-nano-30b-a3b:free` (allowlisted test model, license-free)
+- `google/gemma-4-31b-it:free` (default)
+- `meta-llama/llama-3.2-3b-instruct:free`
+- `nvidia/nemotron-3-nano-30b-a3b:free`
 - `stepfun/step-3.5-flash:free`
 - `nvidia/nemotron-3-super-120b-a12b:free`
 - `google/gemma-3-27b-it:free`
@@ -420,8 +412,6 @@ The default model is allowlisted for simple tests without a Meta Kit license. Al
 - `xiaomi/mimo-v2-pro`
 - `meta-llama/llama-4-maverick`
 - Find more on OpenRouter. See also the [rankings](https://openrouter.ai/rankings)
-
-All models outside `license.freeAiModels` require a valid Meta Kit license. Without a license, switch to an allowlisted test model or activate a Meta Kit license.
 
 #### AI Behavior Settings
 
@@ -898,7 +888,9 @@ This plugin is licensed under the [MIT License](LICENSE.md).
 - **Documentation**: This README and inline code comments
 - **Support Policy**: Support is limited to public GitHub Issues. Email support, consulting, and guaranteed response times are not included.
 
-Although AI heavily supported the development of this plugin, it still took many days of dedicated work to get it to where it is now.
-Lots of testing, iterating and improving and so on. If you'd like to support me, I'd be very grateful.
+Meta Kit is fully MIT-licensed — no paywalls, no feature gates. If it saves you time and you want to keep it healthy, sponsorships are the best way to support continued development:
 
-[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://coff.ee/tearoom1)
+- [GitHub Sponsors](https://github.com/sponsors/tearoom1)
+- [Buy Me a Coffee](https://buymeacoffee.com/tearoom1)
+
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/tearoom1)

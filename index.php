@@ -1,9 +1,6 @@
 <?php
 
-use TearoomOne\MetaKit;
-use TearoomOne\MetaKitLicense;
 use Kirby\Cms\App;
-use Kirby\Plugin\Plugin;
 
 if (!option('tearoom1.meta-kit.enabled', true)) {
     return;
@@ -18,7 +15,6 @@ $classes = [
     'TearoomOne\Sitemap' => 'classes/Sitemap.php',
     'TearoomOne\Robots' => 'classes/Robots.php',
     'TearoomOne\MetaKitController' => 'classes/MetaKitController.php',
-    'TearoomOne\MetaKitLicense' => 'classes/MetaKitLicense.php',
     'TearoomOne\PageDataBuilder' => 'classes/PageDataBuilder.php',
     'TearoomOne\ApiResponse' => 'classes/ApiResponse.php',
     'TearoomOne\SeoAudit' => 'classes/SeoAudit.php',
@@ -30,12 +26,6 @@ load($classes, __DIR__);
 
 App::plugin(
     name: 'tearoom1/meta-kit',
-    license: fn(Plugin $plugin) => new MetaKitLicense(
-        $plugin,
-        'Meta-Kit License',
-        'meta-kit',
-        'https://www.tearoom.one/de/kirby-plugins/meta-kit'
-    ),
     extends: [
         'options' => [
             'cache' => [
@@ -50,11 +40,6 @@ App::plugin(
             'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
             'api.model' => 'google/gemma-4-31b-it:free',
             'api.temperature' => 0.7,
-            'license.freeAiModels' => [
-                'google/gemma-4-31b-it:free',
-                'meta-llama/llama-3.2-3b-instruct:free',
-                'nvidia/nemotron-3-nano-30b-a3b:free',
-            ],
             'maxDescriptionLength' => 160,
             'validation' => [
                 'ranges' => [
@@ -115,10 +100,6 @@ App::plugin(
         ],
         'areas' => [
             'meta-kit' => require __DIR__ . '/src/areas/meta-kit.php',
-            'system' => function () {
-                $plugin = kirby()->plugin('tearoom1/meta-kit');
-                return $plugin->license()->activationDialog();
-            },
         ],
         'hooks' => require __DIR__ . '/src/hooks.php',
         'api' => [
@@ -127,7 +108,7 @@ App::plugin(
         'routes' => require __DIR__ . '/src/routes/routes.php',
         'pageMethods' => [
             'generateSeoTitle' => function (?string $content = null, ?string $languageCode = null) {
-                if (!TearoomOne\MetaKit::canUseAiFeatures()) {
+                if (!TearoomOne\MetaKit::isAiEnabled()) {
                     return null;
                 }
 
@@ -142,7 +123,7 @@ App::plugin(
                 return $metaKit->generateTitle($content, ['language' => $languageCode]);
             },
             'generateSeoDescription' => function (?string $content = null, ?string $languageCode = null) {
-                if (!TearoomOne\MetaKit::canUseAiFeatures()) {
+                if (!TearoomOne\MetaKit::isAiEnabled()) {
                     return null;
                 }
 
@@ -159,7 +140,7 @@ App::plugin(
         ],
         'fieldMethods' => [
             'toSeoTitle' => function ($field) {
-                if (!TearoomOne\MetaKit::canUseAiFeatures()) {
+                if (!TearoomOne\MetaKit::isAiEnabled()) {
                     return null;
                 }
 
@@ -168,7 +149,7 @@ App::plugin(
                 return $metaKit->generateTitle($field->value(), ['language' => $languageCode]);
             },
             'toSeoDescription' => function ($field) {
-                if (!TearoomOne\MetaKit::canUseAiFeatures()) {
+                if (!TearoomOne\MetaKit::isAiEnabled()) {
                     return null;
                 }
 

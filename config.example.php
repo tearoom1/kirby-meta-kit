@@ -31,17 +31,9 @@ return [
         'api.key' => env('OPENROUTER_API_KEY', 'your-api-key-here'),
 
         // AI model to use for description generation
-        // The default free model is allowed without a Meta Kit license for testing.
-        // Other models require a valid Meta Kit license unless added to license.freeAiModels.
+        // Pick any model from https://openrouter.ai/models
         // Leave empty to disable AI features
         'api.model' => 'google/gemma-4-31b-it:free',
-
-        // AI models that can be used without a Meta Kit license
-        'license.freeAiModels' => [
-            'google/gemma-4-31b-it:free',
-            'meta-llama/llama-3.2-3b-instruct:free',
-            'nvidia/nemotron-3-nano-30b-a3b:free',
-        ],
 
         // API endpoint (usually no need to change)
         'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',

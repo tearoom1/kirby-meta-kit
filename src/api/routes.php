@@ -7,8 +7,8 @@
  */
 
 return function () {
-    $licenseGuard = function () {
-        if (!TearoomOne\MetaKit::canUseAiFeatures()) {
+    $aiGuard = function () {
+        if (!TearoomOne\MetaKit::isAiEnabled()) {
             return [
                 'status' => 'error',
                 'message' => TearoomOne\MetaKit::getAiAccessErrorMessage()
@@ -20,25 +20,6 @@ return function () {
 
     $reviewGuard = function () {
         if (!TearoomOne\MetaKit::isReviewEnabled()) {
-            return [
-                'status' => 'error',
-                'message' => 'AI review is disabled. Enable it in the plugin options and make sure AI is configured.'
-            ];
-        }
-
-        return null;
-    };
-
-    $reviewPageGuard = function (string $pageId) use ($reviewGuard, $licenseGuard) {
-        if ($error = $reviewGuard()) {
-            return $error;
-        }
-
-        if ($error = $licenseGuard()) {
-            return $error;
-        }
-
-        if (!TearoomOne\MetaKit::canReviewPage($pageId)) {
             return [
                 'status' => 'error',
                 'message' => 'AI review is disabled. Enable it in the plugin options and make sure AI is configured.'
@@ -101,18 +82,17 @@ return function () {
         ],
     ];
 
-    // Add AI-related routes only if AI is enabled
     if (TearoomOne\MetaKit::isReviewEnabled()) {
         $routes[] = [
             "pattern" => "meta-kit/review-page",
             "method" => "POST",
             "auth" => true,
-            "action" => function () use ($reviewPageGuard) {
-                $pageId = get("pageId");
-                if ($error = $reviewPageGuard($pageId)) {
+            "action" => function () use ($reviewGuard) {
+                if ($error = $reviewGuard()) {
                     return $error;
                 }
 
+                $pageId = get("pageId");
                 return TearoomOne\SeoReview::reviewPage($pageId);
             },
         ];
@@ -123,8 +103,8 @@ return function () {
             "pattern" => "meta-kit/generate",
             "method" => "POST",
             "auth" => true,
-            "action" => function () use ($licenseGuard) {
-                if ($error = $licenseGuard()) {
+            "action" => function () use ($aiGuard) {
+                if ($error = $aiGuard()) {
                     return $error;
                 }
 
@@ -136,8 +116,8 @@ return function () {
             "pattern" => "meta-kit/generate-description",
             "method" => "POST",
             "auth" => true,
-            "action" => function () use ($licenseGuard) {
-                if ($error = $licenseGuard()) {
+            "action" => function () use ($aiGuard) {
+                if ($error = $aiGuard()) {
                     return $error;
                 }
 
@@ -151,8 +131,8 @@ return function () {
             "pattern" => "meta-kit/generate-all",
             "method" => "POST",
             "auth" => true,
-            "action" => function () use ($licenseGuard) {
-                if ($error = $licenseGuard()) {
+            "action" => function () use ($aiGuard) {
+                if ($error = $aiGuard()) {
                     return $error;
                 }
 
@@ -175,8 +155,8 @@ return function () {
             "pattern" => "meta-kit/generate-field",
             "method" => "POST",
             "auth" => true,
-            "action" => function () use ($licenseGuard) {
-                if ($error = $licenseGuard()) {
+            "action" => function () use ($aiGuard) {
+                if ($error = $aiGuard()) {
                     return $error;
                 }
 

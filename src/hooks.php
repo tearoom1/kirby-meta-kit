@@ -84,7 +84,7 @@ return [
 
         if (
             !$autoGenerate ||
-            !TearoomOne\MetaKit::canUseAiFeatures() ||
+            !TearoomOne\MetaKit::isAiEnabled() ||
             $newPage->intendedTemplate()->name() === "error"
         ) {
             return;

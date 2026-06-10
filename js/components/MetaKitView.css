@@ -22,18 +22,38 @@
 
 .k-meta-kit-view {
 
-  /* Language Switcher */
+  /* Top Bar (Language Switcher + Sponsor, both right-aligned) */
 
-  .k-meta-kit-language-bar {
+  .k-meta-kit-topbar {
     margin-top: -1rem;
     margin-bottom: 1rem;
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .k-meta-kit-language-bar {
+    display: flex;
     align-items: center;
 
     .k-button-group {
       gap: 0;
     }
+  }
+
+  .k-meta-kit-sponsor {
+    position: relative;
+  }
+
+  .k-meta-kit-sponsor-button {
+    --button-color-icon: #e0245e;
+    color: #e0245e;
+  }
+
+  .k-meta-kit-sponsor-button:hover {
+    --button-color-icon: #b81d4d;
+    color: #b81d4d;
   }
 
   .k-meta-kit-warning {

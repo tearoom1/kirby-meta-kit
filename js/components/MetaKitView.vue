@@ -1,26 +1,60 @@
 <template>
   <k-panel-inside class="k-meta-kit-view">
-    <!-- Language Switcher -->
-    <div
-      v-if="languages && languages.length > 1"
-      class="k-button-group k-language-selector k-meta-kit-language-bar"
-      data-layout="collapsed"
-      aria-label="Translations"
-    >
-      <k-button
-        v-for="lang in languages"
-        :key="lang.code"
-        :aria-current="lang.code === language ? 'true' : undefined"
-        :aria-label="lang.code"
-        :title="lang.name"
-        :theme="lang.code === language ? 'dark' : 'empty'"
-        variant="filled"
-        size="sm"
-        responsive="true"
-        @click="goToLanguage(lang.code)"
+    <!-- Top Bar: Language Switcher + Sponsor (right-aligned) -->
+    <div class="k-meta-kit-topbar">
+      <div
+        v-if="languages && languages.length > 1"
+        class="k-button-group k-language-selector k-meta-kit-language-bar"
+        data-layout="collapsed"
+        aria-label="Translations"
       >
-        {{ lang.code }}
-      </k-button>
+        <k-button
+          v-for="lang in languages"
+          :key="lang.code"
+          :aria-current="lang.code === language ? 'true' : undefined"
+          :aria-label="lang.code"
+          :title="lang.name"
+          :theme="lang.code === language ? 'dark' : 'empty'"
+          variant="filled"
+          size="sm"
+          responsive="true"
+          @click="goToLanguage(lang.code)"
+        >
+          {{ lang.code }}
+        </k-button>
+      </div>
+
+      <div class="k-meta-kit-sponsor">
+        <k-button
+          class="k-meta-kit-sponsor-button"
+          icon="heart"
+          variant="filled"
+          size="sm"
+          theme="empty"
+          title="Support Meta Kit"
+          aria-label="Support Meta Kit"
+          @click="$refs.sponsorDropdown.toggle()"
+        />
+        <k-dropdown-content
+          ref="sponsorDropdown"
+          align-x="end"
+        >
+          <k-dropdown-item
+            icon="heart"
+            link="https://github.com/sponsors/tearoom1"
+            target="_blank"
+          >
+            Sponsor on GitHub
+          </k-dropdown-item>
+          <k-dropdown-item
+            icon="heart"
+            link="https://buymeacoffee.com/tearoom1"
+            target="_blank"
+          >
+            Buy Me a Coffee
+          </k-dropdown-item>
+        </k-dropdown-content>
+      </div>
     </div>
 
     <!-- Stats Cards -->

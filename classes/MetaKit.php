@@ -14,37 +14,12 @@ class MetaKit
 
     private static ?bool $aiEnabledCache = null;
 
-    public static function hasValidLicense(): bool
-    {
-        $plugin = kirby()->plugin('tearoom1/meta-kit');
-        if (!$plugin) {
-            return false;
-        }
-
-        $license = $plugin->license();
-        return $license && $license->isValid();
-    }
-
     public static function getConfiguredAiModel(): ?string
     {
         $settings = ConfigHelper::getOpenRouterSettings();
         $model = $settings['api.model'] ?? null;
 
         return is_string($model) && trim($model) !== '' ? trim($model) : null;
-    }
-
-    public static function canUseConfiguredAiModel(): bool
-    {
-        return self::canUseAiModel(self::getConfiguredAiModel());
-    }
-
-    public static function canUseAiFeatures(): bool
-    {
-        if (!self::isAiEnabled()) {
-            return false;
-        }
-
-        return self::canUseConfiguredAiModel();
     }
 
     public static function log(string $message): void
@@ -54,84 +29,17 @@ class MetaKit
         }
     }
 
-    public static function getUsableAiModel(): ?string
-    {
-        $configuredModel = self::getConfiguredAiModel();
-        if (self::canUseAiModel($configuredModel)) {
-            return $configuredModel;
-        }
-
-        return null;
-    }
-
-    public static function getFallbackFreeAiModel(): ?string
-    {
-        $freeModels = self::getFreeAiModels();
-
-        return $freeModels[0] ?? null;
-    }
-
-    public static function getFreeAiModels(): array
-    {
-        $settings = ConfigHelper::getOpenRouterSettings();
-        $freeModels = $settings['license.freeAiModels'] ?? [
-            'google/gemma-4-31b-it:free',
-            'meta-llama/llama-3.2-3b-instruct:free',
-            'nvidia/nemotron-3-nano-30b-a3b:free',
-        ];
-
-        if (is_string($freeModels)) {
-            $freeModels = [$freeModels];
-        }
-
-        if (!is_array($freeModels)) {
-            return [];
-        }
-
-        return array_values(array_filter(array_map(
-            fn($model) => trim((string)$model),
-            $freeModels
-        )));
-    }
-
-    public static function canUseAiModel(?string $model): bool
-    {
-        if ($model === null || $model === '') {
-            return false;
-        }
-
-        if (self::hasValidLicense()) {
-            return true;
-        }
-
-        $model = strtolower(trim($model));
-        foreach (self::getFreeAiModels() as $freeModel) {
-            if ($model === strtolower(trim((string)$freeModel))) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public static function getAiAccessErrorMessage(): string
     {
         if (!self::isAiEnabled()) {
             return 'Configure an OpenRouter API key and model to use AI generation.';
         }
 
-        $model = self::getConfiguredAiModel();
-        if ($model === null) {
+        if (self::getConfiguredAiModel() === null) {
             return 'Configure an OpenRouter model to use AI generation.';
         }
 
-        if (self::canUseAiModel($model)) {
-            return '';
-        }
-
-        $freeModels = implode(', ', self::getFreeAiModels());
-
-        return 'The current Meta Kit license does not allow the configured AI model "' . $model . '". Activate a Meta Kit license or switch to an allowlisted free test model' . ($freeModels ? ' (' . $freeModels . ')' : '') . '.';
+        return '';
     }
 
     /**
@@ -177,7 +85,7 @@ class MetaKit
 
     public static function canReviewPage(string $pageId): bool
     {
-        return self::isReviewEnabled() && self::canUseAiFeatures();
+        return self::isReviewEnabled();
     }
 
     public function __construct(Kirby $kirby)
@@ -280,10 +188,6 @@ class MetaKit
 
         if ($model === null || $model === '') {
             throw new Exception('OpenRouter model is not configured');
-        }
-
-        if (!self::canUseAiModel($model)) {
-            throw new Exception(self::getAiAccessErrorMessage());
         }
 
         $response = $this->httpClient->post($this->options['api.endpoint'], [
