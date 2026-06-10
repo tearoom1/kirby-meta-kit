@@ -1,3 +1,11 @@
+## [2.0.1](https://github.com/tearoom1/kirby-meta-kit/compare/v2.0.0...v2.0.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* prevent site OG edits from disappearing ([07cf2cd](https://github.com/tearoom1/kirby-meta-kit/commit/07cf2cdb8ca4ae0128ca6ff59bbcdac6e9732588))
+* role-based access control, escape robots/author, harden sitemap regex ([b1532f2](https://github.com/tearoom1/kirby-meta-kit/commit/b1532f2ccda3bb66e35e929706a8e03c182dee06))
+
 ## [2.0.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.7...v2.0.0) (2026-06-10)
 
 
@@ -34,11 +42,4 @@ Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
 ### Bug Fixes
 
 * block unlicensed ai models ([7247459](https://github.com/tearoom1/kirby-meta-kit/commit/7247459ff084fbf8137e1c19102be9bdec3a46e2))
-
-## [1.5.4](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.3...v1.5.4) (2026-06-08)
-
-
-### Bug Fixes
-
-* preserve batch notification context ([460a270](https://github.com/tearoom1/kirby-meta-kit/commit/460a270c41ca7d3b60d85042669c48e1ac133c9c))
 
