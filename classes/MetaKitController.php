@@ -30,6 +30,15 @@ class MetaKitController
         return in_array($user->role()->name(), $allowed, true);
     }
 
+    private static function canUpdateModel($model): bool
+    {
+        if (!$model || !method_exists($model, 'permissions')) {
+            return false;
+        }
+
+        return $model->permissions()->can('update') === true;
+    }
+
     public static function getPages(): array
     {
         $kirby = kirby();
@@ -308,6 +317,10 @@ class MetaKitController
 
         if (!in_array($fieldName, $allowedFields, true)) {
             return ApiResponse::error('Unsupported field name');
+        }
+
+        if (!self::canUpdateModel($page)) {
+            return ApiResponse::error('Forbidden');
         }
 
         if ($pageId === 'site' && in_array($fieldName, ['ogTitle', 'ogDescription'], true)) {
@@ -596,6 +609,10 @@ class MetaKitController
 
         if (!$page) {
             return ApiResponse::notFound();
+        }
+
+        if ($save && !self::canUpdateModel($page)) {
+            return ApiResponse::error('Forbidden');
         }
 
         $previousLanguage = $kirby->language()?->code();
