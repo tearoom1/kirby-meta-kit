@@ -1,3 +1,10 @@
+## [2.0.4](https://github.com/tearoom1/kirby-meta-kit/compare/v2.0.3...v2.0.4) (2026-07-06)
+
+
+### Bug Fixes
+
+* correct og:locale format and inLanguage schema field ([b068239](https://github.com/tearoom1/kirby-meta-kit/commit/b068239ab9a16b1eb038ced175d3fdd4606652eb))
+
 ## [2.0.3](https://github.com/tearoom1/kirby-meta-kit/compare/v2.0.2...v2.0.3) (2026-07-06)
 
 
@@ -35,11 +42,4 @@ Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
 ### Features
 
 * drop ai license enforcement, add sponsor dropdown ([66e75b7](https://github.com/tearoom1/kirby-meta-kit/commit/66e75b7124ac6e4562f7f2c9e7e8ecd65d9c0c25))
-
-## [1.5.7](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.6...v1.5.7) (2026-06-08)
-
-
-### Bug Fixes
-
-* harden ai license enforcement ([9499aa2](https://github.com/tearoom1/kirby-meta-kit/commit/9499aa29e1bb04fa98b4c25109cc5f6e944e4202))
 
