@@ -202,4 +202,86 @@ class MetaHelperTest extends KirbyTestCase
         $result = MetaHelper::getSeoData($page->metaTitle());
         $this->assertNull($result);
     }
+
+    // ── currentLanguageCode ───────────────────────────────────────────────────
+
+    public function testCurrentLanguageCodeReturnsActiveLanguageInMultilang(): void
+    {
+        $kirby = $this->makeKirby(
+            ['site.de.txt' => "Title: Site\n", 'site.en.txt' => "Title: Site\n"],
+            [],
+            [
+                ['code' => 'de', 'name' => 'Deutsch', 'default' => true],
+                ['code' => 'en', 'name' => 'English'],
+            ]
+        );
+
+        $this->assertSame('de', MetaHelper::currentLanguageCode($kirby));
+    }
+
+    public function testCurrentLanguageCodeFallsBackToEnWhenNoLocaleOption(): void
+    {
+        $kirby = $this->makeKirby(['site.txt' => "Title: Site\n"]);
+        $this->assertSame('en', MetaHelper::currentLanguageCode($kirby));
+    }
+
+    public function testCurrentLanguageCodeUsesLocaleOptionOnSingleLangSite(): void
+    {
+        $kirby = $this->makeKirby(
+            ['site.txt' => "Title: Site\n"],
+            ['locale' => 'de_DE.UTF-8']
+        );
+
+        $this->assertSame('de-DE', MetaHelper::currentLanguageCode($kirby));
+    }
+
+    // ── ogLocale ──────────────────────────────────────────────────────────────
+
+    public function testOgLocaleExpandsSimpleCodeToLanguageRegion(): void
+    {
+        $kirby = $this->makeKirby(
+            ['site.de.txt' => "Title: Site\n"],
+            [],
+            [['code' => 'de', 'name' => 'Deutsch', 'default' => true]]
+        );
+
+        $locale = MetaHelper::ogLocale($kirby->language('de'));
+        $this->assertSame('de_DE', $locale);
+    }
+
+    public function testOgLocaleUsesKirbyLocaleWhenDefined(): void
+    {
+        $kirby = $this->makeKirby(
+            ['site.de.txt' => "Title: Site\n"],
+            [],
+            [['code' => 'de', 'name' => 'Deutsch', 'default' => true, 'locale' => 'de_AT']]
+        );
+
+        $locale = MetaHelper::ogLocale($kirby->language('de'));
+        $this->assertSame('de_AT', $locale);
+    }
+
+    public function testOgLocaleStripsEncodingSuffix(): void
+    {
+        $kirby = $this->makeKirby(
+            ['site.de.txt' => "Title: Site\n"],
+            [],
+            [['code' => 'de', 'name' => 'Deutsch', 'default' => true, 'locale' => 'de_DE.UTF-8']]
+        );
+
+        $locale = MetaHelper::ogLocale($kirby->language('de'));
+        $this->assertSame('de_DE', $locale);
+    }
+
+    public function testOgLocaleHandlesHyphenatedCode(): void
+    {
+        $kirby = $this->makeKirby(
+            ['site.en.txt' => "Title: Site\n"],
+            [],
+            [['code' => 'en-us', 'name' => 'English', 'default' => true]]
+        );
+
+        $locale = MetaHelper::ogLocale($kirby->language('en-us'));
+        $this->assertSame('en_US', $locale);
+    }
 }

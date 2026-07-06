@@ -98,10 +98,10 @@ if ($page->ogImage()->isNotEmpty()) {
     <meta property="og:image:height" content="<?= $ogImage->height() ?>">
 <?php endif; ?>
 <?php if (kirby()->multilang()): ?>
-    <meta property="og:locale" content="<?= str_replace('-', '_', kirby()->language()->code()) ?>">
+    <meta property="og:locale" content="<?= MetaHelper::ogLocale(kirby()->language()) ?>">
 <?php foreach (kirby()->languages() as $language): ?>
 <?php if ($language->code() !== kirby()->language()->code()): ?>
-    <meta property="og:locale:alternate" content="<?= str_replace('-', '_', $language->code()) ?>">
+    <meta property="og:locale:alternate" content="<?= MetaHelper::ogLocale($language) ?>">
 <?php endif; ?>
 <?php endforeach; ?>
 <?php endif; ?>
@@ -178,7 +178,7 @@ $webPageSchema = [
     'name' => $metaTitle,
     'description' => $metaDescription,
     'url' => $page->url(),
-    'inLanguage' => $site->language() ? $site->language()->code() : 'en',
+    'inLanguage' => MetaHelper::currentLanguageCode(kirby()),
     'isPartOf' => [
         '@type' => 'WebSite',
         'url' => $site->url(),
