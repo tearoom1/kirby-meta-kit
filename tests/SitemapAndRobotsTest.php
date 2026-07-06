@@ -131,5 +131,50 @@ class SitemapAndRobotsTest extends KirbyTestCase
         $this->assertStringContainsString('xmlns:xhtml=', $xml);
         $this->assertStringContainsString('xhtml:link rel="alternate" hreflang="en"', $xml);
         $this->assertStringContainsString('xhtml:link rel="alternate" hreflang="de"', $xml);
+        // x-default should point to default language for unmatched visitors
+        $this->assertStringContainsString('xhtml:link rel="alternate" hreflang="x-default"', $xml);
+        // Each language version of the page must appear as its own <url> entry
+        $this->assertSame(2, substr_count($xml, '<url>'), 'Expected one <url> entry per language');
+    }
+
+    public function testSitemapGenerateMultilangCreatesOneEntryPerLanguage(): void
+    {
+        $kirby = $this->makeKirby(
+            [
+                'site.en.txt' => "Title: Site EN\n",
+                'site.de.txt' => "Title: Site DE\n",
+                '01-listed/default.en.txt' => "Title: Listed EN\n",
+                '01-listed/default.de.txt' => "Title: Listed DE\n",
+            ],
+            [],
+            [
+                ['code' => 'en', 'name' => 'English', 'default' => true],
+                ['code' => 'de', 'name' => 'Deutsch'],
+            ]
+        );
+
+        $entries = (new Sitemap($kirby))->generate();
+
+        // 1 page × 2 languages = 2 entries
+        $this->assertCount(2, $entries);
+
+        $urls = array_column($entries, 'url');
+        $this->assertTrue(
+            count(array_filter($urls, fn ($u) => str_contains($u, '/en/'))) > 0,
+            'Expected an English URL entry'
+        );
+        $this->assertTrue(
+            count(array_filter($urls, fn ($u) => str_contains($u, '/de/'))) > 0,
+            'Expected a German URL entry'
+        );
+
+        // Every entry must carry alternates including x-default
+        foreach ($entries as $entry) {
+            $this->assertNotEmpty($entry['alternates']);
+            $hreflangs = array_column($entry['alternates'], 'lang');
+            $this->assertContains('en', $hreflangs);
+            $this->assertContains('de', $hreflangs);
+            $this->assertContains('x-default', $hreflangs);
+        }
     }
 }

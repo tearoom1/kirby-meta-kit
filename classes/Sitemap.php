@@ -32,7 +32,7 @@ class Sitemap
             if ($isMultilang) {
                 $defaultLanguage = $this->kirby->defaultLanguage();
 
-                // Get alternates for all languages
+                // Build alternates list: one per language + x-default pointing to default language
                 $alternates = [];
                 foreach ($this->kirby->languages() as $language) {
                     $alternates[] = [
@@ -40,15 +40,21 @@ class Sitemap
                         'url' => $page->url($language->code())
                     ];
                 }
-
-                // Add URL for default language
-                $sitemap[] = [
-                    'url' => $page->url($defaultLanguage->code()),
-                    'lastmod' =>  (date('c', $timestamp)),
-                    'changefreq' => $this->getChangeFrequency($page),
-                    'priority' => $this->getPriority($page),
-                    'alternates' => $alternates
+                $alternates[] = [
+                    'lang' => 'x-default',
+                    'url' => $page->url($defaultLanguage->code())
                 ];
+
+                // Add one <url> entry per language so all versions are first-class sitemap entries
+                foreach ($this->kirby->languages() as $language) {
+                    $sitemap[] = [
+                        'url' => $page->url($language->code()),
+                        'lastmod' => (date('c', $timestamp)),
+                        'changefreq' => $this->getChangeFrequency($page),
+                        'priority' => $this->getPriority($page),
+                        'alternates' => $alternates
+                    ];
+                }
             } else {
                 // Single language site
                 $sitemap[] = [
