@@ -1,3 +1,10 @@
+## [2.1.0](https://github.com/tearoom1/kirby-meta-kit/compare/v2.0.4...v2.1.0) (2026-07-06)
+
+
+### Features
+
+* support Person and Organization schema types ([6526cd7](https://github.com/tearoom1/kirby-meta-kit/commit/6526cd7485c0b50a61f2e49c4365aa9237e389ba))
+
 ## [2.0.4](https://github.com/tearoom1/kirby-meta-kit/compare/v2.0.3...v2.0.4) (2026-07-06)
 
 
@@ -26,20 +33,4 @@
 
 * prevent site OG edits from disappearing ([07cf2cd](https://github.com/tearoom1/kirby-meta-kit/commit/07cf2cdb8ca4ae0128ca6ff59bbcdac6e9732588))
 * role-based access control, escape robots/author, harden sitemap regex ([b1532f2](https://github.com/tearoom1/kirby-meta-kit/commit/b1532f2ccda3bb66e35e929706a8e03c182dee06))
-
-## [2.0.0](https://github.com/tearoom1/kirby-meta-kit/compare/v1.5.7...v2.0.0) (2026-06-10)
-
-
-### ⚠ BREAKING CHANGES
-
-* The Meta Kit license check is gone. AI generation
-no longer requires a license for any OpenRouter model, and the
-`license.freeAiModels` config option and license activation dialog
-have been removed.
-
-Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
-
-### Features
-
-* drop ai license enforcement, add sponsor dropdown ([66e75b7](https://github.com/tearoom1/kirby-meta-kit/commit/66e75b7124ac6e4562f7f2c9e7e8ecd65d9c0c25))
 
