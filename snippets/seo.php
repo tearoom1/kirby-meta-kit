@@ -120,23 +120,34 @@ if ($page->ogImage()->isNotEmpty()) {
 
 <?php if ($enableSchema): ?>
 <?php
-// Organization Schema
-$organizationSchema = [
+// Entity Schema (Organization or Person)
+$schemaType = $site->schemaType()->isNotEmpty() ? $site->schemaType()->value() : 'Organization';
+$schemaName = $site->schemaName()->isNotEmpty() ? $site->schemaName()->value() : $site->title()->value();
+
+$entitySchema = [
     '@context' => 'https://schema.org',
-    '@type' => 'Organization',
-    'name' => $site->title()->value(),
+    '@type' => $schemaType,
+    'name' => $schemaName,
     'url' => $site->url(),
 ];
 
-// Add logo if available
 if ($site->ogImage()->isNotEmpty()) {
-    $logo = $site->ogImage()->toFile();
-    if ($logo) {
-        $organizationSchema['logo'] = $logo->crop(600, 600)->url();
+    $entityImage = $site->ogImage()->toFile();
+    if ($entityImage) {
+        $entityImageUrl = $entityImage->crop(600, 600)->url();
+        // Person uses "image", Organization uses "logo"
+        $entitySchema[$schemaType === 'Person' ? 'image' : 'logo'] = $entityImageUrl;
     }
 }
 
-// Add social profiles if available
+if ($schemaType === 'Person' && $site->schemaJobTitle()->isNotEmpty()) {
+    $entitySchema['jobTitle'] = $site->schemaJobTitle()->value();
+}
+
+if ($site->schemaEmail()->isNotEmpty()) {
+    $entitySchema['email'] = $site->schemaEmail()->value();
+}
+
 if ($site->metaKitSocialSites()->isNotEmpty()) {
     $socialProfiles = [];
     foreach ($site->metaKitSocialSites()->toStructure() as $social) {
@@ -145,7 +156,7 @@ if ($site->metaKitSocialSites()->isNotEmpty()) {
         }
     }
     if (!empty($socialProfiles)) {
-        $organizationSchema['sameAs'] = $socialProfiles;
+        $entitySchema['sameAs'] = $socialProfiles;
     }
 }
 
@@ -156,8 +167,8 @@ $websiteSchema = [
     'name' => $site->title()->value(),
     'url' => $site->url(),
     'publisher' => [
-        '@type' => 'Organization',
-        'name' => $site->title()->value(),
+        '@type' => $schemaType,
+        'name' => $schemaName,
     ],
 ];
 
@@ -232,7 +243,7 @@ if (!$page->isHomePage() && $page->parents()->count() > 0) {
 
 <!-- Schema.org JSON-LD -->
 <script type="application/ld+json">
-  <?= json_encode($organizationSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+  <?= json_encode($entitySchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
 </script>
 
 <script type="application/ld+json">

@@ -93,3 +93,46 @@ fields:
     query: site.images
     help: Default image for social media sharing (1200×630px recommended)
     width: 1/2
+
+  schemaHeadline:
+    label: Schema Identity
+    type: headline
+    numbered: false
+
+  schemaInfo:
+    type: info
+    text: Choose <strong>Person</strong> for personal sites and portfolios, <strong>Organization</strong> for businesses. These fields are language-independent — edit them in the default language only.
+    theme: positive
+
+  schemaType:
+    label: Entity Type
+    type: select
+    options:
+      - { value: 'Organization', text: 'Organization' }
+      - { value: 'Person', text: 'Person' }
+    default: Organization
+    width: 1/3
+    translate: false
+
+  schemaName:
+    label: Name
+    type: text
+    placeholder: "{{ site.title }}"
+    help: Person's full name or organisation's legal name if different from the site title.
+    width: 1/3
+    translate: false
+
+  schemaEmail:
+    label: Contact Email
+    type: email
+    width: 1/3
+    translate: false
+
+  schemaJobTitle:
+    label: Job Title / Role
+    type: text
+    help: Shown in search results (e.g. "Photographer", "Web Designer").
+    width: 1/2
+    when:
+      schemaType: Person
+    translate: false
