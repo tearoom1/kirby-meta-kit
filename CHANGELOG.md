@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.1...v2.1.2) (2026-07-09)
+
+
+### Bug Fixes
+
+* enforce tested PHP compatibility ([2457fd7](https://github.com/tearoom1/kirby-meta-kit/commit/2457fd7f71f20f644a0108ed4d244d7eb9b46c35))
+
 ## [2.1.1](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.0...v2.1.1) (2026-07-09)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * generate one sitemap entry per language in multilingual sites ([faffa0a](https://github.com/tearoom1/kirby-meta-kit/commit/faffa0a2590ac025982218fed5f4e7bf46a45f10))
-
-## [2.0.2](https://github.com/tearoom1/kirby-meta-kit/compare/v2.0.1...v2.0.2) (2026-06-10)
-
-
-### Bug Fixes
-
-* enforce model update permissions ([6689540](https://github.com/tearoom1/kirby-meta-kit/commit/6689540bcd5f77d05b3ed17751412fcbd3c6d5a5))
 
