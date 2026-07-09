@@ -1,4 +1,5 @@
 /vendor/
+/kirby/
 .DS_Store
 *.log
 .phpunit.result.cache

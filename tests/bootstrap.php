@@ -43,19 +43,20 @@ spl_autoload_register(static function (string $class): void {
     }
 });
 
-// Load Kirby's autoloader directly (bypassing version check for tests)
-// Path: tests -> meta-kit -> plugins -> site -> project root -> vendor
-$kirbyVendorAutoload = __DIR__ . '/../../../../vendor/autoload.php';
+// Composer installs Kirby as a dev dependency. Keep the legacy project-level
+// lookup as a fallback for contributors who have not installed plugin dev dependencies.
+if (class_exists(\Kirby\Cms\App::class) === false) {
+    $kirbyVendorAutoload = __DIR__ . '/../../../../vendor/autoload.php';
 
-if (file_exists($kirbyVendorAutoload)) {
-    require_once $kirbyVendorAutoload;
-} else {
-    // Try alternative path: tests -> meta-kit -> plugins -> site -> project root -> kirby -> vendor
-    $kirbyVendorAutoload = __DIR__ . '/../../../../kirby/vendor/autoload.php';
     if (file_exists($kirbyVendorAutoload)) {
         require_once $kirbyVendorAutoload;
     } else {
-        throw new Exception('Kirby autoloader not found. Please ensure Kirby is installed.');
+        $kirbyVendorAutoload = __DIR__ . '/../../../../kirby/vendor/autoload.php';
+        if (file_exists($kirbyVendorAutoload)) {
+            require_once $kirbyVendorAutoload;
+        } else {
+            throw new Exception('Kirby autoloader not found. Run composer install.');
+        }
     }
 }
 

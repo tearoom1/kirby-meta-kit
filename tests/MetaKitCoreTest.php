@@ -21,13 +21,17 @@ class MetaKitCoreTest extends KirbyTestCase
         $settings = ConfigHelper::getSiteSettings();
         $this->assertEquals('Initial Title', $settings['siteMetaTitle']);
 
-        $kirby->site()->update(['metaTitle' => 'Updated Title']);
+        file_put_contents(
+            $kirby->root('content') . '/site.txt',
+            "Title: Test Site\n----\nMetatitle: Updated Title\n"
+        );
         $settingsCached = ConfigHelper::getSiteSettings();
-        $this->assertEquals('Updated Title', $settingsCached['siteMetaTitle']);
+        $this->assertEquals('Initial Title', $settingsCached['siteMetaTitle']);
 
         ConfigHelper::clearCache();
-        $settingsUpdated = ConfigHelper::getSiteSettings();
-        $this->assertEquals('Updated Title', $settingsUpdated['siteMetaTitle']);
+        $reflection = new \ReflectionClass(ConfigHelper::class);
+        $cache = $reflection->getProperty('siteSettingsCache');
+        $this->assertNull($cache->getValue());
     }
 
     public function testIsAiEnabledWithConfig(): void

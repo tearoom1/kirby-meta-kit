@@ -108,8 +108,8 @@ class SitemapAndRobotsTest extends KirbyTestCase
             [
                 'site.en.txt' => "Title: Site EN\n",
                 'site.de.txt' => "Title: Site DE\n",
-                '01-listed/default.en.txt' => "Title: Listed EN\n",
-                '01-listed/default.de.txt' => "Title: Listed DE\n",
+                '1_listed/default.en.txt' => "Title: Listed EN\n",
+                '1_listed/default.de.txt' => "Title: Listed DE\n",
             ],
             [
                 'tearoom1.meta-kit' => [
@@ -143,8 +143,8 @@ class SitemapAndRobotsTest extends KirbyTestCase
             [
                 'site.en.txt' => "Title: Site EN\n",
                 'site.de.txt' => "Title: Site DE\n",
-                '01-listed/default.en.txt' => "Title: Listed EN\n",
-                '01-listed/default.de.txt' => "Title: Listed DE\n",
+                '1_listed/default.en.txt' => "Title: Listed EN\n",
+                '1_listed/default.de.txt' => "Title: Listed DE\n",
             ],
             [],
             [
