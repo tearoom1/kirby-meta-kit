@@ -7,7 +7,7 @@ class MetaKitController
     /**
      * Avoid short text, numbers and file strings
      */
-    const int MIN_TEXT_LENGTH = 25;
+    const MIN_TEXT_LENGTH = 25;
 
     /**
      * Check whether the current user may access the plugin
