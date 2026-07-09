@@ -1,6 +1,6 @@
 {
   "name": "tearoom1/kirby-meta-kit",
-  "description": "AI-powered SEO plugin for Kirby with meta descriptions, previews, and Schema.org",
+  "description": "AI-powered SEO plugin for Kirby with bulk edit, automatic meta descriptions, live previews, sitemap generation, and Schema.org support.",
   "type": "kirby-plugin",
   "license": "MIT",
   "homepage": "https://github.com/tearoom1/kirby-meta-kit",
