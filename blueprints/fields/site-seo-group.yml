@@ -60,7 +60,6 @@ fields:
     type: mk-description
     fieldType: meta
     maxlength: 180
-    width: 1/2
     help: Default description for search engines. Include primary keyword and a call-to-action.
     width: 1/2
 
