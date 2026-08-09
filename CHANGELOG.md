@@ -1,3 +1,10 @@
+## [2.1.3](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.2...v2.1.3) (2026-08-09)
+
+
+### Bug Fixes
+
+* fixed duplicate width in yml file, fixes [#1](https://github.com/tearoom1/kirby-meta-kit/issues/1) ([be8471b](https://github.com/tearoom1/kirby-meta-kit/commit/be8471b77d92c71748fba00921cdae2e4d87bcb4))
+
 ## [2.1.2](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.1...v2.1.2) (2026-07-09)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * correct og:locale format and inLanguage schema field ([b068239](https://github.com/tearoom1/kirby-meta-kit/commit/b068239ab9a16b1eb038ced175d3fdd4606652eb))
-
-## [2.0.3](https://github.com/tearoom1/kirby-meta-kit/compare/v2.0.2...v2.0.3) (2026-07-06)
-
-
-### Bug Fixes
-
-* generate one sitemap entry per language in multilingual sites ([faffa0a](https://github.com/tearoom1/kirby-meta-kit/commit/faffa0a2590ac025982218fed5f4e7bf46a45f10))
 
