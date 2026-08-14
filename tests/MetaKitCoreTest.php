@@ -150,6 +150,41 @@ class MetaKitCoreTest extends KirbyTestCase
         $this->assertEquals('de', $kirby->language()->code());
     }
 
+    public function testGenerationUsesConfiguredLocaleWhenLanguageContextIsNull(): void
+    {
+        $kirby = $this->makeKirby(
+            ['site.txt' => "Title: Test Site"],
+            ['locale' => 'de_DE.UTF-8']
+        );
+
+        $metaKit = new class($kirby) extends MetaKit
+        {
+            public array $prompts = [];
+
+            protected function callApi(string $prompt, int $maxTokens): string
+            {
+                $this->prompts[] = $prompt;
+
+                return $maxTokens === 50
+                    ? 'Deutscher Meta-Titel'
+                    : str_repeat('Deutsche Beschreibung ', 7);
+            }
+        };
+
+        $metaKit->generateTitle(
+            'Deutscher Seiteninhalt',
+            ['language' => null, 'fieldType' => 'title']
+        );
+        $metaKit->generateDescription(
+            'Deutscher Seiteninhalt',
+            ['language' => null, 'fieldType' => 'description']
+        );
+
+        $this->assertCount(2, $metaKit->prompts);
+        $this->assertStringContainsString('in De-DE', $metaKit->prompts[0]);
+        $this->assertStringContainsString('in De-DE', $metaKit->prompts[1]);
+    }
+
     public function testSanitizeDescriptionTrimsWarningLengthBackToOptimalMax(): void
     {
         $kirby = $this->makeKirby([

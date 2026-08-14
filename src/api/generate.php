@@ -1,12 +1,13 @@
 <?php
 
 use TearoomOne\MetaKit;
+use TearoomOne\MetaHelper;
 
 return function () {
     $kirby = kirby();
     $data = $kirby->request()->body()->toArray();
     $text = $data['text'] ?? '';
-    $language = $data['language'] ?? ($kirby->language()?->code() ?? 'en');
+    $language = $data['language'] ?? MetaHelper::currentLanguageCode($kirby);
     $pageId = $data['pageId'] ?? null;
     $fieldType = $data['fieldType'] ?? 'description'; // 'description' or 'ogDescription'
 

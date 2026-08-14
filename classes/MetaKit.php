@@ -419,7 +419,7 @@ class MetaKit
 
     public function generateTitle(string $content, array $context = []): ?string
     {
-        $language = $context['language'] ?? 'en';
+        $language = $context['language'] ?? MetaHelper::currentLanguageCode($this->kirby);
         $fieldType = $context['fieldType'] ?? 'title'; // 'title' or 'ogTitle'
         $template = $context['template'] ?? null;
 
@@ -449,7 +449,7 @@ class MetaKit
 
     public function generateDescription(string $content, array $context = []): ?string
     {
-        $languageCode = $context['language'] ?? 'en';
+        $languageCode = $context['language'] ?? MetaHelper::currentLanguageCode($this->kirby);
         $fieldType = $context['fieldType'] ?? 'description'; // 'description' or 'ogDescription'
         $template = $context['template'] ?? null;
 

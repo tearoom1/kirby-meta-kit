@@ -644,7 +644,7 @@ class MetaKitController
             }
 
             $context = [
-                'language' => $languageCode,
+                'language' => $languageCode ?? MetaHelper::currentLanguageCode($kirby),
                 'fieldType' => $fieldTypeMap[$fieldName]
             ];
 

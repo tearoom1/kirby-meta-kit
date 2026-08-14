@@ -114,7 +114,7 @@ App::plugin(
                 }
 
                 $metaKit = new TearoomOne\MetaKit(kirby());
-                $languageCode = $languageCode ?? kirby()->language()?->code() ?? 'en';
+                $languageCode = $languageCode ?? TearoomOne\MetaHelper::currentLanguageCode(kirby());
                 $content = $content ?? $this->text()->toString();
 
                 if (empty($content)) {
@@ -129,7 +129,7 @@ App::plugin(
                 }
 
                 $metaKit = new TearoomOne\MetaKit(kirby());
-                $languageCode = $languageCode ?? kirby()->language()?->code() ?? 'en';
+                $languageCode = $languageCode ?? TearoomOne\MetaHelper::currentLanguageCode(kirby());
                 $content = $content ?? $this->text()->toString();
 
                 if (empty($content)) {
@@ -146,7 +146,7 @@ App::plugin(
                 }
 
                 $metaKit = new TearoomOne\MetaKit(kirby());
-                $languageCode = kirby()->language()?->code() ?? 'en';
+                $languageCode = TearoomOne\MetaHelper::currentLanguageCode(kirby());
                 return $metaKit->generateTitle($field->value(), ['language' => $languageCode]);
             },
             'toSeoDescription' => function ($field) {
@@ -155,7 +155,7 @@ App::plugin(
                 }
 
                 $metaKit = new TearoomOne\MetaKit(kirby());
-                $languageCode = kirby()->language()?->code() ?? 'en';
+                $languageCode = TearoomOne\MetaHelper::currentLanguageCode(kirby());
                 return $metaKit->generateDescription($field->value(), ['language' => $languageCode]);
             }
         ],

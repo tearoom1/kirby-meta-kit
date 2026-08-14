@@ -99,7 +99,7 @@ return [
             $content = $newPage->text()->toString();
             if (!empty($content)) {
                 $metaKit = new TearoomOne\MetaKit(kirby());
-                $languageCode = kirby()->language()?->code() ?? "en";
+                $languageCode = TearoomOne\MetaHelper::currentLanguageCode(kirby());
                 $description = $metaKit->generateDescription($content, [
                     "language" => $languageCode,
                 ]);
