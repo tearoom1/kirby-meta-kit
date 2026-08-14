@@ -1,3 +1,10 @@
+## [2.1.4](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.3...v2.1.4) (2026-08-14)
+
+
+### Bug Fixes
+
+* use site locale for AI generation language ([c4202ab](https://github.com/tearoom1/kirby-meta-kit/commit/c4202ab93d3340158fbaebac9037e91750bf7054))
+
 ## [2.1.3](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.2...v2.1.3) (2026-08-09)
 
 
@@ -25,11 +32,4 @@
 ### Features
 
 * support Person and Organization schema types ([6526cd7](https://github.com/tearoom1/kirby-meta-kit/commit/6526cd7485c0b50a61f2e49c4365aa9237e389ba))
-
-## [2.0.4](https://github.com/tearoom1/kirby-meta-kit/compare/v2.0.3...v2.0.4) (2026-07-06)
-
-
-### Bug Fixes
-
-* correct og:locale format and inLanguage schema field ([b068239](https://github.com/tearoom1/kirby-meta-kit/commit/b068239ab9a16b1eb038ced175d3fdd4606652eb))
 
