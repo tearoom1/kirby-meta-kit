@@ -1,3 +1,10 @@
+## [2.1.5](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.4...v2.1.5) (2026-09-21)
+
+
+### Bug Fixes
+
+* omit search action without search page ([a04c4ac](https://github.com/tearoom1/kirby-meta-kit/commit/a04c4ac04d2aa29a4c231f95adf22ca73be09bcc))
+
 ## [2.1.4](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.3...v2.1.4) (2026-08-14)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * restore PHP 8.1 compatibility ([a47b8f7](https://github.com/tearoom1/kirby-meta-kit/commit/a47b8f7562c1aa0ba236fafad71e7c3785149a2c))
-
-## [2.1.0](https://github.com/tearoom1/kirby-meta-kit/compare/v2.0.4...v2.1.0) (2026-07-06)
-
-
-### Features
-
-* support Person and Organization schema types ([6526cd7](https://github.com/tearoom1/kirby-meta-kit/commit/6526cd7485c0b50a61f2e49c4365aa9237e389ba))
 
