@@ -29,6 +29,24 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         $this->assertStringContainsString('<meta property="og:title" content="Custom Meta Title | Site Meta">', $html);
         $this->assertStringContainsString('<meta name="twitter:title" content="Custom Meta Title | Site Meta">', $html);
         $this->assertStringContainsString('<script type="application/ld+json">', $html);
+        $this->assertStringNotContainsString('"SearchAction"', $html);
+    }
+
+    public function testSeoSnippetAddsSearchActionWhenSearchPageExists(): void
+    {
+        $kirby = $this->makeKirby([
+            'site.txt' => "Title: Site Title\n",
+            'article/default.txt' => "Title: Article\n",
+            'search/default.txt' => "Title: Search\n",
+        ]);
+
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('article'));
+
+        $this->assertStringContainsString(
+            '"urlTemplate": "/search?q={search_term_string}"',
+            $html
+        );
     }
 
     public function testSeoSnippetAlwaysRendersFullOutput(): void
@@ -93,6 +111,13 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         $this->assertStringContainsString('hreflang="en"', $html);
         $this->assertStringContainsString('hreflang="de"', $html);
         $this->assertStringContainsString('hreflang="x-default"', $html);
+        $this->assertStringContainsString('"inLanguage": "en"', $html);
+
+        $kirby->setCurrentLanguage('de');
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('article'));
+
+        $this->assertStringContainsString('"inLanguage": "de"', $html);
     }
 
     public function testMetaKitAreaViewReturnsExpectedProps(): void

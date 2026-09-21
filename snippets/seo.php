@@ -172,15 +172,18 @@ $websiteSchema = [
     ],
 ];
 
-// Add search action
-$websiteSchema['potentialAction'] = [
-    '@type' => 'SearchAction',
-    'target' => [
-        '@type' => 'EntryPoint',
-        'urlTemplate' => $site->url() . '/search?q={search_term_string}'
-    ],
-    'query-input' => 'required name=search_term_string'
-];
+// Add search action only when the site has a published search page
+$searchPage = $site->find('search');
+if ($searchPage) {
+    $websiteSchema['potentialAction'] = [
+        '@type' => 'SearchAction',
+        'target' => [
+            '@type' => 'EntryPoint',
+            'urlTemplate' => $searchPage->url() . '?q={search_term_string}'
+        ],
+        'query-input' => 'required name=search_term_string'
+    ];
+}
 
 // WebPage Schema
 $webPageSchema = [
