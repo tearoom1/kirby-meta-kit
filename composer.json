@@ -28,8 +28,7 @@
   },
   "require": {
     "php": "^8.2",
-    "getkirby/composer-installer": "^1.2",
-    "guzzlehttp/guzzle": "^7.0"
+    "getkirby/composer-installer": "^1.2"
   },
   "require-dev": {
     "getkirby/cms": "^5.0",

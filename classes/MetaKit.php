@@ -4,13 +4,12 @@ namespace TearoomOne;
 
 use Kirby\Cms\App as Kirby;
 use Kirby\Exception\Exception;
-use GuzzleHttp\Client;
+use Kirby\Http\Remote;
 
 class MetaKit
 {
     protected $kirby;
     protected $options;
-    protected $httpClient;
 
     private static ?bool $aiEnabledCache = null;
 
@@ -92,9 +91,6 @@ class MetaKit
     {
         $this->kirby = $kirby;
         $this->options = ConfigHelper::getOpenRouterSettings();
-        $this->httpClient = new Client([
-            'timeout' => 30,
-        ]);
     }
 
     /**
@@ -190,27 +186,29 @@ class MetaKit
             throw new Exception('OpenRouter model is not configured');
         }
 
-        $response = $this->httpClient->post($this->options['api.endpoint'], [
-            'http_errors' => false,
+        // Kirby's built-in HTTP client; it doesn't throw on 4xx/5xx responses
+        $response = Remote::request($this->options['api.endpoint'], [
+            'method'  => 'POST',
+            'timeout' => 30,
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
                 'HTTP-Referer' => $this->kirby->url(),
             ],
-            'json' => [
+            'data' => json_encode([
                 'model' => $model,
                 'messages' => [
                     ['role' => 'user', 'content' => $prompt]
                 ],
                 'max_tokens' => $maxTokens,
                 'temperature' => $this->options['api.temperature'] ?? 0.7,
-            ]
+            ]),
         ]);
 
-        $body = $response->getBody()->getContents();
+        $body = (string)$response->content();
         $data = json_decode($body, true);
 
-        if ($response->getStatusCode() >= 400) {
+        if ($response->code() >= 400) {
             $errorMsg = $this->formatOpenRouterError($data, $body, $model);
             self::log('OpenRouter API Error: ' . $errorMsg);
             throw new Exception('OpenRouter API error: ' . $errorMsg);
