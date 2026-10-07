@@ -17,7 +17,7 @@ jobs:
           - "8.4"
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -33,8 +33,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - name: Run JavaScript tests
@@ -49,7 +49,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: conventional Changelog Action
         id: changelog
         uses: TriPSs/conventional-changelog-action@v6
@@ -60,7 +60,7 @@ jobs:
           version-file: "composer.json"
 
       - name: create release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: ${{ steps.changelog.outputs.skipped == 'false' }}
         with:
           token: ${{ secrets.github_token }}
