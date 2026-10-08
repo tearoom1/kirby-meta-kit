@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" size="large" class="k-meta-kit-dialog" :cancel-button="false"  :submit-button="false" @submit.prevent="save">
+  <k-dialog ref="dialog" size="large" class="k-mk2-dialog k-meta-kit-dialog" :cancel-button="false"  :submit-button="false" @submit.prevent="save">
     <k-headline v-if="page">{{ $t('meta-kit.edit.title', { page: page.title }) }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">

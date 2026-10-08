@@ -151,6 +151,7 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         $this->assertArrayHasKey('languages', $result['props']);
         $this->assertSame('de', $result['props']['language']);
         $this->assertSame('de', $kirby->language()->code());
+        $this->assertSame('meta-kit', $area['link']);
     }
 
     public function testSeoPreviewSectionComputedMetaUsesHelperOutput(): void

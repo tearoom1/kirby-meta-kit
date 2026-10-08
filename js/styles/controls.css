@@ -78,13 +78,6 @@
   &[data-theme="dark"] .k-meta-kit-search-clear:hover {
     background: var(--color-gray-800);
   }
-
-  .k-meta-kit-count {
-    font-size: 0.875rem;
-    color: var(--color-text-dimmed);
-    white-space: nowrap;
-  }
-
   .k-meta-kit-metadata-filter,
   .k-meta-kit-pagesize-select {
     padding: 0.5rem 2rem 0.5rem 0.75rem;
@@ -100,25 +93,11 @@
     background-position: right 0.5rem center;
     background-size: 12px;
   }
-
-  .k-meta-kit-metadata-filter {
-    width: 180px;
-  }
-
   .k-meta-kit-pagesize-select {
     width: 110px;
   }
 
   @media (max-width: 1420px) {
-    .k-meta-kit-stats {
-      grid-template-columns: minmax(136px, 0.82fr) repeat(5, minmax(0, 1fr));
-      gap: 0.875rem;
-    }
-
-    .k-meta-kit-stats-card-total {
-      padding-inline: 1rem;
-    }
-
     .k-meta-kit-sort-select {
       display: none;
     }

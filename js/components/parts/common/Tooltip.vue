@@ -2,7 +2,14 @@
   <div class="k-meta-kit-tooltip-wrapper" @mouseenter="show" @mouseleave="hide">
     <slot></slot>
     <div
-      v-if="isVisible && content"
+      v-if="isVisible && hasTip"
+      class="k-meta-kit-tooltip-content k-mk2-tip"
+      :style="tooltipStyle"
+    >
+      <slot name="tip"></slot>
+    </div>
+    <div
+      v-else-if="isVisible && content"
       class="k-meta-kit-tooltip-content"
       :style="tooltipStyle"
       v-html="formattedContent"
@@ -34,6 +41,10 @@ export default {
     };
   },
   computed: {
+    // Rich content passed via the "tip" slot (design v2)
+    hasTip() {
+      return !!this.$scopedSlots.tip;
+    },
     formattedContent() {
       const escaped = escapeHtml(this.content);
 
@@ -45,7 +56,7 @@ export default {
   },
   methods: {
     show(event) {
-      if (!this.content) return;
+      if (!this.content && !this.hasTip) return;
       this.isVisible = true;
       this.$nextTick(() => {
         this.updatePosition(event);

@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" class="k-meta-kit-dialog k-meta-kit-view" size="huge" :cancel-button="false" :submit-button="false">
+  <k-dialog ref="dialog" class="k-mk2-dialog k-meta-kit-dialog k-meta-kit-view" size="huge" :cancel-button="false" :submit-button="false">
     <k-headline>{{ headline }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">

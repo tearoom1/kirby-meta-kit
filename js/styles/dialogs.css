@@ -1,18 +1,5 @@
 /* Checkbox and edit/generate dialogs */
 .k-meta-kit-view {
-  /* Checkbox */
-
-  .k-meta-kit-table-checkbox {
-    width: 40px;
-    text-align: center;
-  }
-
-  .k-meta-kit-table-checkbox input[type="checkbox"] {
-    cursor: pointer;
-    width: 16px;
-    height: 16px;
-  }
-
   /* Dialog Table Layout */
 
   .k-meta-kit-dialog-table-wrapper {
@@ -81,22 +68,6 @@
     color: var(--color-text);
     line-height: 1.2;
   }
-
-  .k-meta-kit-dialog-table-actions {
-    grid-column: -1 / 1;
-    border-bottom: 1px solid var(--color-border);
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-  }
-
-  .k-meta-kit-dialog-field-meta {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 0.5rem;
-    min-height: 1.25rem;
-  }
-
   .k-meta-kit-dialog-generating {
     display: flex;
     align-items: center;
@@ -117,14 +88,6 @@
     margin-top: 0.125rem;
     line-height: 1.35;
   }
-
-  .k-meta-kit-dialog-actions-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: stretch;
-  }
-
   /* Dark mode for dialog table */
 
   &[data-theme="dark"] .k-meta-kit-dialog-table-wrapper {
@@ -240,14 +203,6 @@
     flex-direction: column;
     gap: 0.375rem;
   }
-
-  .k-meta-kit-single-field-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-  }
-
   .k-meta-kit-og-image-empty {
     color: var(--color-text-dimmed);
     font-style: italic;

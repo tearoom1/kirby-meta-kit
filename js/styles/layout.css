@@ -40,20 +40,4 @@
     color: var(--color-text-dimmed);
     font-size: .8rem;
     line-height: 1.35;
-  }
-
-  .k-meta-kit-warning {
-    margin-bottom: 1.5rem;
-  }
-
-  .k-meta-kit-warning .k-box {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-  }
-
-  .k-meta-kit-warning .k-box > span {
-    flex: 1;
-  }
-}
+  }}

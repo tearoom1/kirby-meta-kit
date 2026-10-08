@@ -35,7 +35,7 @@ return [
                         'aiEnabled' => $data['aiEnabled'],
                         'reviewEnabled' => $data['reviewEnabled'],
                         'siteSettings' => $data['siteSettings'],
-                        'validationSettings' => $data['validationSettings'] ?? []
+                        'validationSettings' => $data['validationSettings'] ?? [],
                     ]
                 ];
             }

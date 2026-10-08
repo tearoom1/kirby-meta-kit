@@ -19,35 +19,4 @@
   .k-meta-kit-table td:last-child,
   .k-meta-kit-table th:last-child {
     display: none !important;
-  }
-
-  /* Clean table styles */
-  .k-meta-kit-table {
-    background: white !important;
-    color: black !important;
-  }
-
-  .k-meta-kit-table table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    font-size: 0.8rem !important;
-  }
-
-  .k-meta-kit-table th,
-  .k-meta-kit-table td {
-    border: 1px solid #d1d5db !important;
-    padding: 0.35rem 0.5rem !important;
-    color: black !important;
-    background: white !important;
-    text-align: left !important;
-  }
-
-  .k-meta-kit-table th {
-    background: #f3f4f6 !important;
-    font-weight: 600 !important;
-  }
-
-  .k-meta-kit-table tr {
-    break-inside: avoid;
-  }
-}
+  }}

@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" class="k-meta-kit-dialog k-meta-kit-dialog-bulk" size="huge" :cancel-button="false" :submit-button="false" @submit.prevent="saveAll">
+  <k-dialog ref="dialog" class="k-mk2-dialog k-meta-kit-dialog k-meta-kit-dialog-bulk" size="huge" :cancel-button="false" :submit-button="false" @submit.prevent="saveAll">
     <k-headline>{{ $t('meta-kit.bulkEdit.title', { count: pages.length }) }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">

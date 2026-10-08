@@ -23,15 +23,10 @@
     <div v-if="showPreview" class="k-meta-kit-title-preview">
       {{ fullTitle }}
     </div>
-    <div class="k-meta-kit-dialog-field-meta">
-      <span>
-        <span v-if="value"
-              class="k-meta-kit-field-length"
-              :class="statusClass">
-          {{ $t('meta-kit.chars', { count: charCount }) }}
-        </span>
-      </span>
-    </div>
+    <meta-kit-length-meter
+      :length="charCount"
+      :ranges="ranges"
+    />
     <div v-if="isGenerating" class="k-meta-kit-dialog-generating">
       <k-icon class="k-meta-kit-spinner" type="loader"/>
       <span>{{ $t('meta-kit.generate.generating') }}</span>
@@ -40,7 +35,8 @@
 </template>
 
 <script>
-import { getFieldLengthStatus } from '../../../composables/useValidation.js';
+import { getRangesForPageAndType } from '../../../composables/useValidation.js';
+import MetaKitLengthMeter from '../common/MetaKitLengthMeter.vue';
 import { getFieldTitleDisplay, shouldAppendSiteName } from '../../../composables/panelDisplay.js';
 
 export default {
@@ -99,9 +95,13 @@ export default {
     validationSettings: {
       type: Object,
       default: () => ({})
-    }
+    },
   },
+  components: { MetaKitLengthMeter },
   computed: {
+    ranges() {
+      return getRangesForPageAndType({ template: this.template }, this.type === 'og' ? 'ogTitle' : 'title', this.validationSettings);
+    },
     isSitePage() {
       return this.pageId === 'site';
     },
@@ -148,28 +148,6 @@ export default {
         siteSettings: this.siteSettings
       }).charCount;
     },
-    statusClass() {
-      const titleToUse = this.effectiveTitle;
-      if (!titleToUse) return '';
-
-      // For site page, no color coding
-      if (this.isSitePage) {
-        return '';
-      }
-
-      let finalLength = titleToUse.length;
-      if (this.shouldAppendSiteName) {
-        finalLength = this.fullTitle.length;
-      }
-
-      const status = getFieldLengthStatus(
-        finalLength,
-        this.template,
-        this.type === 'og' ? 'ogTitle' : 'title',
-        this.validationSettings
-      );
-      return status ? `k-meta-kit-status-${status}` : '';
-    }
   }
 };
 </script>

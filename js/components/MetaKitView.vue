@@ -1,5 +1,5 @@
 <template>
-  <k-panel-inside class="k-meta-kit-view">
+  <k-panel-inside class="k-meta-kit-view k-mk2">
     <!-- Top Bar: Language Switcher + Sponsor (right-aligned) -->
     <div class="k-meta-kit-topbar">
       <div
@@ -60,17 +60,20 @@
       </div>
     </div>
 
-    <!-- Stats Cards -->
-    <meta-kit-stats
-      :filtered-count="filteredPages.length"
-      :total-count="pagesData.length"
+    <!-- Stats tiles -->
+    <meta-kit-overview
       :cards="statsCards"
-      :search-active="!!(searchQuery || activeFilters.length)"
+      :total-count="pagesData.length"
+      :active-area="activeArea"
+      :filtered-count="filteredPages.length"
+      @select-area="selectArea"
     />
 
     <!-- Actions & Filters -->
     <meta-kit-actions
-      :selected-count="selectedPages.length"
+      :selected-count="actionPageIds.length"
+      :has-selection="selectedPages.length > 0"
+      :is-filtered="!!(searchQuery || activeFilters.length)"
       :ai-enabled="aiEnabled"
       :review-enabled="reviewEnabled"
       :is-generating="isGeneratingAll"
@@ -85,18 +88,20 @@
           :search-query.sync="searchQuery"
           :active-filters.sync="activeFilters"
           :sort-by.sync="sortBy"
+          :inheritance.sync="inheritance"
         />
       </template>
     </meta-kit-actions>
 
     <!-- Pages Table -->
     <meta-kit-table
+      :inheritance="inheritance"
+      :show-preview="showPreviewInTable"
+      :preview-mode="previewMode"
       :pages="paginatedPages"
       :start-index="(currentPage - 1) * pageSize"
       :selected-pages="selectedPages"
       :is-all-selected="isAllCurrentPageSelected"
-      :show-preview="showPreviewInTable"
-      :preview-mode="previewMode"
       :ai-enabled="aiEnabled"
       :review-enabled="reviewEnabled"
       :site-settings="siteSettingsData"
@@ -178,14 +183,28 @@
     <!-- Bulk Generation Dialog (used for both bulk and single-page AI generate) -->
     <meta-kit-bulk-generate-dialog
       ref="bulkGenerateDialog"
-      :selected-count="singleGeneratePageId ? 1 : selectedPages.length"
+      :selected-count="singleGeneratePageId ? 1 : actionPageIds.length"
       @generate="performBulkGeneration"
     />
 
     <!-- Review generated suggestions before saving -->
     <meta-kit-suggestions-dialog
       ref="suggestionsDialog"
+      :language="language"
+      :pages="pagesData"
+      :site-settings="siteSettingsData"
+      :validation-settings="validationSettingsData"
       @save="saveSuggestions"
+    />
+
+    <!-- Actions for the selected pages -->
+    <meta-kit-selection-bar
+      v-if="selectedPages.length > 0"
+      :count="selectedPages.length"
+      :ai-enabled="aiEnabled"
+      @edit="showSelectedPagesDialog"
+      @generate="generateAllDescriptions"
+      @clear="selectedPages = []"
     />
 
     <!-- Loading Overlay -->
@@ -197,6 +216,9 @@
         <div class="k-meta-kit-loading-text">{{ loadingLabel }}</div>
         <div v-if="loadingProgress" class="k-meta-kit-loading-progress">
           {{ loadingProgress }}
+        </div>
+        <div v-if="progressTotal" class="k-mk2-progress" aria-hidden="true">
+          <span :style="{ width: (progressDone / progressTotal) * 100 + '%' }"></span>
         </div>
         <k-button
           v-if="canCancelGeneration"
@@ -214,11 +236,12 @@
 </template>
 
 <script>
-// Table component
-import MetaKitStats from './parts/table/MetaKitStats.vue';
+// Table area
+import MetaKitOverview from './parts/table/MetaKitOverview.vue';
 import MetaKitFilters from './parts/table/MetaKitFilters.vue';
 import MetaKitActions from './parts/table/MetaKitActions.vue';
 import MetaKitTable from './parts/table/MetaKitTable.vue';
+import MetaKitSelectionBar from './parts/table/MetaKitSelectionBar.vue';
 
 // Edit/Dialog components
 import MetaKitBulkGenerateDialog from './parts/edit/MetaKitBulkGenerateDialog.vue';
@@ -245,6 +268,16 @@ import {
   findDuplicates
 } from '../composables/panelState.js';
 
+// Filters behind each stats tile ("needs attention" in that area)
+const AREA_FILTERS = {
+  slug: ['type-slug', 'warning', 'error'],
+  title: ['type-title', 'warning', 'error'],
+  description: ['type-description', 'warning', 'error'],
+  ogImage: ['type-og-image', 'warning', 'error'],
+  duplicates: ['type-duplicates', 'warning'],
+  noindex: ['type-noindex', 'warning']
+};
+
 export default {
   components: {
     MetaKitTable,
@@ -253,7 +286,8 @@ export default {
     MetaKitBulkEditDialog,
     MetaKitReviewDialog,
     MetaKitSuggestionsDialog,
-    MetaKitStats,
+    MetaKitOverview,
+    MetaKitSelectionBar,
     MetaKitFilters,
     MetaKitActions
   },
@@ -296,16 +330,19 @@ export default {
       // Pagination & Selection
       selectedPages: [],
       currentPage: 1,
-      pageSize: 10,
+      pageSize: 25,
       searchQuery: '',
       activeFilters: [],
       sortBy: 'default',
       showPreviewInTable: false,
       previewMode: 'meta',
+      inheritance: 'dimmed',
       loadingProgress: '',
       loadingLabel: '',
       canCancelGeneration: false,
-      cancelRequested: false
+      cancelRequested: false,
+      progressDone: 0,
+      progressTotal: 0
     };
   },
   computed: {
@@ -319,6 +356,21 @@ export default {
       return this.$t('meta-kit.sponsor.text');
     },
 
+    // Bulk actions use the selection, or all filtered pages without one
+    actionPageIds() {
+      if (this.selectedPages.length > 0) {
+        return this.selectedPages;
+      }
+      return this.filteredPages.map((page) => page.id);
+    },
+    // The stats area whose filter is active (set by clicking its tile)
+    activeArea() {
+      return Object.keys(AREA_FILTERS).find((area) => {
+        const filters = AREA_FILTERS[area];
+        return filters.length === this.activeFilters.length
+          && filters.every((filter) => this.activeFilters.includes(filter));
+      }) || null;
+    },
     duplicates() {
       return findDuplicates(this.pagesData);
     },
@@ -345,6 +397,7 @@ export default {
     statsCards() {
       return [
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'slug'), this.$t('meta-kit.field.slug'), {
+          key: 'slug',
           detailLines: [
             this.$t('meta-kit.stats.slug.good'),
             this.$t('meta-kit.stats.slug.review'),
@@ -352,6 +405,7 @@ export default {
           ]
         }),
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'title'), this.$t('meta-kit.field.metaTitle'), {
+          key: 'title',
           detailLines: [
             this.$t('meta-kit.stats.title.good'),
             this.$t('meta-kit.stats.title.review'),
@@ -359,6 +413,7 @@ export default {
           ]
         }),
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'description'), this.$t('meta-kit.field.metaDescription'), {
+          key: 'description',
           detailLines: [
             this.$t('meta-kit.stats.description.good'),
             this.$t('meta-kit.stats.description.review'),
@@ -366,12 +421,14 @@ export default {
           ]
         }),
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'ogImage'), this.$t('meta-kit.field.ogImage'), {
+          key: 'ogImage',
           detailLines: [
             this.$t('meta-kit.stats.ogImage.good'),
             this.$t('meta-kit.stats.ogImage.review')
           ]
         }),
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'duplicates'), this.$t('meta-kit.field.duplicates'), {
+          key: 'duplicates',
           attentionStatuses: ['review'],
           detailLines: [
             this.$t('meta-kit.stats.duplicates.good'),
@@ -379,18 +436,14 @@ export default {
           ]
         }),
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'noindex'), this.$t('meta-kit.field.noindex'), {
+          key: 'noindex',
           attentionStatuses: ['review'],
           detailLines: [
             this.$t('meta-kit.stats.noindex.good'),
             this.$t('meta-kit.stats.noindex.review')
           ]
         })
-      ].map((card) => ({
-        ...card,
-        attentionClass: card.filteredFix > 0
-          ? 'k-meta-kit-stats-red'
-          : (card.filteredAttention > 0 ? 'k-meta-kit-stats-amber' : 'k-meta-kit-stats-green')
-      }));
+      ];
     }
   },
   watch: {
@@ -521,6 +574,10 @@ export default {
       }
     },
 
+    selectArea(area) {
+      this.activeFilters = !area || this.activeArea === area ? [] : [...AREA_FILTERS[area]];
+    },
+
     // Open the field-selection dialog for a single page's AI generation
     openSinglePageGenerate(pageId) {
       this.singleGeneratePageId = pageId;
@@ -542,7 +599,7 @@ export default {
       // Single-page mode when triggered from the table row AI button
       const pageIds = this.singleGeneratePageId
         ? [this.singleGeneratePageId]
-        : this.selectedPages;
+        : this.actionPageIds;
       this.singleGeneratePageId = null;
 
       const pages = this.pagesData.filter((page) => pageIds.includes(page.id));
@@ -563,6 +620,8 @@ export default {
         result = await runGeneration(jobs, {
           generate: (job) => generateFieldSuggestion(this.$api, job, this.language || null),
           onProgress: ({ done, total, job }) => {
+            this.progressDone = done;
+            this.progressTotal = total;
             this.loadingProgress = job
               ? this.$t('meta-kit.generate.progress', { current: done + 1, total, page: job.pageTitle, field: job.label })
               : '';
@@ -573,6 +632,7 @@ export default {
         this.isGeneratingAll = false;
         this.canCancelGeneration = false;
         this.loadingProgress = '';
+        this.progressTotal = 0;
       }
 
       if (options.review && result.suggestions.length > 0) {
@@ -663,8 +723,8 @@ export default {
       this.selectedPages = toggleSelectAllOnPage(this.paginatedPages, this.selectedPages);
     },
     async showSelectedPagesDialog() {
-      if (this.selectedPages.length === 0) return;
-      this.$refs.allPagesDialog.open(this.selectedPages);
+      if (this.actionPageIds.length === 0) return;
+      this.$refs.allPagesDialog.open(this.actionPageIds);
     }
   }
 };
