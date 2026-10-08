@@ -1,9 +1,9 @@
-label: SEO & Sitemap
+label: meta-kit.bp.site.label
 icon: search
 columns:
   seo:
     type: fields
-    label: SEO
+    label: meta-kit.bp.page.label
     icon: seo
     fields:
       seoSettings:
@@ -12,15 +12,15 @@ columns:
   social:
     width: 1/1
     type: fields
-    label: Social Media
+    label: meta-kit.bp.site.social.label
     icon: share
     fields:
       metaKitSocialSites:
-        label: Social Media Profiles
+        label: meta-kit.bp.site.social.metaKitSocialSites.label
         type: structure
         fields:
           platform:
-            label: Platform
+            label: meta-kit.bp.site.social.metaKitSocialSites.platform.label
             type: select
             options:
               - { value: 'facebook', text: 'Facebook' }
@@ -32,7 +32,7 @@ columns:
               - { value: 'pinterest', text: 'Pinterest' }
               - { value: 'github', text: 'GitHub' }
           url:
-            label: Profile URL
+            label: meta-kit.bp.site.social.metaKitSocialSites.url.label
             type: url
 
   otherSettings:
@@ -42,17 +42,17 @@ columns:
       otherSettings:
         label:
         type: info
-        text: The following settings are language independent. Please set the in the default language. You can also set them in the options (e.g. config.php).
+        text: meta-kit.bp.site.otherSettings.otherSettings.text
         theme: positive
 
   openrouter:
     width: 1/2
     type: fields
-    label: AI Settings
+    label: meta-kit.bp.site.openrouter.label
     icon: ai
     fields:
       metaKitOpenrouter:
-        label: AI Provider
+        label: meta-kit.bp.site.openrouter.metaKitOpenrouter.label
         type: blocks
         fieldsets:
           - mk-openrouter
@@ -63,11 +63,11 @@ columns:
   sitemap:
     width: 1/2
     type: fields
-    label: Sitemap
+    label: meta-kit.bp.site.sitemap.label
     icon: sitemap
     fields:
       metaKitSitemap:
-        label: Sitemap Settings
+        label: meta-kit.bp.site.sitemap.metaKitSitemap.label
         type: blocks
         fieldsets:
           - mk-sitemap
@@ -78,13 +78,13 @@ columns:
   redirects:
     width: 1/1
     type: fields
-    label: Redirects
+    label: meta-kit.bp.site.redirects.metaKitRedirects.label
     icon: shuffle
     fields:
       metaKitRedirects:
-        label: Redirects
+        label: meta-kit.bp.site.redirects.metaKitRedirects.label
         type: structure
-        help: Added automatically when a page gets a new URL (new slug or moved). Old URLs, including those of subpages, redirect with 301 to the page's current URL. Delete an entry to stop redirecting.
+        help: meta-kit.bp.site.redirects.metaKitRedirects.help
         translate: false
         sortBy: created desc
         columns:
@@ -93,22 +93,22 @@ columns:
           created: true
         fields:
           from:
-            label: Old path
+            label: meta-kit.bp.site.redirects.metaKitRedirects.from.label
             type: text
             placeholder: /journal/old-slug
             required: true
           to:
-            label: Page
+            label: meta-kit.bp.site.redirects.metaKitRedirects.to.label
             type: pages
             max: 1
             required: true
           language:
-            label: Language
+            label: meta-kit.bp.site.redirects.metaKitRedirects.language.label
             type: text
             width: 1/2
-            help: Language code for the target URL (multilingual sites)
+            help: meta-kit.bp.site.redirects.metaKitRedirects.language.help
           created:
-            label: Created
+            label: meta-kit.bp.site.redirects.metaKitRedirects.created.label
             type: date
             time: true
             width: 1/2
@@ -116,13 +116,13 @@ columns:
   robots:
     width: 1/1
     type: fields
-    label: Robots.txt
+    label: meta-kit.bp.site.robots.label
     icon: robot
     fields:
       metaKitRobots:
-        label: Robots.txt Settings
+        label: meta-kit.bp.site.robots.metaKitRobots.label
         type: blocks
-        help: Configure robots.txt rules for search engine crawlers. Available at /robots.txt
+        help: meta-kit.bp.site.robots.metaKitRobots.help
         fieldsets:
           - mk-robots
         max: 1

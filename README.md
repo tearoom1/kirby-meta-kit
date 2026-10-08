@@ -618,6 +618,7 @@ Access via the main menu (wand icon):
 - **Batch Operations**: Apply changes to selected pages
 
 #### Features
+- **Panel Languages**: English and German, following each user's panel language. Texts live in `translations/en.json` and `translations/de.json`; another language is one more JSON file with the same keys (registered in `index.php`)
 - **Live Validation**: Green/orange/red indicators as you type
 - **Template Awareness**: Different validation for different page types
 - **Language Support**: Works with multilingual sites

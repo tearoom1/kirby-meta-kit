@@ -3,6 +3,8 @@
  * Centralizes AI generation logic used across field components
  */
 
+import { t } from './i18n.js';
+
 /**
  * Get the current language code from Kirby Panel
  * @returns {string} Language code (defaults to 'en')
@@ -67,7 +69,7 @@ export function createAiGenerationMixin(options = {}) {
           });
 
           if (response.status !== 'success' || !response.content) {
-            throw new Error(response.message || 'Failed to generate');
+            throw new Error(response.message || t('generate.failed'));
           }
 
           if (options.onSuccess) {
@@ -107,7 +109,7 @@ export async function generateAiContent(api, pageId, fieldName, language = null)
     if (response.status !== 'success' || !response.content) {
       return {
         success: false,
-        error: response.message || 'Failed to generate'
+        error: response.message || t('generate.failed')
       };
     }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="k-meta-kit-stats">
     <div class="k-meta-kit-stats-card k-meta-kit-stats-card-total">
-      <div class="k-meta-kit-stats-label">Total Pages</div>
+      <div class="k-meta-kit-stats-label">{{ $t('meta-kit.stats.total') }}</div>
       <div class="k-meta-kit-stats-row">
         <span class="k-meta-kit-stats-value">
           {{ filteredCount }}<span v-if="searchActive" class="k-meta-kit-stats-sub"> / {{ totalCount }}</span>
@@ -42,11 +42,11 @@
           ></div>
         </div>
         <div class="k-meta-kit-stats-hint">
-          <span v-if="card.filteredGood > 0" class="k-meta-kit-stats-green">{{ card.filteredGood }} good</span>
+          <span v-if="card.filteredGood > 0" class="k-meta-kit-stats-green">{{ $t('meta-kit.stats.good', { count: card.filteredGood }) }}</span>
           <span v-if="card.filteredGood > 0 && (card.filteredReview > 0 || card.filteredFix > 0)"> · </span>
-          <span v-if="card.filteredReview > 0" class="k-meta-kit-stats-amber">{{ card.filteredReview }} review</span>
+          <span v-if="card.filteredReview > 0" class="k-meta-kit-stats-amber">{{ $t('meta-kit.stats.review', { count: card.filteredReview }) }}</span>
           <span v-if="card.filteredReview > 0 && card.filteredFix > 0"> · </span>
-          <span v-if="card.filteredFix > 0" class="k-meta-kit-stats-red">{{ card.filteredFix }} fix</span>
+          <span v-if="card.filteredFix > 0" class="k-meta-kit-stats-red">{{ $t('meta-kit.stats.fix', { count: card.filteredFix }) }}</span>
         </div>
       </div>
     </Tooltip>

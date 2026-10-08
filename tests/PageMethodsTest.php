@@ -51,4 +51,13 @@ class PageMethodsTest extends KirbyTestCase
 
         $this->assertNotInstanceOf(\Kirby\Cache\NullCache::class, $kirby->cache('tearoom1.meta-kit.sitemap'));
     }
+
+    #[RunInSeparateProcess]
+    public function testPluginRegistersBothPanelLanguages(): void
+    {
+        $kirby = $this->makePluginKirby(['site.txt' => 'Title: Site']);
+
+        $this->assertSame('Meta Title', $kirby->translation('en')->get('meta-kit.field.metaTitle'));
+        $this->assertSame('Meta-Titel', $kirby->translation('de')->get('meta-kit.field.metaTitle'));
+    }
 }

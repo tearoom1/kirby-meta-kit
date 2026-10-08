@@ -4,6 +4,7 @@
  */
 
 import validationDefaults from '../../config/validation-defaults.json' with { type: 'json' };
+import { t } from './i18n.js';
 
 // Default ranges, shared with PHP (ConfigHelper::getValidationDefaults)
 export const DEFAULT_SEO_RANGES = validationDefaults.ranges;
@@ -158,10 +159,10 @@ export function getLengthValidationReason(page, type, length, validationSettings
   const warning = `${ranges.warning.min}-${ranges.warning.max}`;
 
   if (statusClass === STATUS_CLASSES.warning) {
-    return `Warning:\nLength ${length} is outside optimal (${optimal}), but within warning (${warning}).`;
+    return `Warning:\n${t('reason.lengthWarning', { length, optimal, warning })}`;
   }
 
-  return `Error:\nLength ${length} is outside warning (${warning}). Optimal is ${optimal}.`;
+  return `Error:\n${t('reason.lengthError', { length, optimal, warning })}`;
 }
 
 /**

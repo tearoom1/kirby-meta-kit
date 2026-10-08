@@ -6,7 +6,7 @@
         v-if="languages && languages.length > 1"
         class="k-button-group k-language-selector k-meta-kit-language-bar"
         data-layout="collapsed"
-        aria-label="Translations"
+        :aria-label="$t('meta-kit.languages')"
       >
         <k-button
           v-for="lang in languages"
@@ -31,8 +31,8 @@
           variant="filled"
           size="sm"
           theme="empty"
-          title="Support Meta Kit"
-          aria-label="Support Meta Kit"
+          :title="$t('meta-kit.sponsor.support')"
+          :aria-label="$t('meta-kit.sponsor.support')"
           @click="$refs.sponsorDropdown.toggle()"
         />
         <k-dropdown-content
@@ -47,14 +47,14 @@
             link="https://github.com/sponsors/tearoom1"
             target="_blank"
           >
-            Sponsor on GitHub
+            {{ $t('meta-kit.sponsor.github') }}
           </k-dropdown-item>
           <k-dropdown-item
             icon="heart"
             link="https://buymeacoffee.com/tearoom1"
             target="_blank"
           >
-            Buy Me a Coffee
+            {{ $t('meta-kit.sponsor.coffee') }}
           </k-dropdown-item>
         </k-dropdown-content>
       </div>
@@ -124,9 +124,9 @@
             @click="previousPage"
           />
           <span class="k-meta-kit-pagination-info">
-            Page {{ currentPage }} of {{ totalPages }}
-            <template v-if="searchQuery || activeFilters.length">({{ filteredPages.length }} of {{ pagesData.length }})</template>
-            <template v-else>({{ pagesData.length }} total)</template>
+            {{ $t('meta-kit.pagination.page', { page: currentPage, pages: totalPages }) }}
+            <template v-if="searchQuery || activeFilters.length">{{ $t('meta-kit.pagination.filtered', { count: filteredPages.length, total: pagesData.length }) }}</template>
+            <template v-else>{{ $t('meta-kit.pagination.total', { total: pagesData.length }) }}</template>
           </span>
           <k-button
             icon="angle-right"
@@ -204,7 +204,7 @@
           :disabled="cancelRequested"
           @click="cancelRequested = true"
         >
-          {{ cancelRequested ? 'Stopping after the current field…' : 'Cancel' }}
+          {{ cancelRequested ? $t('meta-kit.generate.stopping') : $t('cancel') }}
         </k-button>
       </div>
     </div>
@@ -295,13 +295,6 @@ export default {
       selectedPages: [],
       currentPage: 1,
       pageSize: 10,
-      pageSizeOptions: [
-        {value: 10, text: '10/page'},
-        {value: 25, text: '25/page'},
-        {value: 50, text: '50/page'},
-        {value: 100, text: '100/page'},
-        {value: 99999, text: 'All'}
-      ],
       searchQuery: '',
       activeFilters: [],
       sortBy: 'default',
@@ -314,14 +307,14 @@ export default {
     };
   },
   computed: {
+    pageSizeOptions() {
+      return [
+        ...[10, 25, 50, 100].map((value) => ({ value, text: this.$t('meta-kit.pagination.perPage', { count: value }) })),
+        { value: 99999, text: this.$t('meta-kit.pagination.all') }
+      ];
+    },
     sponsorText() {
-      const language = this.panelLanguage();
-
-      if (language.startsWith('de')) {
-        return 'Dieses Plugin entsteht mit viel Liebe und laufendem Aufwand. Wenn es dir Zeit spart, hilft eine kleine Spende, Wartung und Weiterentwicklung möglich zu machen.';
-      }
-
-      return 'This plugin is built with care and ongoing effort. If it saves you time, a small donation helps keep maintenance and future improvements going.';
+      return this.$t('meta-kit.sponsor.text');
     },
 
     duplicates() {
@@ -349,45 +342,45 @@ export default {
     },
     statsCards() {
       return [
-        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'slug'), 'Slug', {
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'slug'), this.$t('meta-kit.field.slug'), {
           detailLines: [
-            'Good = slug is valid',
-            'Review = slug has warnings',
-            'Fix = slug has errors'
+            this.$t('meta-kit.stats.slug.good'),
+            this.$t('meta-kit.stats.slug.review'),
+            this.$t('meta-kit.stats.slug.fix')
           ]
         }),
-        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'title'), 'Meta Title', {
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'title'), this.$t('meta-kit.field.metaTitle'), {
           detailLines: [
-            'Good = valid title, including page-title fallback',
-            'Review = title length warning only',
-            'Fix = missing or invalid title'
+            this.$t('meta-kit.stats.title.good'),
+            this.$t('meta-kit.stats.title.review'),
+            this.$t('meta-kit.stats.title.fix')
           ]
         }),
-        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'description'), 'Meta Description', {
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'description'), this.$t('meta-kit.field.metaDescription'), {
           detailLines: [
-            'Good = valid unique description',
-            'Review = inherited from site or length warning',
-            'Fix = missing or invalid description'
+            this.$t('meta-kit.stats.description.good'),
+            this.$t('meta-kit.stats.description.review'),
+            this.$t('meta-kit.stats.description.fix')
           ]
         }),
-        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'ogImage'), 'OG Image', {
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'ogImage'), this.$t('meta-kit.field.ogImage'), {
           detailLines: [
-            'Good = page-specific OG image',
-            'Review = inherited from site'
+            this.$t('meta-kit.stats.ogImage.good'),
+            this.$t('meta-kit.stats.ogImage.review')
           ]
         }),
-        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'duplicates'), 'Duplicates', {
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'duplicates'), this.$t('meta-kit.field.duplicates'), {
           attentionStatuses: ['review'],
           detailLines: [
-            'Good = own title and description are unique',
-            'Review = same meta title or description as another page'
+            this.$t('meta-kit.stats.duplicates.good'),
+            this.$t('meta-kit.stats.duplicates.review')
           ]
         }),
-        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'noindex'), 'Noindex Pages', {
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'noindex'), this.$t('meta-kit.field.noindex'), {
           attentionStatuses: ['review'],
           detailLines: [
-            'Good = indexable page',
-            'Review = page is set to noindex'
+            this.$t('meta-kit.stats.noindex.good'),
+            this.$t('meta-kit.stats.noindex.review')
           ]
         })
       ].map((card) => ({
@@ -410,15 +403,6 @@ export default {
     }
   },
   methods: {
-    panelLanguage() {
-      const panel = window.panel || {};
-      const panelLanguage = panel.language && panel.language.code;
-      const viewLanguage = panel.view && panel.view.props && panel.view.props.language;
-      const browserLanguage = window.navigator && window.navigator.language;
-
-      return String(viewLanguage || panelLanguage || browserLanguage || 'en').toLowerCase();
-    },
-
     buildStatusBuckets(allPages, filteredPages, classify, label, options = {}) {
       const attentionStatuses = options.attentionStatuses || ['review', 'fix'];
       const summarize = (pages) => pages.reduce((acc, page) => {
@@ -433,7 +417,7 @@ export default {
       const totalAttention = attentionStatuses.reduce((sum, status) => sum + total[status], 0);
 
       return {
-        key: label.toLowerCase().replace(/\s+/g, '-'),
+        key: options.key || label,
         label,
         filteredGood: filtered.good,
         filteredReview: filtered.review,
@@ -459,17 +443,17 @@ export default {
       const lines = [label];
 
       if (hasScopedView) {
-        lines.push(`Visible pages: ${this.filteredPages.length} of ${this.pagesData.length}`);
-        lines.push(`Needs attention here: ${filteredAttention}`);
-        lines.push(`Needs attention overall: ${totalAttention}`);
+        lines.push(this.$t('meta-kit.stats.tooltip.visible', { count: this.filteredPages.length, total: this.pagesData.length }));
+        lines.push(this.$t('meta-kit.stats.tooltip.attentionHere', { count: filteredAttention }));
+        lines.push(this.$t('meta-kit.stats.tooltip.attentionOverall', { count: totalAttention }));
       } else {
-        lines.push(`Needs attention: ${filteredAttention} of ${this.pagesData.length}`);
+        lines.push(this.$t('meta-kit.stats.tooltip.attention', { count: filteredAttention, total: this.pagesData.length }));
       }
 
       lines.push(
-        `Good: ${filtered.good}`,
-        `Review: ${filtered.review}`,
-        `Fix: ${filtered.fix}`
+        this.$t('meta-kit.stats.tooltip.good', { count: filtered.good }),
+        this.$t('meta-kit.stats.tooltip.review', { count: filtered.review }),
+        this.$t('meta-kit.stats.tooltip.fix', { count: filtered.fix })
       );
 
       if (detailLines.length > 0) {
@@ -477,7 +461,7 @@ export default {
       }
 
       if (hasScopedView) {
-        lines.push('', `Overall split: ${total.good} good, ${total.review} review, ${total.fix} fix`);
+        lines.push('', this.$t('meta-kit.stats.tooltip.overall', { good: total.good, review: total.review, fix: total.fix }));
       }
 
       return lines.join('\n');
@@ -529,7 +513,7 @@ export default {
           }
         }
       } catch (error) {
-        window.panel.notification.error('Failed to refresh pages');
+        window.panel.notification.error(this.$t('meta-kit.error.refresh'));
       } finally {
         this.isLoadingPages = false;
       }
@@ -549,7 +533,7 @@ export default {
 
     async performBulkGeneration(options) {
       if (!GENERATION_FIELDS.some(({ option }) => options[option])) {
-        window.panel.notification.error('Please select at least one field to generate');
+        window.panel.notification.error(this.$t('meta-kit.generate.selectField'));
         return;
       }
 
@@ -563,12 +547,12 @@ export default {
       const jobs = planGeneration(pages, options);
 
       if (jobs.length === 0) {
-        window.panel.notification.success('Nothing to generate: the selected pages already have these fields.');
+        window.panel.notification.success(this.$t('meta-kit.generate.nothing'));
         return;
       }
 
       this.isGeneratingAll = true;
-      this.loadingLabel = 'Generating metadata with AI...';
+      this.loadingLabel = this.$t('meta-kit.generate.running');
       this.canCancelGeneration = true;
       this.cancelRequested = false;
 
@@ -577,7 +561,9 @@ export default {
         result = await runGeneration(jobs, {
           generate: (job) => generateFieldSuggestion(this.$api, job, this.language || null),
           onProgress: ({ done, total, job }) => {
-            this.loadingProgress = job ? `${done + 1} of ${total} · ${job.pageTitle} – ${job.label}` : '';
+            this.loadingProgress = job
+              ? this.$t('meta-kit.generate.progress', { current: done + 1, total, page: job.pageTitle, field: job.label })
+              : '';
           },
           isCancelled: () => this.cancelRequested
         });
@@ -597,7 +583,7 @@ export default {
 
     async saveSuggestions(suggestions, generationErrors = []) {
       this.isGeneratingAll = true;
-      this.loadingLabel = 'Saving metadata...';
+      this.loadingLabel = this.$t('meta-kit.generate.saving');
 
       let result;
       try {
@@ -611,12 +597,18 @@ export default {
       }
 
       const failed = [...generationErrors, ...result.errors];
-      const summary = `Saved ${result.saved.length} field(s)`;
+      const summary = this.$t('meta-kit.generate.saved', { count: result.saved.length });
 
       if (failed.length > 0) {
         const first = failed[0];
         window.panel.notification.error(
-          `${summary}, ${failed.length} failed. ${first.pageTitle} – ${first.label}: ${first.message}`
+          this.$t('meta-kit.generate.savedWithErrors', {
+            summary,
+            count: failed.length,
+            page: first.pageTitle,
+            field: first.label,
+            message: first.message
+          })
         );
       } else {
         window.panel.notification.success(summary);
@@ -629,7 +621,7 @@ export default {
       this.$refs.singlePageDialog.open(pageId);
     },
 
-    reviewSinglePage(pageId, title = 'Page Content Review') {
+    reviewSinglePage(pageId, title = this.$t('meta-kit.review.title')) {
       this.$refs.reviewDialog.openPage(pageId, title);
     },
 

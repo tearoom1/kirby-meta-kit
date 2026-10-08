@@ -6,7 +6,7 @@
         icon="preview"
         size="sm"
         :disabled="disabled || !canReview"
-        text="Review Content"
+        :text="$t('meta-kit.table.review')"
         @click="reviewSeo"
       />
     </div>
@@ -39,8 +39,8 @@ export default {
       return this.reviewEnabled && this.aiEnabled;
     },
     statusText() {
-      if (!this.aiEnabled) return 'Configure AI to enable reviews';
-      if (!this.reviewEnabled) return 'Content review is disabled';
+      if (!this.aiEnabled) return this.$t('meta-kit.review.needsAi');
+      if (!this.reviewEnabled) return this.$t('meta-kit.review.disabled');
       return null;
     }
   },

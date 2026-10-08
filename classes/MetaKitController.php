@@ -247,15 +247,15 @@ class MetaKitController
         }
 
         if (!in_array($fieldName, $allowedFields, true)) {
-            return ApiResponse::error('Unsupported field name');
+            return ApiResponse::error(Texts::get('error.unsupportedField'));
         }
 
         if (!self::canUpdateModel($page)) {
-            return ApiResponse::error('Forbidden');
+            return ApiResponse::error(Texts::get('error.forbidden'));
         }
 
         if ($pageId === 'site' && in_array($fieldName, ['ogTitle', 'ogDescription'], true)) {
-            return ApiResponse::error('Site does not support page-specific OG fields');
+            return ApiResponse::error(Texts::get('error.siteOg'));
         }
 
         try {
@@ -270,7 +270,7 @@ class MetaKitController
                         : $page->file($value);
 
                     if (!$file) {
-                        return ApiResponse::error('Image file not found');
+                        return ApiResponse::error(Texts::get('error.imageNotFound'));
                     }
                     $page->update([$fieldName => [$file->uuid()->toString()]], $languageCode);
                 }
@@ -283,7 +283,7 @@ class MetaKitController
             return ApiResponse::success([
                 'page' => $updatedPage,
                 'siteSettings' => $pageId === 'site' ? self::getSiteSettings() : null
-            ], 'Field updated successfully');
+            ], Texts::get('fieldUpdated'));
         } catch (\Throwable $e) {
             return ApiResponse::error($e->getMessage());
         }
@@ -572,7 +572,7 @@ class MetaKitController
         }
 
         if ($save && !self::canUpdateModel($page)) {
-            return ApiResponse::error('Forbidden');
+            return ApiResponse::error(Texts::get('error.forbidden'));
         }
 
         $previousLanguage = $kirby->language()?->code();
@@ -595,16 +595,16 @@ class MetaKitController
             ];
 
             if (!isset($fieldTypeMap[$fieldName])) {
-                return ApiResponse::error('Unsupported field name');
+                return ApiResponse::error(Texts::get('error.unsupportedField'));
             }
 
             if ($isSite && in_array($fieldName, ['ogTitle', 'ogDescription'], true)) {
-                return ApiResponse::error('Site does not support page-specific OG fields');
+                return ApiResponse::error(Texts::get('error.siteOg'));
             }
 
             if (!self::hasEnoughContent($page, $isSite)) {
                 return ApiResponse::error(
-                    'Not enough text on this page to generate metadata. Add some content or write it manually.'
+                    Texts::get('error.notEnoughText')
                 );
             }
 
@@ -627,13 +627,14 @@ class MetaKitController
             }
 
             if (!$result) {
-                return ApiResponse::error('Failed to generate content');
+                return ApiResponse::error(Texts::get('generate.contentFailed'));
             }
 
             if ($save) {
                 $page->update([$fieldName => $result], $languageCode);
-                $fieldLabel = ucfirst(str_replace('meta', 'Meta ', $fieldName));
-                return ApiResponse::generated($result, "{$fieldLabel} generated successfully");
+                return ApiResponse::generated($result, Texts::get('generate.fieldDone', [
+                    'field' => Texts::get('field.' . $fieldName),
+                ]));
             }
 
             return ApiResponse::generated($result);

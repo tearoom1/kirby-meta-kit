@@ -1,13 +1,14 @@
 <?php
 
 use Kirby\Cms\Site;
+use Kirby\Toolkit\I18n;
 use TearoomOne\MetaKit;
 
 return [
     'extends' => 'info',
     'props' => [
-        'label' => function ($label = 'AI Content Review') {
-            return $label;
+        'label' => function ($label = 'meta-kit.bp.meta-group.seoReview.label') {
+            return I18n::translate($label, $label);
         },
         'theme' => function ($theme = 'info') {
             return $theme;

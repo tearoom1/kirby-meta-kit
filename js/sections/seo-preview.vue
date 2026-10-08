@@ -1,32 +1,32 @@
 <template>
   <section class="k-seo-preview-section">
     <header class="k-section-header">
-      <h2 class="k-headline">{{ label || 'SEO Preview' }}</h2>
+      <h2 class="k-headline">{{ headline || $t('meta-kit.preview.title') }}</h2>
     </header>
 
     <div v-if="meta" class="k-seo-previews">
       <!-- Google Preview -->
       <div class="k-seo-preview k-seo-preview--google">
-        <h3 class="k-seo-preview__title">Google Search Preview</h3>
+        <h3 class="k-seo-preview__title">{{ $t('meta-kit.preview.google') }}</h3>
         <div class="k-seo-preview__content">
           <div class="k-google-preview">
             <cite class="k-google-preview__url">{{ displayUrl(meta.url) }}</cite>
-            <h3 class="k-google-preview__title">{{ meta.title || 'Page Title' }}</h3>
-            <p class="k-google-preview__description">{{ meta.description || 'No description available' }}</p>
+            <h3 class="k-google-preview__title">{{ meta.title || $t('meta-kit.preview.pageTitle') }}</h3>
+            <p class="k-google-preview__description">{{ meta.description || $t('meta-kit.preview.noDescription') }}</p>
           </div>
         </div>
       </div>
 
       <!-- Share Preview -->
       <div class="k-seo-preview k-seo-preview--twitter">
-        <h3 class="k-seo-preview__title">Share / Card Preview</h3>
+        <h3 class="k-seo-preview__title">{{ $t('meta-kit.preview.share') }}</h3>
         <div class="k-seo-preview__content">
           <div class="k-twitter-preview">
             <div v-if="meta.ogImage" class="k-twitter-preview__image" :style="{ backgroundImage: 'url(' + meta.ogImage + ')' }"></div>
             <div class="k-twitter-preview__body">
               <cite class="k-twitter-preview__url">{{ displayUrl(meta.url) }}</cite>
-              <h4 class="k-twitter-preview__title">{{ meta.ogTitle || meta.title || 'Page Title' }}</h4>
-              <p class="k-twitter-preview__description">{{ truncate(meta.ogDescription || meta.description, 140) || 'No description' }}</p>
+              <h4 class="k-twitter-preview__title">{{ meta.ogTitle || meta.title || $t('meta-kit.preview.pageTitle') }}</h4>
+              <p class="k-twitter-preview__description">{{ truncate(meta.ogDescription || meta.description, 140) || $t('meta-kit.preview.noDescription') }}</p>
             </div>
           </div>
         </div>
@@ -34,7 +34,7 @@
     </div>
 
     <div v-else class="k-seo-preview-loading">
-      Loading preview...
+      {{ $t('meta-kit.preview.loading') }}
     </div>
   </section>
 </template>
@@ -73,6 +73,7 @@ export default {
   },
   data() {
     return {
+      headline: null,
       meta: null,
       siteName: null,
       separator: '|',
@@ -272,7 +273,7 @@ export default {
     handleSeoFieldUpdate(event) {
       // AI generator triggered - use provided data directly (not saved yet)
       if (event.detail && event.detail.seoData) {
-        this.updatePreviewFromData(event.detail.seoData, event.detail.pageTitle || 'Page Title');
+        this.updatePreviewFromData(event.detail.seoData, event.detail.pageTitle || this.$t('meta-kit.preview.pageTitle'));
       }
     },
     handleMetaKitFieldChange(event) {
@@ -326,7 +327,7 @@ export default {
 
       // Get page title (might be in a different field)
       const pageTitleValue = getFieldValue('title');
-      const pageTitle = pageTitleValue || 'Page Title';
+      const pageTitle = pageTitleValue || this.$t('meta-kit.preview.pageTitle');
 
       // Avoid replacing real preview with placeholder content when everything is empty
       const allEmpty = [
@@ -344,11 +345,11 @@ export default {
     },
     updatePreviewFromData(seoData, pageTitle) {
       // Use stored site name and separator (extracted from initial load)
-      const siteName = this.siteName || this.$store?.state?.system?.title || 'Site Name';
+      const siteName = this.siteName || this.$store?.state?.system?.title || this.$t('meta-kit.preview.siteName');
       const separator = this.separator || '|';
 
       // Get page meta title from SEO data or use page title
-      const pageMetaTitle = seoData.metatitle || pageTitle || 'Page Title';
+      const pageMetaTitle = seoData.metatitle || pageTitle || this.$t('meta-kit.preview.pageTitle');
 
       // Build full title (page title + separator + site name)
       const fullTitle = pageMetaTitle + ' ' + separator + ' ' + siteName;
@@ -366,7 +367,7 @@ export default {
       // Get descriptions - handle empty strings as fallback
       const metaDesc = seoData.metadescription && seoData.metadescription.trim()
         ? seoData.metadescription
-        : 'No description available';
+        : this.$t('meta-kit.preview.noDescription');
 
       const ogDesc = (seoData.ogdescription && seoData.ogdescription.trim())
         ? seoData.ogdescription
@@ -387,6 +388,10 @@ export default {
         const lang = this.currentLanguage;
         const url = lang ? `${baseUrl}?language=${encodeURIComponent(lang)}` : baseUrl;
         const response = await this.$api.get(url);
+
+        // The label prop is the raw blueprint value; the section API
+        // returns it translated
+        this.headline = response.label || response.data?.label || null;
 
         // Get meta from response
         let newMeta = null;
@@ -447,7 +452,7 @@ export default {
       }
       // Fallback
       if (!this.siteName) {
-        this.siteName = this.$store?.state?.system?.title || 'Site Name';
+        this.siteName = this.$store?.state?.system?.title || this.$t('meta-kit.preview.siteName');
       }
       if (!this.separator) {
         this.separator = '|';

@@ -3,11 +3,8 @@
  * Returns validation state with status, theme, and message for field components
  */
 
-// Default validation ranges
-const DEFAULT_RANGES = {
-  title: { optimal: { min: 20, max: 60 }, warning: { min: 15, max: 75 } },
-  description: { optimal: { min: 140, max: 160 }, warning: { min: 126, max: 176 } }
-};
+import { DEFAULT_SEO_RANGES as DEFAULT_RANGES } from './useValidation.js';
+import { t } from './i18n.js';
 
 /**
  * Get validation result for a field value
@@ -31,7 +28,7 @@ export function getFieldValidation(length, ranges = {}, suffix = '') {
     return {
       status: 'optimal',
       theme: 'positive',
-      message: `Optimal length. ${rangeText} characters recommended.${suffixText}`
+      message: `${t('length.optimal', { range: rangeText })}${suffixText}`
     };
   }
 
@@ -40,7 +37,7 @@ export function getFieldValidation(length, ranges = {}, suffix = '') {
     return {
       status: 'warning',
       theme: 'notice',
-      message: `Too short. ${rangeText} recommended.${suffixText}`
+      message: `${t('length.short', { range: rangeText })}${suffixText}`
     };
   }
 
@@ -49,7 +46,7 @@ export function getFieldValidation(length, ranges = {}, suffix = '') {
     return {
       status: 'warning',
       theme: 'notice',
-      message: `Slightly too long. ${rangeText} recommended.${suffixText}`
+      message: `${t('length.long', { range: rangeText })}${suffixText}`
     };
   }
 
@@ -58,7 +55,7 @@ export function getFieldValidation(length, ranges = {}, suffix = '') {
     return {
       status: 'error',
       theme: 'negative',
-      message: `Much too short! ${rangeText} recommended.${suffixText}`
+      message: `${t('length.muchTooShort', { range: rangeText })}${suffixText}`
     };
   }
 
@@ -66,7 +63,7 @@ export function getFieldValidation(length, ranges = {}, suffix = '') {
   return {
     status: 'error',
     theme: 'negative',
-    message: `Too long! ${rangeText} recommended.${suffixText}`
+    message: `${t('length.tooLong', { range: rangeText })}${suffixText}`
   };
 }
 

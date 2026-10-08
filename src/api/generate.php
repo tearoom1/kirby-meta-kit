@@ -14,7 +14,7 @@ return function () {
     if (empty($text)) {
         return [
             'status' => 'error',
-            'message' => 'No text provided'
+            'message' => TearoomOne\Texts::get('error.noText')
         ];
     }
 
@@ -39,7 +39,7 @@ return function () {
         if (empty($description)) {
             return [
                 'status' => 'error',
-                'message' => 'AI returned empty description. Check your API key and logs.'
+                'message' => TearoomOne\Texts::get('error.emptyDescription')
             ];
         }
 

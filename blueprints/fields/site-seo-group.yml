@@ -1,22 +1,22 @@
-label: SEO Settings
+label: meta-kit.bp.site-seo-group.label
 type: group
 fields:
   seoReview:
-    label: AI Content Review
+    label: meta-kit.bp.meta-group.seoReview.label
     type: mk-review
 
   appendSiteName:
-    label: Append Site Name to Titles
+    label: meta-kit.bp.site-seo-group.appendSiteName.label
     type: toggle
     text:
       - 'No'
       - 'Yes'
     default: true
-    help: Automatically add site name to all page titles (e.g., "Page Title | Site Name")
+    help: meta-kit.bp.site-seo-group.appendSiteName.help
     width: 1/4
 
   appendSiteNameTo:
-    label: Append Site Name to
+    label: meta-kit.bp.site-seo-group.appendSiteNameTo.label
     type: checkboxes
     columns: 2
     options:
@@ -30,58 +30,77 @@ fields:
     width: 1/4
 
   metaTitle:
-    label: Overwrite Site Name
+    label: meta-kit.bp.site-seo-group.metaTitle.label
     type: text
     placeholder: "{{ site.title }}"
-    help: >
-      Overwrite the site name. Will be appended to page titles if "Append Site Name to Titles" is enabled.
+    help: meta-kit.bp.site-seo-group.metaTitle.help
     when:
       appendSiteName: true
     width: 1/4
 
   titleSeparator:
-    label: Title Separator
+    label: meta-kit.bp.site-seo-group.titleSeparator.label
     type: select
     options:
-      - { value: '|', text: '| (pipe)' }
-      - { value: '-', text: '- (dash)' }
-      - { value: '–', text: '– (en dash)' }
-      - { value: '—', text: '— (em dash)' }
-      - { value: '•', text: '• (bullet)' }
-      - { value: '/', text: '/ (slash)' }
+      - value: '|'
+        text:
+          '*': meta-kit.bp.site-seo-group.option.pipe
+      - value: '-'
+        text:
+          '*': meta-kit.bp.site-seo-group.option.dash
+      - value: '–'
+        text:
+          '*': meta-kit.bp.site-seo-group.option.en-dash
+      - value: '—'
+        text:
+          '*': meta-kit.bp.site-seo-group.option.em-dash
+      - value: '•'
+        text:
+          '*': meta-kit.bp.site-seo-group.option.bullet
+      - value: '/'
+        text:
+          '*': meta-kit.bp.site-seo-group.option.slash
     default: '|'
-    help: Separator between page title and site name
+    help: meta-kit.bp.site-seo-group.titleSeparator.help
     when:
       appendSiteName: true
     width: 1/4
 
   metaDescription:
-    label: Default Meta Description
+    label: meta-kit.bp.site-seo-group.metaDescription.label
     type: mk-description
     fieldType: meta
     maxlength: 180
-    help: Default description for search engines. Include primary keyword and a call-to-action.
+    help: meta-kit.bp.site-seo-group.metaDescription.help
     width: 1/2
 
   metaAuthor:
-    label: Default Author
+    label: meta-kit.bp.site-seo-group.metaAuthor.label
     type: text
-    help: The default author name. This field has no influence on SEO.
+    help: meta-kit.bp.site-seo-group.metaAuthor.help
     width: 1/4
 
   robots:
-    label: Default robots directive
+    label: meta-kit.bp.site-seo-group.robots.label
     type: select
     options:
-      - { value: 'index, follow', text: 'Index, Follow' }
-      - { value: 'noindex, follow', text: 'No Index, Follow' }
-      - { value: 'index, nofollow', text: 'Index, No Follow' }
-      - { value: 'noindex, nofollow', text: 'No Index, No Follow' }
+      - value: 'index, follow'
+        text:
+          '*': meta-kit.bp.meta-group.option.index-follow
+      - value: 'noindex, follow'
+        text:
+          '*': meta-kit.bp.meta-group.option.no-index-follow
+      - value: 'index, nofollow'
+        text:
+          '*': meta-kit.bp.meta-group.option.index-no-follow
+      - value: 'noindex, nofollow'
+        text:
+          '*': meta-kit.bp.meta-group.option.no-index-no-follow
     width: 1/4
     translate: false
 
   ogImage:
-    label: Default Social Media Image
+    label: meta-kit.bp.site-seo-group.ogImage.label
     type: files
     max: 1
     layout: cards
@@ -90,47 +109,51 @@ fields:
       cover: true
     size: large
     query: site.images
-    help: Default image for social media sharing (1200×630px recommended)
+    help: meta-kit.bp.site-seo-group.ogImage.help
     width: 1/2
 
   schemaHeadline:
-    label: Schema Identity
+    label: meta-kit.bp.site-seo-group.schemaHeadline.label
     type: headline
     numbered: false
 
   schemaInfo:
     type: info
-    text: Choose <strong>Person</strong> for personal sites and portfolios, <strong>Organization</strong> for businesses. These fields are language-independent — edit them in the default language only.
+    text: meta-kit.bp.site-seo-group.schemaInfo.text
     theme: positive
 
   schemaType:
-    label: Entity Type
+    label: meta-kit.bp.site-seo-group.schemaType.label
     type: select
     options:
-      - { value: 'Organization', text: 'Organization' }
-      - { value: 'Person', text: 'Person' }
+      - value: 'Organization'
+        text:
+          '*': meta-kit.bp.site-seo-group.option.organization
+      - value: 'Person'
+        text:
+          '*': meta-kit.bp.site-seo-group.option.person
     default: Organization
     width: 1/3
     translate: false
 
   schemaName:
-    label: Name
+    label: meta-kit.bp.site-seo-group.schemaName.label
     type: text
     placeholder: "{{ site.title }}"
-    help: Person's full name or organisation's legal name if different from the site title.
+    help: meta-kit.bp.site-seo-group.schemaName.help
     width: 1/3
     translate: false
 
   schemaEmail:
-    label: Contact Email
+    label: meta-kit.bp.site-seo-group.schemaEmail.label
     type: email
     width: 1/3
     translate: false
 
   schemaJobTitle:
-    label: Job Title / Role
+    label: meta-kit.bp.site-seo-group.schemaJobTitle.label
     type: text
-    help: Shown in search results (e.g. "Photographer", "Web Designer").
+    help: meta-kit.bp.site-seo-group.schemaJobTitle.help
     width: 1/2
     when:
       schemaType: Person

@@ -1,37 +1,37 @@
 <template>
   <div class="k-meta-kit-controls">
     <div class="k-meta-kit-view-select">
-      <label class="k-meta-kit-view-select-label" for="k-meta-kit-view-mode">View</label>
+      <label class="k-meta-kit-view-select-label" for="k-meta-kit-view-mode">{{ $t('meta-kit.view') }}</label>
       <select
         id="k-meta-kit-view-mode"
         class="k-meta-kit-view-select-input"
         :value="viewMode"
         @change="updateViewMode($event.target.value)"
-        title="Choose table view"
+        :title="$t('meta-kit.view.choose')"
       >
-        <option value="count">Count</option>
-        <option value="meta">Meta content</option>
-        <option value="og">OG content</option>
+        <option value="count">{{ $t('meta-kit.view.count') }}</option>
+        <option value="meta">{{ $t('meta-kit.view.meta') }}</option>
+        <option value="og">{{ $t('meta-kit.view.og') }}</option>
       </select>
     </div>
 
     <div class="k-meta-kit-view-select k-meta-kit-sort-select">
-      <label class="k-meta-kit-view-select-label" for="k-meta-kit-sort-mode">Sort</label>
+      <label class="k-meta-kit-view-select-label" for="k-meta-kit-sort-mode">{{ $t('meta-kit.sort') }}</label>
       <select
         id="k-meta-kit-sort-mode"
         class="k-meta-kit-view-select-input"
         :value="sortBy"
         @change="$emit('update:sort-by', $event.target.value)"
-        title="Choose table sort order"
+        :title="$t('meta-kit.sort.choose')"
       >
-        <option value="default">Default</option>
-        <option value="attention">Needs attention</option>
-        <option value="name-asc">Name A-Z</option>
-        <option value="name-desc">Name Z-A</option>
-        <option value="level-asc">Level low-high</option>
-        <option value="level-desc">Level high-low</option>
-        <option value="status">Status</option>
-        <option value="template">Template</option>
+        <option value="default">{{ $t('meta-kit.sort.default') }}</option>
+        <option value="attention">{{ $t('meta-kit.sort.attention') }}</option>
+        <option value="name-asc">{{ $t('meta-kit.sort.nameAsc') }}</option>
+        <option value="name-desc">{{ $t('meta-kit.sort.nameDesc') }}</option>
+        <option value="level-asc">{{ $t('meta-kit.sort.levelAsc') }}</option>
+        <option value="level-desc">{{ $t('meta-kit.sort.levelDesc') }}</option>
+        <option value="status">{{ $t('meta-kit.status') }}</option>
+        <option value="template">{{ $t('meta-kit.template') }}</option>
       </select>
     </div>
 
@@ -40,14 +40,14 @@
         icon="search"
         :value="searchQuery"
         @input="$emit('update:search-query', $event)"
-        placeholder="Filter pages..."
+        :placeholder="$t('meta-kit.search.placeholder')"
         class="k-meta-kit-search"
       />
       <button
         v-if="searchQuery"
         class="k-meta-kit-search-clear"
         @click="$emit('update:search-query', '')"
-        title="Clear search"
+        :title="$t('meta-kit.search.clear')"
       >
         <k-icon type="cancel"/>
       </button>
@@ -60,14 +60,14 @@
         :class="{ 'active': isDropdownOpen || activeFilters.length > 0 }"
       >
         <k-icon type="filter" />
-        <span>Filters</span>
+        <span>{{ $t('meta-kit.filters') }}</span>
         <span v-if="activeFilters.length > 0" class="k-meta-kit-filter-count">{{ activeFilters.length }}</span>
         <k-icon :type="isDropdownOpen ? 'angle-up' : 'angle-down'" />
       </button>
 
       <div v-if="isDropdownOpen" class="k-meta-kit-filter-dropdown-content">
         <div class="k-meta-kit-filter-group k-meta-kit-filter-group-grid">
-          <div class="k-meta-kit-filter-group-title">State</div>
+          <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.filter.state') }}</div>
           <label class="k-meta-kit-filter-option">
             <input
               type="checkbox"
@@ -75,7 +75,7 @@
               :checked="isFilterActive('good')"
               @change="toggleFilter('good')"
             />
-            <span>Good</span>
+            <span>{{ $t('meta-kit.state.good') }}</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -84,7 +84,7 @@
               :checked="isFilterActive('attention')"
               @change="toggleFilter('attention')"
             />
-            <span>Needs Attention</span>
+            <span>{{ $t('meta-kit.filter.attention') }}</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -93,7 +93,7 @@
               :checked="isFilterActive('warning')"
               @change="toggleFilter('warning')"
             />
-            <span>Warnings</span>
+            <span>{{ $t('meta-kit.filter.warnings') }}</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -102,12 +102,12 @@
               :checked="isFilterActive('error')"
               @change="toggleFilter('error')"
             />
-            <span>Fixes</span>
+            <span>{{ $t('meta-kit.filter.fixes') }}</span>
           </label>
         </div>
 
         <div class="k-meta-kit-filter-group k-meta-kit-filter-group-grid">
-          <div class="k-meta-kit-filter-group-title">Fields</div>
+          <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.filter.fields') }}</div>
           <label class="k-meta-kit-filter-option">
             <input
               type="checkbox"
@@ -115,7 +115,7 @@
               :checked="isFilterActive('type-slug')"
               @change="toggleFilter('type-slug')"
             />
-            <span>Slug</span>
+            <span>{{ $t('meta-kit.field.slug') }}</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -124,7 +124,7 @@
               :checked="isFilterActive('type-title')"
               @change="toggleFilter('type-title')"
             />
-            <span>Meta Title</span>
+            <span>{{ $t('meta-kit.field.metaTitle') }}</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -133,7 +133,7 @@
               :checked="isFilterActive('type-description')"
               @change="toggleFilter('type-description')"
             />
-            <span>Meta Desc.</span>
+            <span>{{ $t('meta-kit.field.metaDescription.short') }}</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -142,7 +142,7 @@
               :checked="isFilterActive('type-og-title')"
               @change="toggleFilter('type-og-title')"
             />
-            <span>OG Title</span>
+            <span>{{ $t('meta-kit.field.ogTitle') }}</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -151,7 +151,7 @@
               :checked="isFilterActive('type-og-description')"
               @change="toggleFilter('type-og-description')"
             />
-            <span>OG Desc.</span>
+            <span>{{ $t('meta-kit.field.ogDescription.short') }}</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -160,7 +160,7 @@
               :checked="isFilterActive('type-og-image')"
               @change="toggleFilter('type-og-image')"
             />
-            <span>OG Img.</span>
+            <span>{{ $t('meta-kit.field.ogImage.short') }}</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -169,7 +169,7 @@
               :checked="isFilterActive('type-noindex')"
               @change="toggleFilter('type-noindex')"
             />
-            <span>Noidx</span>
+            <span>{{ $t('meta-kit.field.noindex.short') }}</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -178,12 +178,12 @@
               :checked="isFilterActive('type-duplicates')"
               @change="toggleFilter('type-duplicates')"
             />
-            <span>Dupl.</span>
+            <span>{{ $t('meta-kit.field.duplicates.short') }}</span>
           </label>
         </div>
 
         <div class="k-meta-kit-filter-group">
-          <div class="k-meta-kit-filter-group-title">Metadata</div>
+          <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.filter.metadata') }}</div>
           <label class="k-meta-kit-filter-option">
             <input
               type="checkbox"
@@ -191,12 +191,12 @@
               :checked="isFilterActive('complete')"
               @change="toggleFilter('complete')"
             />
-            <span>Complete Metadata</span>
+            <span>{{ $t('meta-kit.filter.complete') }}</span>
           </label>
         </div>
 
         <div class="k-meta-kit-filter-group">
-          <div class="k-meta-kit-filter-group-title">Status</div>
+          <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.status') }}</div>
           <label class="k-meta-kit-filter-option">
             <input
               type="checkbox"
@@ -204,7 +204,7 @@
               :checked="isFilterActive('listed')"
               @change="toggleFilter('listed')"
             />
-            <span>Listed</span>
+            <span>{{ $t('meta-kit.status.listed') }}</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -213,7 +213,7 @@
               :checked="isFilterActive('unlisted')"
               @change="toggleFilter('unlisted')"
             />
-            <span>Unlisted</span>
+            <span>{{ $t('meta-kit.status.unlisted') }}</span>
           </label>
           <label class="k-meta-kit-filter-option">
             <input
@@ -222,13 +222,13 @@
               :checked="isFilterActive('drafts')"
               @change="toggleFilter('drafts')"
             />
-            <span>Drafts</span>
+            <span>{{ $t('meta-kit.status.drafts') }}</span>
           </label>
         </div>
 
         <div v-if="activeFilters.length > 0" class="k-meta-kit-filter-actions">
           <button @click="clearFilters" class="k-meta-kit-filter-clear">
-            Clear all
+            {{ $t('meta-kit.filter.clear') }}
           </button>
         </div>
       </div>

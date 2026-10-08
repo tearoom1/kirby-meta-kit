@@ -4,14 +4,14 @@
 
     <div v-if="isLoading" class="k-meta-kit-loading">
       <k-icon class="k-meta-kit-spinner" type="loader"/>
-      <span>Loading page...</span>
+      <span>{{ $t('meta-kit.loading.page') }}</span>
     </div>
 
     <div v-else-if="page" class="k-meta-kit-single-edit">
       <!-- Meta Title -->
       <div class="k-meta-kit-single-field">
         <meta-kit-title-field
-          label="Meta Title"
+          :label="$t('meta-kit.field.metaTitle')"
           :value="editedFields.metaTitle"
           @input="editedFields.metaTitle = $event"
           :page-id="page.id"
@@ -20,7 +20,7 @@
           :ai-enabled="aiEnabled"
           :is-generating="generating.metaTitle"
           @generate="generate('metaTitle')"
-          :placeholder="page.metaTitle || page.title || 'No meta title set'"
+          :placeholder="page.metaTitle || page.title || $t('meta-kit.noMetaTitle')"
           field-class="k-meta-kit-single-field-content"
         />
       </div>
@@ -28,13 +28,13 @@
       <!-- Meta Description -->
       <div class="k-meta-kit-single-field">
         <meta-kit-description-field
-          label="Meta Description"
+          :label="$t('meta-kit.field.metaDescription')"
           :value="editedFields.metaDescription"
           @input="editedFields.metaDescription = $event"
           :ai-enabled="aiEnabled"
           :is-generating="generating.metaDescription"
           @generate="generate('metaDescription')"
-          :placeholder="page.metaDescription || siteSettings.siteMetaDescription || 'No meta description set'"
+          :placeholder="page.metaDescription || siteSettings.siteMetaDescription || $t('meta-kit.noMetaDescription')"
           :rows="3"
           buttons="false"
           field-class="k-meta-kit-single-field-content"
@@ -44,7 +44,7 @@
       <!-- OG Title -->
       <div v-if="!isSitePage" class="k-meta-kit-single-field">
         <meta-kit-title-field
-          label="OG Title"
+          :label="$t('meta-kit.field.ogTitle')"
           :value="editedFields.ogTitle"
           @input="editedFields.ogTitle = $event"
           :page-id="page.id"
@@ -54,7 +54,7 @@
           :ai-enabled="aiEnabled"
           :is-generating="generating.ogTitle"
           @generate="generate('ogTitle')"
-          :placeholder="page.ogTitle || page.metaTitle || page.title || 'No OG title'"
+          :placeholder="page.ogTitle || page.metaTitle || page.title || $t('meta-kit.noOgTitle')"
           type="og"
           field-class="k-meta-kit-single-field-content"
         />
@@ -63,13 +63,13 @@
       <!-- OG Description -->
       <div v-if="!isSitePage" class="k-meta-kit-single-field">
         <meta-kit-description-field
-          label="OG Description"
+          :label="$t('meta-kit.field.ogDescription')"
           :value="editedFields.ogDescription"
           @input="editedFields.ogDescription = $event"
           :ai-enabled="aiEnabled"
           :is-generating="generating.ogDescription"
           @generate="generate('ogDescription')"
-          :placeholder="page.ogDescription || page.metaDescription || siteSettings.siteMetaDescription || 'No OG description'"
+          :placeholder="page.ogDescription || page.metaDescription || siteSettings.siteMetaDescription || $t('meta-kit.noOgDescription')"
           type="og"
           :rows="3"
           buttons="false"
@@ -79,14 +79,14 @@
 
       <!-- OG Image -->
       <div v-if="!isSitePage" class="k-meta-kit-single-field">
-        <label class="k-meta-kit-dialog-field-label">OG Image</label>
+        <label class="k-meta-kit-dialog-field-label">{{ $t('meta-kit.field.ogImage') }}</label>
         <div class="k-meta-kit-single-field-content">
           <div v-if="page.ogImage" class="k-meta-kit-og-image-current">
             <img :src="page.ogImage.url" :alt="page.ogImage.filename"/>
             <span class="k-meta-kit-og-image-filename">{{ page.ogImage.filename }}</span>
           </div>
           <div v-else class="k-meta-kit-og-image-empty">
-            No OG image set
+            {{ $t('meta-kit.noOgImage') }}
           </div>
         </div>
       </div>
@@ -99,7 +99,7 @@
             :href="page.panelUrl"
             class="k-link k-meta-kit-dialog-panel-link"
           >
-            Edit in Panel
+            {{ $t('meta-kit.editInPanel') }}
           </a>
         </div>
         <div class="k-meta-kit-dialog-footer-meta">
@@ -111,9 +111,9 @@
           </span>
         </div>
         <div class="k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-end">
-          <k-button @click="close">Close</k-button>
+          <k-button @click="close">{{ $t('meta-kit.close') }}</k-button>
           <k-button v-if="hasChanges" icon="check" theme="positive" @click="save">
-            Save {{ changedFieldCount }} {{ changedFieldCount === 1 ? 'Field' : 'Fields' }}
+            {{ $t('meta-kit.saveFields', { count: changedFieldCount }) }}
           </k-button>
         </div>
       </div>
@@ -201,7 +201,7 @@ export default {
           this.editedFields.ogDescription = this.page.ogDescription || '';
         }
       } catch (error) {
-        window.panel.notification.error('Failed to load page');
+        window.panel.notification.error(this.$t('meta-kit.error.loadPage'));
       } finally {
         this.isLoading = false;
       }
@@ -255,12 +255,12 @@ export default {
         });
         if (response.status === 'success' && response.content) {
           this.editedFields[fieldName] = response.content;
-          window.panel.notification.success('AI content generated successfully');
+          window.panel.notification.success(this.$t('meta-kit.generated'));
         } else {
-          window.panel.notification.error(response.message || 'Failed to generate content');
+          window.panel.notification.error(response.message || this.$t('meta-kit.generate.contentFailed'));
         }
       } catch (error) {
-        window.panel.notification.error(error?.message || 'Failed to generate content');
+        window.panel.notification.error(error?.message || this.$t('meta-kit.generate.contentFailed'));
       } finally {
         this.generating[fieldName] = false;
       }
@@ -293,9 +293,9 @@ export default {
 
       if (failedResults.length > 0) {
         const firstError = failedResults[0]?.message;
-        this.setSaveFeedback('error', firstError || `Failed to update ${failedResults.length} field${failedResults.length > 1 ? 's' : ''}`);
+        this.setSaveFeedback('error', firstError || this.$t('meta-kit.error.updateFields', { count: failedResults.length }));
         window.panel.notification.error(
-          firstError || `Failed to update ${failedResults.length} field${failedResults.length > 1 ? 's' : ''}`
+          firstError || this.$t('meta-kit.error.updateFields', { count: failedResults.length })
         );
       }
 
@@ -304,7 +304,7 @@ export default {
         const latestPage = latestResponse?.data?.page || null;
         const latestSiteSettings = latestResponse?.data?.siteSettings || null;
 
-        this.setSaveFeedback('success', `Saved ${savedCount} field${savedCount > 1 ? 's' : ''}`);
+        this.setSaveFeedback('success', this.$t('meta-kit.generate.saved', { count: savedCount }));
         if (latestPage) {
           this.page = latestPage;
           this.editedFields.metaTitle = this.page.metaTitle || '';

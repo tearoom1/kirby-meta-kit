@@ -1,55 +1,57 @@
-name: Robots.txt Settings
+name: meta-kit.bp.robots.name
 preview: fields
 wysiwyg: true
 tabs:
   general:
-    label: General
+    label: meta-kit.bp.robots.general.label
     fields:
       info:
         type: info
-        label: Robots.txt Configuration
-        text: Configure the robots.txt file for your site. This file tells search engine crawlers which pages they can access. The robots.txt will be automatically available at /robots.txt
+        label: meta-kit.bp.robots.general.info.label
+        text: meta-kit.bp.robots.general.info.text
         theme: info
         translate: false
       enabled:
-        label: Enable Custom Robots.txt
+        label: meta-kit.bp.robots.general.enabled.label
         type: toggle
         default: true
-        help: When disabled, a basic robots.txt will be served
+        help: meta-kit.bp.robots.general.enabled.help
         width: 1/3
         translate: false
       defaultRules:
-        label: Default Rules
+        label: meta-kit.bp.robots.general.defaultRules.label
         type: toggle
         default: true
-        help: 'Include "User-agent: * / Allow: /" as fallback'
+        help: meta-kit.bp.robots.general.defaultRules.help
         when:
           enabled: true
         width: 1/3
         translate: false
       includeSitemap:
-        label: Include Sitemap
+        label: meta-kit.bp.robots.general.includeSitemap.label
         type: toggle
         default: true
-        help: 'Add "Sitemap: [url]/sitemap.xml" to robots.txt'
+        help: meta-kit.bp.robots.general.includeSitemap.help
         when:
           enabled: true
         width: 1/3
         translate: false
       customRules:
-        label: User Agent Rules
+        label: meta-kit.bp.robots.general.customRules.label
         type: structure
-        help: Add custom rules for specific user agents
+        help: meta-kit.bp.robots.general.customRules.help
         when:
           enabled: true
         translate: false
         fields:
           userAgent:
-            label: User Agent
+            label: meta-kit.bp.robots.general.customRules.userAgent.label
             type: select
             default: "*"
             options:
-              - { value: '*', text: '* (All Bots)' }
+              - value: '*'
+                text:
+                  '*': meta-kit.bp.robots.option.all-bots
               - { value: 'Googlebot', text: 'Googlebot' }
               - { value: 'Googlebot-Image', text: 'Googlebot-Image' }
               - { value: 'Googlebot-News', text: 'Googlebot-News' }
@@ -61,83 +63,67 @@ tabs:
               - { value: 'facebookexternalhit', text: 'Facebook' }
               - { value: 'Twitterbot', text: 'Twitter' }
               - { value: 'LinkedInBot', text: 'LinkedIn' }
-              - { value: 'custom', text: 'Custom User Agent' }
-            help: Select a user agent or choose 'Custom' to enter your own
+              - value: 'custom'
+                text:
+                  '*': meta-kit.bp.robots.option.custom-user-agent
+            help: meta-kit.bp.robots.general.customRules.userAgent.help
           customUserAgent:
-            label: Custom User Agent Name
+            label: meta-kit.bp.robots.general.customRules.customUserAgent.label
             type: text
-            placeholder: e.g., MyBot
+            placeholder: meta-kit.bp.robots.general.customRules.customUserAgent.placeholder
             when:
               userAgent: custom
-            help: Enter the exact user agent name
+            help: meta-kit.bp.robots.general.customRules.customUserAgent.help
           allowPaths:
-            label: Allowed Paths
+            label: meta-kit.bp.robots.general.customRules.allowPaths.label
             type: tags
             placeholder: /images/, /public/
-            help: |
-              Paths that this user agent is allowed to crawl.
-              Enter paths one by one (press Enter after each).
-              Leave empty if you want to allow everything except disallowed paths.
+            help: meta-kit.bp.robots.general.customRules.allowPaths.help
           disallowPaths:
-            label: Disallowed Paths
+            label: meta-kit.bp.robots.general.customRules.disallowPaths.label
             type: tags
             placeholder: /admin/, /private/
-            help: |
-              Paths that this user agent should NOT crawl.
-              Enter paths one by one (press Enter after each).
-              Common examples: /panel/, /api/, /admin/
+            help: meta-kit.bp.robots.general.customRules.disallowPaths.help
           crawlDelay:
-            label: Crawl Delay (seconds)
+            label: meta-kit.bp.robots.general.customRules.crawlDelay.label
             type: number
             min: 0
             max: 60
             step: 1
             placeholder: 0
-            help: |
-              Optional delay between requests (in seconds).
-              Use this to limit server load. 0 = no delay.
-              Note: Not all bots respect this directive.
-
+            help: meta-kit.bp.robots.general.customRules.crawlDelay.help
   advanced:
-    label: Advanced
+    label: meta-kit.bp.robots.advanced.label
     fields:
       blockBadBots:
-        label: Block Known Bad Bots
+        label: meta-kit.bp.robots.advanced.blockBadBots.label
         type: toggle
         default: false
-        help: |
-          Automatically block known scrapers and spam bots.
-          Includes bots like: AhrefsBot, MJ12bot, SemrushBot, etc.
+        help: meta-kit.bp.robots.advanced.blockBadBots.help
         when:
           enabled: true
         translate: false
       blockAiCrawlers:
-        label: Block AI Training Crawlers
+        label: meta-kit.bp.robots.advanced.blockAiCrawlers.label
         type: toggle
         default: false
-        help: |
-          Ask crawlers that collect content for AI training to stay away
-          (GPTBot, ClaudeBot, CCBot, Google-Extended, …). AI assistants that
-          look up and link to pages (ChatGPT search, Claude, Perplexity) stay allowed.
+        help: meta-kit.bp.robots.advanced.blockAiCrawlers.help
         when:
           enabled: true
         translate: false
       llmsTxt:
-        label: Provide llms.txt
+        label: meta-kit.bp.robots.advanced.llmsTxt.label
         type: toggle
         default: false
-        help: Publish /llms.txt, a Markdown overview of your pages for AI assistants (same pages as the sitemap)
+        help: meta-kit.bp.robots.advanced.llmsTxt.help
         translate: false
       customDirectives:
-        label: Custom Directives
+        label: meta-kit.bp.robots.advanced.customDirectives.label
         type: textarea
         placeholder: |
           Host: example.com
           Request-rate: 1/1
-        help: |
-          Add custom robots.txt directives (advanced users only).
-          Each line should be a valid robots.txt directive.
-          Example: "Host: www.example.com"
+        help: meta-kit.bp.robots.advanced.customDirectives.help
         font: monospace
         when:
           enabled: true

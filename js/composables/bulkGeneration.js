@@ -4,12 +4,14 @@
  * Kept framework-agnostic so we can test with plain Node test runner.
  */
 
+import { t } from './i18n.js';
+
 // Option key from the generate dialog → page field and "has value" flag
 export const GENERATION_FIELDS = [
-  { option: 'title', field: 'metaTitle', hasKey: 'hasMetaTitle', label: 'Meta Title' },
-  { option: 'description', field: 'metaDescription', hasKey: 'hasMetaDescription', label: 'Meta Description' },
-  { option: 'ogTitle', field: 'ogTitle', hasKey: 'hasOgTitle', label: 'OG Title' },
-  { option: 'ogDescription', field: 'ogDescription', hasKey: 'hasOgDescription', label: 'OG Description' }
+  { option: 'title', field: 'metaTitle', hasKey: 'hasMetaTitle' },
+  { option: 'description', field: 'metaDescription', hasKey: 'hasMetaDescription' },
+  { option: 'ogTitle', field: 'ogTitle', hasKey: 'hasOgTitle' },
+  { option: 'ogDescription', field: 'ogDescription', hasKey: 'hasOgDescription' }
 ];
 
 /**
@@ -20,7 +22,7 @@ export function planGeneration(pages = [], options = {}) {
   const jobs = [];
 
   for (const page of pages) {
-    for (const { option, field, hasKey, label } of GENERATION_FIELDS) {
+    for (const { option, field, hasKey } of GENERATION_FIELDS) {
       if (!options[option] || page[hasKey]) continue;
       if (page.id === 'site' && field.startsWith('og')) continue;
 
@@ -28,7 +30,7 @@ export function planGeneration(pages = [], options = {}) {
         pageId: page.id,
         pageTitle: page.title || page.id,
         field,
-        label
+        label: t(`field.${field}`)
       });
     }
   }
@@ -61,7 +63,7 @@ export async function runGeneration(jobs, { generate, onProgress = () => {}, isC
       const value = await generate(job);
       suggestions.push({ ...job, value, selected: true });
     } catch (error) {
-      errors.push({ ...job, message: error?.message || 'Generation failed' });
+      errors.push({ ...job, message: error?.message || t('generate.failed') });
     }
   }
 
@@ -87,7 +89,7 @@ export async function applySuggestions(suggestions, apply) {
       await apply(suggestion);
       saved.push(suggestion);
     } catch (error) {
-      errors.push({ ...suggestion, message: error?.message || 'Saving failed' });
+      errors.push({ ...suggestion, message: error?.message || t('generate.saveFailed') });
     }
   }
 
@@ -105,7 +107,7 @@ export async function generateFieldSuggestion(api, { pageId, field }, language =
   });
 
   if (response?.status !== 'success' || !response.content) {
-    throw new Error(response?.message || 'Generation failed');
+    throw new Error(response?.message || t('generate.failed'));
   }
 
   return response.content;

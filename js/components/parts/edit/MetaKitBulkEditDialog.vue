@@ -4,7 +4,7 @@
 
     <div v-if="isLoading" class="k-meta-kit-loading">
       <k-icon class="k-meta-kit-spinner" type="loader"/>
-      <span>Loading pages...</span>
+      <span>{{ $t('meta-kit.loading.pages') }}</span>
     </div>
 
     <div v-else-if="pages.length > 0">
@@ -36,7 +36,7 @@
 
           <!-- Meta Title -->
           <meta-kit-title-field
-            label="Meta Title"
+            :label="$t('meta-kit.field.metaTitle')"
             :value="editedFields[page.id].metaTitle"
             @input="editedFields[page.id].metaTitle = $event"
             :page-id="page.id"
@@ -45,19 +45,19 @@
             :ai-enabled="aiEnabled"
             :is-generating="generating[page.id].metaTitle"
             @generate="generate(page.id, 'metaTitle')"
-            :placeholder="page.metaTitle || page.title || 'No meta title'"
+            :placeholder="page.metaTitle || page.title || $t('meta-kit.noMetaTitle')"
             type="meta"
           />
 
           <!-- Meta Description -->
           <meta-kit-description-field
-            label="Meta Description"
+            :label="$t('meta-kit.field.metaDescription')"
             :value="editedFields[page.id].metaDescription"
             @input="editedFields[page.id].metaDescription = $event"
             :ai-enabled="aiEnabled"
             :is-generating="generating[page.id].metaDescription"
             @generate="generate(page.id, 'metaDescription')"
-            :placeholder="page.metaDescription || siteSettings.siteMetaDescription || 'No meta description'"
+            :placeholder="page.metaDescription || siteSettings.siteMetaDescription || $t('meta-kit.noMetaDescription')"
             :rows="3"
           />
         </div>
@@ -73,7 +73,7 @@
 
           <!-- OG Title -->
           <meta-kit-title-field
-            label="OG Title"
+            :label="$t('meta-kit.field.ogTitle')"
             :value="editedFields[page.id].ogTitle"
             @input="editedFields[page.id].ogTitle = $event"
             :page-id="page.id"
@@ -83,25 +83,25 @@
             :ai-enabled="aiEnabled"
             :is-generating="generating[page.id].ogTitle"
             @generate="generate(page.id, 'ogTitle')"
-            :placeholder="page.ogTitle || page.metaTitle || page.title || 'No OG title'"
+            :placeholder="page.ogTitle || page.metaTitle || page.title || $t('meta-kit.noOgTitle')"
             type="og"
           />
 
           <!-- OG Description -->
           <meta-kit-description-field
-            label="OG Description"
+            :label="$t('meta-kit.field.ogDescription')"
             :value="editedFields[page.id].ogDescription"
             @input="editedFields[page.id].ogDescription = $event"
             :ai-enabled="aiEnabled"
             :is-generating="generating[page.id].ogDescription"
             @generate="generate(page.id, 'ogDescription')"
-            :placeholder="page.ogDescription || page.metaDescription || siteSettings.siteMetaDescription || 'No OG description'"
+            :placeholder="page.ogDescription || page.metaDescription || siteSettings.siteMetaDescription || $t('meta-kit.noOgDescription')"
             type="og"
             :rows="3"
           />
         </div>
         <div v-if="editableOgPages.length === 0" class="k-meta-kit-empty">
-          <p>No page-specific OG fields available.</p>
+          <p>{{ $t('meta-kit.bulkEdit.noOg') }}</p>
         </div>
       </div>
 
@@ -117,15 +117,15 @@
           </span>
         </div>
         <div class="k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-end">
-          <k-button @click="close">Close</k-button>
-          <k-button v-if="hasAnyChanges" icon="check" theme="positive" @click="saveAll">Apply All Changes</k-button>
+          <k-button @click="close">{{ $t('meta-kit.close') }}</k-button>
+          <k-button v-if="hasAnyChanges" icon="check" theme="positive" @click="saveAll">{{ $t('meta-kit.bulkEdit.apply') }}</k-button>
         </div>
       </div>
     </div>
 
     <div v-else class="k-meta-kit-empty">
       <k-icon type="check"/>
-      <p>No pages selected!</p>
+      <p>{{ $t('meta-kit.bulkEdit.none') }}</p>
     </div>
   </k-dialog>
 </template>
@@ -213,7 +213,7 @@ export default {
           });
         }
       } catch (error) {
-        window.panel.notification.error('Failed to load pages');
+        window.panel.notification.error(this.$t('meta-kit.error.loadPages'));
       } finally {
         this.isLoading = false;
       }
@@ -269,12 +269,12 @@ export default {
         });
         if (response.status === 'success' && response.content) {
           this.editedFields[pageId][fieldName] = response.content;
-          window.panel.notification.success('AI content generated successfully');
+          window.panel.notification.success(this.$t('meta-kit.generated'));
         } else {
-          window.panel.notification.error(response.message || 'Failed to generate content');
+          window.panel.notification.error(response.message || this.$t('meta-kit.generate.contentFailed'));
         }
       } catch (error) {
-        window.panel.notification.error(error?.message || 'Failed to generate content');
+        window.panel.notification.error(error?.message || this.$t('meta-kit.generate.contentFailed'));
       } finally {
         this.generating[pageId][fieldName] = false;
       }
@@ -317,8 +317,8 @@ export default {
               }
               totalSaved++;
             } catch (error) {
-              this.setSaveFeedback('error', error?.message || `Failed to update ${field.name} for ${page.title}`);
-              window.panel.notification.error(error?.message || `Failed to update ${field.name} for ${page.title}`);
+              this.setSaveFeedback('error', error?.message || this.$t('meta-kit.error.updateField', { field: field.name, page: page.title }));
+              window.panel.notification.error(error?.message || this.$t('meta-kit.error.updateField', { field: field.name, page: page.title }));
             }
           }
         }
@@ -340,7 +340,7 @@ export default {
           });
         });
 
-        this.setSaveFeedback('success', `Saved ${totalSaved} field${totalSaved > 1 ? 's' : ''} across ${this.pages.length} page${this.pages.length > 1 ? 's' : ''}`);
+        this.setSaveFeedback('success', this.$t('meta-kit.bulkEdit.saved', { count: totalSaved, pages: this.pages.length }));
         this.$emit('saved', {
           pages: this.pages,
           siteSettings: latestSiteSettings

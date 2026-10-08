@@ -30,7 +30,7 @@
             class="k-mk-ai-button"
             size="xs"
             icon="ai"
-            :text="isGenerating ? 'Generating…' : 'Generate'"
+            :text="isGenerating ? $t('meta-kit.generate.generating') : $t('meta-kit.generate.button')"
             :disabled="disabled || isGenerating"
             @click="generateWithAi"
           />

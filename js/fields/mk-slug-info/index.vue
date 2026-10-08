@@ -4,20 +4,20 @@
       <k-box :theme="validation.theme" class="k-mk-slug-validation-box">
       <div class="k-mk-slug-stats">
         <div class="k-mk-slug-stat k-mk-slug-stat-slug">
-          <span class="k-mk-slug-stat-label">Slug:</span>
+          <span class="k-mk-slug-stat-label">{{ $t('meta-kit.field.slug') }}:</span>
           <span :class="'k-mk-slug-stat-value k-mk-validation-status-' + validation.status">{{ displaySlug }}</span>
         </div>
         <div class="k-mk-slug-stat">
-          <span class="k-mk-slug-stat-label">Words:</span>
+          <span class="k-mk-slug-stat-label">{{ $t('meta-kit.slug.words') }}:</span>
           <span :class="'k-mk-slug-stat-value k-mk-validation-status-' + validation.wordsStatus">{{ wordCount }}</span>
         </div>
         <div class="k-mk-slug-stat">
-          <span class="k-mk-slug-stat-label">Length:</span>
-          <span :class="'k-mk-slug-stat-value k-mk-validation-status-' + validation.lengthStatus">{{ slugLength }} chars</span>
+          <span class="k-mk-slug-stat-label">{{ $t('meta-kit.slug.length') }}:</span>
+          <span :class="'k-mk-slug-stat-value k-mk-validation-status-' + validation.lengthStatus">{{ $t('meta-kit.chars', { count: slugLength }) }}</span>
         </div>
         <div class="k-mk-slug-stat">
-          <span class="k-mk-slug-stat-label">Depth:</span>
-          <span :class="'k-mk-slug-stat-value k-mk-validation-status-' + validation.depthStatus">{{ depth }} levels</span>
+          <span class="k-mk-slug-stat-label">{{ $t('meta-kit.slug.depth') }}:</span>
+          <span :class="'k-mk-slug-stat-value k-mk-validation-status-' + validation.depthStatus">{{ $t('meta-kit.slug.levels', { count: depth }) }}</span>
         </div>
       </div>
 
@@ -27,12 +27,12 @@
       </div>
 
       <details class="k-mk-slug-guidelines">
-        <summary>SEO Guidelines{{ templateInfo }}</summary>
+        <summary>{{ $t('meta-kit.slug.guidelines') }}{{ templateInfo }}</summary>
         <ul>
-          <li><strong>Words:</strong> {{ wordsGuideline }}</li>
-          <li><strong>Length:</strong> {{ lengthGuideline }} characters</li>
-          <li><strong>Nesting:</strong> ≤ {{ depthGuideline }} levels deep for best crawling</li>
-          <li><strong>Best practices:</strong> Use hyphens, lowercase, descriptive keywords</li>
+          <li><strong>{{ $t('meta-kit.slug.words') }}:</strong> {{ wordsGuideline }}</li>
+          <li><strong>{{ $t('meta-kit.slug.length') }}:</strong> {{ $t('meta-kit.chars', { count: lengthGuideline }) }}</li>
+          <li><strong>{{ $t('meta-kit.slug.nesting') }}:</strong> {{ $t('meta-kit.slug.nesting.help', { count: depthGuideline }) }}</li>
+          <li><strong>{{ $t('meta-kit.slug.bestPractices') }}:</strong> {{ $t('meta-kit.slug.bestPractices.help') }}</li>
         </ul>
       </details>
         </div>
@@ -99,7 +99,7 @@ export default {
         return {
           status: '',
           theme: 'info',
-          message: 'No slug available yet'
+          message: this.$t('meta-kit.slug.none')
         };
       }
 
@@ -115,11 +115,11 @@ export default {
       // Check depth
       const depthStatus = this.getStatus(depth, settings.depth);
       if (depthStatus === 'warning') {
-        messages.push(`Consider reducing nesting depth (currently ${depth} levels)`);
+        messages.push(this.$t('meta-kit.slug.msg.depthWarning', { count: depth }));
         overallStatus = 'warning';
         theme = 'notice';
       } else if (depthStatus === 'error') {
-        messages.push(`Too deeply nested! Reduce to ${settings.depth.optimal.max} levels or less`);
+        messages.push(this.$t('meta-kit.slug.msg.depthError', { count: settings.depth.optimal.max }));
         overallStatus = 'error';
         theme = 'negative';
       }
@@ -128,16 +128,16 @@ export default {
       const wordsStatus = this.getStatus(words, settings.words);
       if (wordsStatus === 'warning') {
         if (words < settings.words.optimal.min) {
-          messages.push(`Consider adding more descriptive words`);
+          messages.push(this.$t('meta-kit.slug.msg.moreWords'));
         } else {
-          messages.push(`Consider shortening the slug (${words} words)`);
+          messages.push(this.$t('meta-kit.slug.msg.fewerWords', { count: words }));
         }
         if (overallStatus === 'optimal') {
           overallStatus = 'warning';
           theme = 'notice';
         }
       } else if (wordsStatus === 'error') {
-        messages.push(`Slug too long! Reduce to ${settings.words.optimal.max} words or less`);
+        messages.push(this.$t('meta-kit.slug.msg.wordsError', { count: settings.words.optimal.max }));
         overallStatus = 'error';
         theme = 'negative';
       }
@@ -145,13 +145,13 @@ export default {
       // Check length
       const lengthStatus = this.getStatus(length, settings.length);
       if (lengthStatus === 'warning') {
-        messages.push(`Slug is ${length} characters (${settings.length.optimal.max} recommended)`);
+        messages.push(this.$t('meta-kit.slug.msg.lengthWarning', { count: length, max: settings.length.optimal.max }));
         if (overallStatus === 'optimal') {
           overallStatus = 'warning';
           theme = 'notice';
         }
       } else if (lengthStatus === 'error') {
-        messages.push(`Slug too long! Reduce to ${settings.length.optimal.max} characters or less`);
+        messages.push(this.$t('meta-kit.slug.msg.lengthError', { count: settings.length.optimal.max }));
         overallStatus = 'error';
         theme = 'negative';
       }
@@ -159,7 +159,7 @@ export default {
       return {
         status: overallStatus,
         theme: theme,
-        message: messages.length > 0 ? messages.join('. ') : 'Slug fulfills the validation rules',
+        message: messages.length > 0 ? messages.join('. ') : this.$t('meta-kit.slug.msg.ok'),
         depthStatus: depthStatus,
         wordsStatus: wordsStatus,
         lengthStatus: lengthStatus

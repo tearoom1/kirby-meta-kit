@@ -1,120 +1,174 @@
-name: AI Settings
+name: meta-kit.bp.openrouter.name
 icon: ai
 preview: fields
 wysiwyg: true
 fields:
   infoAi:
     type: info
-    label: AI Integration
-    text: AI features are automatically disabled if the API key and model are not configured either here or in the config.
+    label: meta-kit.bp.openrouter.infoAi.label
+    text: meta-kit.bp.openrouter.infoAi.text
     theme: info
     translate: false
   provider:
-    label: Provider
+    label: meta-kit.bp.openrouter.provider.label
     type: select
     placeholder: OpenRouter
     options:
-      - { value: 'mistral', text: 'Mistral (EU)' }
-      - { value: 'custom', text: 'Other OpenAI-compatible API' }
-    help: Leave empty for OpenRouter. Mistral processes your content in the EU.
+      - value: 'mistral'
+        text:
+          '*': meta-kit.bp.openrouter.option.mistral-eu
+      - value: 'custom'
+        text:
+          '*': meta-kit.bp.openrouter.option.other-openai-compatible-api
+    help: meta-kit.bp.openrouter.provider.help
     width: 1/2
     translate: false
   apiKey:
-    label: API Key
+    label: meta-kit.bp.openrouter.apiKey.label
     type: text
-    help: API key of the selected provider. Leave empty to disable AI features.
+    help: meta-kit.bp.openrouter.apiKey.help
     width: 1/2
     translate: false
   endpoint:
-    label: API Endpoint
+    label: meta-kit.bp.openrouter.endpoint.label
     type: url
     placeholder: https://example.com/v1/chat/completions
-    help: Full URL of the chat completions endpoint
+    help: meta-kit.bp.openrouter.endpoint.help
     width: 1/2
     translate: false
     when:
       provider: custom
   model:
-    label: AI Model
+    label: meta-kit.bp.openrouter.mistralModel.label
     type: select
     when:
       provider: ''
     options:
-      - { value: 'google/gemma-4-31b-it:free', text: 'Gemma 4 31B (Free test model)' }
-      - { value: 'google/gemma-4-26b-a4b-it:free', text: 'Gemma 4 26B A4B (Free test model)' }
-      - { value: 'openai/gpt-6-luna', text: 'GPT-6 Luna (Paid)' }
-      - { value: 'openai/gpt-6-sol', text: 'GPT-6 Sol (Paid)' }
-      - { value: 'openai/gpt-5-mini', text: 'GPT-5 Mini (Paid)' }
-      - { value: 'openai/gpt-5', text: 'GPT-5 (Paid)' }
-      - { value: 'openai/gpt-4o-mini', text: 'GPT-4o Mini (Paid)' }
-      - { value: 'openai/gpt-4o', text: 'GPT-4o (Paid)' }
-      - { value: 'anthropic/claude-haiku-5.5', text: 'Claude Haiku 5.5 (Paid)' }
-      - { value: 'anthropic/claude-sonnet-5.5', text: 'Claude Sonnet 5.5 (Paid)' }
-      - { value: 'anthropic/claude-haiku-4.5', text: 'Claude Haiku 4.5 (Paid)' }
-      - { value: 'anthropic/claude-sonnet-4.5', text: 'Claude Sonnet 4.5 (Paid)' }
-      - { value: 'google/gemini-3.5-flash', text: 'Gemini 3.5 Flash (Paid)' }
-      - { value: 'google/gemini-3.1-flash-lite', text: 'Gemini 3.1 Flash Lite (Paid)' }
-      - { value: 'mistralai/mistral-large-4-0', text: 'Mistral Large 4 (Paid)' }
-      - { value: 'mistralai/mistral-large', text: 'Mistral Large (Paid)' }
-      - { value: 'meta-llama/llama-3.3-70b-instruct', text: 'Llama 3.3 70B (Paid)' }
-      - { value: 'deepseek/deepseek-v4-flash', text: 'DeepSeek V4 Flash (Paid)' }
-      - { value: 'deepseek/deepseek-chat', text: 'DeepSeek Chat V3 (Paid)' }
-      - { value: 'custom', text: 'Other model (enter model ID)' }
+      - value: 'google/gemma-4-31b-it:free'
+        text:
+          '*': meta-kit.bp.openrouter.option.gemma-4-31b-free-test-model
+      - value: 'google/gemma-4-26b-a4b-it:free'
+        text:
+          '*': meta-kit.bp.openrouter.option.gemma-4-26b-a4b-free-test-model
+      - value: 'openai/gpt-6-luna'
+        text:
+          '*': meta-kit.bp.openrouter.option.gpt-6-luna-paid
+      - value: 'openai/gpt-6-sol'
+        text:
+          '*': meta-kit.bp.openrouter.option.gpt-6-sol-paid
+      - value: 'openai/gpt-5-mini'
+        text:
+          '*': meta-kit.bp.openrouter.option.gpt-5-mini-paid
+      - value: 'openai/gpt-5'
+        text:
+          '*': meta-kit.bp.openrouter.option.gpt-5-paid
+      - value: 'openai/gpt-4o-mini'
+        text:
+          '*': meta-kit.bp.openrouter.option.gpt-4o-mini-paid
+      - value: 'openai/gpt-4o'
+        text:
+          '*': meta-kit.bp.openrouter.option.gpt-4o-paid
+      - value: 'anthropic/claude-haiku-5.5'
+        text:
+          '*': meta-kit.bp.openrouter.option.claude-haiku-5-5-paid
+      - value: 'anthropic/claude-sonnet-5.5'
+        text:
+          '*': meta-kit.bp.openrouter.option.claude-sonnet-5-5-paid
+      - value: 'anthropic/claude-haiku-4.5'
+        text:
+          '*': meta-kit.bp.openrouter.option.claude-haiku-4-5-paid
+      - value: 'anthropic/claude-sonnet-4.5'
+        text:
+          '*': meta-kit.bp.openrouter.option.claude-sonnet-4-5-paid
+      - value: 'google/gemini-3.5-flash'
+        text:
+          '*': meta-kit.bp.openrouter.option.gemini-3-5-flash-paid
+      - value: 'google/gemini-3.1-flash-lite'
+        text:
+          '*': meta-kit.bp.openrouter.option.gemini-3-1-flash-lite-paid
+      - value: 'mistralai/mistral-large-4-0'
+        text:
+          '*': meta-kit.bp.openrouter.option.mistral-large-4-paid
+      - value: 'mistralai/mistral-large'
+        text:
+          '*': meta-kit.bp.openrouter.option.mistral-large-paid
+      - value: 'meta-llama/llama-3.3-70b-instruct'
+        text:
+          '*': meta-kit.bp.openrouter.option.llama-3-3-70b-paid
+      - value: 'deepseek/deepseek-v4-flash'
+        text:
+          '*': meta-kit.bp.openrouter.option.deepseek-v4-flash-paid
+      - value: 'deepseek/deepseek-chat'
+        text:
+          '*': meta-kit.bp.openrouter.option.deepseek-chat-v3-paid
+      - value: 'custom'
+        text:
+          '*': meta-kit.bp.openrouter.option.other-model-enter-model-id
     default: "google/gemma-4-31b-it:free"
     width: 1/2
     translate: false
   customModel:
-    label: Custom Model ID
+    label: meta-kit.bp.openrouter.customModel.label
     type: text
     placeholder: openai/gpt-6-luna
-    help: Any model ID from <a href="https://openrouter.ai/models" target="_blank">openrouter.ai/models</a>
+    help: meta-kit.bp.openrouter.customModel.help
     width: 1/2
     translate: false
     when:
       provider: ''
       model: custom
   mistralModel:
-    label: AI Model
+    label: meta-kit.bp.openrouter.mistralModel.label
     type: select
-    placeholder: Mistral Small (default)
+    placeholder: meta-kit.bp.openrouter.mistralModel.placeholder
     options:
       - { value: 'mistral-small-latest', text: 'Mistral Small' }
       - { value: 'mistral-medium-latest', text: 'Mistral Medium' }
       - { value: 'mistral-large-latest', text: 'Mistral Large' }
-    help: Other models can be set with api.model in the config
+    help: meta-kit.bp.openrouter.mistralModel.help
     width: 1/2
     translate: false
     when:
       provider: mistral
   endpointModel:
-    label: Model ID
+    label: meta-kit.bp.openrouter.endpointModel.label
     type: text
     placeholder: llama3.3
-    help: Model name as expected by the endpoint
+    help: meta-kit.bp.openrouter.endpointModel.help
     width: 1/2
     translate: false
     when:
       provider: custom
   temperature:
-    label: Creativity Level
+    label: meta-kit.bp.openrouter.temperature.label
     type: range
     min: 0.1
     max: 1.0
     step: 0.1
     default: 0.7
     width: 1/2
-    help: Higher values make output more random, lower values more focused. Ignored by models that don't support it.
+    help: meta-kit.bp.openrouter.temperature.help
     translate: false
   reasoning:
-    label: Reasoning Effort
+    label: meta-kit.bp.openrouter.reasoning.label
     type: select
     options:
-      - { value: 'none', text: 'None (fastest)' }
-      - { value: 'minimal', text: 'Minimal' }
-      - { value: 'low', text: 'Low' }
-      - { value: 'medium', text: 'Medium' }
-      - { value: 'high', text: 'High' }
-    placeholder: Model default
+      - value: 'none'
+        text:
+          '*': meta-kit.bp.openrouter.option.none-fastest
+      - value: 'minimal'
+        text:
+          '*': meta-kit.bp.openrouter.option.minimal
+      - value: 'low'
+        text:
+          '*': meta-kit.bp.openrouter.option.low
+      - value: 'medium'
+        text:
+          '*': meta-kit.bp.openrouter.option.medium
+      - value: 'high'
+        text:
+          '*': meta-kit.bp.openrouter.option.high
+    placeholder: meta-kit.bp.openrouter.reasoning.placeholder
     width: 1/2
-    help: How long reasoning models (GPT-5/6, Gemini 3, …) think before answering. Lower is faster and cheaper. Leave empty to use the model's default. Ignored by models without reasoning and by Mistral.
+    help: meta-kit.bp.openrouter.reasoning.help
     translate: false

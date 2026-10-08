@@ -16,6 +16,7 @@ $classes = [
     'TearoomOne\Robots' => 'classes/Robots.php',
     'TearoomOne\LlmsTxt' => 'classes/LlmsTxt.php',
     'TearoomOne\Redirects' => 'classes/Redirects.php',
+    'TearoomOne\Texts' => 'classes/Texts.php',
     'TearoomOne\MetaKitController' => 'classes/MetaKitController.php',
     'TearoomOne\PageDataBuilder' => 'classes/PageDataBuilder.php',
     'TearoomOne\ApiResponse' => 'classes/ApiResponse.php',
@@ -46,6 +47,11 @@ App::plugin(
             'excludeStatus' => [],
             'sitemap.exclude' => ['error'],
             'autoGenerate' => false,
+        ],
+        // Panel texts; blueprints and components use the `meta-kit.*` keys
+        'translations' => [
+            'en' => json_decode(file_get_contents(__DIR__ . '/translations/en.json'), true),
+            'de' => json_decode(file_get_contents(__DIR__ . '/translations/de.json'), true),
         ],
         'blueprints' => [
             'meta-kit/site' => __DIR__ . '/blueprints/site.yml',

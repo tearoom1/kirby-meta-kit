@@ -1,11 +1,12 @@
 <?php
 
+use Kirby\Toolkit\I18n;
 use TearoomOne\MetaHelper;
 
 return [
     'props' => [
-        'label' => function (string $label = 'SEO Preview') {
-            return $label;
+        'label' => function (string $label = 'meta-kit.preview.title') {
+            return I18n::translate($label, $label);
         }
     ],
     'computed' => [

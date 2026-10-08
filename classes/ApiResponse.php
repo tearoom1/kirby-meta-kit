@@ -87,9 +87,9 @@ class ApiResponse
     /**
      * Create a not found response
      */
-    public static function notFound(string $entity = 'Page'): array
+    public static function notFound(): array
     {
-        return self::error("{$entity} not found");
+        return self::error(Texts::get('error.pageNotFound'));
     }
 
 }

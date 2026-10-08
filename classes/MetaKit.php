@@ -70,11 +70,11 @@ class MetaKit
     public static function getAiAccessErrorMessage(): string
     {
         if (!self::isAiEnabled()) {
-            return 'Configure an AI provider API key and model to use AI generation.';
+            return Texts::get('error.aiNotConfigured');
         }
 
         if (self::getConfiguredAiModel() === null) {
-            return 'Configure an AI model to use AI generation.';
+            return Texts::get('error.aiNoModel');
         }
 
         return '';
@@ -211,15 +211,15 @@ class MetaKit
             : null;
 
         if (empty($apiKey)) {
-            throw new Exception($label . ' API key is not configured');
+            throw new Exception(Texts::get('error.apiKeyMissing', ['provider' => $label]));
         }
 
         if ($model === null || $model === '') {
-            throw new Exception($label . ' model is not configured');
+            throw new Exception(Texts::get('error.modelMissing', ['provider' => $label]));
         }
 
         if (empty($endpoint)) {
-            throw new Exception($label . ' API endpoint is not configured');
+            throw new Exception(Texts::get('error.endpointMissing', ['provider' => $label]));
         }
 
         $payload = [
@@ -279,8 +279,8 @@ class MetaKit
         if (!is_string($content) || trim($content) === '') {
             $finishReason = $data['choices'][0]['finish_reason'] ?? null;
             $errorMsg = $finishReason === 'length'
-                ? 'The model used up its token limit before returning any text'
-                : 'The model returned an empty response';
+                ? Texts::get('error.tokenLimit')
+                : Texts::get('error.emptyResponse');
             $errorMsg .= ' (model: ' . $model . ')';
             self::log($label . ' API Error: ' . $errorMsg);
             throw new Exception($label . ' API error: ' . $errorMsg);

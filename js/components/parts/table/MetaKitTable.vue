@@ -11,17 +11,17 @@
           />
         </th>
         <th>#</th>
-        <th>Page</th>
-        <th v-if="!showPreview">Slug</th>
-        <th v-if="showPreview">{{ previewMode === 'og' ? 'OG Title' : 'Meta Title' }}</th>
-        <th v-if="showPreview">{{ previewMode === 'og' ? 'OG Desc.' : 'Meta Desc.' }}</th>
-        <th v-if="!showPreview">Meta Title</th>
-        <th v-if="!showPreview">Meta Desc.</th>
-        <th v-if="!showPreview">OG Title</th>
-        <th v-if="!showPreview">OG Desc.</th>
-        <th v-if="!showPreview || previewMode === 'og'">OG Img.</th>
-        <th v-if="!showPreview">Robots</th>
-        <th>Actions</th>
+        <th>{{ $t('meta-kit.table.page') }}</th>
+        <th v-if="!showPreview">{{ $t('meta-kit.field.slug') }}</th>
+        <th v-if="showPreview">{{ previewMode === 'og' ? $t('meta-kit.field.ogTitle') : $t('meta-kit.field.metaTitle') }}</th>
+        <th v-if="showPreview">{{ previewMode === 'og' ? $t('meta-kit.field.ogDescription.short') : $t('meta-kit.field.metaDescription.short') }}</th>
+        <th v-if="!showPreview">{{ $t('meta-kit.field.metaTitle') }}</th>
+        <th v-if="!showPreview">{{ $t('meta-kit.field.metaDescription.short') }}</th>
+        <th v-if="!showPreview">{{ $t('meta-kit.field.ogTitle') }}</th>
+        <th v-if="!showPreview">{{ $t('meta-kit.field.ogDescription.short') }}</th>
+        <th v-if="!showPreview || previewMode === 'og'">{{ $t('meta-kit.field.ogImage.short') }}</th>
+        <th v-if="!showPreview">{{ $t('meta-kit.table.robots') }}</th>
+        <th>{{ $t('meta-kit.table.actions') }}</th>
       </tr>
       </thead>
       <tbody>
@@ -252,7 +252,7 @@
               icon="edit"
               size="sm"
               @click="$emit('edit-page', page.id)"
-              title="Edit Metadata"
+              :title="$t('meta-kit.table.edit')"
             />
             <k-button
               v-if="aiEnabled"
@@ -260,14 +260,14 @@
               class="k-meta-kit-button-ai-generate"
               size="sm"
               @click="$emit('generate-page', page.id)"
-              title="Generate with AI"
+              :title="$t('meta-kit.table.generate')"
             />
             <k-button
               v-if="canReviewPage(page)"
               icon="preview"
               size="sm"
-              @click="$emit('review-page', page.id, `Content Review: ${page.title}`)"
-              title="Review Content"
+              @click="$emit('review-page', page.id, $t('meta-kit.review.titleFor', { page: page.title }))"
+              :title="$t('meta-kit.table.review')"
             />
           </div>
         </td>
@@ -369,9 +369,9 @@ export default {
     return {
       // Status mappings
       statusMappings: {
-        listed: { label: 'Listed', dotClass: 'k-meta-kit-status-dot-listed' },
-        unlisted: { label: 'Unlisted', dotClass: 'k-meta-kit-status-dot-unlisted' },
-        draft: { label: 'Draft', dotClass: 'k-meta-kit-status-dot-draft' }
+        listed: { label: 'meta-kit.status.listed', dotClass: 'k-meta-kit-status-dot-listed' },
+        unlisted: { label: 'meta-kit.status.unlisted', dotClass: 'k-meta-kit-status-dot-unlisted' },
+        draft: { label: 'meta-kit.status.draft', dotClass: 'k-meta-kit-status-dot-draft' }
       }
     };
   },
@@ -496,11 +496,11 @@ export default {
       const sections = [];
 
       if (grouped.error.length > 0) {
-        sections.push(`Error:\n${grouped.error.join('\n')}`);
+        sections.push(`${this.$t('meta-kit.tooltip.error')}\n${grouped.error.join('\n')}`);
       }
 
       if (grouped.warning.length > 0) {
-        sections.push(`Warning:\n${grouped.warning.join('\n')}`);
+        sections.push(`${this.$t('meta-kit.tooltip.warning')}\n${grouped.warning.join('\n')}`);
       }
 
       if (grouped.info.length > 0) {
@@ -512,7 +512,7 @@ export default {
 
     getInheritanceWarningReason(page, fieldType) {
       if (isInheritedFromLanguage(page, fieldType, this.siteSettings)) {
-        return 'Warning:\nInherited from the main language.';
+        return `Warning:\n${this.$t('meta-kit.reason.mainLanguage')}`;
       }
 
       if (
@@ -520,7 +520,7 @@ export default {
         !page.hasOgTitle &&
         isInheritedFromLanguage(page, 'metaTitle', this.siteSettings)
       ) {
-        return 'Warning:\nInherited from the main language.';
+        return `Warning:\n${this.$t('meta-kit.reason.mainLanguage')}`;
       }
 
       if (
@@ -528,14 +528,14 @@ export default {
         !page.hasOgDescription &&
         isInheritedFromLanguage(page, 'metaDescription', this.siteSettings)
       ) {
-        return 'Warning:\nInherited from the main language.';
+        return `Warning:\n${this.$t('meta-kit.reason.mainLanguage')}`;
       }
 
       return '';
     },
 
     getTitleTooltip(page, showContent = true) {
-      if (!page.title && !page.metaTitle) return 'No title';
+      if (!page.title && !page.metaTitle) return this.$t('meta-kit.noTitle');
       if (page.id === 'site') {
         return showContent ? (page.hasMetaTitle ? page.metaTitle : page.title) : '';
       }
@@ -559,12 +559,12 @@ export default {
       if (!ids?.length) return '';
 
       const titles = ids.map((id) => this.allPages.find((other) => other.id === id)?.title || id);
-      return `Warning:\nSame ${field === 'title' ? 'meta title' : 'meta description'} as: ${titles.join(', ')}`;
+      return `Warning:\n${this.$t(field === 'title' ? 'meta-kit.reason.duplicateTitle' : 'meta-kit.reason.duplicateDescription', { pages: titles.join(', ') })}`;
     },
 
     getDescriptionTooltip(page, showContent = true) {
       const text = getEffectiveDescription(page, 'meta', this.siteSettings);
-      if (!text) return 'No meta description';
+      if (!text) return this.$t('meta-kit.noMetaDescription');
 
       const source = getInheritanceSource(page, 'metaDescription', this.siteSettings);
       const base = this.tooltipText(text, source, showContent);
@@ -574,7 +574,7 @@ export default {
     },
 
     getOgTitleTooltip(page, showContent = true) {
-      if (!page.title && !page.ogTitle && !page.metaTitle) return 'No OG title';
+      if (!page.title && !page.ogTitle && !page.metaTitle) return this.$t('meta-kit.noOgTitle');
       if (page.id === 'site') {
         const source = getInheritanceSource(page, 'ogTitle', this.siteSettings);
         const content = getEffectiveTitle(page, 'og');
@@ -599,7 +599,7 @@ export default {
 
     getOgDescriptionTooltip(page, showContent = true) {
       const text = getEffectiveDescription(page, 'og', this.siteSettings);
-      if (!text) return 'No OG description';
+      if (!text) return this.$t('meta-kit.noOgDescription');
 
       const source = getInheritanceSource(page, 'ogDescription', this.siteSettings);
       const base = this.tooltipText(text, source, showContent);
@@ -666,28 +666,47 @@ export default {
     },
 
     getSlugTooltip(page) {
-      if (page.id === 'site') return 'Site root';
+      if (page.id === 'site') return this.$t('meta-kit.slug.siteRoot');
 
       const { slug, wordCount, length, numSlashes, cfg, issues } = getSlugAnalysis(page, this.validationSettings);
       const statusClass = this.getSlugStatusClass(page);
-      const status = statusClass === 'k-meta-kit-status-error' ? 'error'
-        : (statusClass === 'k-meta-kit-status-warning' ? 'warning' : 'ok');
+      const status = this.$t(statusClass === 'k-meta-kit-status-error' ? 'meta-kit.slug.status.error'
+        : (statusClass === 'k-meta-kit-status-warning' ? 'meta-kit.slug.status.warning' : 'meta-kit.slug.status.ok'));
+      const label = (key) => this.$t(`meta-kit.slug.${key.toLowerCase()}`);
+      const range = (rule) => `${rule.optimal.min}-${rule.optimal.max} / ${rule.warning.min}-${rule.warning.max}`;
 
       const reasons = issues.length
-        ? `\n\nWhy ${status}:\n` + issues
-          .map(i => i.severity === 'warning'
-            ? `${i.key} ${i.value} is outside optimal (${i.optimal}), but within warning (${i.warning}).`
-            : `${i.key} ${i.value} is outside warning (${i.warning}). Optimal is ${i.optimal}.`
-          ).join('\n')
+        ? `\n\n${this.$t('meta-kit.slug.why', { status })}\n` + issues
+          .map((issue) => this.$t(issue.severity === 'warning' ? 'meta-kit.slug.issue.warning' : 'meta-kit.slug.issue.error', {
+            key: label(issue.key),
+            value: issue.value,
+            optimal: issue.optimal,
+            warning: issue.warning
+          }))
+          .join('\n')
         : '';
 
-      return `Slug: ${slug}\n\nDepth: ${numSlashes}\nWords: ${wordCount}\nLength: ${length} characters\n\nRanges (optimal / warning):\n\nDepth: ${cfg.depth.optimal.min}-${cfg.depth.optimal.max} / ${cfg.depth.warning.min}-${cfg.depth.warning.max}\nWords: ${cfg.words.optimal.min}-${cfg.words.optimal.max} / ${cfg.words.warning.min}-${cfg.words.warning.max}\nLength: ${cfg.length.optimal.min}-${cfg.length.optimal.max} / ${cfg.length.warning.min}-${cfg.length.warning.max}\nAvg word length: ${cfg.wordLength.optimal.min}-${cfg.wordLength.optimal.max} / ${cfg.wordLength.warning.min}-${cfg.wordLength.warning.max}${reasons}`;
+      return [
+        `${this.$t('meta-kit.field.slug')}: ${slug}`,
+        '',
+        `${label('Depth')}: ${numSlashes}`,
+        `${label('Words')}: ${wordCount}`,
+        `${label('Length')}: ${this.$t('meta-kit.chars', { count: length })}`,
+        '',
+        this.$t('meta-kit.slug.ranges'),
+        '',
+        `${label('Depth')}: ${range(cfg.depth)}`,
+        `${label('Words')}: ${range(cfg.words)}`,
+        `${label('Length')}: ${range(cfg.length)}`,
+        `${this.$t('meta-kit.slug.wordlength')}: ${range(cfg.wordLength)}`
+      ].join('\n') + reasons;
     },
 
     // Status display helpers
     getStatusLabel(page) {
       if (!page.status) return '—';
-      return this.statusMappings[page.status]?.label ||
+      const labelKey = this.statusMappings[page.status]?.label;
+      return (labelKey && this.$t(labelKey)) ||
              page.status.charAt(0).toUpperCase() + page.status.slice(1);
     },
 
@@ -701,7 +720,7 @@ export default {
     },
 
     getRobotsTooltip(page) {
-      return page.robots || 'Robots directives not set';
+      return page.robots || this.$t('meta-kit.robots.notSet');
     }
   }
 };

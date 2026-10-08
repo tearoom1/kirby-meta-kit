@@ -1,9 +1,9 @@
 <template>
   <k-dialog ref="dialog" class="k-meta-kit-dialog k-meta-kit-suggestions-dialog" size="large">
-    <k-headline>Review Generated Metadata</k-headline>
+    <k-headline>{{ $t('meta-kit.suggestions.title') }}</k-headline>
     <k-text>
-      Nothing is saved yet. Edit or deselect suggestions, then save the ones you want to keep.
-      <template v-if="cancelled"><br>Generation was cancelled; only the finished suggestions are listed.</template>
+      {{ $t('meta-kit.suggestions.intro') }}
+      <template v-if="cancelled"><br>{{ $t('meta-kit.suggestions.cancelled') }}</template>
     </k-text>
 
     <ul v-if="suggestions.length" class="k-meta-kit-suggestions">
@@ -17,20 +17,20 @@
           <input v-model="suggestion.selected" type="checkbox" />
           <strong>{{ suggestion.pageTitle }}</strong>
           <span class="k-meta-kit-suggestion-field">{{ suggestion.label }}</span>
-          <span class="k-meta-kit-suggestion-count">{{ (suggestion.value || '').length }} chars</span>
+          <span class="k-meta-kit-suggestion-count">{{ $t('meta-kit.chars', { count: (suggestion.value || '').length }) }}</span>
         </label>
         <textarea
           v-model="suggestion.value"
           class="k-meta-kit-suggestion-text"
           :rows="suggestion.field.endsWith('Title') ? 1 : 3"
           :disabled="!suggestion.selected"
-          :aria-label="`${suggestion.label} for ${suggestion.pageTitle}`"
+          :aria-label="$t('meta-kit.suggestions.field', { field: suggestion.label, page: suggestion.pageTitle })"
         ></textarea>
       </li>
     </ul>
 
     <k-box v-if="errors.length" theme="negative" class="k-meta-kit-suggestions-errors">
-      <strong>{{ errors.length }} field(s) could not be generated:</strong>
+      <strong>{{ $t('meta-kit.suggestions.errors', { count: errors.length }) }}</strong>
       <ul>
         <li v-for="error in errors" :key="error.pageId + ':' + error.field">
           {{ error.pageTitle }} – {{ error.label }}: {{ error.message }}
@@ -40,14 +40,14 @@
 
     <template #footer>
       <k-button-group class="k-meta-kit-bulk-buttons">
-        <k-button @click="close()">Discard</k-button>
+        <k-button @click="close()">{{ $t('meta-kit.suggestions.discard') }}</k-button>
         <k-button
           icon="check"
           theme="positive"
           :disabled="selectedCount === 0"
           @click="save"
         >
-          Save selected ({{ selectedCount }})
+          {{ $t('meta-kit.suggestions.save', { count: selectedCount }) }}
         </k-button>
       </k-button-group>
     </template>

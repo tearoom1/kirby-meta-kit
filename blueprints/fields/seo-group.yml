@@ -1,67 +1,75 @@
 type: group
-label: SEO
+label: meta-kit.bp.meta-group.label
 fields:
   slugInfo:
-    label: Slug Validation
+    label: meta-kit.bp.meta-group.slugInfo.label
     type: mk-slug-info
 
   metaTitle:
-    label: Meta Title
+    label: meta-kit.bp.meta-group.metaTitle.label
     type: mk-title
     fieldType: meta
-    help: Title for search engines. Defaults to the page title. See also the site settings for additional options.
+    help: meta-kit.bp.meta-group.metaTitle.help
 
   metaDescription:
-    label: Meta Description
+    label: meta-kit.bp.meta-group.metaDescription.label
     type: mk-description
     fieldType: meta
     maxlength: 180
-    help: Description for search engines. Include primary keyword and a call-to-action.
+    help: meta-kit.bp.meta-group.metaDescription.help
 
   metaAuthor:
-    label: Author
+    label: meta-kit.bp.meta-group.metaAuthor.label
     type: text
-    help: Author of the page. This field has no influence on SEO.
+    help: meta-kit.bp.meta-group.metaAuthor.help
     width: 1/2
 
   canonicalUrl:
-    label: Canonical URL
+    label: meta-kit.bp.meta-group.canonicalUrl.label
     type: url
-    help: Custom canonical URL
+    help: meta-kit.bp.meta-group.canonicalUrl.help
     width: 1/2
 
   robots:
-    label: Set a robots directive
+    label: meta-kit.bp.meta-group.robots.label
     type: select
     options:
-      - { value: 'index, follow', text: 'Index, Follow' }
-      - { value: 'noindex, follow', text: 'No Index, Follow' }
-      - { value: 'index, nofollow', text: 'Index, No Follow' }
-      - { value: 'noindex, nofollow', text: 'No Index, No Follow' }
+      - value: 'index, follow'
+        text:
+          '*': meta-kit.bp.meta-group.option.index-follow
+      - value: 'noindex, follow'
+        text:
+          '*': meta-kit.bp.meta-group.option.no-index-follow
+      - value: 'index, nofollow'
+        text:
+          '*': meta-kit.bp.meta-group.option.index-no-follow
+      - value: 'noindex, nofollow'
+        text:
+          '*': meta-kit.bp.meta-group.option.no-index-no-follow
     width: 1/2
     translate: false
 
   seoSocialSeparator:
     label:
     type: info
-    text: Social Media Settings
+    text: meta-kit.bp.meta-group.seoSocialSeparator.text
     theme: positive
 
   ogTitle:
-    label: Social Media Title
+    label: meta-kit.bp.meta-group.ogTitle.label
     type: mk-title
     fieldType: og
-    help: Title for social media shares. Uses the meta title if empty.
+    help: meta-kit.bp.meta-group.ogTitle.help
 
   ogDescription:
-    label: Social Media Description
+    label: meta-kit.bp.meta-group.ogDescription.label
     type: mk-description
     fieldType: og
     maxlength: 310
-    help: Description for social media. Uses the meta description if empty.
+    help: meta-kit.bp.meta-group.ogDescription.help
 
   ogImage:
-    label: Social Media Image
+    label: meta-kit.bp.meta-group.ogImage.label
     type: files
     max: 1
     layout: cards
@@ -70,27 +78,27 @@ fields:
       cover: true
     size: medium
     query: page.images
-    help: "Recommended: 1200×630px for Facebook/WhatsApp. Twitter prefers 2:1 (800×400px), but 1200×630 works well for both."
+    help: meta-kit.bp.meta-group.ogImage.help
 
   sitemapSeparator:
     label:
     type: info
-    text: Sitemap Settings
+    text: meta-kit.bp.sitemap.name
     theme: positive
 
   sitemapPriority:
-    label: Sitemap Priority
+    label: meta-kit.bp.seo-group.sitemapPriority.label
     type: number
     min: 0.0
     max: 1.0
     step: 0.1
     width: 1/2
-    placeholder: Default
-    help: Override default priority for this page (0.0 - 1.0). Leave empty to use default.
+    placeholder: meta-kit.bp.seo-group.sitemapPriority.placeholder
+    help: meta-kit.bp.seo-group.sitemapPriority.help
     translate: false
 
   sitemapChangefreq:
-    label: Sitemap Change Frequency
+    label: meta-kit.bp.seo-group.sitemapChangefreq.label
     type: select
     options:
       '': Default
@@ -102,5 +110,5 @@ fields:
       yearly: Yearly
       never: Never
     width: 1/2
-    help: Override default change frequency for this page. Leave empty to use default.
+    help: meta-kit.bp.seo-group.sitemapChangefreq.help
     translate: false

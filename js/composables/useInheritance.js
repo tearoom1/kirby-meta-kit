@@ -3,6 +3,8 @@
  * Centralizes inheritance checking for meta fields
  */
 
+import { t } from './i18n.js';
+
 /**
  * Check if title is inherited (from language or page title)
  * @param {Object} page - Page object
@@ -179,6 +181,14 @@ export function isInheritedFromLanguage(page, fieldType, siteSettings = {}) {
  * @param {number} maxLength - Maximum content length before truncation
  * @returns {string}
  */
+// Internal source ids → translation keys
+const SOURCE_KEYS = {
+  'site': 'source.site',
+  'page title': 'source.pageTitle',
+  'meta title': 'source.metaTitle',
+  'meta description': 'source.metaDescription'
+};
+
 export function buildTooltipText(content, inheritanceSource, showContent = true, maxLength = 200) {
   let text = content || '';
   const knownFallbackSources = new Set(['site', 'page title', 'meta title', 'meta description']);
@@ -190,13 +200,13 @@ export function buildTooltipText(content, inheritanceSource, showContent = true,
 
   if (showContent) {
     if (shouldShowSource) {
-      return `${text}\n\nSource: ${inheritanceSource}`;
+      return `${text}\n\n${t('source', { source: t(SOURCE_KEYS[inheritanceSource]) })}`;
     }
 
     return text;
   }
 
-  return shouldShowSource ? `Source: ${inheritanceSource}` : '';
+  return shouldShowSource ? t('source', { source: t(SOURCE_KEYS[inheritanceSource]) }) : '';
 }
 
 export default {

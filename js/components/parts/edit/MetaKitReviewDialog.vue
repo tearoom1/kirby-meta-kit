@@ -4,7 +4,7 @@
 
     <div v-if="isLoading" class="k-meta-kit-loading">
       <k-icon class="k-meta-kit-spinner" type="loader"/>
-      <span>Reviewing content…</span>
+      <span>{{ $t('meta-kit.review.loading') }}</span>
     </div>
 
     <div v-else-if="error" class="k-meta-kit-review-div">
@@ -25,22 +25,22 @@
         </div>
         <div v-if="reviewData.review?.verdict || reviewData.review?.searchIntent" class="k-meta-kit-review-summary-meta">
           <div v-if="reviewData.review?.verdict" class="k-meta-kit-review-meta-row">
-            <span class="k-meta-kit-review-meta-label">Verdict</span>
+            <span class="k-meta-kit-review-meta-label">{{ $t('meta-kit.review.verdict') }}</span>
             <span>{{ reviewData.review.verdict }}</span>
           </div>
           <div v-if="reviewData.review?.searchIntent" class="k-meta-kit-review-meta-row">
-            <span class="k-meta-kit-review-meta-label">Search intent</span>
+            <span class="k-meta-kit-review-meta-label">{{ $t('meta-kit.review.searchIntent') }}</span>
             <span>{{ reviewData.review.searchIntent }}</span>
           </div>
         </div>
         <div v-if="reviewData.review?.needsRewrite" class="k-meta-kit-review-warning">
-          Rewrite recommended before targeting SEO keywords
+          {{ $t('meta-kit.review.rewrite') }}
         </div>
       </div>
 
       <!-- Keyphrases -->
       <div v-if="reviewData.review?.keyphrases?.length" class="k-meta-kit-review-block">
-        <h3 class="k-meta-kit-review-block-title">Suggested keyphrases</h3>
+        <h3 class="k-meta-kit-review-block-title">{{ $t('meta-kit.review.keyphrases') }}</h3>
         <div class="k-meta-kit-review-keyphrases">
           <div
             v-for="(item, index) in reviewData.review.keyphrases"
@@ -63,25 +63,25 @@
       <!-- Strengths + Problems side by side -->
       <div class="k-meta-kit-review-grid">
         <div class="k-meta-kit-review-block k-meta-kit-review-block--strengths">
-          <h3 class="k-meta-kit-review-block-title">What works</h3>
+          <h3 class="k-meta-kit-review-block-title">{{ $t('meta-kit.review.strengths') }}</h3>
           <ul v-if="reviewData.review?.strengths?.length" class="k-meta-kit-review-list">
             <li v-for="(item, index) in reviewData.review.strengths" :key="`strength-${index}`">{{ item }}</li>
           </ul>
-          <p v-else class="k-meta-kit-review-empty">No strengths returned.</p>
+          <p v-else class="k-meta-kit-review-empty">{{ $t('meta-kit.review.noStrengths') }}</p>
         </div>
 
         <div class="k-meta-kit-review-block k-meta-kit-review-block--problems">
-          <h3 class="k-meta-kit-review-block-title">Content problems</h3>
+          <h3 class="k-meta-kit-review-block-title">{{ $t('meta-kit.review.problems') }}</h3>
           <ul v-if="reviewData.review?.contentProblems?.length" class="k-meta-kit-review-list">
             <li v-for="(item, index) in reviewData.review.contentProblems" :key="`problem-${index}`">{{ item }}</li>
           </ul>
-          <p v-else class="k-meta-kit-review-empty">No major content problems returned.</p>
+          <p v-else class="k-meta-kit-review-empty">{{ $t('meta-kit.review.noProblems') }}</p>
         </div>
       </div>
 
       <!-- Improvements – full width -->
       <div v-if="reviewData.review?.improvements?.length" class="k-meta-kit-review-block k-meta-kit-review-block--improvements">
-        <h3 class="k-meta-kit-review-block-title">What to improve</h3>
+        <h3 class="k-meta-kit-review-block-title">{{ $t('meta-kit.review.improvements') }}</h3>
         <ol class="k-meta-kit-review-list k-meta-kit-review-list--ordered">
           <li v-for="(item, index) in reviewData.review.improvements" :key="`improvement-${index}`">{{ item }}</li>
         </ol>
@@ -89,7 +89,7 @@
 
       <!-- Metadata fit -->
       <div v-if="reviewData.review?.metadataFit?.length" class="k-meta-kit-review-block k-meta-kit-review-block--metadata">
-        <h3 class="k-meta-kit-review-block-title">Metadata fit</h3>
+        <h3 class="k-meta-kit-review-block-title">{{ $t('meta-kit.review.metadataFit') }}</h3>
         <ul class="k-meta-kit-review-list">
           <li v-for="(item, index) in reviewData.review.metadataFit" :key="`metadata-${index}`">{{ item }}</li>
         </ul>
@@ -97,7 +97,7 @@
 
       <!-- Next steps -->
       <div v-if="reviewData.review?.nextSteps?.length" class="k-meta-kit-review-block k-meta-kit-review-block--nextsteps">
-        <h3 class="k-meta-kit-review-block-title">Next steps</h3>
+        <h3 class="k-meta-kit-review-block-title">{{ $t('meta-kit.review.nextSteps') }}</h3>
         <ol class="k-meta-kit-review-list k-meta-kit-review-list--ordered">
           <li v-for="(item, index) in reviewData.review.nextSteps" :key="`next-${index}`">{{ item }}</li>
         </ol>
@@ -111,13 +111,13 @@
             :href="reviewData.page.panelUrl"
             class="k-link k-meta-kit-dialog-panel-link"
           >
-            Edit in Panel
+            {{ $t('meta-kit.editInPanel') }}
           </a>
-          <button class="k-link k-meta-kit-dialog-panel-link" @click="print">Print</button>
+          <button class="k-link k-meta-kit-dialog-panel-link" @click="print">{{ $t('meta-kit.review.print') }}</button>
         </div>
         <div class="k-meta-kit-dialog-footer-meta"></div>
         <div class="k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-end">
-          <k-button @click="close">Close</k-button>
+          <k-button @click="close">{{ $t('meta-kit.close') }}</k-button>
         </div>
       </div>
     </div>
@@ -137,16 +137,16 @@ export default {
       reviewData: null,
       isLoading: false,
       error: '',
-      headline: 'AI Content Review'
+      headline: ''
     };
   },
   computed: {
     fallbackSummary() {
-      return 'Something went wrong.';
+      return this.$t('meta-kit.review.failedGeneric');
     }
   },
   methods: {
-    async openPage(pageId, title = 'Page Content Review') {
+    async openPage(pageId, title = this.$t('meta-kit.review.title')) {
       await this.fetchReview('meta-kit/review-page', { pageId }, title);
     },
     async fetchReview(route, payload, title) {
@@ -161,10 +161,10 @@ export default {
         if (response.status === 'success') {
           this.reviewData = response.data;
         } else {
-          this.error = response.message || 'Failed to load review.';
+          this.error = response.message || this.$t('meta-kit.review.failed');
         }
       } catch (error) {
-        this.error = error?.message || 'Failed to load review.';
+        this.error = error?.message || this.$t('meta-kit.review.failed');
       } finally {
         this.isLoading = false;
       }
@@ -219,15 +219,15 @@ export default {
       // Summary card
       const qc = qualityColors[(review.overallQuality || '').toLowerCase()];
       let meta = '';
-      if (review.verdict) meta += `<div style="display:flex;gap:.5rem;font-size:.8125rem;line-height:1.45"><span style="flex-shrink:0;width:6.5rem;color:#6b7280;font-weight:500">Verdict</span><span>${esc(review.verdict)}</span></div>`;
-      if (review.searchIntent) meta += `<div style="display:flex;gap:.5rem;font-size:.8125rem;line-height:1.45"><span style="flex-shrink:0;width:6.5rem;color:#6b7280;font-weight:500">Search intent</span><span>${esc(review.searchIntent)}</span></div>`;
+      if (review.verdict) meta += `<div style="display:flex;gap:.5rem;font-size:.8125rem;line-height:1.45"><span style="flex-shrink:0;width:6.5rem;color:#6b7280;font-weight:500">${esc(this.$t('meta-kit.review.verdict'))}</span><span>${esc(review.verdict)}</span></div>`;
+      if (review.searchIntent) meta += `<div style="display:flex;gap:.5rem;font-size:.8125rem;line-height:1.45"><span style="flex-shrink:0;width:6.5rem;color:#6b7280;font-weight:500">${esc(this.$t('meta-kit.review.searchIntent'))}</span><span>${esc(review.searchIntent)}</span></div>`;
       sections += `<div style="border:1px solid #d1d5db;border-radius:4px;overflow:hidden;break-inside:avoid">
         <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.875rem 1rem">
           <p style="flex:1;margin:0;font-weight:500;line-height:1.5">${esc(review.summary || this.fallbackSummary)}</p>
           ${review.overallQuality ? badge(review.overallQuality, qc) : ''}
         </div>
         ${meta ? `<div style="border-top:1px solid #d1d5db;padding:.625rem 1rem;display:flex;flex-direction:column;gap:.375rem">${meta}</div>` : ''}
-        ${review.needsRewrite ? `<div style="border-top:1px solid #fed7aa;background:#ffedd5;color:#9a3412;padding:.5rem 1rem;font-size:.8125rem;font-weight:600">Rewrite recommended before targeting SEO keywords</div>` : ''}
+        ${review.needsRewrite ? `<div style="border-top:1px solid #fed7aa;background:#ffedd5;color:#9a3412;padding:.5rem 1rem;font-size:.8125rem;font-weight:600">${esc(this.$t('meta-kit.review.rewrite'))}</div>` : ''}
       </div>`;
 
       // Keyphrases
@@ -239,21 +239,21 @@ export default {
             <p style="margin:.25rem 0 0;font-size:.8125rem;color:#6b7280;line-height:1.45">${esc(item.reason)}</p>
           </div>`;
         }).join('');
-        sections += block('Suggested keyphrases', '#9ca3af', phrases);
+        sections += block(this.$t('meta-kit.review.keyphrases'), '#9ca3af', phrases);
       }
 
       // Strengths + Problems
-      const strengthsHTML = review.strengths?.length ? ul(review.strengths) : '<p style="color:#6b7280;font-size:.875rem;margin:0">No strengths returned.</p>';
-      const problemsHTML = review.contentProblems?.length ? ul(review.contentProblems) : '<p style="color:#6b7280;font-size:.875rem;margin:0">No content problems returned.</p>';
+      const strengthsHTML = review.strengths?.length ? ul(review.strengths) : `<p style="color:#6b7280;font-size:.875rem;margin:0">${esc(this.$t('meta-kit.review.noStrengths'))}</p>`;
+      const problemsHTML = review.contentProblems?.length ? ul(review.contentProblems) : `<p style="color:#6b7280;font-size:.875rem;margin:0">${esc(this.$t('meta-kit.review.noProblems'))}</p>`;
       sections += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem">
-        ${block('What works', '#16a34a', strengthsHTML)}
-        ${block('Content problems', '#dc2626', problemsHTML)}
+        ${block(this.$t('meta-kit.review.strengths'), '#16a34a', strengthsHTML)}
+        ${block(this.$t('meta-kit.review.problems'), '#dc2626', problemsHTML)}
       </div>`;
 
-      if (review.improvements?.length) sections += block('What to improve', '#ea580c', ol(review.improvements));
-      if (review.metadataFit?.length)  sections += block('Metadata fit', '#9ca3af', ul(review.metadataFit));
+      if (review.improvements?.length) sections += block(this.$t('meta-kit.review.improvements'), '#ea580c', ol(review.improvements));
+      if (review.metadataFit?.length)  sections += block(this.$t('meta-kit.review.metadataFit'), '#9ca3af', ul(review.metadataFit));
 
-      if (review.nextSteps?.length) sections += block('Next steps', '#2563eb', ol(review.nextSteps));
+      if (review.nextSteps?.length) sections += block(this.$t('meta-kit.review.nextSteps'), '#2563eb', ol(review.nextSteps));
 
       return `<!DOCTYPE html>
 <html lang="en">

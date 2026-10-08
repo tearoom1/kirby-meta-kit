@@ -6,7 +6,7 @@
         :disabled="selectedCount === 0"
         @click="$emit('edit-selected')"
       >
-        Edit Selected<span v-if="selectedCount > 0"> ({{ selectedCount }})</span>
+        {{ $t('meta-kit.actions.edit') }}<span v-if="selectedCount > 0"> ({{ selectedCount }})</span>
       </k-button>
       <k-button
         v-if="aiEnabled"
@@ -16,9 +16,9 @@
         :progress="isGenerating"
         @click="$emit('generate-missing')"
       >
-        Generate Missing<span v-if="selectedCount > 0"> ({{ selectedCount }})</span>
+        {{ $t('meta-kit.actions.generate') }}<span v-if="selectedCount > 0"> ({{ selectedCount }})</span>
       </k-button>
-      <k-button icon="refresh" @click="$emit('refresh')"></k-button>
+      <k-button icon="refresh" :title="$t('meta-kit.actions.refresh')" @click="$emit('refresh')"></k-button>
     </k-button-group>
 
     <slot name="filters"></slot>

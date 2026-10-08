@@ -11,7 +11,7 @@
         @click="$emit('generate')"
         :title="buttonSize === 'xs' ? 'AI Generate' : undefined"
       >
-        <template v-if="buttonSize !== 'xs'">AI Generate</template>
+        <template v-if="buttonSize !== 'xs'">{{ $t('meta-kit.generate.ai') }}</template>
       </k-button>
     </div>
     <k-input
@@ -34,7 +34,7 @@
     </div>
     <div v-if="isGenerating" class="k-meta-kit-dialog-generating">
       <k-icon class="k-meta-kit-spinner" type="loader"/>
-      <span>Generating...</span>
+      <span>{{ $t('meta-kit.generate.generating') }}</span>
     </div>
   </div>
 </template>

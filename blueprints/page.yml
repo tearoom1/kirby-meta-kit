@@ -1,4 +1,4 @@
-label: SEO
+label: meta-kit.bp.page.label
 icon: search
 columns:
 
@@ -16,4 +16,4 @@ columns:
     sections:
       seoPreview:
         type: seo-preview
-        label: SEO Preview
+        label: meta-kit.bp.page.preview.seoPreview.label

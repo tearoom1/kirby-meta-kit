@@ -1,7 +1,7 @@
 <template>
   <k-dialog ref="dialog" class="k-meta-kit-dialog" size="medium">
-    <k-headline>Generate Missing Metadata</k-headline>
-    <k-text>Select which fields to generate for {{ selectedCount }} selected page(s):</k-text>
+    <k-headline>{{ $t('meta-kit.generate.title') }}</k-headline>
+    <k-text>{{ $t('meta-kit.generate.intro', { count: selectedCount }) }}</k-text>
 
     <div class="k-meta-kit-bulk-options">
       <label class="k-meta-kit-bulk-option">
@@ -10,8 +10,8 @@
           v-model="options.title"
         />
         <div class="k-meta-kit-bulk-option-content">
-          <strong>Meta Title</strong>
-          <span>Generate meta titles for search engines (pages without one)</span>
+          <strong>{{ $t('meta-kit.field.metaTitle') }}</strong>
+          <span>{{ $t('meta-kit.generate.metaTitle.help') }}</span>
         </div>
       </label>
       <label class="k-meta-kit-bulk-option">
@@ -20,8 +20,8 @@
           v-model="options.description"
         />
         <div class="k-meta-kit-bulk-option-content">
-          <strong>Meta Description</strong>
-          <span>Generate meta descriptions for search engines (pages without one)</span>
+          <strong>{{ $t('meta-kit.field.metaDescription') }}</strong>
+          <span>{{ $t('meta-kit.generate.metaDescription.help') }}</span>
         </div>
       </label>
       <label class="k-meta-kit-bulk-option">
@@ -30,8 +30,8 @@
           v-model="options.ogTitle"
         />
         <div class="k-meta-kit-bulk-option-content">
-          <strong>OG Title</strong>
-          <span>Generate social media titles (pages without one)</span>
+          <strong>{{ $t('meta-kit.field.ogTitle') }}</strong>
+          <span>{{ $t('meta-kit.generate.ogTitle.help') }}</span>
         </div>
       </label>
       <label class="k-meta-kit-bulk-option">
@@ -40,8 +40,8 @@
           v-model="options.ogDescription"
         />
         <div class="k-meta-kit-bulk-option-content">
-          <strong>OG Description</strong>
-          <span>Generate social media descriptions (pages without one)</span>
+          <strong>{{ $t('meta-kit.field.ogDescription') }}</strong>
+          <span>{{ $t('meta-kit.generate.ogDescription.help') }}</span>
         </div>
       </label>
     </div>
@@ -52,21 +52,21 @@
         v-model="options.review"
       />
       <div class="k-meta-kit-bulk-option-content">
-        <strong>Review before saving</strong>
-        <span>Show the generated texts first and save only the ones you keep</span>
+        <strong>{{ $t('meta-kit.generate.review') }}</strong>
+        <span>{{ $t('meta-kit.generate.review.help') }}</span>
       </div>
     </label>
 
     <template #footer>
       <k-button-group class="k-meta-kit-bulk-buttons">
-        <k-button @click="close()">Cancel</k-button>
+        <k-button @click="close()">{{ $t('cancel') }}</k-button>
         <k-button
           icon="sparkling"
           class="k-meta-kit-button-ai-generate"
           :disabled="!hasAnySelected"
           @click="generate"
         >
-          Generate
+          {{ $t('meta-kit.generate.button') }}
         </k-button>
       </k-button-group>
     </template>

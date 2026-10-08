@@ -11,7 +11,7 @@ return function () {
         if (!TearoomOne\MetaKitController::canAccess()) {
             return \Kirby\Http\Response::json([
                 'status' => 'error',
-                'message' => 'Forbidden'
+                'message' => TearoomOne\Texts::get('error.forbidden')
             ], 403);
         }
 
@@ -33,7 +33,7 @@ return function () {
         if (!TearoomOne\MetaKit::isReviewEnabled()) {
             return [
                 'status' => 'error',
-                'message' => 'AI review is disabled. Enable it in the plugin options and make sure AI is configured.'
+                'message' => TearoomOne\Texts::get('error.reviewDisabled')
             ];
         }
 
