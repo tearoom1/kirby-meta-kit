@@ -1,3 +1,10 @@
+## [3.1.1](https://github.com/tearoom1/kirby-meta-kit/compare/v3.1.0...v3.1.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* toolbar groups Display with sort and the search with Filters ([96787bf](https://github.com/tearoom1/kirby-meta-kit/commit/96787bff0b28ef26c981073abdf1161e0e331616))
+
 ## [3.1.0](https://github.com/tearoom1/kirby-meta-kit/compare/v3.0.0...v3.1.0) (2026-10-08)
 
 
@@ -71,17 +78,4 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
 ### Bug Fixes
 
 * correct grammar in AI settings info text ([cfacaa0](https://github.com/tearoom1/kirby-meta-kit/commit/cfacaa038470de164efcc1254d98ecd0e10cc2d1))
-
-## [2.2.0](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.6...v2.2.0) (2026-10-08)
-
-
-### Features
-
-* support Mistral and other OpenAI-compatible AI providers ([2b209cb](https://github.com/tearoom1/kirby-meta-kit/commit/2b209cb1d91e40d76c0dd6df4c5b264e065309fc))
-
-
-### Bug Fixes
-
-* let AI settings from the panel take effect ([8cd5309](https://github.com/tearoom1/kirby-meta-kit/commit/8cd5309fb4fdb2902a7087a312c3e9f396779057))
-* send 'site' as pageId from site-level title and description fields ([5151ac5](https://github.com/tearoom1/kirby-meta-kit/commit/5151ac5b2ff1c402dfcf0fa66b2571a495b7d8a1))
 
