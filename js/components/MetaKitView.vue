@@ -1,5 +1,5 @@
 <template>
-  <k-panel-inside class="k-meta-kit-view">
+  <k-panel-inside class="k-meta-kit-view" :class="{ 'k-mk2': isV2 }">
     <!-- Top Bar: Language Switcher + Sponsor (right-aligned) -->
     <div class="k-meta-kit-topbar">
       <div
@@ -103,7 +103,9 @@
 
     <!-- Pages Table -->
     <meta-kit-table-v2
-      v-if="isV2 && !showPreviewInTable"
+      v-if="isV2"
+      :show-preview="showPreviewInTable"
+      :preview-mode="previewMode"
       :pages="paginatedPages"
       :start-index="(currentPage - 1) * pageSize"
       :selected-pages="selectedPages"
@@ -253,6 +255,9 @@
         <div v-if="loadingProgress" class="k-meta-kit-loading-progress">
           {{ loadingProgress }}
         </div>
+        <div v-if="isV2 && progressTotal" class="k-mk2-progress" aria-hidden="true">
+          <span :style="{ width: (progressDone / progressTotal) * 100 + '%' }"></span>
+        </div>
         <k-button
           v-if="canCancelGeneration"
           icon="cancel"
@@ -384,7 +389,9 @@ export default {
       loadingProgress: '',
       loadingLabel: '',
       canCancelGeneration: false,
-      cancelRequested: false
+      cancelRequested: false,
+      progressDone: 0,
+      progressTotal: 0
     };
   },
   computed: {
@@ -670,6 +677,8 @@ export default {
         result = await runGeneration(jobs, {
           generate: (job) => generateFieldSuggestion(this.$api, job, this.language || null),
           onProgress: ({ done, total, job }) => {
+            this.progressDone = done;
+            this.progressTotal = total;
             this.loadingProgress = job
               ? this.$t('meta-kit.generate.progress', { current: done + 1, total, page: job.pageTitle, field: job.label })
               : '';
@@ -680,6 +689,7 @@ export default {
         this.isGeneratingAll = false;
         this.canCancelGeneration = false;
         this.loadingProgress = '';
+        this.progressTotal = 0;
       }
 
       if (options.review && result.suggestions.length > 0) {
