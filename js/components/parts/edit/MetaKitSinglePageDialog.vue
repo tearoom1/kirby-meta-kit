@@ -1,5 +1,5 @@
 <template>
-  <k-dialog :class="{ 'k-mk2-dialog': variant === 'v2' }" ref="dialog" size="large" class="k-meta-kit-dialog" :cancel-button="false"  :submit-button="false" @submit.prevent="save">
+  <k-dialog ref="dialog" size="large" class="k-mk2-dialog k-meta-kit-dialog" :cancel-button="false"  :submit-button="false" @submit.prevent="save">
     <k-headline v-if="page">{{ $t('meta-kit.edit.title', { page: page.title }) }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -11,7 +11,6 @@
       <!-- Meta Title -->
       <div class="k-meta-kit-single-field">
         <meta-kit-title-field
-            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
           :label="$t('meta-kit.field.metaTitle')"
@@ -31,7 +30,6 @@
       <!-- Meta Description -->
       <div class="k-meta-kit-single-field">
         <meta-kit-description-field
-            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
           :label="$t('meta-kit.field.metaDescription')"
@@ -50,7 +48,6 @@
       <!-- OG Title -->
       <div v-if="!isSitePage" class="k-meta-kit-single-field">
         <meta-kit-title-field
-            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
           :label="$t('meta-kit.field.ogTitle')"
@@ -72,7 +69,6 @@
       <!-- OG Description -->
       <div v-if="!isSitePage" class="k-meta-kit-single-field">
         <meta-kit-description-field
-            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
           :label="$t('meta-kit.field.ogDescription')"
@@ -147,11 +143,6 @@ export default {
     validationSettings: {
       type: Object,
       default: () => ({})
-    },
-    // Temporary design comparison
-    variant: {
-      type: String,
-      default: 'v1'
     },
     api: {
       type: Object,

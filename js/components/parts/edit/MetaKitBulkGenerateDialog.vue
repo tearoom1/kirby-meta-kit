@@ -1,7 +1,7 @@
 <template>
-  <k-dialog :class="{ 'k-mk2-dialog': variant === 'v2' }" ref="dialog" class="k-meta-kit-dialog" size="medium">
+  <k-dialog ref="dialog" class="k-mk2-dialog k-meta-kit-dialog" size="medium">
     <k-headline>{{ $t('meta-kit.generate.title') }}</k-headline>
-    <k-text>{{ $t(variant === 'v2' ? 'meta-kit.v2.generate.intro' : 'meta-kit.generate.intro', { count: selectedCount }) }}</k-text>
+    <k-text>{{ $t('meta-kit.v2.generate.intro', { count: selectedCount }) }}</k-text>
 
     <div class="k-meta-kit-bulk-options">
       <label class="k-meta-kit-bulk-option">
@@ -76,11 +76,6 @@
 <script>
 export default {
   props: {
-    // Temporary design comparison
-    variant: {
-      type: String,
-      default: 'v1'
-    },
     selectedCount: {
       type: Number,
       default: 0

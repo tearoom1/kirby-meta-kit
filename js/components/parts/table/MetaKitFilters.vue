@@ -35,7 +35,7 @@
       </select>
     </div>
 
-    <div v-if="showInheritance" class="k-meta-kit-view-select k-meta-kit-inheritance-select">
+    <div class="k-meta-kit-view-select k-meta-kit-inheritance-select">
       <label class="k-meta-kit-view-select-label" for="k-meta-kit-inheritance-mode">{{ $t('meta-kit.inheritance') }}</label>
       <select
         id="k-meta-kit-inheritance-mode"
@@ -276,15 +276,11 @@ export default {
       type: String,
       default: 'default'
     },
-    // V2: how inherited values appear in the table (none | dimmed | marked)
+    // How inherited values appear in the table (none | dimmed | marked)
     inheritance: {
       type: String,
       default: 'dimmed',
       validator: value => ['none', 'dimmed', 'marked'].includes(value)
-    },
-    showInheritance: {
-      type: Boolean,
-      default: false
     }
   },
   data() {

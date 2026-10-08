@@ -600,30 +600,34 @@ When disabled:
 
 ### Meta Kit Area
 
-Access via the main menu (wand icon):
+Access via the main menu (wand icon).
 
-#### Dashboard
-- **Action-Focused Stats**: See which areas need review or fixes first
-- **Duplicates**: Pages whose own meta title or description is the same as another page's (stats card, "Dupl." filter, and the table tooltip names the other pages)
-- **Page Overview**: List all pages with validation and inheritance status
-- **Quick Actions**: Bulk edit, bulk generate, filter, search, and refresh
-- **Bulk Generation**: Runs page by page with progress and a cancel button; generated texts are shown for review (edit, deselect) before anything is saved
+#### Overview tiles
+- One tile per area: slug, meta title, meta description, OG image, duplicates, noindex pages
+- Each tile shows how many pages are open, split into **fix** (red) and **review** (orange); areas with nothing open are listed as "in order"
+- Click a tile to filter the table to that area, click again to clear the filter
+- **Duplicates**: pages whose own meta title or description is the same as another page's; the tooltip in the table names the other pages
 
-#### Bulk Editor
-- **Table View**: See multiple pages at once in count, meta-content, or OG-content mode
-- **Focused Editing**: Edit a single page or multiple selected pages in dedicated dialogs
-- **AI Generation**: Generate button for each field
-- **Character Counters**: Real-time validation with color indicators
-- **Filter & Search**: Combine field filters with state filters like good, warning, and fix
-- **Batch Operations**: Apply changes to selected pages
+#### Pages table
+- **Count view** shows the length of every field; **Meta content** and **OG content** show the texts themselves
+- Only problems get a dot: red for fix, orange for review, nothing when the value is fine
+- **Inherited values are dimmed**. The *Inherited* switch decides how they appear: hidden (a dash, so you see what the page really sets), dimmed, or dimmed with the source written beneath (Title, Meta, Site, or the main language)
+- Hover any value for the full text, a length meter with the optimal range, and where an inherited value comes from
+- Slugs show their parent path dimmed; the tooltip lists depth, word count and length against the configured ranges
+- **Filters** by state, field, status and complete metadata; a text search; and sorting by attention, name, level, status or template
+- **Edit** and **Generate Missing** act on the selected pages, or on all filtered pages when nothing is selected. The button says which: "Edit all (75)", "Edit filtered (12)" or "Edit 3 selected"
+- **Bulk generation** runs page by page with progress and a cancel button; generated texts are shown for review (edit, deselect) before anything is saved
+
+#### Dialogs
+- **Single page** and **bulk edit** dialogs with a length meter under every field and an AI button per field
+- **Content review** (opt-in): an AI verdict with keyphrases, strengths, problems and next steps, printable
 
 #### Features
 - **Panel Languages**: English and German, following each user's panel language. Texts live in `translations/en.json` and `translations/de.json`; another language is one more JSON file with the same keys (registered in `index.php`)
-- **Live Validation**: Green/orange/red indicators as you type
-- **Template Awareness**: Different validation for different page types
-- **Language Support**: Works with multilingual sites
-- **Inheritance Display**: See when values come from site defaults, the main language, or other fallbacks
-- **Quick Navigation**: Jump to page editor from table
+- **Template Awareness**: Different validation ranges for different page types
+- **Language Support**: Works with multilingual sites, with a switch for the content language
+- **Dark mode**: follows the Panel theme
+- **Quick Navigation**: Jump to the page editor from the table
 
 ### Page Editor
 

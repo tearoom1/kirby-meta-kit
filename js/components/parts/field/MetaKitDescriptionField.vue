@@ -23,19 +23,9 @@
       :buttons="buttons"
     />
     <meta-kit-length-meter
-      v-if="variant === 'v2'"
       :length="(value || '').length"
       :ranges="ranges"
     />
-    <div v-else class="k-meta-kit-dialog-field-meta">
-      <span>
-        <span v-if="value"
-              class="k-meta-kit-field-length"
-              :class="statusClass">
-          {{ $t('meta-kit.chars', { count: value.length }) }}
-        </span>
-      </span>
-    </div>
     <div v-if="isGenerating" class="k-meta-kit-dialog-generating">
       <k-icon class="k-meta-kit-spinner" type="loader"/>
       <span>{{ $t('meta-kit.generate.generating') }}</span>
@@ -44,8 +34,8 @@
 </template>
 
 <script>
-import { getFieldLengthStatus, getRangesForPageAndType } from '../../../composables/useValidation.js';
-import MetaKitLengthMeter from '../v2/MetaKitLengthMeter.vue';
+import { getRangesForPageAndType } from '../../../composables/useValidation.js';
+import MetaKitLengthMeter from '../common/MetaKitLengthMeter.vue';
 
 export default {
   props: {
@@ -96,28 +86,12 @@ export default {
       type: Object,
       default: () => ({})
     },
-    // Temporary design comparison
-    variant: {
-      type: String,
-      default: 'v1'
-    }
   },
   components: { MetaKitLengthMeter },
   computed: {
     ranges() {
       return getRangesForPageAndType({ template: this.template }, this.type === 'og' ? 'ogDescription' : 'description', this.validationSettings);
     },
-    statusClass() {
-      if (!this.value) return '';
-
-      const status = getFieldLengthStatus(
-        this.value.length,
-        this.template,
-        this.type === 'og' ? 'ogDescription' : 'description',
-        this.validationSettings
-      );
-      return status ? `k-meta-kit-status-${status}` : '';
-    }
   }
 };
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <k-panel-inside class="k-meta-kit-view" :class="{ 'k-mk2': isV2 }">
+  <k-panel-inside class="k-meta-kit-view k-mk2">
     <!-- Top Bar: Language Switcher + Sponsor (right-aligned) -->
     <div class="k-meta-kit-topbar">
       <div
@@ -60,27 +60,18 @@
       </div>
     </div>
 
-    <!-- Stats Cards -->
-    <meta-kit-overview-v2
-      v-if="isV2"
+    <!-- Stats tiles -->
+    <meta-kit-overview
       :cards="statsCards"
       :total-count="pagesData.length"
       :active-area="activeArea"
       :filtered-count="filteredPages.length"
       @select-area="selectArea"
     />
-    <meta-kit-stats
-      v-else
-      :filtered-count="filteredPages.length"
-      :total-count="pagesData.length"
-      :cards="statsCards"
-      :search-active="!!(searchQuery || activeFilters.length)"
-    />
 
     <!-- Actions & Filters -->
     <meta-kit-actions
-      :selected-count="isV2 ? actionPageIds.length : selectedPages.length"
-      :variant="variant"
+      :selected-count="actionPageIds.length"
       :has-selection="selectedPages.length > 0"
       :is-filtered="!!(searchQuery || activeFilters.length)"
       :ai-enabled="aiEnabled"
@@ -98,14 +89,12 @@
           :active-filters.sync="activeFilters"
           :sort-by.sync="sortBy"
           :inheritance.sync="inheritance"
-          :show-inheritance="isV2"
         />
       </template>
     </meta-kit-actions>
 
     <!-- Pages Table -->
-    <meta-kit-table-v2
-      v-if="isV2"
+    <meta-kit-table
       :inheritance="inheritance"
       :show-preview="showPreviewInTable"
       :preview-mode="previewMode"
@@ -113,26 +102,6 @@
       :start-index="(currentPage - 1) * pageSize"
       :selected-pages="selectedPages"
       :is-all-selected="isAllCurrentPageSelected"
-      :ai-enabled="aiEnabled"
-      :review-enabled="reviewEnabled"
-      :site-settings="siteSettingsData"
-      :validation-settings="validationSettingsData"
-      :duplicates="duplicates"
-      :all-pages="pagesData"
-      @toggle-select-all="toggleSelectAllCurrentPage"
-      @toggle-page="togglePageSelection"
-      @review-page="reviewSinglePage"
-      @edit-page="editSinglePageMetadata"
-      @generate-page="openSinglePageGenerate"
-    />
-    <meta-kit-table
-      v-else
-      :pages="paginatedPages"
-      :start-index="(currentPage - 1) * pageSize"
-      :selected-pages="selectedPages"
-      :is-all-selected="isAllCurrentPageSelected"
-      :show-preview="showPreviewInTable"
-      :preview-mode="previewMode"
       :ai-enabled="aiEnabled"
       :review-enabled="reviewEnabled"
       :site-settings="siteSettingsData"
@@ -190,7 +159,6 @@
     <meta-kit-bulk-edit-dialog
       ref="allPagesDialog"
       :validation-settings="validationSettingsData"
-      :variant="variant"
       :api="$api"
       :site-settings="siteSettingsData"
       :ai-enabled="aiEnabled"
@@ -201,7 +169,6 @@
     <meta-kit-single-page-dialog
       ref="singlePageDialog"
       :validation-settings="validationSettingsData"
-      :variant="variant"
       :api="$api"
       :site-settings="siteSettingsData"
       :ai-enabled="aiEnabled"
@@ -210,21 +177,18 @@
 
     <meta-kit-review-dialog
       ref="reviewDialog"
-      :variant="variant"
       :api="$api"
     />
 
     <!-- Bulk Generation Dialog (used for both bulk and single-page AI generate) -->
     <meta-kit-bulk-generate-dialog
       ref="bulkGenerateDialog"
-      :variant="variant"
       :selected-count="singleGeneratePageId ? 1 : actionPageIds.length"
       @generate="performBulkGeneration"
     />
 
     <!-- Review generated suggestions before saving -->
-    <meta-kit-suggestions-dialog-v2
-      v-if="isV2"
+    <meta-kit-suggestions-dialog
       ref="suggestionsDialog"
       :language="language"
       :pages="pagesData"
@@ -232,15 +196,10 @@
       :validation-settings="validationSettingsData"
       @save="saveSuggestions"
     />
-    <meta-kit-suggestions-dialog
-      v-else
-      ref="suggestionsDialog"
-      @save="saveSuggestions"
-    />
 
-    <!-- V2: actions for the selected pages -->
+    <!-- Actions for the selected pages -->
     <meta-kit-selection-bar
-      v-if="isV2 && selectedPages.length > 0"
+      v-if="selectedPages.length > 0"
       :count="selectedPages.length"
       :ai-enabled="aiEnabled"
       @edit="showSelectedPagesDialog"
@@ -258,7 +217,7 @@
         <div v-if="loadingProgress" class="k-meta-kit-loading-progress">
           {{ loadingProgress }}
         </div>
-        <div v-if="isV2 && progressTotal" class="k-mk2-progress" aria-hidden="true">
+        <div v-if="progressTotal" class="k-mk2-progress" aria-hidden="true">
           <span :style="{ width: (progressDone / progressTotal) * 100 + '%' }"></span>
         </div>
         <k-button
@@ -277,11 +236,12 @@
 </template>
 
 <script>
-// Table component
-import MetaKitStats from './parts/table/MetaKitStats.vue';
+// Table area
+import MetaKitOverview from './parts/table/MetaKitOverview.vue';
 import MetaKitFilters from './parts/table/MetaKitFilters.vue';
 import MetaKitActions from './parts/table/MetaKitActions.vue';
 import MetaKitTable from './parts/table/MetaKitTable.vue';
+import MetaKitSelectionBar from './parts/table/MetaKitSelectionBar.vue';
 
 // Edit/Dialog components
 import MetaKitBulkGenerateDialog from './parts/edit/MetaKitBulkGenerateDialog.vue';
@@ -289,11 +249,6 @@ import MetaKitSinglePageDialog from './parts/edit/MetaKitSinglePageDialog.vue';
 import MetaKitBulkEditDialog from './parts/edit/MetaKitBulkEditDialog.vue';
 import MetaKitReviewDialog from './parts/edit/MetaKitReviewDialog.vue';
 import MetaKitSuggestionsDialog from './parts/edit/MetaKitSuggestionsDialog.vue';
-// Temporary design comparison (variant v2)
-import MetaKitOverviewV2 from './parts/v2/MetaKitOverviewV2.vue';
-import MetaKitTableV2 from './parts/v2/MetaKitTableV2.vue';
-import MetaKitSuggestionsDialogV2 from './parts/v2/MetaKitSuggestionsDialogV2.vue';
-import MetaKitSelectionBar from './parts/v2/MetaKitSelectionBar.vue';
 import {
   GENERATION_FIELDS,
   planGeneration,
@@ -313,7 +268,7 @@ import {
   findDuplicates
 } from '../composables/panelState.js';
 
-// V2: filters behind each stats tile ("needs attention" in that area)
+// Filters behind each stats tile ("needs attention" in that area)
 const AREA_FILTERS = {
   slug: ['type-slug', 'warning', 'error'],
   title: ['type-title', 'warning', 'error'],
@@ -331,11 +286,8 @@ export default {
     MetaKitBulkEditDialog,
     MetaKitReviewDialog,
     MetaKitSuggestionsDialog,
-    MetaKitOverviewV2,
-    MetaKitTableV2,
-    MetaKitSuggestionsDialogV2,
+    MetaKitOverview,
     MetaKitSelectionBar,
-    MetaKitStats,
     MetaKitFilters,
     MetaKitActions
   },
@@ -362,11 +314,6 @@ export default {
         siteMetaTitle: '',
         titleSeparator: '|'
       })
-    },
-    // 'v2' = temporary new design, shown as a second panel area
-    variant: {
-      type: String,
-      default: 'v1'
     }
   },
   data() {
@@ -383,7 +330,7 @@ export default {
       // Pagination & Selection
       selectedPages: [],
       currentPage: 1,
-      pageSize: this.variant === 'v2' ? 25 : 10,
+      pageSize: 25,
       searchQuery: '',
       activeFilters: [],
       sortBy: 'default',
@@ -409,17 +356,14 @@ export default {
       return this.$t('meta-kit.sponsor.text');
     },
 
-    isV2() {
-      return this.variant === 'v2';
-    },
-    // V2: bulk actions use the selection, or all filtered pages without one
+    // Bulk actions use the selection, or all filtered pages without one
     actionPageIds() {
-      if (this.selectedPages.length > 0 || !this.isV2) {
+      if (this.selectedPages.length > 0) {
         return this.selectedPages;
       }
       return this.filteredPages.map((page) => page.id);
     },
-    // V2: the stats area whose filter is active (set by clicking its tile)
+    // The stats area whose filter is active (set by clicking its tile)
     activeArea() {
       return Object.keys(AREA_FILTERS).find((area) => {
         const filters = AREA_FILTERS[area];
@@ -499,12 +443,7 @@ export default {
             this.$t('meta-kit.stats.noindex.review')
           ]
         })
-      ].map((card) => ({
-        ...card,
-        attentionClass: card.filteredFix > 0
-          ? 'k-meta-kit-stats-red'
-          : (card.filteredAttention > 0 ? 'k-meta-kit-stats-amber' : 'k-meta-kit-stats-green')
-      }));
+      ];
     }
   },
   watch: {

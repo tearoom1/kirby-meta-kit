@@ -1,5 +1,5 @@
 <template>
-  <k-dialog :class="{ 'k-mk2-dialog': variant === 'v2' }" ref="dialog" class="k-meta-kit-dialog k-meta-kit-dialog-bulk" size="huge" :cancel-button="false" :submit-button="false" @submit.prevent="saveAll">
+  <k-dialog ref="dialog" class="k-mk2-dialog k-meta-kit-dialog k-meta-kit-dialog-bulk" size="huge" :cancel-button="false" :submit-button="false" @submit.prevent="saveAll">
     <k-headline>{{ $t('meta-kit.bulkEdit.title', { count: pages.length }) }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -36,7 +36,6 @@
 
           <!-- Meta Title -->
           <meta-kit-title-field
-            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
             :label="$t('meta-kit.field.metaTitle')"
@@ -54,7 +53,6 @@
 
           <!-- Meta Description -->
           <meta-kit-description-field
-            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
             :label="$t('meta-kit.field.metaDescription')"
@@ -79,7 +77,6 @@
 
           <!-- OG Title -->
           <meta-kit-title-field
-            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
             :label="$t('meta-kit.field.ogTitle')"
@@ -98,7 +95,6 @@
 
           <!-- OG Description -->
           <meta-kit-description-field
-            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
             :label="$t('meta-kit.field.ogDescription')"
@@ -157,11 +153,6 @@ export default {
     validationSettings: {
       type: Object,
       default: () => ({})
-    },
-    // Temporary design comparison
-    variant: {
-      type: String,
-      default: 'v1'
     },
     api: {
       type: Object,

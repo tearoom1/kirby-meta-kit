@@ -1,26 +1,5 @@
 /* Field length indicator and OG image display */
 .k-meta-kit-view {
-  /* Field length indicator */
-
-  .k-meta-kit-field-length {
-    display: inline-block;
-    margin-left: 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-
-  .k-meta-kit-field-length.k-meta-kit-status-success {
-    color: var(--color-green-600);
-  }
-
-  .k-meta-kit-field-length.k-meta-kit-status-warning {
-    color: var(--color-orange-600);
-  }
-
-  .k-meta-kit-field-length.k-meta-kit-status-error {
-    color: var(--color-red-600);
-  }
-
   /* Single page edit dialog */
 
   /* OG Image Display */

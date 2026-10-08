@@ -7,56 +7,6 @@
     align-items: center;
     gap: 1rem;
   }
-
-  .k-meta-kit-table {
-    background: var(--color-back);
-    border: 1px solid var(--color-border);
-    border-radius: var(--rounded);
-    overflow-x: auto;
-  }
-
-  .k-meta-kit-table table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 960px;
-  }
-
-  .k-meta-kit-table th:first-child,
-  .k-meta-kit-table td:first-child {
-    width: 40px;
-    text-align: center;
-  }
-
-  .k-meta-kit-table th:nth-child(2),
-  .k-meta-kit-table td:nth-child(2) {
-    width: 50px;
-    text-align: center;
-  }
-
-  .k-meta-kit-table th:nth-child(3),
-  .k-meta-kit-table td:nth-child(3) {
-    width: 250px;
-  }
-
-  .k-meta-kit-table th:nth-child(4),
-  .k-meta-kit-table td:nth-child(4) {
-    min-width: 150px;
-    width: auto;
-  }
-
-  .k-meta-kit-table th:nth-child(n+5),
-  .k-meta-kit-table td:nth-child(n+5) {
-    width: 104px;
-    max-width: 104px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .k-meta-kit-table th:nth-child(n+5) {
-    text-align: center;
-  }
-
   /* When showing preview, expand columns and allow text wrapping */
   /* Note: In preview mode, Template and Robots columns are hidden, so nth-child values shift */
 
@@ -72,175 +22,12 @@
     overflow: visible;
     text-overflow: clip;
   }
-
-  /* Description column (becomes 5th) */
-
-  .k-meta-kit-table-preview th:nth-child(5),
-  .k-meta-kit-table-preview td:nth-child(5) {
-    width: 40%;
-    min-width: 250px;
-    max-width: none;
-    white-space: normal;
-    word-break: break-word;
-    overflow: visible;
-    text-overflow: clip;
-  }
-
-  /* Image column (becomes 6th) - make it smaller */
-
-  .k-meta-kit-table-preview th:nth-child(6),
-  .k-meta-kit-table-preview td:nth-child(6) {
-    width: 60px;
-  }
-
-
-  .k-meta-kit-table-preview th:nth-child(n+4) {
-    text-align: center;
-  }
-
-  .k-meta-kit-table th:nth-child(7),
-  .k-meta-kit-table th:nth-child(8),
-  .k-meta-kit-table td:nth-child(7),
-  .k-meta-kit-table td:nth-child(8) {
-    width: 88px;
-  }
-
-  .k-meta-kit-table th:nth-child(9),
-  .k-meta-kit-table td:nth-child(9) {
-    width: 84px;
-    max-width: 84px;
-  }
-
-  .k-meta-kit-table th:nth-child(10),
-  .k-meta-kit-table td:nth-child(10) {
-    width: 84px;
-    max-width: 84px;
-  }
-
-  @media (min-width: 1500px) {
-    .k-meta-kit-table table {
-      min-width: 1100px;
-    }
-
-    .k-meta-kit-table th:nth-child(n+5),
-    .k-meta-kit-table td:nth-child(n+5) {
-      max-width: 112px;
-    }
-
-    .k-meta-kit-table th:nth-child(9),
-    .k-meta-kit-table td:nth-child(9),
-    .k-meta-kit-table th:nth-child(10),
-    .k-meta-kit-table td:nth-child(10) {
-      width: 90px;
-      max-width: 90px;
-    }
-  }
-
-  .k-meta-kit-table-actions {
-    display: flex;
-    gap: 0.25rem;
-    justify-content: center;
-    align-items: center;
-    opacity: 0.88;
-    transition: opacity 0.18s ease;
-  }
-
-  .k-meta-kit-table th {
-    background: var(--color-back);
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-text);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .k-meta-kit-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--color-border);
-    font-size: 0.875rem;
-  }
-
-  .k-meta-kit-table-page {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .k-meta-kit-page-title-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .k-meta-kit-status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .k-meta-kit-status-dot-listed {
-    background-color: var(--color-green-600);
-  }
-
-  .k-meta-kit-status-dot-unlisted {
-    background-color: var(--color-blue-600);
-  }
-
-  .k-meta-kit-status-dot-draft {
-    background-color: var(--color-red-500);
-  }
-
-  .k-meta-kit-table-page-id {
-    font-size: 0.75rem;
-    color: var(--color-text-dimmed);
-    font-family: var(--font-mono);
-    font-weight: 400;
-  }
-
-  /* Page info in edit dialog */
-
-  .k-meta-kit-page-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
+  @media (min-width: 1500px) {  }
   .k-meta-kit-page-id {
     color: var(--color-text-dimmed);
     font-family: var(--font-mono);
     font-weight: 400;
   }
-
-  .k-meta-kit-table tbody tr {
-    position: relative;
-    transition: background-color 0.18s ease;
-  }
-
-  .k-meta-kit-table tbody tr:last-child td {
-    border-bottom: none;
-  }
-
-  .k-meta-kit-table tbody tr:hover td {
-    background: var(--color-back);
-  }
-
-  .k-meta-kit-table tbody tr.k-meta-kit-row-selected td {
-    background: color-mix(in srgb, var(--color-focus) 8%, var(--color-back));
-  }
-
-  .k-meta-kit-table tbody tr.k-meta-kit-row-selected:hover td {
-    background: color-mix(in srgb, var(--color-focus) 11%, var(--color-back));
-  }
-
-  .k-meta-kit-table tbody tr.k-meta-kit-row-selected td:first-child {
-    box-shadow: inset 3px 0 0 var(--color-focus);
-  }
-
-  .k-meta-kit-table tbody tr.k-meta-kit-row-selected .k-meta-kit-table-actions {
-    opacity: 1;
-  }
-
   .k-meta-kit-table-center {
     text-align: center;
 
@@ -248,82 +35,6 @@
       display: inline-block;
     }
   }
-
-  .k-meta-kit-og-image-indicator {
-    display: inline-block;
-    padding-bottom: 2px;
-  }
-
-  .k-meta-kit-table-tooltip {
-    cursor: help;
-    display: inline-block;
-  }
-
-  .k-meta-kit-table-value-group {
-    position: relative;
-    display: inline-block;
-    min-width: 1.8ch;
-    padding-right: 0.62rem;
-    white-space: nowrap;
-  }
-
-  .k-meta-kit-table-tooltip:hover {
-    border-bottom-color: var(--color-focus);
-  }
-
-  .k-meta-kit-table-value-muted {
-    color: var(--color-text-dimmed);
-    font-weight: 500;
-  }
-
-  /* Preview mode indicators - use underline instead of text color */
-
-  .k-meta-kit-table-preview-indicator {
-    color: var(--color-text) !important;
-    display: inline-block;
-    padding-bottom: 2px;
-  }
-
-  .k-meta-kit-table-preview-fallback {
-    color: var(--color-text-dimmed);
-  }
-
-  .k-meta-kit-table-preview-indicator[data-status="warning"] {
-    border-bottom: 3px solid #f59e0b !important;
-  }
-
-  .k-meta-kit-table-preview-indicator[data-status="error"] {
-    border-bottom: 3px solid #dc2626 !important;
-  }
-
-  .k-meta-kit-table-preview-indicator[data-status="success"] {
-    border-bottom: none !important;
-  }
-
-  /* Dark mode support */
-
-  &[data-theme="dark"] .k-meta-kit-table-preview-indicator[data-status="warning"] {
-    border-bottom-color: #fbbf24 !important;
-  }
-
-  &[data-theme="dark"] .k-meta-kit-table-preview-indicator[data-status="error"] {
-    border-bottom-color: #ef4444 !important;
-  }
-
-  .k-meta-kit-table .k-link {
-    color: var(--color-blue-600);
-    text-decoration: none;
-  }
-
-  .k-meta-kit-table .k-link:hover {
-    text-decoration: underline;
-  }
-
-  .k-meta-kit-status-success {
-    color: var(--color-green-600);
-    font-weight: 600;
-  }
-
   .k-meta-kit-status-optimal {
     color: var(--color-text-dimmed);
     font-weight: 500;
@@ -338,49 +49,6 @@
     color: var(--color-red-600);
     font-weight: 600;
   }
-
-  /* Inherited values - dimmed but keep status colors */
-
-  .k-meta-kit-inherited {
-    /*opacity: 0.6;*/
-    font-style: italic;
-  }
-
-  .k-meta-kit-table-source-marker {
-    display: inline-block;
-    color: var(--color-text-dimmed);
-    font-size: 0.68rem;
-    font-weight: 700;
-    font-style: normal;
-    line-height: 1;
-    position: absolute;
-    right: 0;
-    top: -0.2em;
-    opacity: 0.9;
-    width: 0.55rem;
-    text-align: center;
-  }
-
-  .k-meta-kit-og-image-indicator.k-meta-kit-inherited {
-    opacity: 0.6;
-  }
-
-  /* Inherited values in preview mode */
-
-  .k-meta-kit-inherited-preview, .k-meta-kit-table-preview-fallback {
-    opacity: 0.6;
-    font-style: italic;
-  }
-
-  .k-meta-kit-icon-success {
-    color: var(--color-green-600);
-    opacity: 0.7;
-  }
-
-  .k-meta-kit-icon-warning {
-    color: var(--color-orange-600);
-  }
-
   .k-meta-kit-loading,
   .k-meta-kit-empty {
     display: flex;
@@ -392,7 +60,6 @@
     color: var(--color-gray-600);
   }
 
-
   .k-tag {
     display: inline-block;
     padding: 0.25rem 0.5rem;
@@ -402,89 +69,10 @@
     font-size: 0.75rem;
     font-weight: 500;
   }
-
-  /* Dark mode support */
-
-  &[data-theme="dark"] .k-meta-kit-stats-card {
-    background: var(--color-black);
-    border-color: var(--color-border);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-table {
-    background: var(--color-black);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-table th {
-    background: var(--color-back);
-    color: var(--color-text);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-table td {
-    background: var(--color-black);
-    color: var(--color-text);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-table tbody tr:hover td {
-    background: var(--color-back);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-table tbody tr.k-meta-kit-row-selected td {
-    background: color-mix(in srgb, var(--color-focus) 12%, var(--color-black));
-  }
-
-  &[data-theme="dark"] .k-meta-kit-table tbody tr.k-meta-kit-row-selected:hover td {
-    background: color-mix(in srgb, var(--color-focus) 16%, var(--color-black));
-  }
-
-  &[data-theme="dark"] .k-meta-kit-table .k-link {
-    color: var(--color-blue-400);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-status-published {
-    color: var(--color-green-400);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-status-unlisted {
-    color: var(--color-orange-400);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-status-draft {
-    color: var(--color-gray-400);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-status-dot-published {
-    background-color: var(--color-green-400);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-status-dot-unlisted {
-    background-color: var(--color-orange-400);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-status-dot-draft {
-    background-color: var(--color-gray-400);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-inherited.k-meta-kit-status-success {
-    color: var(--color-green-400);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-inherited.k-meta-kit-status-warning {
-    color: var(--color-orange-400);
-  }
-
-  &[data-theme="dark"] .k-meta-kit-inherited.k-meta-kit-status-error {
-    color: var(--color-red-400);
-  }
-
   &[data-theme="dark"] .k-meta-kit-status-optimal,
   &[data-theme="dark"] .k-meta-kit-table-value-muted {
     color: var(--color-gray-400);
   }
-
-  &[data-theme="dark"] .k-meta-kit-table-source-marker {
-    color: var(--color-gray-400);
-  }
-
   &[data-theme="dark"] .k-tag {
     background: var(--color-back);
     color: var(--color-blue-300);

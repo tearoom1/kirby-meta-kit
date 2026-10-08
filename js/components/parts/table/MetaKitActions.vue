@@ -3,18 +3,17 @@
     <k-button-group>
       <k-button
         icon="edit"
-        :title="variant === 'v2' && !hasSelection ? scopeHint : null"
+        :title="hasSelection ? null : scopeHint"
         :disabled="selectedCount === 0"
         @click="$emit('edit-selected')"
       >
-        <template v-if="variant === 'v2'">{{ editLabel }}</template>
-        <template v-else>{{ $t('meta-kit.actions.edit') }}<span v-if="selectedCount > 0"> ({{ selectedCount }})</span></template>
+        {{ editLabel }}
       </k-button>
       <k-button
         v-if="aiEnabled"
         icon="sparkling"
         class="k-meta-kit-button-ai-generate"
-        :title="variant === 'v2' && !hasSelection ? scopeHint : null"
+        :title="hasSelection ? null : scopeHint"
         :disabled="isGenerating || selectedCount === 0"
         :progress="isGenerating"
         @click="$emit('generate-missing')"
@@ -47,11 +46,7 @@ export default {
       type: Boolean,
       default: false
     },
-    // Temporary design comparison: v2 acts on the filtered pages without a selection
-    variant: {
-      type: String,
-      default: 'v1'
-    },
+    // Without a selection the actions apply to all filtered pages
     hasSelection: {
       type: Boolean,
       default: false
@@ -62,7 +57,7 @@ export default {
     }
   },
   computed: {
-    // V2: say what the button acts on — the selection, the filtered pages or all pages
+    // Say what the button acts on — the selection, the filtered pages or all pages
     editLabel() {
       const count = this.selectedCount;
       if (this.hasSelection) return this.$t('meta-kit.v2.editSelected', { count });

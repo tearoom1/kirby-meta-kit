@@ -1,379 +1,215 @@
 <template>
-  <div class="k-meta-kit-table" :class="{ 'k-meta-kit-table-preview': showPreview }">
-    <table>
-      <thead>
-      <tr>
-        <th class="k-meta-kit-table-checkbox">
-          <input
-            type="checkbox"
-            :checked="isAllSelected"
-            @change="$emit('toggle-select-all')"
-          />
-        </th>
-        <th>#</th>
-        <th>{{ $t('meta-kit.table.page') }}</th>
-        <th v-if="!showPreview">{{ $t('meta-kit.field.slug') }}</th>
-        <th v-if="showPreview">{{ previewMode === 'og' ? $t('meta-kit.field.ogTitle') : $t('meta-kit.field.metaTitle') }}</th>
-        <th v-if="showPreview">{{ previewMode === 'og' ? $t('meta-kit.field.ogDescription.short') : $t('meta-kit.field.metaDescription.short') }}</th>
-        <th v-if="!showPreview">{{ $t('meta-kit.field.metaTitle') }}</th>
-        <th v-if="!showPreview">{{ $t('meta-kit.field.metaDescription.short') }}</th>
-        <th v-if="!showPreview">{{ $t('meta-kit.field.ogTitle') }}</th>
-        <th v-if="!showPreview">{{ $t('meta-kit.field.ogDescription.short') }}</th>
-        <th v-if="!showPreview || previewMode === 'og'">{{ $t('meta-kit.field.ogImage.short') }}</th>
-        <th v-if="!showPreview">{{ $t('meta-kit.table.robots') }}</th>
-        <th>{{ $t('meta-kit.table.actions') }}</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr
-        v-for="(page, index) in pages"
-        :key="page.id"
-        :class="{ 'k-meta-kit-row-selected': isPageSelected(page.id) }"
-      >
-        <td class="k-meta-kit-table-checkbox">
-          <input
-            type="checkbox"
-            :checked="isPageSelected(page.id)"
-            @change="$emit('toggle-page', page.id)"
-          />
-        </td>
-        <td>{{ startIndex + index + 1 }}</td>
-        <td>
-          <div class="k-meta-kit-table-page">
-              <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
-          <div class="k-meta-kit-page-title-wrapper">
-            <span class="k-meta-kit-table-page-id">{{ page.template }}</span>
-            <span :class="['k-meta-kit-status-dot', getStatusDotClass(page)]" :title="getStatusLabel(page)"></span>
+  <div class="k-mk2-table-wrap">
+    <div class="k-mk2-table-scroll">
+      <table class="k-mk2-table" :class="{ 'is-content': showPreview }">
+        <thead>
+          <tr>
+            <th class="k-mk2-check">
+              <input
+                type="checkbox"
+                :checked="isAllSelected"
+                :aria-label="$t('meta-kit.v2.selectAll')"
+                @change="$emit('toggle-select-all')"
+              />
+            </th>
+            <th>{{ $t('meta-kit.table.page') }}</th>
+            <template v-if="!showPreview">
+              <th>{{ $t('meta-kit.field.slug') }}</th>
+              <th class="k-mk2-count-col">{{ $t('meta-kit.field.metaTitle') }}</th>
+              <th class="k-mk2-count-col">{{ $t('meta-kit.field.metaDescription.short') }}</th>
+              <th class="k-mk2-count-col">{{ $t('meta-kit.field.ogTitle') }}</th>
+              <th class="k-mk2-count-col">{{ $t('meta-kit.field.ogDescription.short') }}</th>
+              <th class="k-mk2-image-col">{{ $t('meta-kit.field.ogImage.short') }}</th>
+            </template>
+            <template v-else>
+              <th>{{ $t(isOg ? 'meta-kit.field.ogTitle' : 'meta-kit.field.metaTitle') }}</th>
+              <th>{{ $t(isOg ? 'meta-kit.field.ogDescription' : 'meta-kit.field.metaDescription') }}</th>
+              <th v-if="isOg" class="k-mk2-image-col">{{ $t('meta-kit.field.ogImage.short') }}</th>
+            </template>
+            <th class="k-mk2-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="page in pages"
+            :key="page.id"
+            :class="{ 'is-selected': isPageSelected(page.id) }"
+          >
+            <td class="k-mk2-check">
+              <input
+                type="checkbox"
+                :checked="isPageSelected(page.id)"
+                :aria-label="page.title"
+                @change="$emit('toggle-page', page.id)"
+              />
+            </td>
+            <td class="k-mk2-page">
+              <span class="k-mk2-title">
+                <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
+              </span>
+              <span class="k-mk2-sub">
+                <k-icon v-if="page.id === 'site'" type="globe" class="k-mk2-status is-site" />
+                <k-icon
+                  v-else-if="statusIcon(page)"
+                  :type="statusIcon(page)"
+                  :class="['k-mk2-status', 'is-' + page.status]"
+                  :title="getStatusLabel(page)"
+                  :aria-label="getStatusLabel(page)"
+                />
+                <span>{{ page.template }}</span>
+                <span v-if="page.robots && page.robots.includes('noindex')" class="k-mk2-pill">noindex</span>
+              </span>
+            </td>
 
-          </div></div>
-        </td>
-        <td v-if="!showPreview">
-          <Tooltip :content="getSlugTooltip(page)">
-            <span
-              :class="[getSlugStatusClass(page), 'k-meta-kit-table-tooltip']"
-            >
-              {{ page.id }}
-            </span>
-          </Tooltip>
-        </td>
-
-        <!-- Title Column (Meta or OG based on mode) -->
-        <td v-if="showPreview">
-          <template v-if="previewMode === 'meta'">
-            <Tooltip :content="getTitleTooltip(page, false)">
-              <span
-                :class="['k-meta-kit-table-preview-indicator',
-                  'k-meta-kit-table-tooltip']"
-                :data-status="getStatusValue(getTableTitleStatusClass(page))"
-              >
-                <span :class="isTitleInherited(page) ? 'k-meta-kit-inherited-preview' : ''">
-                  {{ getFullTitlePreview(page, 'meta') }}
+            <!-- Count view -->
+            <template v-if="!showPreview">
+              <td class="k-mk2-slug-col">
+                <Tooltip>
+                  <template #tip>
+                    <div class="k-mk2-tip-body">
+                      <p class="k-mk2-tip-text">{{ page.id === 'site' ? '/' : page.id }}</p>
+                      <p v-for="row in slugRows(page)" :key="row.key" class="k-mk2-tip-line">
+                        <i :class="['k-mk2-dot', 'is-' + row.level]"></i>{{ row.label }}: <strong>{{ row.value }}</strong>
+                        <span class="k-mk2-muted"> · {{ $t('meta-kit.v2.review.optimal', { range: row.optimal }) }}</span>
+                      </p>
+                    </div>
+                  </template>
+                  <span class="k-mk2-slug">
+                    <i :class="['k-mk2-dot', dot(page, 'slug')]"></i>
+                    <span><span class="k-mk2-slug-parent">{{ slugParent(page) }}</span>{{ slugName(page) }}</span>
                   </span>
-              </span>
-            </Tooltip>
-          </template>
-          <template v-else>
-            <Tooltip :content="getOgTitleTooltip(page, false)">
-              <span
-                :class="['k-meta-kit-table-preview-indicator',
-                  'k-meta-kit-table-tooltip',
-                  isOgTitleInherited(page) ? 'k-meta-kit-inherited-preview' : '']"
-                :data-status="getStatusValue(getTableOgTitleStatusClass(page))"
-              >
-                  <template v-if="page.hasOgTitle">
-                    {{ getFullTitlePreview(page, 'og') }}
-                  </template>
-                  <template v-else>
-                    <span class="k-meta-kit-table-preview-fallback">
-                      {{ getFullTitlePreview(page, 'og') }}
-                    </span>
-                  </template>
-              </span>
-            </Tooltip>
-          </template>
-        </td>
+                </Tooltip>
+              </td>
+              <td v-for="field in COUNT_FIELDS" :key="field" class="k-mk2-count-col">
+                <Tooltip>
+                  <template #tip><meta-kit-field-tip v-bind="tip(page, field)" /></template>
+                  <span class="k-mk2-cell k-mk2-stack" :class="{ 'is-inherited': !!tip(page, field).source }">
+                    <span v-if="hidden(page, field)"><i class="k-mk2-dot is-none"></i>—</span>
+                    <template v-else>
+                      <span><i :class="['k-mk2-dot', dot(page, CLASSIFY[field])]"></i>{{ tip(page, field).length || '—' }}</span>
+                      <span v-if="mark(page, field)" class="k-mk2-cap">{{ mark(page, field) }}</span>
+                    </template>
+                  </span>
+                </Tooltip>
+              </td>
+              <td class="k-mk2-image-col">
+                <Tooltip>
+                  <template #tip><div class="k-mk2-tip-body"><p class="k-mk2-tip-line">{{ imageTip(page) }}</p></div></template>
+                  <span class="k-mk2-image k-mk2-stack">
+                    <span v-if="imageState(page) === 'site' && inheritance === 'none'" class="k-mk2-cell is-inherited">—</span>
+                    <k-icon v-else-if="imageState(page) !== 'none'" type="check" :class="'is-' + imageState(page)" />
+                    <i v-else class="k-mk2-dot is-error"></i>
+                    <span v-if="imageState(page) === 'site' && inheritance === 'marked'" class="k-mk2-cap">{{ $t('meta-kit.v2.source.site') }}</span>
+                  </span>
+                </Tooltip>
+              </td>
+            </template>
 
-        <!-- Description Column (Meta or OG based on mode) -->
-        <td v-if="showPreview">
-          <template v-if="previewMode === 'meta'">
-            <Tooltip :content="getDescriptionTooltip(page, false)">
-              <span class="k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip"
-                    :data-status="getStatusValue(getDescriptionStatusClass(page))"
-              >
-                  <template v-if="page.hasMetaDescription">
-                    {{ page.metaDescription }}
-                  </template>
-                  <template v-else-if="siteSettings.siteMetaDescription">
-                    <span class="k-meta-kit-table-preview-fallback">
-                      {{ siteSettings.siteMetaDescription }}
-                    </span>
-                  </template>
-                  <template v-else>
-                    —
-                  </template>
-              </span>
-            </Tooltip>
-          </template>
-          <template v-else>
-            <Tooltip :content="getOgDescriptionTooltip(page, false)">
-              <span class="k-meta-kit-table-preview-indicator k-meta-kit-table-tooltip"
-                    :data-status="getStatusValue(getOgDescriptionStatusClass(page))"
-              >
-                  <template v-if="page.hasOgDescription">
-                    {{ page.ogDescription }}
-                  </template>
-                  <template v-else-if="page.hasMetaDescription">
-                    <span class="k-meta-kit-table-preview-fallback">
-                      {{ page.metaDescription }}
-                    </span>
-                  </template>
-                  <template v-else-if="siteSettings.siteMetaDescription">
-                    <span class="k-meta-kit-table-preview-fallback">
-                      {{ siteSettings.siteMetaDescription }}
-                    </span>
-                  </template>
-                  <template v-else>
-                    —
-                  </template>
-              </span>
-            </Tooltip>
-          </template>
-        </td>
+            <!-- Content views (meta / OG texts) -->
+            <template v-else>
+              <td v-for="field in contentFields" :key="field" class="k-mk2-content">
+                <Tooltip>
+                  <template #tip><meta-kit-field-tip v-bind="tip(page, field)" /></template>
+                  <div class="k-mk2-content-text" :class="{ 'is-inherited': !!tip(page, field).source }">
+                    <template v-if="hidden(page, field)"><i class="k-mk2-dot is-none"></i><span>—</span></template>
+                    <template v-else>
+                      <i :class="['k-mk2-dot', dot(page, CLASSIFY[field])]"></i>
+                      <span>{{ tip(page, field).text || '—' }}</span>
+                    </template>
+                  </div>
+                  <div v-if="tip(page, field).length && !hidden(page, field)" class="k-mk2-sub k-mk2-content-meta">
+                    {{ $t('meta-kit.chars', { count: tip(page, field).length }) }}<span v-if="mark(page, field)"> · {{ mark(page, field) }}</span>
+                  </div>
+                </Tooltip>
+              </td>
+              <td v-if="isOg" class="k-mk2-image-col">
+                <Tooltip>
+                  <template #tip><div class="k-mk2-tip-body"><p class="k-mk2-tip-line">{{ imageTip(page) }}</p></div></template>
+                  <span class="k-mk2-image k-mk2-stack">
+                    <span v-if="imageState(page) === 'site' && inheritance === 'none'" class="k-mk2-cell is-inherited">—</span>
+                    <k-icon v-else-if="imageState(page) !== 'none'" type="check" :class="'is-' + imageState(page)" />
+                    <i v-else class="k-mk2-dot is-error"></i>
+                    <span v-if="imageState(page) === 'site' && inheritance === 'marked'" class="k-mk2-cap">{{ $t('meta-kit.v2.source.site') }}</span>
+                  </span>
+                </Tooltip>
+              </td>
+            </template>
 
-        <!-- Title Column only when not preview -->
-        <td v-if="!showPreview" class="k-meta-kit-table-center">
-          <Tooltip :content="getTitleTooltip(page)">
-              <span class="k-meta-kit-table-value-group k-meta-kit-table-tooltip">
-                <span :class="[
-                  getTableTitleStatusClass(page),
-                  getTableTitleStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
-                  isTitleInherited(page) ? 'k-meta-kit-inherited' : ''
-                ]">
-                  {{ getTitleDisplay(page) }}
-                </span>
-                <span v-if="getInheritanceBadgeLabel(page, 'metaTitle')" class="k-meta-kit-table-source-marker">
-                  {{ getInheritanceBadgeLabel(page, 'metaTitle') }}
-                </span>
-              </span>
-          </Tooltip>
-        </td>
-
-        <!-- Description Column only when not preview -->
-        <td v-if="!showPreview" class="k-meta-kit-table-center">
-          <Tooltip :content="getDescriptionTooltip(page)">
-              <span class="k-meta-kit-table-value-group k-meta-kit-table-tooltip">
-                <span
-                  :class="[
-                    getDescriptionStatusClass(page),
-                    getDescriptionStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
-                    isDescriptionInherited(page) ? 'k-meta-kit-inherited' : ''
-                  ]">
-                  {{ getDescriptionDisplay(page) }}
-                </span>
-                <span v-if="getInheritanceBadgeLabel(page, 'metaDescription')" class="k-meta-kit-table-source-marker">
-                  {{ getInheritanceBadgeLabel(page, 'metaDescription') }}
-                </span>
-              </span>
-          </Tooltip>
-        </td>
-
-        <!-- OG Title Column only when not preview -->
-        <td v-if="!showPreview" class="k-meta-kit-table-center">
-          <Tooltip :content="getOgTitleTooltip(page)">
-              <span class="k-meta-kit-table-value-group k-meta-kit-table-tooltip">
-                <span :class="[
-                  getTableOgTitleStatusClass(page),
-                  getTableOgTitleStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
-                  isOgTitleInherited(page) ? 'k-meta-kit-inherited' : ''
-                  ]">
-                  {{ getOgTitleDisplay(page) }}
-                </span>
-                <span v-if="getInheritanceBadgeLabel(page, 'ogTitle')" class="k-meta-kit-table-source-marker">
-                  {{ getInheritanceBadgeLabel(page, 'ogTitle') }}
-                </span>
-              </span>
-          </Tooltip>
-        </td>
-
-        <!-- OG Description Column only when not preview -->
-        <td v-if="!showPreview" class="k-meta-kit-table-center">
-          <Tooltip :content="getOgDescriptionTooltip(page)">
-              <span class="k-meta-kit-table-value-group k-meta-kit-table-tooltip">
-                <span
-                  :class="[
-                    getOgDescriptionStatusClass(page),
-                    getOgDescriptionStatusClass(page) === 'k-meta-kit-status-optimal' ? 'k-meta-kit-table-value-muted' : '',
-                    isOgDescriptionInherited(page) ? 'k-meta-kit-inherited' : ''
-                  ]">
-                  {{ getOgDescriptionDisplay(page) }}
-                </span>
-                <span v-if="getInheritanceBadgeLabel(page, 'ogDescription')" class="k-meta-kit-table-source-marker">
-                  {{ getInheritanceBadgeLabel(page, 'ogDescription') }}
-                </span>
-              </span>
-          </Tooltip>
-        </td>
-
-        <!-- OG Image (only in OG mode) -->
-        <td class="k-meta-kit-table-center" v-if="!showPreview || previewMode === 'og'">
-          <template v-if="page.hasOgImage">
-            <Tooltip :content="$t('meta-kit.ogImage.own')">
-              <span class="k-meta-kit-og-image-indicator">
-                <k-icon type="check" class="k-meta-kit-icon-success"/>
-              </span>
-            </Tooltip>
-          </template>
-          <template v-else-if="!page.hasOgImage && siteSettings.siteHasOgImage">
-            <Tooltip :content="$t('meta-kit.ogImage.site')">
-              <span class="k-meta-kit-og-image-indicator k-meta-kit-inherited">
-                <k-icon type="check" class="k-meta-kit-icon-success"/>
-              </span>
-            </Tooltip>
-          </template>
-          <template v-else>
-            <Tooltip :content="$t('meta-kit.ogImage.none')">
-              <span>—</span>
-            </Tooltip>
-          </template>
-        </td>
-
-        <!-- Robots (only in meta mode when not showing preview) -->
-        <td v-if="!showPreview" class="k-meta-kit-table-center">
-          <template v-if="page.robots && page.robots.includes('noindex')">
-            <Tooltip :content="getRobotsTooltip(page)">
-              <span class="k-meta-kit-robots-noindex k-meta-kit-table-tooltip">{{ getRobotsDisplay(page) }}</span>
-            </Tooltip>
-          </template>
-          <span v-else>—</span>
-        </td>
-        <td class="k-meta-kit-table-center">
-          <div class="k-meta-kit-table-actions">
-            <k-button
-              icon="edit"
-              size="sm"
-              @click="$emit('edit-page', page.id)"
-              :title="$t('meta-kit.table.edit')"
-            />
-            <k-button
-              v-if="aiEnabled"
-              icon="sparkling"
-              class="k-meta-kit-button-ai-generate"
-              size="sm"
-              @click="$emit('generate-page', page.id)"
-              :title="$t('meta-kit.table.generate')"
-            />
-            <k-button
-              v-if="canReviewPage(page)"
-              icon="preview"
-              size="sm"
-              @click="$emit('review-page', page.id, $t('meta-kit.review.titleFor', { page: page.title }))"
-              :title="$t('meta-kit.table.review')"
-            />
-          </div>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+            <td class="k-mk2-actions">
+              <k-button icon="edit" size="sm" :title="$t('meta-kit.table.edit')" @click="$emit('edit-page', page.id)" />
+              <k-button v-if="aiEnabled" icon="sparkling" size="sm" :title="$t('meta-kit.table.generate')" @click="$emit('generate-page', page.id)" />
+              <k-button
+                v-if="canReviewPage(page)"
+                icon="preview"
+                size="sm"
+                :title="$t('meta-kit.table.review')"
+                @click="$emit('review-page', page.id, $t('meta-kit.review.titleFor', { page: page.title }))"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="k-mk2-legend">
+      <span><i class="k-mk2-dot is-error"></i>{{ $t('meta-kit.v2.level.error') }}</span>
+      <span><i class="k-mk2-dot is-warning"></i>{{ $t('meta-kit.v2.level.warning') }}</span>
+      <span>{{ $t('meta-kit.v2.legend.good') }}</span>
+      <span v-if="inheritance === 'none'">{{ $t('meta-kit.v2.legend.hidden') }}</span>
+      <span v-else-if="inheritance === 'marked'">{{ $t('meta-kit.v2.legend.marks') }}</span>
+      <span v-else>{{ $t('meta-kit.v2.legend.inherited') }}</span>
+    </p>
   </div>
 </template>
 
 <script>
+// Pages table: one row per page with quality dots, inherited values dimmed,
+// rich tooltips per field and the content views (meta / OG texts)
 import Tooltip from '../common/Tooltip.vue';
-import {
-  getStatusClass,
-  getStatusValue,
-  getLengthValidationReason,
-  STATUS_CLASSES
-} from '../../../composables/useValidation.js';
-import {
-  isTitleInherited,
-  isDescriptionInherited,
-  isOgTitleInherited,
-  isOgDescriptionInherited,
-  getEffectiveTitle,
-  getEffectiveDescription,
-  getInheritanceSource,
-  isInheritedFromLanguage,
-  buildTooltipText
-} from '../../../composables/useInheritance.js';
-import {
-  shouldAppendSiteName,
-  buildTitleWithSiteName,
-  getTableTitleDisplay
-} from '../../../composables/panelDisplay.js';
+import MetaKitFieldTip from '../common/MetaKitFieldTip.vue';
 import { classifyPageField, getSlugAnalysis } from '../../../composables/panelState.js';
+import { getEffectiveDescription, getInheritanceSource } from '../../../composables/useInheritance.js';
+import { getRangesForPageAndType, isOutsideRange } from '../../../composables/useValidation.js';
+import { getTableTitleDisplay } from '../../../composables/panelDisplay.js';
 
-const LEVEL_CLASSES = {
-  good: STATUS_CLASSES.optimal,
-  warning: STATUS_CLASSES.warning,
-  error: STATUS_CLASSES.error
+const COUNT_FIELDS = ['metaTitle', 'metaDescription', 'ogTitle', 'ogDescription'];
+// Field → classifier / range type
+const CLASSIFY = { metaTitle: 'title', metaDescription: 'description', ogTitle: 'ogTitle', ogDescription: 'ogDescription' };
+// [label, help]: the label is the word under the value when inheritance is
+// "marked" and the pill in the tooltip; help is the tooltip sentence
+const SOURCES = {
+  'site': ['meta-kit.v2.source.site', 'meta-kit.v2.source.site.help'],
+  'page title': ['meta-kit.v2.source.title', 'meta-kit.v2.source.title.help'],
+  'meta title': ['meta-kit.v2.source.meta', 'meta-kit.field.metaTitle'],
+  'meta description': ['meta-kit.v2.source.meta', 'meta-kit.field.metaDescription']
+};
+
+const STATUS_LABELS = {
+  listed: 'meta-kit.status.listed',
+  unlisted: 'meta-kit.status.unlisted',
+  draft: 'meta-kit.status.draft'
 };
 
 export default {
-  components: {
-    Tooltip
-  },
+  components: { Tooltip, MetaKitFieldTip },
   props: {
-    pages: {
-      type: Array,
-      required: true
-    },
+    pages: { type: Array, required: true },
     // All pages (not only this page of the table), to name duplicates
-    allPages: {
-      type: Array,
-      default: () => []
-    },
-    duplicates: {
-      type: Object,
-      default: () => ({ title: {}, description: {} })
-    },
-    startIndex: {
-      type: Number,
-      default: 0
-    },
-    selectedPages: {
-      type: Array,
-      default: () => []
-    },
-    isAllSelected: {
-      type: Boolean,
-      default: false
-    },
-    showPreview: {
-      type: Boolean,
-      default: false
-    },
-    previewMode: {
-      type: String,
-      default: 'meta',
-      validator: value => ['meta', 'og'].includes(value)
-    },
-    aiEnabled: {
-      type: Boolean,
-      default: true
-    },
-    reviewEnabled: {
-      type: Boolean,
-      default: false
-    },
-    siteSettings: {
-      type: Object,
-      default: () => ({})
-    },
-    validationSettings: {
-      type: Object,
-      default: () => ({})
-    }
+    allPages: { type: Array, default: () => [] },
+    duplicates: { type: Object, default: () => ({ title: {}, description: {} }) },
+    startIndex: { type: Number, default: 0 },
+    selectedPages: { type: Array, default: () => [] },
+    isAllSelected: { type: Boolean, default: false },
+    showPreview: { type: Boolean, default: false },
+    previewMode: { type: String, default: 'meta', validator: (value) => ['meta', 'og'].includes(value) },
+    aiEnabled: { type: Boolean, default: true },
+    reviewEnabled: { type: Boolean, default: false },
+    siteSettings: { type: Object, default: () => ({}) },
+    validationSettings: { type: Object, default: () => ({}) },
+    // none: inherited cells show a dash · dimmed: muted · marked: muted with the source word beneath
+    inheritance: { type: String, default: 'dimmed' }
   },
   data() {
-    return {
-      // Status mappings
-      statusMappings: {
-        listed: { label: 'meta-kit.status.listed', dotClass: 'k-meta-kit-status-dot-listed' },
-        unlisted: { label: 'meta-kit.status.unlisted', dotClass: 'k-meta-kit-status-dot-unlisted' },
-        draft: { label: 'meta-kit.status.draft', dotClass: 'k-meta-kit-status-dot-draft' }
-      }
-    };
+    return { COUNT_FIELDS, CLASSIFY };
   },
   computed: {
     classifierContext() {
@@ -382,345 +218,111 @@ export default {
         validationSettings: this.validationSettings,
         duplicates: this.duplicates
       };
+    },
+    isOg() {
+      return this.previewMode === 'og';
+    },
+    contentFields() {
+      return this.isOg ? ['ogTitle', 'ogDescription'] : ['metaTitle', 'metaDescription'];
     }
   },
   methods: {
-    shouldAppendSiteName(type) {
-      return shouldAppendSiteName(this.siteSettings, type);
-    },
-
     isPageSelected(pageId) {
       return this.selectedPages.includes(pageId);
     },
-
-    canReviewPage(page) {
+    canReviewPage() {
       return this.reviewEnabled;
     },
-
-    // Delegate to composables with proper context
-    getStatusClass(page, length, type) {
-      return getStatusClass(page, length, type, this.validationSettings);
-    },
-
-    getStatusValue(statusClass) {
-      return getStatusValue(statusClass);
-    },
-
-    getLengthValidationReason(page, type, length) {
-      return getLengthValidationReason(page, type, length, this.validationSettings);
-    },
-
-    // Inheritance helpers - delegate to composables
-    isTitleInherited(page) {
-      return isTitleInherited(page);
-    },
-
-    isDescriptionInherited(page) {
-      return isDescriptionInherited(page, this.siteSettings);
-    },
-
-    isOgTitleInherited(page) {
-      return isOgTitleInherited(page);
-    },
-
-    isOgDescriptionInherited(page) {
-      return isOgDescriptionInherited(page, this.siteSettings);
-    },
-
-    // Title length calculator with site name appending
     getTitleLength(page, type = 'meta') {
       return getTableTitleDisplay(page, this.siteSettings, type).charCount;
     },
-
-    getFullTitlePreview(page, type) {
-      const preview = getTableTitleDisplay(page, this.siteSettings, type).fullTitle;
-      return preview || '—';
-    },
-
-    // Status colours come from the shared classifier (panelState.js);
-    // fields without a value stay uncoloured and show "—"
-    fieldStatusClass(page, field, length) {
-      if (!length) return '';
-      return LEVEL_CLASSES[classifyPageField(page, field, this.classifierContext)];
-    },
-
-    getTableTitleStatusClass(page) {
-      return this.fieldStatusClass(page, 'title', this.getTitleLength(page, 'meta'));
-    },
-
-    getTableOgTitleStatusClass(page) {
-      return this.fieldStatusClass(page, 'ogTitle', this.getTitleLength(page, 'og'));
-    },
-
-    // Tooltip methods
-    tooltipText(content, inheritanceSource, showContent) {
-      return buildTooltipText(content, inheritanceSource, showContent);
-    },
-
-    // Join tooltip parts with newlines only when both have content
-    joinTooltipParts(...parts) {
-      return parts.filter(Boolean).join('\n\n');
-    },
-
-    getReasonSeverity(reason) {
-      if (!reason) return '';
-      if (reason.startsWith('Error:')) return 'error';
-      if (reason.startsWith('Warning:')) return 'warning';
-      return '';
-    },
-
-    combineReasonParts(...reasons) {
-      const grouped = {
-        error: [],
-        warning: [],
-        info: []
-      };
-
-      reasons.filter(Boolean).forEach((reason) => {
-        const severity = this.getReasonSeverity(reason);
-        const body = reason.replace(/^(Warning|Error):\n?/, '').trim();
-
-        if (severity === 'error') {
-          grouped.error.push(body);
-          return;
-        }
-
-        if (severity === 'warning') {
-          grouped.warning.push(body);
-          return;
-        }
-
-        grouped.info.push(reason.trim());
-      });
-
-      const sections = [];
-
-      if (grouped.error.length > 0) {
-        sections.push(`${this.$t('meta-kit.tooltip.error')}\n${grouped.error.join('\n')}`);
-      }
-
-      if (grouped.warning.length > 0) {
-        sections.push(`${this.$t('meta-kit.tooltip.warning')}\n${grouped.warning.join('\n')}`);
-      }
-
-      if (grouped.info.length > 0) {
-        sections.push(grouped.info.join('\n\n'));
-      }
-
-      return sections.join('\n\n');
-    },
-
-    getInheritanceWarningReason(page, fieldType) {
-      if (isInheritedFromLanguage(page, fieldType, this.siteSettings)) {
-        return `Warning:\n${this.$t('meta-kit.reason.mainLanguage')}`;
-      }
-
-      if (
-        fieldType === 'ogTitle' &&
-        !page.hasOgTitle &&
-        isInheritedFromLanguage(page, 'metaTitle', this.siteSettings)
-      ) {
-        return `Warning:\n${this.$t('meta-kit.reason.mainLanguage')}`;
-      }
-
-      if (
-        fieldType === 'ogDescription' &&
-        !page.hasOgDescription &&
-        isInheritedFromLanguage(page, 'metaDescription', this.siteSettings)
-      ) {
-        return `Warning:\n${this.$t('meta-kit.reason.mainLanguage')}`;
-      }
-
-      return '';
-    },
-
-    getTitleTooltip(page, showContent = true) {
-      if (!page.title && !page.metaTitle) return this.$t('meta-kit.noTitle');
-      if (page.id === 'site') {
-        return showContent ? (page.hasMetaTitle ? page.metaTitle : page.title) : '';
-      }
-
-      const source = getInheritanceSource(page, 'metaTitle', this.siteSettings);
-      const tooltip = buildTitleWithSiteName(
-        getTableTitleDisplay(page, this.siteSettings, 'meta').effectiveTitle,
-        this.siteSettings,
-        'meta'
-      );
-
-      const base = this.tooltipText(tooltip, source, showContent);
-      const inheritanceReason = this.getInheritanceWarningReason(page, 'metaTitle');
-      const lengthReason = this.getLengthValidationReason(page, 'title', this.getTitleLength(page, 'meta'));
-      return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason), this.getDuplicateReason(page, 'title'));
-    },
-
-    // "Same text as: …" for pages sharing their own title/description
-    getDuplicateReason(page, field) {
-      const ids = this.duplicates?.[field]?.[page.id];
-      if (!ids?.length) return '';
-
-      const titles = ids.map((id) => this.allPages.find((other) => other.id === id)?.title || id);
-      return `Warning:\n${this.$t(field === 'title' ? 'meta-kit.reason.duplicateTitle' : 'meta-kit.reason.duplicateDescription', { pages: titles.join(', ') })}`;
-    },
-
-    getDescriptionTooltip(page, showContent = true) {
-      const text = getEffectiveDescription(page, 'meta', this.siteSettings);
-      if (!text) return this.$t('meta-kit.noMetaDescription');
-
-      const source = getInheritanceSource(page, 'metaDescription', this.siteSettings);
-      const base = this.tooltipText(text, source, showContent);
-      const inheritanceReason = this.getInheritanceWarningReason(page, 'metaDescription');
-      const lengthReason = this.getLengthValidationReason(page, 'description', text.length);
-      return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason), this.getDuplicateReason(page, 'description'));
-    },
-
-    getOgTitleTooltip(page, showContent = true) {
-      if (!page.title && !page.ogTitle && !page.metaTitle) return this.$t('meta-kit.noOgTitle');
-      if (page.id === 'site') {
-        const source = getInheritanceSource(page, 'ogTitle', this.siteSettings);
-        const content = getEffectiveTitle(page, 'og');
-        const base = this.tooltipText(content, source, showContent);
-        const inheritanceReason = this.getInheritanceWarningReason(page, 'ogTitle');
-        const lengthReason = this.getLengthValidationReason(page, 'ogTitle', this.getTitleLength(page, 'og'));
-        return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
-      }
-
-      const source = getInheritanceSource(page, 'ogTitle', this.siteSettings);
-      const tooltip = buildTitleWithSiteName(
-        getTableTitleDisplay(page, this.siteSettings, 'og').effectiveTitle,
-        this.siteSettings,
-        'og'
-      );
-
-      const base = this.tooltipText(tooltip, source, showContent);
-      const inheritanceReason = this.getInheritanceWarningReason(page, 'ogTitle');
-      const lengthReason = this.getLengthValidationReason(page, 'ogTitle', this.getTitleLength(page, 'og'));
-      return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
-    },
-
-    getOgDescriptionTooltip(page, showContent = true) {
-      const text = getEffectiveDescription(page, 'og', this.siteSettings);
-      if (!text) return this.$t('meta-kit.noOgDescription');
-
-      const source = getInheritanceSource(page, 'ogDescription', this.siteSettings);
-      const base = this.tooltipText(text, source, showContent);
-      const inheritanceReason = this.getInheritanceWarningReason(page, 'ogDescription');
-      const lengthReason = this.getLengthValidationReason(page, 'ogDescription', text.length);
-      return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
-    },
-
-    getInheritanceBadgeLabel(page, fieldType) {
-      const source = getInheritanceSource(page, fieldType, this.siteSettings);
-
-      switch (source) {
-        case 'site':
-          return 's';
-        case 'page title':
-          return 't';
-        case 'meta title':
-          return 'm';
-        case 'meta description':
-          return 'm';
-        default:
-          return source ? source.charAt(0).toLowerCase() : '';
-      }
-    },
-
-    // Display methods
-    getTitleDisplay(page) {
-      const length = this.getTitleLength(page, 'meta');
-      return length ? (this.isTitleInherited(page) ? `${length}` : length) : '—';
-    },
-
-    getDescriptionDisplay(page) {
-      const desc = getEffectiveDescription(page, 'meta', this.siteSettings);
-      return desc ? desc.length : '—';
-    },
-
-    getDescriptionStatusClass(page) {
-      const desc = getEffectiveDescription(page, 'meta', this.siteSettings);
-      return this.fieldStatusClass(page, 'description', desc?.length || 0);
-    },
-
-    getOgTitleDisplay(page) {
-      const length = this.getTitleLength(page, 'og');
-      return length ? (this.isOgTitleInherited(page) ? `${length}` : length) : '—';
-    },
-
-    getOgDescriptionDisplay(page) {
-      const desc = getEffectiveDescription(page, 'og', this.siteSettings);
-      return desc ? desc.length : '—';
-    },
-
-    getOgDescriptionStatusClass(page) {
-      const desc = getEffectiveDescription(page, 'og', this.siteSettings);
-      return this.fieldStatusClass(page, 'ogDescription', desc?.length || 0);
-    },
-
-    // Slug methods
-    getSlug(page) {
-      return getSlugAnalysis(page, this.validationSettings).slug;
-    },
-
-    getSlugStatusClass(page) {
-      return LEVEL_CLASSES[classifyPageField(page, 'slug', this.classifierContext)];
-    },
-
-    getSlugTooltip(page) {
-      if (page.id === 'site') return this.$t('meta-kit.slug.siteRoot');
-
-      const { slug, wordCount, length, numSlashes, cfg, issues } = getSlugAnalysis(page, this.validationSettings);
-      const statusClass = this.getSlugStatusClass(page);
-      const status = this.$t(statusClass === 'k-meta-kit-status-error' ? 'meta-kit.slug.status.error'
-        : (statusClass === 'k-meta-kit-status-warning' ? 'meta-kit.slug.status.warning' : 'meta-kit.slug.status.ok'));
-      const label = (key) => this.$t(`meta-kit.slug.${key.toLowerCase()}`);
-      const range = (rule) => `${rule.optimal.min}-${rule.optimal.max} / ${rule.warning.min}-${rule.warning.max}`;
-
-      const reasons = issues.length
-        ? `\n\n${this.$t('meta-kit.slug.why', { status })}\n` + issues
-          .map((issue) => this.$t(issue.severity === 'warning' ? 'meta-kit.slug.issue.warning' : 'meta-kit.slug.issue.error', {
-            key: label(issue.key),
-            value: issue.value,
-            optimal: issue.optimal,
-            warning: issue.warning
-          }))
-          .join('\n')
-        : '';
-
-      return [
-        `${this.$t('meta-kit.field.slug')}: ${slug}`,
-        '',
-        `${label('Depth')}: ${numSlashes}`,
-        `${label('Words')}: ${wordCount}`,
-        `${label('Length')}: ${this.$t('meta-kit.chars', { count: length })}`,
-        '',
-        this.$t('meta-kit.slug.ranges'),
-        '',
-        `${label('Depth')}: ${range(cfg.depth)}`,
-        `${label('Words')}: ${range(cfg.words)}`,
-        `${label('Length')}: ${range(cfg.length)}`,
-        `${this.$t('meta-kit.slug.wordlength')}: ${range(cfg.wordLength)}`
-      ].join('\n') + reasons;
-    },
-
-    // Status display helpers
     getStatusLabel(page) {
       if (!page.status) return '—';
-      const labelKey = this.statusMappings[page.status]?.label;
-      return (labelKey && this.$t(labelKey)) ||
-             page.status.charAt(0).toUpperCase() + page.status.slice(1);
+      const key = STATUS_LABELS[page.status];
+      return (key && this.$t(key)) || page.status.charAt(0).toUpperCase() + page.status.slice(1);
     },
-
-    getStatusDotClass(page) {
-      return page.status ? (this.statusMappings[page.status]?.dotClass || '') : '';
+    dot(page, field) {
+      return `is-${classifyPageField(page, field, this.classifierContext)}`;
     },
+    // Everything a cell and its tooltip show for one field
+    tip(page, field) {
+      const og = field.startsWith('og');
+      const isTitle = field.endsWith('Title');
+      const text = isTitle
+        ? (getTableTitleDisplay(page, this.siteSettings, og ? 'og' : 'meta').fullTitle || '')
+        : (getEffectiveDescription(page, og ? 'og' : 'meta', this.siteSettings) || '');
+      const length = isTitle ? this.getTitleLength(page, og ? 'og' : 'meta') : text.length;
 
-    getRobotsDisplay(page) {
-      if (!page.robots) return '—';
-      return page.robots.includes('noindex') ? 'nidx' : page.robots;
+      const notes = [];
+      if (!og) {
+        const duplicates = this.duplicates?.[isTitle ? 'title' : 'description']?.[page.id];
+        if (duplicates?.length) {
+          const titles = duplicates.map((id) => this.allPages.find((other) => other.id === id)?.title || id);
+          notes.push(this.$t(isTitle ? 'meta-kit.reason.duplicateTitle' : 'meta-kit.reason.duplicateDescription', { pages: titles.join(', ') }));
+        }
+      }
+
+      return {
+        text,
+        length,
+        ranges: page.id === 'site' && isTitle ? null : getRangesForPageAndType(page, CLASSIFY[field], this.validationSettings),
+        source: this.source(page, field),
+        notes
+      };
     },
-
-    getRobotsTooltip(page) {
-      return page.robots || this.$t('meta-kit.robots.notSet');
+    source(page, field) {
+      const source = getInheritanceSource(page, field, this.siteSettings);
+      if (!source) return null;
+      if (SOURCES[source]) {
+        const [label, help] = SOURCES[source];
+        return { label: this.$t(label), help: this.$t('meta-kit.v2.tip.inherited', { source: this.$t(help) }) };
+      }
+      // Inherited from the main language: source is its name
+      return { label: String(source), help: this.$t('meta-kit.v2.tip.mainLanguage', { language: String(source) }) };
+    },
+    hidden(page, field) {
+      return this.inheritance === 'none' && !!this.source(page, field);
+    },
+    // The source word shown beneath an inherited value
+    mark(page, field) {
+      if (this.inheritance !== 'marked') return null;
+      return this.source(page, field)?.label || null;
+    },
+    slugRows(page) {
+      if (page.id === 'site') return [];
+      const { wordCount, length, numSlashes, cfg } = getSlugAnalysis(page, this.validationSettings);
+      const row = (key, value, rule) => ({
+        key,
+        label: this.$t(`meta-kit.slug.${key}`),
+        value,
+        optimal: `${rule.optimal.min}–${rule.optimal.max}`,
+        level: isOutsideRange(value, rule.warning) ? 'error' : (isOutsideRange(value, rule.optimal) ? 'warning' : 'good')
+      });
+      return [row('depth', numSlashes, cfg.depth), row('words', wordCount, cfg.words), row('length', length, cfg.length)];
+    },
+    // Long paths wrap; the parent path is dimmed so the slug itself stands out
+    slugParent(page) {
+      if (page.id === 'site' || !page.id.includes('/')) return '';
+      return page.id.slice(0, page.id.lastIndexOf('/') + 1);
+    },
+    slugName(page) {
+      if (page.id === 'site') return '/';
+      return page.id.slice(page.id.lastIndexOf('/') + 1);
+    },
+    // Same status icons as Kirby's page lists
+    statusIcon(page) {
+      return { listed: 'status-listed', unlisted: 'status-unlisted', draft: 'status-draft' }[page.status] || null;
+    },
+    // A check for an image (dimmed when the site image is used), a red dot when none applies
+    imageState(page) {
+      if (page.hasOgImage) return 'own';
+      if (this.siteSettings?.siteHasOgImage) return 'site';
+      return 'none';
+    },
+    imageTip(page) {
+      if (page.hasOgImage) return this.$t('meta-kit.ogImage.own');
+      if (this.siteSettings?.siteHasOgImage) return this.$t('meta-kit.ogImage.site');
+      return this.$t('meta-kit.ogImage.none');
     }
   }
 };

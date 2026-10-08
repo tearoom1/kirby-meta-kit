@@ -24,19 +24,9 @@
       {{ fullTitle }}
     </div>
     <meta-kit-length-meter
-      v-if="variant === 'v2'"
       :length="charCount"
       :ranges="ranges"
     />
-    <div v-else class="k-meta-kit-dialog-field-meta">
-      <span>
-        <span v-if="value"
-              class="k-meta-kit-field-length"
-              :class="statusClass">
-          {{ $t('meta-kit.chars', { count: charCount }) }}
-        </span>
-      </span>
-    </div>
     <div v-if="isGenerating" class="k-meta-kit-dialog-generating">
       <k-icon class="k-meta-kit-spinner" type="loader"/>
       <span>{{ $t('meta-kit.generate.generating') }}</span>
@@ -45,8 +35,8 @@
 </template>
 
 <script>
-import { getFieldLengthStatus, getRangesForPageAndType } from '../../../composables/useValidation.js';
-import MetaKitLengthMeter from '../v2/MetaKitLengthMeter.vue';
+import { getRangesForPageAndType } from '../../../composables/useValidation.js';
+import MetaKitLengthMeter from '../common/MetaKitLengthMeter.vue';
 import { getFieldTitleDisplay, shouldAppendSiteName } from '../../../composables/panelDisplay.js';
 
 export default {
@@ -106,11 +96,6 @@ export default {
       type: Object,
       default: () => ({})
     },
-    // Temporary design comparison
-    variant: {
-      type: String,
-      default: 'v1'
-    }
   },
   components: { MetaKitLengthMeter },
   computed: {
@@ -163,28 +148,6 @@ export default {
         siteSettings: this.siteSettings
       }).charCount;
     },
-    statusClass() {
-      const titleToUse = this.effectiveTitle;
-      if (!titleToUse) return '';
-
-      // For site page, no color coding
-      if (this.isSitePage) {
-        return '';
-      }
-
-      let finalLength = titleToUse.length;
-      if (this.shouldAppendSiteName) {
-        finalLength = this.fullTitle.length;
-      }
-
-      const status = getFieldLengthStatus(
-        finalLength,
-        this.template,
-        this.type === 'og' ? 'ogTitle' : 'title',
-        this.validationSettings
-      );
-      return status ? `k-meta-kit-status-${status}` : '';
-    }
   }
 };
 </script>

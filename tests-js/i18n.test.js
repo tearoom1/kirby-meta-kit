@@ -50,14 +50,14 @@ test('every key used in components, scripts, blueprints and PHP exists', () => {
 });
 
 test('t() falls back to English and fills placeholders', () => {
-  assert.equal(t('stats.good', { count: 3 }), '3 good');
+  assert.equal(t('v2.fix', { count: 3 }), '3 fix');
   assert.equal(t('does.not.exist'), 'meta-kit.does.not.exist');
 });
 
 test('t() uses the panel translation when available', () => {
-  globalThis.window = { panel: { t: (key, data, fallback) => (key === 'meta-kit.stats.good' ? `${data.count} gut` : fallback) } };
+  globalThis.window = { panel: { t: (key, data, fallback) => (key === 'meta-kit.v2.fix' ? `${data.count} gut` : fallback) } };
   try {
-    assert.equal(t('stats.good', { count: 2 }), '2 gut');
+    assert.equal(t('v2.fix', { count: 2 }), '2 gut');
   } finally {
     delete globalThis.window;
   }
