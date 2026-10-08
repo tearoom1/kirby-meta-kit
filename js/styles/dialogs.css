@@ -1,0 +1,280 @@
+/* Checkbox and edit/generate dialogs */
+.k-meta-kit-view {
+  /* Checkbox */
+
+  .k-meta-kit-table-checkbox {
+    width: 40px;
+    text-align: center;
+  }
+
+  .k-meta-kit-table-checkbox input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Dialog Table Layout */
+
+  .k-meta-kit-dialog-table-wrapper {
+    overflow-x: auto;
+    max-height: 70vh;
+    border: 1px solid var(--color-border);
+    border-radius: var(--rounded);
+    background: var(--color-background);
+    padding: 0.875rem;
+    margin-top: 0.75rem;
+  }
+
+  .k-meta-kit-dialog-table-page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.875rem 1rem;
+    margin-bottom: 0;
+    padding: 0.875rem 0;
+
+    > * {
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+    }
+  }
+
+  .k-meta-kit-dialog-table-page:not(:last-child) {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .k-meta-kit-dialog-page-info {
+    grid-column: -1 / 1;
+    display: flex;
+    flex-direction: row;
+    gap: 0.875rem;
+    align-items: baseline;
+    justify-content: space-between;
+
+    h2 {
+      text-transform: uppercase;
+      color: var(--color-text-dimmed);
+      font-size: 0.8rem;
+    }
+  }
+
+  .k-meta-kit-dialog-page-info .k-link {
+    font-size: 0.9rem;
+  }
+
+  .k-meta-kit-page-id {
+    color: var(--color-text-dimmed);
+    font-size: 0.8rem;
+  }
+
+  .k-meta-kit-dialog-field-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.125rem;
+  }
+
+  .k-meta-kit-dialog-field-label {
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--color-text);
+    line-height: 1.2;
+  }
+
+  .k-meta-kit-dialog-table-actions {
+    grid-column: -1 / 1;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .k-meta-kit-dialog-field-meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    min-height: 1.25rem;
+  }
+
+  .k-meta-kit-dialog-generating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-text-dimmed);
+    font-size: 0.875rem;
+    padding: 0.5rem;
+    background: var(--color-background);
+    border-radius: var(--rounded-xs);
+  }
+
+  .k-meta-kit-title-preview {
+    font-size: 0.8125rem;
+    color: var(--color-text-dimmed);
+    padding: 0.35rem 0.5rem;
+    background: var(--color-background);
+    border-radius: var(--rounded-xs);
+    margin-top: 0.125rem;
+    line-height: 1.35;
+  }
+
+  .k-meta-kit-dialog-actions-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  /* Dark mode for dialog table */
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-table-wrapper {
+    background: var(--color-black);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-table thead {
+    background: var(--color-back);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-table th {
+    background: var(--color-back);
+    color: var(--color-text);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-table tbody tr:hover {
+    background: var(--color-back);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-generating {
+    background: var(--color-black);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-bulk-option {
+    background: var(--color-black);
+    border-color: var(--color-border);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-bulk-option:hover {
+    background: var(--color-gray-900);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-bulk-option-content span {
+    color: var(--color-gray-400);
+  }
+
+  /* Bulk Generation Dialog */
+
+  .k-meta-kit-bulk-options {
+    padding: 1rem 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .k-meta-kit-bulk-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--rounded-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .k-meta-kit-bulk-option:hover {
+    background: var(--color-background);
+    border-color: var(--color-focus);
+  }
+
+  .k-meta-kit-bulk-option input[type="checkbox"] {
+    margin-top: 0.125rem;
+    cursor: pointer;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+
+  .k-meta-kit-bulk-option-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+  }
+
+  .k-meta-kit-bulk-option-content strong {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .k-meta-kit-bulk-option-content span {
+    font-size: 0.875rem;
+    color: var(--color-gray-600);
+  }
+
+  .k-meta-kit-bulk-buttons {
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+  }
+
+  /* Single Page Edit Dialog */
+
+  .k-dialog[data-size="large"] .k-meta-kit-single-edit {
+    max-width: 56rem;
+    margin: 0 auto;
+  }
+
+  .k-meta-kit-single-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .k-meta-kit-single-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .k-meta-kit-single-field-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .k-meta-kit-single-field-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .k-meta-kit-og-image-empty {
+    color: var(--color-text-dimmed);
+    font-style: italic;
+    padding: 0.65rem 0.875rem;
+    background: var(--color-background);
+    border-radius: var(--rounded);
+    text-align: center;
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-empty {
+    background: var(--color-black);
+  }
+
+  /* Tabs for bulk edit dialog */
+
+  .k-meta-kit-tabs {
+    display: flex;
+    margin: -0.5rem 0 0.5rem;
+
+    .k-button {
+      background: var(--color-back);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+    .k-button.active {
+      background: var(--color-gray-800);
+      color: var(--color-white);
+    }
+  }
+}

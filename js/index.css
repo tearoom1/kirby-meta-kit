@@ -1,4 +1,13 @@
-@import './components/MetaKitView.css';
+@import './styles/dialog-base.css';
+@import './styles/layout.css';
+@import './styles/stats.css';
+@import './styles/table.css';
+@import './styles/fields.css';
+@import './styles/controls.css';
+@import './styles/dialogs.css';
+@import './styles/loading.css';
+@import './styles/review.css';
+@import './styles/print.css';
 
 /* SEO Preview Section */
 .k-seo-preview-section {

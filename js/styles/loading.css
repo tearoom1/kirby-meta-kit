@@ -1,0 +1,67 @@
+/* Loading overlay */
+.k-meta-kit-view {
+  /* Loading Overlay */
+
+  .k-meta-kit-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.2s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .k-meta-kit-loading-content {
+    background: var(--color-background);
+    border-radius: var(--rounded);
+    padding: 2rem 3rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    min-width: 300px;
+    max-width: 500px;
+    text-align: center;
+  }
+
+  .k-meta-kit-loading-spinner {
+    font-size: 3rem;
+    color: var(--color-blue-600);
+    animation: mk-spin 1s linear infinite;
+  }
+
+  .k-meta-kit-loading-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .k-meta-kit-loading-progress {
+    font-size: 0.875rem;
+    color: var(--color-text-dimmed);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-loading-overlay {
+    background: rgba(0, 0, 0, 0.85);
+  }
+
+  .k-panel[data-color-scheme="dark"] .k-meta-kit-loading-spinner {
+    color: var(--color-blue-400);
+  }
+}

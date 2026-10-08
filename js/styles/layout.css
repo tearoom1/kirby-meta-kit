@@ -1,0 +1,59 @@
+/* Top bar and notices */
+.k-meta-kit-view {
+  /* Top Bar (Language Switcher + Sponsor, both right-aligned) */
+
+  .k-meta-kit-topbar {
+    margin-top: -1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .k-meta-kit-language-bar {
+    display: flex;
+    align-items: center;
+
+    .k-button-group {
+      gap: 0;
+    }
+  }
+
+  .k-meta-kit-sponsor {
+    position: relative;
+  }
+
+  .k-meta-kit-sponsor-button {
+    --button-color-icon: #e0245e;
+    color: #e0245e;
+  }
+
+  .k-meta-kit-sponsor-button:hover {
+    --button-color-icon: #b81d4d;
+    color: #b81d4d;
+  }
+
+  .k-meta-kit-sponsor-text {
+    max-width: 17rem;
+    padding: .75rem .75rem .5rem;
+    color: var(--color-text-dimmed);
+    font-size: .8rem;
+    line-height: 1.35;
+  }
+
+  .k-meta-kit-warning {
+    margin-bottom: 1.5rem;
+  }
+
+  .k-meta-kit-warning .k-box {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .k-meta-kit-warning .k-box > span {
+    flex: 1;
+  }
+}
