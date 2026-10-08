@@ -1,5 +1,6 @@
 <?php
 
+use Kirby\Cms\Site;
 use TearoomOne\ConfigHelper;
 use TearoomOne\MetaKit;
 
@@ -35,7 +36,7 @@ return [
                 'siteMetaTitle' => $siteSettings['siteMetaTitle'],
                 'titleSeparator' => $siteSettings['titleSeparator'],
                 'fieldType' => $this->fieldType(),
-                'pageId' => $this->pageId() ?? $model->id(),
+                'pageId' => $this->pageId() ?? ($model instanceof Site ? 'site' : $model->id()),
                 'template' => $template
             ];
         },
