@@ -42,17 +42,23 @@ $ogDescription = MetaHelper::buildOgDescription($page, $site, $metaDescription);
 
 // Get OG image (flat field on page, fallback to site flat field)
 $ogImage = null;
-if ($page->ogImage()->isNotEmpty()) {
-    $ogImageFile = $page->ogImage()->toFile();
-    if ($ogImageFile) {
-        $ogImage = $ogImageFile->resize(1200, 630);
-    }
-} elseif ($site->ogImage()->isNotEmpty()) {
-    $ogImageFile = $site->ogImage()->toFile();
-    if ($ogImageFile) {
-        $ogImage = $ogImageFile->resize(1200, 630);
-    }
+$ogImageFile = $page->ogImage()->isNotEmpty()
+    ? $page->ogImage()->toFile()
+    : ($site->ogImage()->isNotEmpty() ? $site->ogImage()->toFile() : null);
+if ($ogImageFile) {
+    $ogImage = $ogImageFile->resize(1200, 630);
 }
+$ogImageAlt = $ogImageFile && $ogImageFile->alt()->isNotEmpty() ? $ogImageFile->alt()->value() : null;
+
+// Articles (blog posts etc.) get og:type article, dates and Article schema
+$isArticle = in_array(
+    $page->intendedTemplate()->name(),
+    (array)option('tearoom1.meta-kit.opengraph.articleTemplates', ['article', 'post']),
+    true
+);
+$dateField = $page->content()->get(option('tearoom1.meta-kit.opengraph.dateField', 'date'));
+$publishedTime = $isArticle && $dateField->isNotEmpty() ? $dateField->toDate('c') : null;
+$modifiedTime = $isArticle ? date('c', $page->modified()) : null;
 ?>
 
 <?php if ($enableMeta): ?>
@@ -86,8 +92,9 @@ if ($page->ogImage()->isNotEmpty()) {
 
 <?php if ($enableOpengraph): ?>
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="<?= $page->url() ?>">
+    <meta property="og:type" content="<?= $isArticle ? 'article' : 'website' ?>">
+    <meta property="og:site_name" content="<?= esc($site->title()->value()) ?>">
+    <meta property="og:url" content="<?= esc($page->url()) ?>">
     <meta property="og:title" content="<?= esc($ogTitle) ?>">
 <?php if (!empty($ogDescription)): ?>
     <meta property="og:description" content="<?= esc($ogDescription) ?>">
@@ -96,6 +103,15 @@ if ($page->ogImage()->isNotEmpty()) {
     <meta property="og:image" content="<?= $ogImage->url() ?>">
     <meta property="og:image:width" content="<?= $ogImage->width() ?>">
     <meta property="og:image:height" content="<?= $ogImage->height() ?>">
+<?php if ($ogImageAlt): ?>
+    <meta property="og:image:alt" content="<?= esc($ogImageAlt) ?>">
+<?php endif; ?>
+<?php endif; ?>
+<?php if ($publishedTime): ?>
+    <meta property="article:published_time" content="<?= $publishedTime ?>">
+<?php endif; ?>
+<?php if ($modifiedTime): ?>
+    <meta property="article:modified_time" content="<?= $modifiedTime ?>">
 <?php endif; ?>
 <?php if (kirby()->multilang()): ?>
     <meta property="og:locale" content="<?= MetaHelper::ogLocale(kirby()->language()) ?>">
@@ -107,13 +123,16 @@ if ($page->ogImage()->isNotEmpty()) {
 <?php endif; ?>
 
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:card" content="<?= $ogImage ? 'summary_large_image' : 'summary' ?>">
     <meta name="twitter:title" content="<?= esc($ogTitle) ?>">
 <?php if (!empty($ogDescription)): ?>
     <meta name="twitter:description" content="<?= esc($ogDescription) ?>">
 <?php endif; ?>
 <?php if ($ogImage): ?>
     <meta name="twitter:image" content="<?= $ogImage->url() ?>">
+<?php if ($ogImageAlt): ?>
+    <meta name="twitter:image:alt" content="<?= esc($ogImageAlt) ?>">
+<?php endif; ?>
 <?php endif; ?>
 
 <?php endif; ?>
@@ -205,6 +224,33 @@ if ($ogImage) {
     $webPageSchema['image'] = $ogImage->url();
 }
 
+// Article schema for article templates
+if ($isArticle) {
+    $articleSchema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'Article',
+        'headline' => mb_substr($page->title()->value(), 0, 110),
+        'description' => $metaDescription,
+        'url' => $page->url(),
+        'mainEntityOfPage' => $page->url(),
+        'inLanguage' => MetaHelper::currentLanguageCode(kirby()),
+        'dateModified' => $modifiedTime,
+        'publisher' => [
+            '@type' => $schemaType,
+            'name' => $schemaName,
+        ],
+    ];
+    if ($publishedTime) {
+        $articleSchema['datePublished'] = $publishedTime;
+    }
+    if ($author) {
+        $articleSchema['author'] = ['@type' => 'Person', 'name' => $author->value()];
+    }
+    if ($ogImage) {
+        $articleSchema['image'] = $ogImage->url();
+    }
+}
+
 // Add breadcrumb
 if (!$page->isHomePage() && $page->parents()->count() > 0) {
     $breadcrumbItems = [];
@@ -260,6 +306,12 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG | JSON_HE
 <script type="application/ld+json">
   <?= json_encode($webPageSchema, $jsonFlags) ?>
 </script>
+
+<?php if (isset($articleSchema)): ?>
+<script type="application/ld+json">
+  <?= json_encode($articleSchema, $jsonFlags) ?>
+</script>
+<?php endif; ?>
 
 <?php if (isset($breadcrumbSchema)): ?>
 <script type="application/ld+json">

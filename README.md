@@ -758,14 +758,24 @@ robots.txt available at `/robots.txt` with:
 - Organization data (site-wide)
 - WebSite with site search
 - WebPage with breadcrumbs
-- Article markup for blog posts
-- Product markup (if configured)
+- Article markup for article templates (see below)
 
 **Enable/Disable:**
 
 ```php
 'schema.enabled' => true,
 ```
+
+### Articles
+
+Pages with an article template get `og:type` `article`, `article:published_time` (from their date field), `article:modified_time` and an `Article` schema with author (from Meta Author) and publisher:
+
+```php
+'opengraph.articleTemplates' => ['article', 'post'],  // default
+'opengraph.dateField' => 'date',                      // default
+```
+
+All pages also get `og:site_name`, `og:image:alt`/`twitter:image:alt` from the image's alt text, and a `summary` Twitter card when there is no image (`summary_large_image` otherwise).
 
 ---
 

@@ -208,6 +208,70 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         $this->assertSame('Evil</script><script>alert(1)</script>', $json['name'] ?? null);
     }
 
+    public function testArticlePagesGetArticleTagsAndSchema(): void
+    {
+        $kirby = $this->makeKirby([
+            'site.txt' => "Title: Tea Room\n----\nAppendsitename: false\n",
+            'journal/post/article.txt' => "Title: Sencha\n----\nDate: 2026-03-01 10:00\n----\nMetadescription: About sencha\n----\nMetaauthor: Mia\n",
+            'about/default.txt' => "Title: About\n",
+        ]);
+
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('journal/post'));
+
+        $this->assertStringContainsString('<meta property="og:type" content="article">', $html);
+        $this->assertStringContainsString('<meta property="og:site_name" content="Tea Room">', $html);
+        $this->assertMatchesRegularExpression('~<meta property="article:published_time" content="2026-03-01T10:00:00[^"]*">~', $html);
+        $this->assertStringContainsString('<meta property="article:modified_time"', $html);
+        $this->assertStringContainsString('"@type": "Article"', $html);
+        $this->assertStringContainsString('"headline": "Sencha"', $html);
+        $this->assertStringContainsString('"name": "Mia"', $html);
+        // No image: the small Twitter card
+        $this->assertStringContainsString('<meta name="twitter:card" content="summary">', $html);
+
+        $html = $this->renderSeoSnippet($kirby->page('about'));
+        $this->assertStringContainsString('<meta property="og:type" content="website">', $html);
+        $this->assertStringNotContainsString('article:published_time', $html);
+        $this->assertStringNotContainsString('"@type": "Article"', $html);
+    }
+
+    public function testArticleTemplatesAreConfigurable(): void
+    {
+        $kirby = $this->makeKirby([
+            'site.txt' => 'Title: Site',
+            'news/item/news-item.txt' => "Title: News\n----\nPublished: 2026-01-02\n",
+        ], ['tearoom1.meta-kit' => [
+            'opengraph.articleTemplates' => ['news-item'],
+            'opengraph.dateField' => 'published',
+        ]]);
+
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('news/item'));
+
+        $this->assertStringContainsString('<meta property="og:type" content="article">', $html);
+        $this->assertStringContainsString('<meta property="article:published_time" content="2026-01-02T', $html);
+    }
+
+    public function testImageAltTextAndLargeCardWithImage(): void
+    {
+        $kirby = $this->makeKirby([
+            'site.txt' => 'Title: Site',
+            'about/default.txt' => "Title: About\n----\nOgimage: - cover.png\n",
+            'about/cover.png.txt' => "Alt: Two cups of green tea\n",
+        ]);
+        // 1×1 PNG
+        file_put_contents($kirby->root('content') . '/about/cover.png', base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+        ));
+
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('about'));
+
+        $this->assertStringContainsString('<meta name="twitter:card" content="summary_large_image">', $html);
+        $this->assertStringContainsString('<meta property="og:image:alt" content="Two cups of green tea">', $html);
+        $this->assertStringContainsString('<meta name="twitter:image:alt" content="Two cups of green tea">', $html);
+    }
+
     private function renderSeoSnippet($page): string
     {
         $site = site();

@@ -57,6 +57,11 @@ return [
         // SEO Settings
         // ============================================
 
+        // Templates rendered as articles (og:type article, publish/modified
+        // dates and Article schema) and the field holding their publish date
+        'opengraph.articleTemplates' => ['article', 'post'],
+        'opengraph.dateField' => 'date',
+
         // Auto-generate a missing meta description when a page is saved.
         // Runs after the response is sent (PHP-FPM), so saving isn't blocked,
         // but it still makes an API call for every save of such a page.
