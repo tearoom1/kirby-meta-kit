@@ -48,7 +48,8 @@ abstract class KirbyTestCase extends TestCase
     protected function makeKirby(
         array $contentFiles,
         array $options = [],
-        ?array $languages = null
+        ?array $languages = null,
+        array $extraConfig = []
     ): KirbyApp {
         $testDir = sys_get_temp_dir() . '/kirby-test-' . uniqid();
         $this->tempDirs[] = $testDir;
@@ -84,6 +85,11 @@ abstract class KirbyTestCase extends TestCase
 
         if ($languages !== null) {
             $config['languages'] = $languages;
+        }
+
+        $config = array_replace($config, $extraConfig);
+        if (array_key_exists('user', $extraConfig) && $extraConfig['user'] === null) {
+            unset($config['user']);
         }
 
         $kirby = new KirbyApp($config);

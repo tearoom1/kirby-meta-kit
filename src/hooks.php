@@ -70,8 +70,9 @@ return [
         if ($needsUpdate && !defined("KIRBY_META_KIT_INITIALIZING")) {
             define("KIRBY_META_KIT_INITIALIZING", true);
             try {
-                kirby()->impersonate("kirby");
-                $site->update($updates);
+                // Scoped impersonation: the rest of the request must keep
+                // running as the actual visitor, even if the update fails
+                kirby()->impersonate("kirby", fn () => $site->update($updates));
             } catch (\Exception $e) {
                 // Silently fail - site might be read-only or in a context where updates aren't allowed
             }
