@@ -15,10 +15,10 @@
             <th>{{ $t('meta-kit.table.page') }}</th>
             <template v-if="!showPreview">
               <th>{{ $t('meta-kit.field.slug') }}</th>
-              <th>{{ $t('meta-kit.field.metaTitle') }}</th>
-              <th>{{ $t('meta-kit.field.metaDescription.short') }}</th>
-              <th>{{ $t('meta-kit.field.ogTitle') }}</th>
-              <th>{{ $t('meta-kit.field.ogDescription.short') }}</th>
+              <th class="k-mk2-count-col">{{ $t('meta-kit.field.metaTitle') }}</th>
+              <th class="k-mk2-count-col">{{ $t('meta-kit.field.metaDescription.short') }}</th>
+              <th class="k-mk2-count-col">{{ $t('meta-kit.field.ogTitle') }}</th>
+              <th class="k-mk2-count-col">{{ $t('meta-kit.field.ogDescription.short') }}</th>
               <th class="k-mk2-image-col">{{ $t('meta-kit.field.ogImage.short') }}</th>
             </template>
             <template v-else>
@@ -26,17 +26,7 @@
               <th>{{ $t(isOg ? 'meta-kit.field.ogDescription' : 'meta-kit.field.metaDescription') }}</th>
               <th v-if="isOg" class="k-mk2-image-col">{{ $t('meta-kit.field.ogImage.short') }}</th>
             </template>
-            <th class="k-mk2-actions">
-              <Tooltip>
-                <template #tip>
-                  <div class="k-mk2-tip-body">
-                    <p class="k-mk2-tip-line"><i class="k-mk2-dot is-error"></i>{{ $t('meta-kit.v2.level.error') }} · <i class="k-mk2-dot is-warning"></i>{{ $t('meta-kit.v2.level.warning') }} · <i class="k-mk2-dot is-good"></i>{{ $t('meta-kit.v2.level.good') }}</p>
-                    <p class="k-mk2-tip-line">{{ $t('meta-kit.v2.legend.sources') }}</p>
-                  </div>
-                </template>
-                <span class="k-mk2-info" tabindex="0" :aria-label="$t('meta-kit.v2.legend.sources')">ⓘ</span>
-              </Tooltip>
-            </th>
+            <th class="k-mk2-actions"></th>
           </tr>
         </thead>
         <tbody>
@@ -55,6 +45,9 @@
             </td>
             <td class="k-mk2-page">
               <span class="k-mk2-title">
+                <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
+              </span>
+              <span class="k-mk2-sub">
                 <k-icon v-if="page.id === 'site'" type="globe" class="k-mk2-status is-site" />
                 <k-icon
                   v-else-if="statusIcon(page)"
@@ -63,11 +56,8 @@
                   :title="getStatusLabel(page)"
                   :aria-label="getStatusLabel(page)"
                 />
-                <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
-              </span>
-              <span class="k-mk2-sub">
-                {{ page.template }}
-                <span v-if="page.robots && page.robots.includes('noindex')" class="k-mk2-pill is-warning">noindex</span>
+                <span>{{ page.template }}</span>
+                <span v-if="page.robots && page.robots.includes('noindex')" class="k-mk2-pill">noindex</span>
               </span>
             </td>
 
@@ -90,21 +80,26 @@
                   </span>
                 </Tooltip>
               </td>
-              <td v-for="field in COUNT_FIELDS" :key="field">
+              <td v-for="field in COUNT_FIELDS" :key="field" class="k-mk2-count-col">
                 <Tooltip>
                   <template #tip><meta-kit-field-tip v-bind="tip(page, field)" /></template>
-                  <span class="k-mk2-cell">
-                    <i :class="['k-mk2-dot', dot(page, CLASSIFY[field])]"></i>{{ tip(page, field).length || '—' }}
-                    <span v-if="tip(page, field).source" class="k-mk2-pill">{{ tip(page, field).source.label }}</span>
+                  <span class="k-mk2-cell k-mk2-stack" :class="{ 'is-inherited': !!tip(page, field).source }">
+                    <span v-if="hidden(page, field)"><i class="k-mk2-dot is-none"></i>—</span>
+                    <template v-else>
+                      <span><i :class="['k-mk2-dot', dot(page, CLASSIFY[field])]"></i>{{ tip(page, field).length || '—' }}</span>
+                      <span v-if="mark(page, field)" class="k-mk2-cap">{{ mark(page, field) }}</span>
+                    </template>
                   </span>
                 </Tooltip>
               </td>
               <td class="k-mk2-image-col">
                 <Tooltip>
                   <template #tip><div class="k-mk2-tip-body"><p class="k-mk2-tip-line">{{ imageTip(page) }}</p></div></template>
-                  <span class="k-mk2-image">
-                    <k-icon v-if="imageState(page) !== 'none'" type="check" :class="'is-' + imageState(page)" />
+                  <span class="k-mk2-image k-mk2-stack">
+                    <span v-if="imageState(page) === 'site' && inheritance === 'none'" class="k-mk2-cell is-inherited">—</span>
+                    <k-icon v-else-if="imageState(page) !== 'none'" type="check" :class="'is-' + imageState(page)" />
                     <i v-else class="k-mk2-dot is-error"></i>
+                    <span v-if="imageState(page) === 'site' && inheritance === 'marked'" class="k-mk2-cap">{{ $t('meta-kit.v2.source.site') }}</span>
                   </span>
                 </Tooltip>
               </td>
@@ -116,21 +111,25 @@
                 <Tooltip>
                   <template #tip><meta-kit-field-tip v-bind="tip(page, field)" /></template>
                   <div class="k-mk2-content-text" :class="{ 'is-inherited': !!tip(page, field).source }">
-                    <i :class="['k-mk2-dot', dot(page, CLASSIFY[field])]"></i>
-                    <span>{{ tip(page, field).text || '—' }}</span>
+                    <template v-if="hidden(page, field)"><i class="k-mk2-dot is-none"></i><span>—</span></template>
+                    <template v-else>
+                      <i :class="['k-mk2-dot', dot(page, CLASSIFY[field])]"></i>
+                      <span>{{ tip(page, field).text || '—' }}</span>
+                    </template>
                   </div>
-                  <div v-if="tip(page, field).length" class="k-mk2-sub k-mk2-content-meta">
-                    {{ $t('meta-kit.chars', { count: tip(page, field).length }) }}
-                    <span v-if="tip(page, field).source" class="k-mk2-pill">{{ tip(page, field).source.label }}</span>
+                  <div v-if="tip(page, field).length && !hidden(page, field)" class="k-mk2-sub k-mk2-content-meta">
+                    {{ $t('meta-kit.chars', { count: tip(page, field).length }) }}<span v-if="mark(page, field)"> · {{ mark(page, field) }}</span>
                   </div>
                 </Tooltip>
               </td>
               <td v-if="isOg" class="k-mk2-image-col">
                 <Tooltip>
                   <template #tip><div class="k-mk2-tip-body"><p class="k-mk2-tip-line">{{ imageTip(page) }}</p></div></template>
-                  <span class="k-mk2-image">
-                    <k-icon v-if="imageState(page) !== 'none'" type="check" :class="'is-' + imageState(page)" />
+                  <span class="k-mk2-image k-mk2-stack">
+                    <span v-if="imageState(page) === 'site' && inheritance === 'none'" class="k-mk2-cell is-inherited">—</span>
+                    <k-icon v-else-if="imageState(page) !== 'none'" type="check" :class="'is-' + imageState(page)" />
                     <i v-else class="k-mk2-dot is-error"></i>
+                    <span v-if="imageState(page) === 'site' && inheritance === 'marked'" class="k-mk2-cap">{{ $t('meta-kit.v2.source.site') }}</span>
                   </span>
                 </Tooltip>
               </td>
@@ -151,6 +150,14 @@
         </tbody>
       </table>
     </div>
+    <p class="k-mk2-legend">
+      <span><i class="k-mk2-dot is-error"></i>{{ $t('meta-kit.v2.level.error') }}</span>
+      <span><i class="k-mk2-dot is-warning"></i>{{ $t('meta-kit.v2.level.warning') }}</span>
+      <span>{{ $t('meta-kit.v2.legend.good') }}</span>
+      <span v-if="inheritance === 'none'">{{ $t('meta-kit.v2.legend.hidden') }}</span>
+      <span v-else-if="inheritance === 'marked'">{{ $t('meta-kit.v2.legend.marks') }}</span>
+      <span v-else>{{ $t('meta-kit.v2.legend.inherited') }}</span>
+    </p>
   </div>
 </template>
 
@@ -167,6 +174,8 @@ import { getTableTitleDisplay } from '../../../composables/panelDisplay.js';
 const COUNT_FIELDS = ['metaTitle', 'metaDescription', 'ogTitle', 'ogDescription'];
 // Field → classifier / range type
 const CLASSIFY = { metaTitle: 'title', metaDescription: 'description', ogTitle: 'ogTitle', ogDescription: 'ogDescription' };
+// [label, help]: the label is the word under the value when inheritance is
+// "marked" and the pill in the tooltip; help is the tooltip sentence
 const SOURCES = {
   'site': ['meta-kit.v2.source.site', 'meta-kit.v2.source.site.help'],
   'page title': ['meta-kit.v2.source.title', 'meta-kit.v2.source.title.help'],
@@ -177,6 +186,10 @@ const SOURCES = {
 export default {
   extends: MetaKitTable,
   components: { MetaKitFieldTip },
+  props: {
+    // none: inherited cells show a dash · dimmed: muted · marked: muted with the source word beneath
+    inheritance: { type: String, default: 'dimmed' }
+  },
   data() {
     return { COUNT_FIELDS, CLASSIFY };
   },
@@ -225,8 +238,16 @@ export default {
         const [label, help] = SOURCES[source];
         return { label: this.$t(label), help: this.$t('meta-kit.v2.tip.inherited', { source: this.$t(help) }) };
       }
-      // Inherited from the main language
-      return { label: String(source).toUpperCase(), help: this.$t('meta-kit.v2.tip.mainLanguage', { language: String(source).toUpperCase() }) };
+      // Inherited from the main language: source is its name
+      return { label: String(source), help: this.$t('meta-kit.v2.tip.mainLanguage', { language: String(source) }) };
+    },
+    hidden(page, field) {
+      return this.inheritance === 'none' && !!this.source(page, field);
+    },
+    // The source word shown beneath an inherited value
+    mark(page, field) {
+      if (this.inheritance !== 'marked') return null;
+      return this.source(page, field)?.label || null;
     },
     slugRows(page) {
       if (page.id === 'site') return [];

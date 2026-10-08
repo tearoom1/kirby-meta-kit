@@ -35,6 +35,21 @@
       </select>
     </div>
 
+    <div v-if="showInheritance" class="k-meta-kit-view-select k-meta-kit-inheritance-select">
+      <label class="k-meta-kit-view-select-label" for="k-meta-kit-inheritance-mode">{{ $t('meta-kit.inheritance') }}</label>
+      <select
+        id="k-meta-kit-inheritance-mode"
+        class="k-meta-kit-view-select-input"
+        :value="inheritance"
+        @change="$emit('update:inheritance', $event.target.value)"
+        :title="$t('meta-kit.inheritance.choose')"
+      >
+        <option value="none">{{ $t('meta-kit.inheritance.none') }}</option>
+        <option value="dimmed">{{ $t('meta-kit.inheritance.dimmed') }}</option>
+        <option value="marked">{{ $t('meta-kit.inheritance.marked') }}</option>
+      </select>
+    </div>
+
     <div class="k-meta-kit-search-wrapper">
       <k-search-input
         icon="search"
@@ -260,6 +275,16 @@ export default {
     sortBy: {
       type: String,
       default: 'default'
+    },
+    // V2: how inherited values appear in the table (none | dimmed | marked)
+    inheritance: {
+      type: String,
+      default: 'dimmed',
+      validator: value => ['none', 'dimmed', 'marked'].includes(value)
+    },
+    showInheritance: {
+      type: Boolean,
+      default: false
     }
   },
   data() {

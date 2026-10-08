@@ -7,7 +7,8 @@
         :disabled="selectedCount === 0"
         @click="$emit('edit-selected')"
       >
-        {{ variant === 'v2' ? $t('meta-kit.v2.edit') : $t('meta-kit.actions.edit') }}<span v-if="selectedCount > 0"> ({{ selectedCount }})</span>
+        <template v-if="variant === 'v2'">{{ editLabel }}</template>
+        <template v-else>{{ $t('meta-kit.actions.edit') }}<span v-if="selectedCount > 0"> ({{ selectedCount }})</span></template>
       </k-button>
       <k-button
         v-if="aiEnabled"
@@ -61,6 +62,12 @@ export default {
     }
   },
   computed: {
+    // V2: say what the button acts on — the selection, the filtered pages or all pages
+    editLabel() {
+      const count = this.selectedCount;
+      if (this.hasSelection) return this.$t('meta-kit.v2.editSelected', { count });
+      return this.$t(this.isFiltered ? 'meta-kit.v2.editFiltered' : 'meta-kit.v2.editAll', { count });
+    },
     scopeHint() {
       return this.$t(this.isFiltered ? 'meta-kit.v2.scope.filtered' : 'meta-kit.v2.scope.all');
     }

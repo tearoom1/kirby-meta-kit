@@ -97,6 +97,8 @@
           :search-query.sync="searchQuery"
           :active-filters.sync="activeFilters"
           :sort-by.sync="sortBy"
+          :inheritance.sync="inheritance"
+          :show-inheritance="isV2"
         />
       </template>
     </meta-kit-actions>
@@ -104,6 +106,7 @@
     <!-- Pages Table -->
     <meta-kit-table-v2
       v-if="isV2"
+      :inheritance="inheritance"
       :show-preview="showPreviewInTable"
       :preview-mode="previewMode"
       :pages="paginatedPages"
@@ -386,6 +389,7 @@ export default {
       sortBy: 'default',
       showPreviewInTable: false,
       previewMode: 'meta',
+      inheritance: 'dimmed',
       loadingProgress: '',
       loadingLabel: '',
       canCancelGeneration: false,
