@@ -61,3 +61,27 @@ test('the site root has no slug and is always good', () => {
   assert.deepEqual(analysis.issues, []);
   assert.equal(classifyPageField({ id: 'site' }, 'slug', context), 'good');
 });
+
+import { findDuplicates, filterPages } from '../js/composables/panelState.js';
+
+test('finds pages sharing their own title or description, ignoring case and spacing', () => {
+  const pages = [
+    page({ id: 'a', title: 'A', hasMetaTitle: true, metaTitle: 'Green Tea', hasMetaDescription: true, metaDescription: 'Unique one' }),
+    page({ id: 'b', title: 'B', hasMetaTitle: true, metaTitle: ' green  tea ', hasMetaDescription: true, metaDescription: 'Shared text' }),
+    page({ id: 'c', title: 'C', hasMetaTitle: true, metaTitle: 'Black Tea', hasMetaDescription: true, metaDescription: 'Shared text' }),
+    // Inherited (not own) values are not compared
+    page({ id: 'd', title: 'D', hasMetaTitle: false, metaTitle: 'Green Tea', hasMetaDescription: false, metaDescription: 'Shared text' })
+  ];
+
+  const duplicates = findDuplicates(pages);
+
+  assert.deepEqual(duplicates.title, { a: ['b'], b: ['a'] });
+  assert.deepEqual(duplicates.description, { b: ['c'], c: ['b'] });
+
+  const ctx = { ...context, duplicates };
+  assert.deepEqual(pages.map((p) => classifyPageField(p, 'duplicates', ctx)), ['warning', 'warning', 'warning', 'good']);
+  assert.deepEqual(
+    filterPages(pages, ['type-duplicates', 'warning'], '', ctx).map((p) => p.id),
+    ['a', 'b', 'c']
+  );
+});

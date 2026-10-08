@@ -603,8 +603,10 @@ Access via the main menu (wand icon):
 
 #### Dashboard
 - **Action-Focused Stats**: See which areas need review or fixes first
+- **Duplicates**: Pages whose own meta title or description is the same as another page's (stats card, "Dupl." filter, and the table tooltip names the other pages)
 - **Page Overview**: List all pages with validation and inheritance status
 - **Quick Actions**: Bulk edit, bulk generate, filter, search, and refresh
+- **Bulk Generation**: Runs page by page with progress and a cancel button; generated texts are shown for review (edit, deselect) before anything is saved
 
 #### Bulk Editor
 - **Table View**: See multiple pages at once in count, meta-content, or OG-content mode

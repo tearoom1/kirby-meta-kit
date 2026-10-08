@@ -33,7 +33,8 @@ const TYPE_FILTERS = new Set([
   'type-og-title',
   'type-og-description',
   'type-og-image',
-  'type-noindex'
+  'type-noindex',
+  'type-duplicates'
 ]);
 const STATUS_FILTERS = new Set(['listed', 'unlisted', 'drafts']);
 
@@ -182,15 +183,57 @@ export function classifyPageField(page, field, context = {}) {
       return classifyOgImage(page, siteSettings);
     case 'noindex':
       return classifyNoindex(page);
+    case 'duplicates': {
+      const duplicates = context.duplicates || {};
+      return duplicates.title?.[page.id] || duplicates.description?.[page.id] ? 'warning' : 'good';
+    }
     default:
       return 'good';
   }
 }
 
 const ATTENTION_FIELDS = ['slug', 'title', 'description', 'ogTitle', 'ogDescription', 'ogImage'];
+const WARNING_ONLY_FIELDS = ['noindex', 'duplicates'];
+
+const normalizeForComparison = (text) => String(text || '').trim().replace(/\s+/g, ' ').toLowerCase();
+
+/**
+ * Pages whose own meta title or description (current language) is the
+ * same as another page's. Inherited values are not compared: the table
+ * already flags inheritance on its own.
+ *
+ * @returns {{ title: Object<string, string[]>, description: Object<string, string[]> }}
+ *          per field: page id → ids of the other pages with the same text
+ */
+export function findDuplicates(pages = []) {
+  const result = { title: {}, description: {} };
+  const fields = [
+    ['title', 'hasMetaTitle', 'metaTitle'],
+    ['description', 'hasMetaDescription', 'metaDescription']
+  ];
+
+  for (const [key, hasKey, valueKey] of fields) {
+    const groups = new Map();
+
+    for (const page of pages) {
+      const value = normalizeForComparison(page[hasKey] ? page[valueKey] : '');
+      if (!value) continue;
+      groups.set(value, [...(groups.get(value) || []), page.id]);
+    }
+
+    for (const ids of groups.values()) {
+      if (ids.length < 2) continue;
+      for (const id of ids) {
+        result[key][id] = ids.filter((other) => other !== id);
+      }
+    }
+  }
+
+  return result;
+}
 
 function hasWarningAttention(page, context = {}) {
-  return [...ATTENTION_FIELDS, 'noindex']
+  return [...ATTENTION_FIELDS, ...WARNING_ONLY_FIELDS]
     .some((field) => classifyPageField(page, field, context) === 'warning');
 }
 
@@ -220,7 +263,8 @@ const TYPE_FILTER_FIELDS = {
   'type-og-title': 'ogTitle',
   'type-og-description': 'ogDescription',
   'type-og-image': 'ogImage',
-  'type-noindex': 'noindex'
+  'type-noindex': 'noindex',
+  'type-duplicates': 'duplicates'
 };
 
 function getTypeStatus(page, filter, context = {}) {

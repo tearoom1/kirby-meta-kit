@@ -171,6 +171,15 @@
             />
             <span>Noidx</span>
           </label>
+          <label class="k-meta-kit-filter-option">
+            <input
+              type="checkbox"
+              value="type-duplicates"
+              :checked="isFilterActive('type-duplicates')"
+              @change="toggleFilter('type-duplicates')"
+            />
+            <span>Dupl.</span>
+          </label>
         </div>
 
         <div class="k-meta-kit-filter-group">

@@ -101,6 +101,8 @@
       :review-enabled="reviewEnabled"
       :site-settings="siteSettingsData"
       :validation-settings="validationSettingsData"
+      :duplicates="duplicates"
+      :all-pages="pagesData"
       @toggle-select-all="toggleSelectAllCurrentPage"
       @toggle-page="togglePageSelection"
       @review-page="reviewSinglePage"
@@ -237,7 +239,8 @@ import {
   getTotalPages,
   isAllCurrentPageSelected as isAllSelectedOnPage,
   toggleSelectAllCurrentPage as toggleSelectAllOnPage,
-  classifyPageField
+  classifyPageField,
+  findDuplicates
 } from '../composables/panelState.js';
 
 export default {
@@ -321,16 +324,19 @@ export default {
       return 'This plugin is built with care and ongoing effort. If it saves you time, a small donation helps keep maintenance and future improvements going.';
     },
 
+    duplicates() {
+      return findDuplicates(this.pagesData);
+    },
+    classifierContext() {
+      return {
+        siteSettings: this.siteSettingsData,
+        validationSettings: this.validationSettingsData,
+        duplicates: this.duplicates
+      };
+    },
     filteredPages() {
-      const filtered = filterPages(this.pagesData, this.activeFilters, this.searchQuery, {
-        siteSettings: this.siteSettingsData,
-        validationSettings: this.validationSettingsData
-      });
-
-      return sortPages(filtered, this.sortBy, {
-        siteSettings: this.siteSettingsData,
-        validationSettings: this.validationSettingsData
-      });
+      const filtered = filterPages(this.pagesData, this.activeFilters, this.searchQuery, this.classifierContext);
+      return sortPages(filtered, this.sortBy, this.classifierContext);
     },
     paginatedPages() {
       return paginatePages(this.filteredPages, this.currentPage, this.pageSize);
@@ -368,6 +374,13 @@ export default {
           detailLines: [
             'Good = page-specific OG image',
             'Review = inherited from site'
+          ]
+        }),
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'duplicates'), 'Duplicates', {
+          attentionStatuses: ['review'],
+          detailLines: [
+            'Good = own title and description are unique',
+            'Review = same meta title or description as another page'
           ]
         }),
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'noindex'), 'Noindex Pages', {
@@ -496,10 +509,7 @@ export default {
 
     // Stats cards use the shared classifier, in their own wording
     classifyForStats(page, field) {
-      const level = classifyPageField(page, field, {
-        siteSettings: this.siteSettingsData,
-        validationSettings: this.validationSettingsData
-      });
+      const level = classifyPageField(page, field, this.classifierContext);
       return { good: 'good', warning: 'review', error: 'fix' }[level];
     },
 

@@ -318,6 +318,15 @@ export default {
       type: Array,
       required: true
     },
+    // All pages (not only this page of the table), to name duplicates
+    allPages: {
+      type: Array,
+      default: () => []
+    },
+    duplicates: {
+      type: Object,
+      default: () => ({ title: {}, description: {} })
+    },
     startIndex: {
       type: Number,
       default: 0
@@ -370,7 +379,8 @@ export default {
     classifierContext() {
       return {
         siteSettings: this.siteSettings,
-        validationSettings: this.validationSettings
+        validationSettings: this.validationSettings,
+        duplicates: this.duplicates
       };
     }
   },
@@ -448,11 +458,8 @@ export default {
     },
 
     // Join tooltip parts with newlines only when both have content
-    joinTooltipParts(base, reason) {
-      if (!base && !reason) return '';
-      if (!base) return reason;
-      if (!reason) return base;
-      return `${base}\n\n${reason}`;
+    joinTooltipParts(...parts) {
+      return parts.filter(Boolean).join('\n\n');
     },
 
     getReasonSeverity(reason) {
@@ -543,7 +550,16 @@ export default {
       const base = this.tooltipText(tooltip, source, showContent);
       const inheritanceReason = this.getInheritanceWarningReason(page, 'metaTitle');
       const lengthReason = this.getLengthValidationReason(page, 'title', this.getTitleLength(page, 'meta'));
-      return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
+      return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason), this.getDuplicateReason(page, 'title'));
+    },
+
+    // "Same text as: …" for pages sharing their own title/description
+    getDuplicateReason(page, field) {
+      const ids = this.duplicates?.[field]?.[page.id];
+      if (!ids?.length) return '';
+
+      const titles = ids.map((id) => this.allPages.find((other) => other.id === id)?.title || id);
+      return `Warning:\nSame ${field === 'title' ? 'meta title' : 'meta description'} as: ${titles.join(', ')}`;
     },
 
     getDescriptionTooltip(page, showContent = true) {
@@ -554,7 +570,7 @@ export default {
       const base = this.tooltipText(text, source, showContent);
       const inheritanceReason = this.getInheritanceWarningReason(page, 'metaDescription');
       const lengthReason = this.getLengthValidationReason(page, 'description', text.length);
-      return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason));
+      return this.joinTooltipParts(base, this.combineReasonParts(inheritanceReason, lengthReason), this.getDuplicateReason(page, 'description'));
     },
 
     getOgTitleTooltip(page, showContent = true) {
