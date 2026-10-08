@@ -1,3 +1,10 @@
+## [2.1.6](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.5...v2.1.6) (2026-10-08)
+
+
+### Bug Fixes
+
+* support reasoning models and custom OpenRouter model IDs ([f502cd6](https://github.com/tearoom1/kirby-meta-kit/commit/f502cd674da01f47bb6caf821afa3f5256db25d9))
+
 ## [2.1.5](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.4...v2.1.5) (2026-09-21)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * enforce tested PHP compatibility ([2457fd7](https://github.com/tearoom1/kirby-meta-kit/commit/2457fd7f71f20f644a0108ed4d244d7eb9b46c35))
-
-## [2.1.1](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.0...v2.1.1) (2026-07-09)
-
-
-### Bug Fixes
-
-* restore PHP 8.1 compatibility ([a47b8f7](https://github.com/tearoom1/kirby-meta-kit/commit/a47b8f7562c1aa0ba236fafad71e7c3785149a2c))
 
