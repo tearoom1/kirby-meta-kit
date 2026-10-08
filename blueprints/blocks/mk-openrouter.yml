@@ -6,7 +6,7 @@ fields:
   infoAi:
     type: info
     label: AI Integration
-    text: AI features will be automatically disabled if the API key and model is not configured either here or in the config.
+    text: AI features are automatically disabled if the API key and model are not configured either here or in the config.
     theme: info
     translate: false
   provider:
