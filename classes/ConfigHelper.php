@@ -49,7 +49,11 @@ class ConfigHelper
      */
     public static function mergeOptions(array $defaults, array $siteSettings): array
     {
-        $configSettings = kirby()->option('tearoom1.meta-kit', []);
+        // null in config.php means "not set" and must not hide a panel value
+        $configSettings = array_filter(
+            kirby()->option('tearoom1.meta-kit', []),
+            fn ($value) => $value !== null
+        );
         return array_merge($defaults, $siteSettings, $configSettings);
     }
 

@@ -37,10 +37,8 @@ App::plugin(
             'ai.enabled' => true,
             'review.enabled' => false,
             'ai.tone' => 'formal',
-            'api.key' => null,
-            'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
-            'api.model' => 'google/gemma-4-31b-it:free',
-            'api.temperature' => 0.7,
+            // api.* defaults live in ConfigHelper::getOpenRouterSettings(); defining
+            // them here would override the AI settings made in the panel
             'maxDescriptionLength' => 160,
             'validation' => [
                 'ranges' => [
