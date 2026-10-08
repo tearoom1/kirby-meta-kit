@@ -37,21 +37,7 @@
               :disabled="!item.suggestion.selected"
               :aria-label="$t('meta-kit.suggestions.field', { field: item.suggestion.label, page: group.title })"
             ></textarea>
-            <div v-if="meter(item)" class="k-mk2-meter-row">
-              <span class="k-mk2-meter" aria-hidden="true">
-                <span
-                  v-for="(zone, index) in meter(item).zones"
-                  :key="index"
-                  :class="['k-mk2-zone', 'is-' + zone.level]"
-                  :style="{ width: zone.width + '%' }"
-                ></span>
-                <span :class="['k-mk2-marker', 'is-' + meter(item).level]" :style="{ left: meter(item).position + '%' }"></span>
-              </span>
-              <span>
-                <strong :class="'is-' + meter(item).level">{{ $t('meta-kit.chars', { count: meter(item).length }) }}</strong>
-                · {{ meter(item).verdict }} · {{ $t('meta-kit.v2.review.optimal', { range: meter(item).optimal }) }}
-              </span>
-            </div>
+            <meta-kit-length-meter v-bind="measure(item)" />
           </div>
         </div>
       </section>
@@ -78,6 +64,7 @@
 </template>
 
 <script>
+import MetaKitLengthMeter from './MetaKitLengthMeter.vue';
 import { getRangesForPageAndType } from '../../../composables/useValidation.js';
 import { getEffectiveDescription, getInheritanceSource } from '../../../composables/useInheritance.js';
 import { buildTitleWithSiteName, getTableTitleDisplay } from '../../../composables/panelDisplay.js';
@@ -97,6 +84,7 @@ const SOURCE_KEYS = {
 };
 
 export default {
+  components: { MetaKitLengthMeter },
   props: {
     pages: { type: Array, default: () => [] },
     siteSettings: { type: Object, default: () => ({}) },
@@ -167,40 +155,15 @@ export default {
 
       return this.$t('meta-kit.v2.review.previous', { source: label, length });
     },
-    // Length bar: zones from the validation ranges, marker at the new length
-    meter({ suggestion, page, isTitle }) {
-      const ranges = getRangesForPageAndType(page, RANGE_TYPES[suggestion.field], this.validationSettings);
-      if (!ranges) return null;
-
-      // Titles are judged with the appended site name, like in the table
+    // Length and ranges for the meter; titles are judged with the
+    // appended site name, like in the table
+    measure({ suggestion, page, isTitle }) {
       const text = isTitle
         ? buildTitleWithSiteName(suggestion.value || '', this.siteSettings, suggestion.field === 'ogTitle' ? 'og' : 'meta')
         : (suggestion.value || '');
-      const length = text.length;
-      const { optimal, warning } = ranges;
-      const scale = Math.max(warning.max * 1.2, length);
-      const pct = (value) => (value / scale) * 100;
-
-      let level = 'good';
-      let verdict = this.$t('meta-kit.v2.review.verdict.good');
-      if (length < warning.min) { level = 'error'; verdict = this.$t('meta-kit.v2.review.verdict.tooShort'); }
-      else if (length < optimal.min) { level = 'warning'; verdict = this.$t('meta-kit.v2.review.verdict.short'); }
-      else if (length > warning.max) { level = 'error'; verdict = this.$t('meta-kit.v2.review.verdict.tooLong'); }
-      else if (length > optimal.max) { level = 'warning'; verdict = this.$t('meta-kit.v2.review.verdict.long'); }
-
       return {
-        length,
-        level,
-        verdict,
-        optimal: `${optimal.min}–${optimal.max}`,
-        position: Math.min(pct(length), 99),
-        zones: [
-          { level: 'error', width: pct(warning.min) },
-          { level: 'warning', width: pct(optimal.min - warning.min) },
-          { level: 'good', width: pct(optimal.max - optimal.min) },
-          { level: 'warning', width: pct(warning.max - optimal.max) },
-          { level: 'error', width: 100 - pct(warning.max) }
-        ]
+        length: text.length,
+        ranges: getRangesForPageAndType(page, RANGE_TYPES[suggestion.field], this.validationSettings)
       };
     }
   }

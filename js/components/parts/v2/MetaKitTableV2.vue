@@ -67,9 +67,12 @@
                 <span v-if="page.robots && page.robots.includes('noindex')" class="k-mk2-pill is-warning">noindex</span>
               </span>
             </td>
-            <td>
+            <td class="k-mk2-slug-col">
               <Tooltip :content="getSlugTooltip(page)">
-                <span class="k-mk2-cell"><i :class="['k-mk2-dot', dot(page, 'slug')]"></i>{{ page.id === 'site' ? '/' : page.id }}</span>
+                <span class="k-mk2-slug">
+                  <i :class="['k-mk2-dot', dot(page, 'slug')]"></i>
+                  <span><span class="k-mk2-slug-parent">{{ slugParent(page) }}</span>{{ slugName(page) }}</span>
+                </span>
               </Tooltip>
             </td>
             <td>
@@ -163,6 +166,15 @@ export default {
       const source = getInheritanceSource(page, fieldType, this.siteSettings);
       if (!source) return '';
       return SOURCE_KEYS[source] ? this.$t(SOURCE_KEYS[source]) : String(source).toUpperCase();
+    },
+    // Long paths wrap; the parent path is dimmed so the slug itself stands out
+    slugParent(page) {
+      if (page.id === 'site' || !page.id.includes('/')) return '';
+      return page.id.slice(0, page.id.lastIndexOf('/') + 1);
+    },
+    slugName(page) {
+      if (page.id === 'site') return '/';
+      return page.id.slice(page.id.lastIndexOf('/') + 1);
     },
     // Same status icons as Kirby's page lists
     statusIcon(page) {

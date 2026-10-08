@@ -22,7 +22,12 @@
       :rows="rows"
       :buttons="buttons"
     />
-    <div class="k-meta-kit-dialog-field-meta">
+    <meta-kit-length-meter
+      v-if="variant === 'v2'"
+      :length="(value || '').length"
+      :ranges="ranges"
+    />
+    <div v-else class="k-meta-kit-dialog-field-meta">
       <span>
         <span v-if="value"
               class="k-meta-kit-field-length"
@@ -39,7 +44,8 @@
 </template>
 
 <script>
-import { getFieldLengthStatus } from '../../../composables/useValidation.js';
+import { getFieldLengthStatus, getRangesForPageAndType } from '../../../composables/useValidation.js';
+import MetaKitLengthMeter from '../v2/MetaKitLengthMeter.vue';
 
 export default {
   props: {
@@ -89,9 +95,18 @@ export default {
     validationSettings: {
       type: Object,
       default: () => ({})
+    },
+    // Temporary design comparison
+    variant: {
+      type: String,
+      default: 'v1'
     }
   },
+  components: { MetaKitLengthMeter },
   computed: {
+    ranges() {
+      return getRangesForPageAndType({ template: this.template }, this.type === 'og' ? 'ogDescription' : 'description', this.validationSettings);
+    },
     statusClass() {
       if (!this.value) return '';
 

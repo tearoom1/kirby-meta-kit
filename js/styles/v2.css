@@ -292,3 +292,21 @@
 .k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-dialog-table-page { border: 0; border-top: 1px solid var(--color-gray-200); border-radius: 0; background: none; }
 .k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-dialog-page-info { font-weight: 600; }
 .k-mk2-status.is-site { color: var(--mk2-muted); }
+.k-meta-kit-dialog.k-mk2-dialog > .k-meta-kit-bulk-buttons {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--mk2-line);
+  background: var(--color-gray-50, #fafafa);
+  padding: var(--spacing-3) var(--dialog-padding, var(--spacing-6));
+}
+.k-meta-kit-dialog.k-mk2-dialog > .k-meta-kit-bulk-buttons .k-meta-kit-button-ai-generate {
+  background: var(--color-gray-900, #16171a);
+  border-color: transparent;
+  color: var(--color-white);
+  font-weight: 600;
+}
+/* Slugs: wrap long paths instead of widening the table */
+.k-mk2-slug-col { min-width: 15rem; max-width: 20rem; }
+.k-mk2-slug { display: inline-flex; align-items: baseline; overflow-wrap: break-word; line-height: 1.35; }
+.k-mk2-slug .k-mk2-dot { flex-shrink: 0; }
+.k-mk2-slug-parent { color: var(--mk2-muted); }

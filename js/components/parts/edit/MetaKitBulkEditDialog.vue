@@ -36,6 +36,7 @@
 
           <!-- Meta Title -->
           <meta-kit-title-field
+            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
             :label="$t('meta-kit.field.metaTitle')"
@@ -53,6 +54,7 @@
 
           <!-- Meta Description -->
           <meta-kit-description-field
+            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
             :label="$t('meta-kit.field.metaDescription')"
@@ -77,6 +79,7 @@
 
           <!-- OG Title -->
           <meta-kit-title-field
+            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
             :label="$t('meta-kit.field.ogTitle')"
@@ -95,6 +98,7 @@
 
           <!-- OG Description -->
           <meta-kit-description-field
+            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
             :label="$t('meta-kit.field.ogDescription')"

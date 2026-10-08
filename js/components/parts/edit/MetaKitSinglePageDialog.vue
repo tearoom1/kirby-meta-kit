@@ -11,6 +11,7 @@
       <!-- Meta Title -->
       <div class="k-meta-kit-single-field">
         <meta-kit-title-field
+            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
           :label="$t('meta-kit.field.metaTitle')"
@@ -30,6 +31,7 @@
       <!-- Meta Description -->
       <div class="k-meta-kit-single-field">
         <meta-kit-description-field
+            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
           :label="$t('meta-kit.field.metaDescription')"
@@ -48,6 +50,7 @@
       <!-- OG Title -->
       <div v-if="!isSitePage" class="k-meta-kit-single-field">
         <meta-kit-title-field
+            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
           :label="$t('meta-kit.field.ogTitle')"
@@ -69,6 +72,7 @@
       <!-- OG Description -->
       <div v-if="!isSitePage" class="k-meta-kit-single-field">
         <meta-kit-description-field
+            :variant="variant"
             :template="page.template"
             :validation-settings="validationSettings"
           :label="$t('meta-kit.field.ogDescription')"

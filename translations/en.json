@@ -415,6 +415,7 @@
   "meta-kit.v2.edit": "Edit",
   "meta-kit.v2.filtered": "filtered",
   "meta-kit.v2.fix": "{count} fix",
+  "meta-kit.v2.generate.intro": "Select which fields to generate for {count} page(s):",
   "meta-kit.v2.group.search": "Search",
   "meta-kit.v2.group.share": "Sharing",
   "meta-kit.v2.image.none": "missing",
