@@ -214,3 +214,81 @@
 .k-mk2-skipped { display: flex; flex-direction: column; gap: 0.2rem; margin-top: var(--spacing-4); padding: 0.6rem 0.8rem; border-radius: var(--rounded); background: var(--color-gray-100); font-size: var(--text-xs); color: var(--mk2-muted); }
 .k-mk2-skipped strong { color: var(--color-text); }
 .k-mk2-review-foot { display: flex; align-items: center; gap: var(--spacing-2); width: 100%; padding: var(--spacing-3) var(--dialog-padding, var(--spacing-6)); border-top: 1px solid var(--mk2-line); }
+
+/* Page status: Kirby's own status icons, set apart from the small check dots */
+.k-mk2-title { display: inline-flex; align-items: center; gap: 0.4rem; }
+.k-mk2-status { --icon-size: 0.875rem; flex-shrink: 0; }
+.k-mk2-status.is-listed { color: var(--color-positive, #5d800d); }
+.k-mk2-status.is-unlisted { color: var(--color-blue-500, #4271ae); }
+.k-mk2-status.is-draft { color: var(--color-negative, #c82829); }
+.k-mk2-page .k-mk2-sub { padding-left: 1.275rem; }
+.k-mk2-info { display: inline-flex; width: 1.5rem; height: 1.5rem; align-items: center; justify-content: center; border-radius: 50%; color: var(--mk2-muted); cursor: help; }
+.k-mk2-info:hover, .k-mk2-info:focus-visible { background: var(--color-gray-200); color: var(--color-text); }
+
+/* Sub-dialogs in the style of the review dialog */
+.k-meta-kit-dialog.k-mk2-dialog {
+  --mk2-surface: var(--color-white);
+  --mk2-line: var(--color-border);
+  --mk2-muted: var(--color-text-dimmed);
+  font-variant-numeric: tabular-nums;
+}
+.k-meta-kit-dialog.k-mk2-dialog > .k-dialog-body > .k-headline,
+.k-meta-kit-dialog.k-mk2-dialog .k-headline:first-child {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  margin-bottom: var(--spacing-3);
+  padding-bottom: var(--spacing-3);
+  border-bottom: 1px solid var(--mk2-line);
+}
+.k-meta-kit-dialog.k-mk2-dialog .k-text { color: var(--mk2-muted); font-size: var(--text-sm); }
+
+/* Buttons: quiet by default, the confirming action dark */
+.k-meta-kit-dialog.k-mk2-dialog .k-button,
+.k-meta-kit-dialog.k-mk2-dialog .k-link.k-meta-kit-dialog-panel-link {
+  background: var(--mk2-surface);
+  color: var(--color-text);
+  border: 1px solid var(--mk2-line);
+  border-radius: 0.375rem;
+}
+.k-meta-kit-dialog.k-mk2-dialog .k-button:hover,
+.k-meta-kit-dialog.k-mk2-dialog .k-link.k-meta-kit-dialog-panel-link:hover { background: var(--color-gray-100); }
+.k-meta-kit-dialog.k-mk2-dialog .k-button[data-theme="positive"],
+.k-meta-kit-dialog.k-mk2-dialog .k-dialog-footer .k-meta-kit-button-ai-generate {
+  background: var(--color-gray-900, #16171a);
+  border-color: transparent;
+  color: var(--color-white);
+  font-weight: 600;
+}
+.k-meta-kit-dialog.k-mk2-dialog .k-button[data-theme="positive"]:hover,
+.k-meta-kit-dialog.k-mk2-dialog .k-dialog-footer .k-meta-kit-button-ai-generate:hover { background: var(--color-black, #000); }
+
+/* Footers: separated, with breathing room */
+.k-meta-kit-dialog.k-mk2-dialog .k-dialog-footer,
+.k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-dialog-footer {
+  border-top: 1px solid var(--mk2-line);
+  background: var(--color-gray-50, #fafafa);
+  padding: var(--spacing-3) var(--dialog-padding, var(--spacing-6));
+}
+.k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-dialog-footer {
+  margin: var(--spacing-4) calc(-1 * var(--dialog-padding, var(--spacing-6))) calc(-1 * var(--dialog-padding, var(--spacing-6)));
+}
+
+/* Generate dialog: plain rows instead of boxed options */
+.k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-bulk-options { gap: 0; }
+.k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-bulk-option {
+  border: 0;
+  border-top: 1px solid var(--color-gray-200);
+  border-radius: 0;
+  background: none;
+  padding: var(--spacing-3) 0;
+}
+.k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-bulk-option:hover { background: none; }
+.k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-bulk-option-content span { color: var(--mk2-muted); }
+.k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-bulk-review-option { margin-top: 0; border-top: 1px solid var(--mk2-line); }
+
+/* Edit dialogs: field rows like the review rows */
+.k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-single-field { padding: var(--spacing-3) 0; border-top: 1px solid var(--color-gray-200); }
+.k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-dialog-field-label { font-weight: 600; font-size: var(--text-sm); }
+.k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-dialog-table-page { border: 0; border-top: 1px solid var(--color-gray-200); border-radius: 0; background: none; }
+.k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-dialog-page-info { font-weight: 600; }
+.k-mk2-status.is-site { color: var(--mk2-muted); }

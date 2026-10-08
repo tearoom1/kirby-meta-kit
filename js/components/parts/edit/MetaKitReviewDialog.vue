@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" class="k-meta-kit-dialog k-meta-kit-view" size="huge" :cancel-button="false" :submit-button="false">
+  <k-dialog :class="{ 'k-mk2-dialog': variant === 'v2' }" ref="dialog" class="k-meta-kit-dialog k-meta-kit-view" size="huge" :cancel-button="false" :submit-button="false">
     <k-headline>{{ headline }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -127,6 +127,11 @@
 <script>
 export default {
   props: {
+    // Temporary design comparison
+    variant: {
+      type: String,
+      default: 'v1'
+    },
     api: {
       type: Object,
       required: true

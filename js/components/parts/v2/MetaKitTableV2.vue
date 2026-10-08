@@ -1,16 +1,5 @@
 <template>
   <div class="k-mk2-table-wrap">
-    <div class="k-mk2-legend">
-      <strong>{{ $t('meta-kit.v2.inheritedFrom') }}</strong>
-      <span><span class="k-mk2-pill">{{ $t('meta-kit.v2.source.site') }}</span> {{ $t('meta-kit.v2.source.site.help') }}</span>
-      <span><span class="k-mk2-pill">{{ $t('meta-kit.v2.source.title') }}</span> {{ $t('meta-kit.v2.source.title.help') }}</span>
-      <span><span class="k-mk2-pill">{{ $t('meta-kit.v2.source.meta') }}</span> {{ $t('meta-kit.v2.source.meta.help') }}</span>
-      <span class="k-mk2-legend-spacer"></span>
-      <span><i class="k-mk2-dot is-error"></i>{{ $t('meta-kit.v2.level.error') }}</span>
-      <span><i class="k-mk2-dot is-warning"></i>{{ $t('meta-kit.v2.level.warning') }}</span>
-      <span><i class="k-mk2-dot is-good"></i>{{ $t('meta-kit.v2.level.good') }}</span>
-    </div>
-
     <div class="k-mk2-table-scroll">
       <table class="k-mk2-table">
         <thead>
@@ -36,7 +25,11 @@
             <th>{{ $t('meta-kit.v2.col.title') }}</th>
             <th>{{ $t('meta-kit.v2.col.description') }}</th>
             <th>{{ $t('meta-kit.v2.col.image') }}</th>
-            <th><span class="k-mk2-sr">{{ $t('meta-kit.table.actions') }}</span></th>
+            <th class="k-mk2-actions">
+              <Tooltip :content="legend">
+                <span class="k-mk2-info" tabindex="0" :aria-label="legend">ⓘ</span>
+              </Tooltip>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -54,9 +47,23 @@
               />
             </td>
             <td class="k-mk2-page">
-              <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
+              <span class="k-mk2-title">
+                <k-icon
+                  v-if="page.id === 'site'"
+                  type="globe"
+                  class="k-mk2-status is-site"
+                />
+                <k-icon
+                  v-else-if="statusIcon(page)"
+                  :type="statusIcon(page).icon"
+                  :class="['k-mk2-status', 'is-' + page.status]"
+                  :title="getStatusLabel(page)"
+                  :aria-label="getStatusLabel(page)"
+                />
+                <a :href="page.panelUrl" class="k-link">{{ page.title }}</a>
+              </span>
               <span class="k-mk2-sub">
-                {{ page.template }}<template v-if="page.status"> · {{ getStatusLabel(page) }}</template>
+                {{ page.template }}
                 <span v-if="page.robots && page.robots.includes('noindex')" class="k-mk2-pill is-warning">noindex</span>
               </span>
             </td>
@@ -136,6 +143,15 @@ const SOURCE_KEYS = {
 
 export default {
   extends: MetaKitTable,
+  computed: {
+    legend() {
+      return [
+        this.$t('meta-kit.v2.legend.levels'),
+        '',
+        this.$t('meta-kit.v2.legend.sources')
+      ].join('\n');
+    }
+  },
   methods: {
     dot(page, field) {
       return `is-${classifyPageField(page, field, this.classifierContext)}`;
@@ -147,6 +163,11 @@ export default {
       const source = getInheritanceSource(page, fieldType, this.siteSettings);
       if (!source) return '';
       return SOURCE_KEYS[source] ? this.$t(SOURCE_KEYS[source]) : String(source).toUpperCase();
+    },
+    // Same status icons as Kirby's page lists
+    statusIcon(page) {
+      const icons = { listed: 'status-listed', unlisted: 'status-unlisted', draft: 'status-draft' };
+      return icons[page.status] ? { icon: icons[page.status] } : null;
     },
     imageLabel(page) {
       if (page.hasOgImage) return this.$t('meta-kit.v2.image.own');

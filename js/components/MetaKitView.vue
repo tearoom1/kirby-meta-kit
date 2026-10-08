@@ -185,6 +185,7 @@
     <meta-kit-bulk-edit-dialog
       ref="allPagesDialog"
       :validation-settings="validationSettingsData"
+      :variant="variant"
       :api="$api"
       :site-settings="siteSettingsData"
       :ai-enabled="aiEnabled"
@@ -195,6 +196,7 @@
     <meta-kit-single-page-dialog
       ref="singlePageDialog"
       :validation-settings="validationSettingsData"
+      :variant="variant"
       :api="$api"
       :site-settings="siteSettingsData"
       :ai-enabled="aiEnabled"
@@ -203,12 +205,14 @@
 
     <meta-kit-review-dialog
       ref="reviewDialog"
+      :variant="variant"
       :api="$api"
     />
 
     <!-- Bulk Generation Dialog (used for both bulk and single-page AI generate) -->
     <meta-kit-bulk-generate-dialog
       ref="bulkGenerateDialog"
+      :variant="variant"
       :selected-count="singleGeneratePageId ? 1 : actionPageIds.length"
       @generate="performBulkGeneration"
     />

@@ -1,11 +1,5 @@
 <template>
   <section class="k-mk2-overview">
-    <p class="k-mk2-headline">
-      <strong>{{ $t('meta-kit.v2.pages', { count: totalCount }) }}</strong>
-      <span v-if="attentionCards.length">{{ $t('meta-kit.v2.areasAttention', { count: attentionCards.length }) }}</span>
-      <span v-else>{{ $t('meta-kit.v2.allGood') }}</span>
-    </p>
-
     <div class="k-mk2-tiles">
       <button
         v-for="card in attentionCards"
