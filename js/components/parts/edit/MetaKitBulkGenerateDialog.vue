@@ -46,6 +46,17 @@
       </label>
     </div>
 
+    <label class="k-meta-kit-bulk-option k-meta-kit-bulk-review-option">
+      <input
+        type="checkbox"
+        v-model="options.review"
+      />
+      <div class="k-meta-kit-bulk-option-content">
+        <strong>Review before saving</strong>
+        <span>Show the generated texts first and save only the ones you keep</span>
+      </div>
+    </label>
+
     <template #footer>
       <k-button-group class="k-meta-kit-bulk-buttons">
         <k-button @click="close()">Cancel</k-button>
@@ -76,7 +87,8 @@ export default {
         title: false,
         description: true,
         ogTitle: false,
-        ogDescription: false
+        ogDescription: false,
+        review: true
       }
     };
   },
@@ -92,6 +104,7 @@ export default {
       this.options.description = true;
       this.options.ogTitle = false;
       this.options.ogDescription = false;
+      this.options.review = true;
       this.$refs.dialog.open();
     },
     close() {

@@ -178,18 +178,32 @@
       @generate="performBulkGeneration"
     />
 
+    <!-- Review generated suggestions before saving -->
+    <meta-kit-suggestions-dialog
+      ref="suggestionsDialog"
+      @save="saveSuggestions"
+    />
+
     <!-- Loading Overlay -->
     <div v-if="isGeneratingAll" class="k-meta-kit-loading-overlay">
       <div class="k-meta-kit-loading-content">
         <div class="k-meta-kit-loading-spinner">
           <k-icon type="loader" />
         </div>
-        <div class="k-meta-kit-loading-text">
-          <template v-if="isGeneratingAll">Generating metadata with AI...</template>
-        </div>
+        <div class="k-meta-kit-loading-text">{{ loadingLabel }}</div>
         <div v-if="loadingProgress" class="k-meta-kit-loading-progress">
           {{ loadingProgress }}
         </div>
+        <k-button
+          v-if="canCancelGeneration"
+          icon="cancel"
+          variant="filled"
+          size="sm"
+          :disabled="cancelRequested"
+          @click="cancelRequested = true"
+        >
+          {{ cancelRequested ? 'Stopping after the current field…' : 'Cancel' }}
+        </k-button>
       </div>
     </div>
   </k-panel-inside>
@@ -207,6 +221,15 @@ import MetaKitBulkGenerateDialog from './parts/edit/MetaKitBulkGenerateDialog.vu
 import MetaKitSinglePageDialog from './parts/edit/MetaKitSinglePageDialog.vue';
 import MetaKitBulkEditDialog from './parts/edit/MetaKitBulkEditDialog.vue';
 import MetaKitReviewDialog from './parts/edit/MetaKitReviewDialog.vue';
+import MetaKitSuggestionsDialog from './parts/edit/MetaKitSuggestionsDialog.vue';
+import {
+  GENERATION_FIELDS,
+  planGeneration,
+  runGeneration,
+  applySuggestions,
+  generateFieldSuggestion
+} from '../composables/bulkGeneration.js';
+import { applySingleFieldUpdate } from '../composables/saveFields.js';
 import {
   filterPages,
   sortPages,
@@ -224,6 +247,7 @@ export default {
     MetaKitSinglePageDialog,
     MetaKitBulkEditDialog,
     MetaKitReviewDialog,
+    MetaKitSuggestionsDialog,
     MetaKitStats,
     MetaKitFilters,
     MetaKitActions
@@ -280,7 +304,10 @@ export default {
       sortBy: 'default',
       showPreviewInTable: false,
       previewMode: 'meta',
-      loadingProgress: ''
+      loadingProgress: '',
+      loadingLabel: '',
+      canCancelGeneration: false,
+      cancelRequested: false
     };
   },
   computed: {
@@ -511,68 +538,81 @@ export default {
     },
 
     async performBulkGeneration(options) {
-      if (!options.title && !options.description && !options.ogTitle && !options.ogDescription) {
+      if (!GENERATION_FIELDS.some(({ option }) => options[option])) {
         window.panel.notification.error('Please select at least one field to generate');
         return;
       }
-
-      this.isGeneratingAll = true;
 
       // Single-page mode when triggered from the table row AI button
       const pageIds = this.singleGeneratePageId
         ? [this.singleGeneratePageId]
         : this.selectedPages;
-
       this.singleGeneratePageId = null;
 
+      const pages = this.pagesData.filter((page) => pageIds.includes(page.id));
+      const jobs = planGeneration(pages, options);
+
+      if (jobs.length === 0) {
+        window.panel.notification.success('Nothing to generate: the selected pages already have these fields.');
+        return;
+      }
+
+      this.isGeneratingAll = true;
+      this.loadingLabel = 'Generating metadata with AI...';
+      this.canCancelGeneration = true;
+      this.cancelRequested = false;
+
+      let result;
       try {
-        const response = await this.$api.post('meta-kit/generate-all', {
-          generateTitle: options.title,
-          generateDescription: options.description,
-          generateOgTitle: options.ogTitle,
-          generateOgDescription: options.ogDescription,
-          pageIds
+        result = await runGeneration(jobs, {
+          generate: (job) => generateFieldSuggestion(this.$api, job, this.language || null),
+          onProgress: ({ done, total, job }) => {
+            this.loadingProgress = job ? `${done + 1} of ${total} · ${job.pageTitle} – ${job.label}` : '';
+          },
+          isCancelled: () => this.cancelRequested
         });
-
-        if (response.status === 'success') {
-          const generated = response.generated || 0;
-          const skipped = response.skipped || 0;
-          const failed = response.failed || 0;
-          const details = `Generated ${generated}, skipped ${skipped}, failed ${failed}`;
-
-          if (failed > 0) {
-            const firstError = Array.isArray(response.errors) && response.errors.length > 0
-              ? response.errors[0].message
-              : null;
-            const failedLabel = failed === 1 ? '1 field failed' : `${failed} fields failed`;
-            const message = firstError
-              ? `${failedLabel}: ${firstError}\n${details}`
-              : `${failedLabel}. ${details}`;
-            window.panel.notification.error(message);
-          } else {
-            const message = `${response.message || 'Generation completed!'}\n${details}`;
-            window.panel.notification.success(message);
-          }
-
-          await this.refreshPages();
-        } else {
-          const firstError = Array.isArray(response.errors) && response.errors.length > 0
-            ? response.errors[0].message
-            : null;
-          window.panel.notification.error(firstError || response.message || 'Generation failed');
-        }
-      } catch (error) {
-        let errorMessage = 'Failed to generate metadata';
-        if (error.message) {
-          errorMessage += `: ${error.message}`;
-        } else if (error.error) {
-          errorMessage += `: ${error.error}`;
-        }
-        window.panel.notification.error(errorMessage);
       } finally {
         this.isGeneratingAll = false;
+        this.canCancelGeneration = false;
         this.loadingProgress = '';
       }
+
+      if (options.review && result.suggestions.length > 0) {
+        this.$refs.suggestionsDialog.open(result);
+        return;
+      }
+
+      await this.saveSuggestions(result.suggestions, result.errors);
+    },
+
+    async saveSuggestions(suggestions, generationErrors = []) {
+      this.isGeneratingAll = true;
+      this.loadingLabel = 'Saving metadata...';
+
+      let result;
+      try {
+        result = await applySuggestions(suggestions, (suggestion) => applySingleFieldUpdate(this.$api, {
+          pageId: suggestion.pageId,
+          fieldName: suggestion.field,
+          value: suggestion.value
+        }));
+      } finally {
+        this.isGeneratingAll = false;
+      }
+
+      const failed = [...generationErrors, ...result.errors];
+      const summary = `Saved ${result.saved.length} field(s)`;
+
+      if (failed.length > 0) {
+        const first = failed[0];
+        window.panel.notification.error(
+          `${summary}, ${failed.length} failed. ${first.pageTitle} – ${first.label}: ${first.message}`
+        );
+      } else {
+        window.panel.notification.success(summary);
+      }
+
+      await this.refreshPages();
     },
 
     async editSinglePageMetadata(pageId) {
