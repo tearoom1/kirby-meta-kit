@@ -19,7 +19,6 @@ $classes = [
     'TearoomOne\MetaKitController' => 'classes/MetaKitController.php',
     'TearoomOne\PageDataBuilder' => 'classes/PageDataBuilder.php',
     'TearoomOne\ApiResponse' => 'classes/ApiResponse.php',
-    'TearoomOne\SeoAudit' => 'classes/SeoAudit.php',
     'TearoomOne\SeoReview' => 'classes/SeoReview.php',
 ];
 
