@@ -86,7 +86,14 @@ App::plugin(
 
                 $metaKit = new TearoomOne\MetaKit(kirby());
                 $languageCode = $languageCode ?? TearoomOne\MetaHelper::currentLanguageCode(kirby());
-                $content = $content ?? $this->text()->toString();
+                if ($content === null) {
+                    // Same content detection as the panel; pages with too
+                    // little text return null instead of a guessed text
+                    if (!TearoomOne\MetaKitController::hasEnoughContent($this)) {
+                        return null;
+                    }
+                    $content = TearoomOne\MetaKitController::getContentForGeneration($this);
+                }
 
                 if (empty($content)) {
                     return null;
@@ -101,7 +108,14 @@ App::plugin(
 
                 $metaKit = new TearoomOne\MetaKit(kirby());
                 $languageCode = $languageCode ?? TearoomOne\MetaHelper::currentLanguageCode(kirby());
-                $content = $content ?? $this->text()->toString();
+                if ($content === null) {
+                    // Same content detection as the panel; pages with too
+                    // little text return null instead of a guessed text
+                    if (!TearoomOne\MetaKitController::hasEnoughContent($this)) {
+                        return null;
+                    }
+                    $content = TearoomOne\MetaKitController::getContentForGeneration($this);
+                }
 
                 if (empty($content)) {
                     return null;

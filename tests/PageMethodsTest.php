@@ -24,6 +24,18 @@ class PageMethodsTest extends KirbyTestCase
     }
 
     #[RunInSeparateProcess]
+    public function testGenerateMethodsReturnNullForPagesWithoutText(): void
+    {
+        $kirby = $this->makePluginKirby([
+            'site.txt' => 'Title: Site',
+            'thin/default.txt' => "Title: Thin\n----\nText: Short\n",
+        ]);
+
+        $this->assertNull($kirby->page('thin')->generateSeoTitle());
+        $this->assertNull($kirby->page('thin')->generateSeoDescription());
+    }
+
+    #[RunInSeparateProcess]
     public function testDeprecatedSettingsAliasStillWorks(): void
     {
         $this->makePluginKirby(['site.txt' => 'Title: Site']);

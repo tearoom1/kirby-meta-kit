@@ -413,7 +413,7 @@ class MetaKitController
      * Get content for AI generation: the title plus the page text
      * (for the site, the home page's)
      */
-    private static function getContentForGeneration($page, bool $isSite = false): string
+    public static function getContentForGeneration($page, bool $isSite = false): string
     {
         $source = self::getContentSource($page, $isSite);
         $body = self::extractPageContent($source);
