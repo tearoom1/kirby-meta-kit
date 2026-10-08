@@ -16,13 +16,18 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Dark: lifted level colours, soft zones as translucent tints so they stay
+   distinguishable from each other and from the surface */
 .k-panel[data-theme="dark"].k-meta-kit-view,
 .k-panel[data-theme="dark"] .k-mk2-review,
 .k-panel[data-theme="dark"] .k-mk2-dialog {
   --mk2-surface: var(--color-gray-850, #2b2b2b);
-  --mk2-error-soft: #5a2f28;
-  --mk2-warning-soft: #5a4424;
-  --mk2-good-soft: #34452a;
+  --mk2-error: #e2694f;
+  --mk2-warning: #e8a64a;
+  --mk2-good: #8dbd62;
+  --mk2-error-soft: color-mix(in srgb, var(--mk2-error) 34%, transparent);
+  --mk2-warning-soft: color-mix(in srgb, var(--mk2-warning) 34%, transparent);
+  --mk2-good-soft: color-mix(in srgb, var(--mk2-good) 30%, transparent);
 }
 
 .k-mk2-muted { color: var(--mk2-muted); }
@@ -359,9 +364,12 @@
 .k-panel[data-theme="dark"] .k-meta-kit-tooltip-content.k-mk2-tip {
   --mk2-surface: var(--color-gray-800, #2b2b2b);
   --mk2-line: var(--color-gray-700, #3a3a3a);
-  --mk2-error-soft: #5a2f28;
-  --mk2-warning-soft: #5a4424;
-  --mk2-good-soft: #34452a;
+  --mk2-error: #e2694f;
+  --mk2-warning: #e8a64a;
+  --mk2-good: #8dbd62;
+  --mk2-error-soft: color-mix(in srgb, var(--mk2-error) 34%, transparent);
+  --mk2-warning-soft: color-mix(in srgb, var(--mk2-warning) 34%, transparent);
+  --mk2-good-soft: color-mix(in srgb, var(--mk2-good) 30%, transparent);
   box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.45);
 }
 .k-mk2-tip-body { display: flex; flex-direction: column; gap: 0.45rem; }
