@@ -35,7 +35,7 @@
     border-radius: var(--rounded);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-current {
+  &[data-theme="dark"] .k-meta-kit-og-image-current {
     background: var(--color-dark);
   }
 
@@ -47,7 +47,7 @@
     background: var(--color-white);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-current img {
+  &[data-theme="dark"] .k-meta-kit-og-image-current img {
     background: var(--color-black);
   }
 

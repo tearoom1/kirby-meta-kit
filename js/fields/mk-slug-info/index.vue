@@ -289,31 +289,31 @@ export default {
   margin-bottom: 0.5rem;
 }
 
-.k-panel[data-color-scheme="dark"] .k-mk-slug-stat-label {
+.k-panel[data-theme="dark"] .k-mk-slug-stat-label {
   color: var(--color-gray-400);
 }
 
-.k-panel[data-color-scheme="dark"] .k-mk-validation-status-optimal {
+.k-panel[data-theme="dark"] .k-mk-validation-status-optimal {
   color: var(--color-green-400);
 }
 
-.k-panel[data-color-scheme="dark"] .k-mk-validation-status-warning {
+.k-panel[data-theme="dark"] .k-mk-validation-status-warning {
   color: var(--color-orange-400);
 }
 
-.k-panel[data-color-scheme="dark"] .k-mk-validation-status-error {
+.k-panel[data-theme="dark"] .k-mk-validation-status-error {
   color: var(--color-red-400);
 }
 
-.k-panel[data-color-scheme="dark"] .k-mk-slug-message {
+.k-panel[data-theme="dark"] .k-mk-slug-message {
   background: var(--color-black);
 }
 
-.k-panel[data-color-scheme="dark"] .k-mk-slug-guidelines summary {
+.k-panel[data-theme="dark"] .k-mk-slug-guidelines summary {
   color: var(--color-gray-400);
 }
 
-.k-panel[data-color-scheme="dark"] .k-mk-slug-guidelines summary:hover {
+.k-panel[data-theme="dark"] .k-mk-slug-guidelines summary:hover {
   color: var(--color-text);
 }
 </style>

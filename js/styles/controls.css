@@ -75,7 +75,7 @@
     transform: translateY(-50%) scale(0.95);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-search-clear:hover {
+  &[data-theme="dark"] .k-meta-kit-search-clear:hover {
     background: var(--color-gray-800);
   }
 
@@ -272,44 +272,44 @@
     outline-offset: 2px;
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-metadata-filter,
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-pagesize-select {
+  &[data-theme="dark"] .k-meta-kit-metadata-filter,
+  &[data-theme="dark"] .k-meta-kit-pagesize-select {
     background-color: var(--color-black);
     border-color: var(--color-border);
     color: var(--color-white);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-filter-button {
+  &[data-theme="dark"] .k-meta-kit-filter-button {
     background: var(--color-black);
     border-color: var(--color-border);
     color: var(--color-white);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-filter-button.active {
+  &[data-theme="dark"] .k-meta-kit-filter-button.active {
     background: var(--color-blue-900);
     border-color: var(--color-blue-600);
     color: var(--color-blue-300);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-filter-dropdown-content {
+  &[data-theme="dark"] .k-meta-kit-filter-dropdown-content {
     background: var(--color-black);
     border-color: var(--color-border);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-filter-group-title {
+  &[data-theme="dark"] .k-meta-kit-filter-group-title {
     color: var(--color-gray-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-filter-option:hover {
+  &[data-theme="dark"] .k-meta-kit-filter-option:hover {
     background: var(--color-back);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-filter-clear {
+  &[data-theme="dark"] .k-meta-kit-filter-clear {
     color: var(--color-blue-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-filter-clear:hover {
+  &[data-theme="dark"] .k-meta-kit-filter-clear:hover {
     background: var(--color-blue-900);
   }
 

@@ -127,37 +127,37 @@
 
   /* Dark mode for dialog table */
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-table-wrapper {
+  &[data-theme="dark"] .k-meta-kit-dialog-table-wrapper {
     background: var(--color-black);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-table thead {
+  &[data-theme="dark"] .k-meta-kit-dialog-table thead {
     background: var(--color-back);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-table th {
+  &[data-theme="dark"] .k-meta-kit-dialog-table th {
     background: var(--color-back);
     color: var(--color-text);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-table tbody tr:hover {
+  &[data-theme="dark"] .k-meta-kit-dialog-table tbody tr:hover {
     background: var(--color-back);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-dialog-generating {
+  &[data-theme="dark"] .k-meta-kit-dialog-generating {
     background: var(--color-black);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-bulk-option {
+  &[data-theme="dark"] .k-meta-kit-bulk-option {
     background: var(--color-black);
     border-color: var(--color-border);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-bulk-option:hover {
+  &[data-theme="dark"] .k-meta-kit-bulk-option:hover {
     background: var(--color-gray-900);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-bulk-option-content span {
+  &[data-theme="dark"] .k-meta-kit-bulk-option-content span {
     color: var(--color-gray-400);
   }
 
@@ -257,7 +257,7 @@
     text-align: center;
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-og-image-empty {
+  &[data-theme="dark"] .k-meta-kit-og-image-empty {
     background: var(--color-black);
   }
 

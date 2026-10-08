@@ -302,11 +302,11 @@
 
   /* Dark mode support */
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-table-preview-indicator[data-status="warning"] {
+  &[data-theme="dark"] .k-meta-kit-table-preview-indicator[data-status="warning"] {
     border-bottom-color: #fbbf24 !important;
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-table-preview-indicator[data-status="error"] {
+  &[data-theme="dark"] .k-meta-kit-table-preview-indicator[data-status="error"] {
     border-bottom-color: #ef4444 !important;
   }
 
@@ -405,87 +405,87 @@
 
   /* Dark mode support */
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-stats-card {
+  &[data-theme="dark"] .k-meta-kit-stats-card {
     background: var(--color-black);
     border-color: var(--color-border);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-table {
+  &[data-theme="dark"] .k-meta-kit-table {
     background: var(--color-black);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-table th {
+  &[data-theme="dark"] .k-meta-kit-table th {
     background: var(--color-back);
     color: var(--color-text);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-table td {
+  &[data-theme="dark"] .k-meta-kit-table td {
     background: var(--color-black);
     color: var(--color-text);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-table tbody tr:hover td {
+  &[data-theme="dark"] .k-meta-kit-table tbody tr:hover td {
     background: var(--color-back);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-table tbody tr.k-meta-kit-row-selected td {
+  &[data-theme="dark"] .k-meta-kit-table tbody tr.k-meta-kit-row-selected td {
     background: color-mix(in srgb, var(--color-focus) 12%, var(--color-black));
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-table tbody tr.k-meta-kit-row-selected:hover td {
+  &[data-theme="dark"] .k-meta-kit-table tbody tr.k-meta-kit-row-selected:hover td {
     background: color-mix(in srgb, var(--color-focus) 16%, var(--color-black));
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-table .k-link {
+  &[data-theme="dark"] .k-meta-kit-table .k-link {
     color: var(--color-blue-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-status-published {
+  &[data-theme="dark"] .k-meta-kit-status-published {
     color: var(--color-green-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-status-unlisted {
+  &[data-theme="dark"] .k-meta-kit-status-unlisted {
     color: var(--color-orange-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-status-draft {
+  &[data-theme="dark"] .k-meta-kit-status-draft {
     color: var(--color-gray-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-status-dot-published {
+  &[data-theme="dark"] .k-meta-kit-status-dot-published {
     background-color: var(--color-green-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-status-dot-unlisted {
+  &[data-theme="dark"] .k-meta-kit-status-dot-unlisted {
     background-color: var(--color-orange-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-status-dot-draft {
+  &[data-theme="dark"] .k-meta-kit-status-dot-draft {
     background-color: var(--color-gray-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-inherited.k-meta-kit-status-success {
+  &[data-theme="dark"] .k-meta-kit-inherited.k-meta-kit-status-success {
     color: var(--color-green-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-inherited.k-meta-kit-status-warning {
+  &[data-theme="dark"] .k-meta-kit-inherited.k-meta-kit-status-warning {
     color: var(--color-orange-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-inherited.k-meta-kit-status-error {
+  &[data-theme="dark"] .k-meta-kit-inherited.k-meta-kit-status-error {
     color: var(--color-red-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-status-optimal,
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-table-value-muted {
+  &[data-theme="dark"] .k-meta-kit-status-optimal,
+  &[data-theme="dark"] .k-meta-kit-table-value-muted {
     color: var(--color-gray-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-table-source-marker {
+  &[data-theme="dark"] .k-meta-kit-table-source-marker {
     color: var(--color-gray-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-tag {
+  &[data-theme="dark"] .k-tag {
     background: var(--color-back);
     color: var(--color-blue-300);
   }

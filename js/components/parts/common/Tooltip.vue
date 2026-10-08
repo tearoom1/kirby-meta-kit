@@ -126,17 +126,17 @@ export default {
   color: #ef4444;
 }
 
-.k-panel[data-color-scheme="dark"] .k-meta-kit-tooltip-content {
+.k-panel[data-theme="dark"] .k-meta-kit-tooltip-content {
   background: var(--color-gray-800);
   color: var(--color-white);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.k-panel[data-color-scheme="dark"] .k-meta-kit-tooltip-label-warning {
+.k-panel[data-theme="dark"] .k-meta-kit-tooltip-label-warning {
   color: #fbbf24;
 }
 
-.k-panel[data-color-scheme="dark"] .k-meta-kit-tooltip-label-error {
+.k-panel[data-theme="dark"] .k-meta-kit-tooltip-label-error {
   color: #f87171;
 }
 </style>

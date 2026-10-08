@@ -94,7 +94,7 @@
             <span class="k-meta-kit-og-image-filename">{{ page.ogImage.filename }}</span>
           </div>
           <div v-else class="k-meta-kit-og-image-empty">
-            {{ $t('meta-kit.noOgImage') }}
+            {{ siteSettings && siteSettings.siteHasOgImage ? $t('meta-kit.ogImage.site') : $t('meta-kit.noOgImage') }}
           </div>
         </div>
       </div>

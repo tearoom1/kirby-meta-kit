@@ -111,15 +111,15 @@
     background-color: var(--color-gray-300);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-stats-label {
+  &[data-theme="dark"] .k-meta-kit-stats-label {
     color: var(--color-gray-400);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-stats-value {
+  &[data-theme="dark"] .k-meta-kit-stats-value {
     color: var(--color-white);
   }
 
-  .k-panel[data-color-scheme="dark"] .k-meta-kit-stats-neutral {
+  &[data-theme="dark"] .k-meta-kit-stats-neutral {
     background-color: var(--color-gray-600);
   }
 }
