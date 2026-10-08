@@ -213,9 +213,17 @@ class ConfigHelper
     }
 
     /**
-     * Get AI provider settings from site panel or config
+     * @deprecated Use getAiSettings(), which also covers other providers
      */
     public static function getOpenRouterSettings(): array
+    {
+        return self::getAiSettings();
+    }
+
+    /**
+     * Get AI provider settings from site panel or config
+     */
+    public static function getAiSettings(): array
     {
         $defaults = [
             'api.provider' => 'openrouter',

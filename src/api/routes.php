@@ -146,24 +146,6 @@ return function () {
             },
         ];
         $routes[] = [
-            "pattern" => "meta-kit/generate-description",
-            "method" => "POST",
-            "auth" => true,
-            "action" => function () use ($accessGuard, $aiGuard) {
-                if ($error = $accessGuard()) {
-                    return $error;
-                }
-                if ($error = $aiGuard()) {
-                    return $error;
-                }
-
-                $pageId = get("pageId");
-                return TearoomOne\MetaKitController::generateDescription(
-                    $pageId,
-                );
-            },
-        ];
-        $routes[] = [
             "pattern" => "meta-kit/generate-all",
             "method" => "POST",
             "auth" => true,

@@ -37,7 +37,7 @@ App::plugin(
             'ai.enabled' => true,
             'review.enabled' => false,
             'ai.tone' => 'formal',
-            // api.* defaults live in ConfigHelper::getOpenRouterSettings(); defining
+            // api.* defaults live in ConfigHelper::getAiSettings(); defining
             // them here would override the AI settings made in the panel
             // validation defaults live in config/validation-defaults.json
             'excludeTemplates' => [],
@@ -53,7 +53,7 @@ App::plugin(
             'fields/seo-group' => __DIR__ . '/blueprints/fields/seo-group.yml',
             'fields/site-seo-group' => __DIR__ . '/blueprints/fields/site-seo-group.yml',
             'meta-kit/fields/og-image' => __DIR__ . '/blueprints/fields/og-image.php',
-            // Blocks for other settings (OpenRouter, Sitemap, Robots)
+            // Blocks for other settings (AI provider, Sitemap, Robots)
             'blocks/mk-openrouter' => __DIR__ . '/blueprints/blocks/mk-openrouter.yml',
             'blocks/mk-sitemap' => __DIR__ . '/blueprints/blocks/mk-sitemap.yml',
             'blocks/mk-robots' => __DIR__ . '/blueprints/blocks/mk-robots.yml',

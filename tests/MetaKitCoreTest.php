@@ -97,7 +97,7 @@ class MetaKitCoreTest extends KirbyTestCase
         );
         ConfigHelper::clearCache();
 
-        $this->assertSame('openai/gpt-6-luna', ConfigHelper::getOpenRouterSettings()['api.model']);
+        $this->assertSame('openai/gpt-6-luna', ConfigHelper::getAiSettings()['api.model']);
         $this->assertTrue(MetaKit::isAiEnabled());
     }
 
@@ -107,7 +107,7 @@ class MetaKitCoreTest extends KirbyTestCase
             'site.txt' => "Title: Test Site\n----\nMetaKitOpenrouter:\n- type: mk-openrouter\n  content:\n    provider: mistral\n    apiKey: site-key\n    model: openai/gpt-6-luna\n",
         ]);
 
-        $settings = ConfigHelper::getOpenRouterSettings();
+        $settings = ConfigHelper::getAiSettings();
 
         $this->assertSame('mistral', $settings['api.provider']);
         $this->assertSame('https://api.mistral.ai/v1/chat/completions', $settings['api.endpoint']);
@@ -121,7 +121,7 @@ class MetaKitCoreTest extends KirbyTestCase
             'site.txt' => "Title: Test Site\n----\nMetaKitOpenrouter:\n- type: mk-openrouter\n  content:\n    provider: mistral\n    apiKey: site-key\n    mistralModel: mistral-large-latest\n",
         ]);
 
-        $this->assertSame('mistral-large-latest', ConfigHelper::getOpenRouterSettings()['api.model']);
+        $this->assertSame('mistral-large-latest', ConfigHelper::getAiSettings()['api.model']);
     }
 
     public function testCustomProviderUsesPanelEndpointAndModel(): void
@@ -131,7 +131,7 @@ class MetaKitCoreTest extends KirbyTestCase
             'site.txt' => "Title: Test Site\n----\nMetaKitOpenrouter:\n- type: mk-openrouter\n  content:\n    provider: custom\n    apiKey: site-key\n    endpoint: https://llm.example.com/v1/chat/completions\n    endpointModel: llama3.3\n",
         ]);
 
-        $settings = ConfigHelper::getOpenRouterSettings();
+        $settings = ConfigHelper::getAiSettings();
 
         $this->assertSame('https://llm.example.com/v1/chat/completions', $settings['api.endpoint']);
         $this->assertSame('llama3.3', $settings['api.model']);
@@ -163,7 +163,7 @@ class MetaKitCoreTest extends KirbyTestCase
             ]
         );
 
-        $settings = ConfigHelper::getOpenRouterSettings();
+        $settings = ConfigHelper::getAiSettings();
 
         $this->assertSame('openai/gpt-6-luna', $settings['api.model']);
         $this->assertSame('site-key', $settings['api.key']);
@@ -351,7 +351,7 @@ class MetaKitCoreTest extends KirbyTestCase
 
         $metaKit = new MetaKit($kirby);
         $reflection = new \ReflectionClass(MetaKit::class);
-        $method = $reflection->getMethod('formatOpenRouterError');
+        $method = $reflection->getMethod('formatApiError');
 
         $message = $method->invoke($metaKit, [
             'error' => [

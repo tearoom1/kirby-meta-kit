@@ -39,20 +39,25 @@ class MetaKitController
         return $model->permissions()->can('update') === true;
     }
 
+    /**
+     * Whether a page is hidden from Meta Kit by the excludeTemplates or
+     * excludeStatus option
+     */
+    public static function isExcluded($page): bool
+    {
+        $excludeTemplates = (array)option('tearoom1.meta-kit.excludeTemplates', []);
+        $excludeStatus = (array)option('tearoom1.meta-kit.excludeStatus', []);
+
+        return in_array($page->intendedTemplate()->name(), $excludeTemplates, true)
+            || in_array($page->status(), $excludeStatus, true);
+    }
+
     public static function getPages(): array
     {
         $kirby = kirby();
         $pages = $kirby->site()->index(true);
         $result = [];
 
-        $excludeTemplates = option('tearoom1.meta-kit.excludeTemplates', []);
-        $excludeStatus = option('tearoom1.meta-kit.excludeStatus', []);
-        if (!is_array($excludeTemplates)) {
-            $excludeTemplates = [$excludeTemplates];
-        }
-        if (!is_array($excludeStatus)) {
-            $excludeStatus = [$excludeStatus];
-        }
 
         $languageCode = $kirby->language()?->code();
 
@@ -61,9 +66,7 @@ class MetaKitController
 
         // Add pages
         foreach ($pages as $page) {
-            $template = $page->intendedTemplate()->name();
-            $status = $page->status();
-            if (in_array($template, $excludeTemplates, true) || in_array($status, $excludeStatus, true)) {
+            if (self::isExcluded($page)) {
                 continue;
             }
 
@@ -122,33 +125,18 @@ class MetaKitController
 
 
     /**
-     * @deprecated Use generateAllFields() instead, which supports all four SEO field types.
+     * Fields that bulk generation can fill, with their label for messages
      */
-    public static function generateAllDescriptions(): array
-    {
-        $kirby = kirby();
-        $pages = $kirby->site()->index();
-        $generated = 0;
-        $failed = 0;
-        $skipped = 0;
-        $errors = [];
-
-        foreach ($pages as $page) {
-            if (self::hasFieldInCurrentLanguage($page, 'metaDescription')) {
-                $skipped++;
-                continue;
-            }
-
-            $result = self::generateDescription($page->id());
-            $result['status'] === 'success' ? $generated++ : $failed++;
-        }
-
-        return ApiResponse::batch($generated, $skipped, $failed,
-            "Generated {$generated} descriptions, skipped {$skipped}, failed {$failed}");
-    }
+    private const GENERATABLE_FIELDS = [
+        'metaTitle' => 'meta titles',
+        'metaDescription' => 'meta descriptions',
+        'ogTitle' => 'OG titles',
+        'ogDescription' => 'OG descriptions',
+    ];
 
     /**
-     * Generate selected fields (title and/or description) for specified pages
+     * Generate the selected fields for the given pages, skipping fields that
+     * already have a value in the current language
      */
     public static function generateAllFields(
         bool  $generateTitle = false,
@@ -159,22 +147,21 @@ class MetaKitController
     ): array
     {
         $kirby = kirby();
+        $requested = array_keys(array_filter([
+            'metaTitle' => $generateTitle,
+            'metaDescription' => $generateDescription,
+            'ogTitle' => $generateOgTitle,
+            'ogDescription' => $generateOgDescription,
+        ]));
 
         // Get pages to process
         if (empty($pageIds)) {
             $pages = $kirby->site()->index();
         } else {
-            $pages = [];
-            foreach ($pageIds as $pageId) {
-                if ($pageId === 'site') {
-                    $pages[] = $kirby->site();
-                } else {
-                    $page = $kirby->page($pageId);
-                    if ($page) {
-                        $pages[] = $page;
-                    }
-                }
-            }
+            $pages = array_filter(array_map(
+                fn ($pageId) => self::getPageOrSite($pageId),
+                $pageIds
+            ));
         }
 
         $generated = 0;
@@ -184,83 +171,28 @@ class MetaKitController
 
         foreach ($pages as $page) {
             $isSite = ($page instanceof \Kirby\Cms\Site);
+            $pageId = $isSite ? 'site' : $page->id();
             $pageSkipped = true;
 
-            // Generate title if requested (both site and pages use flat fields)
-            if ($generateTitle) {
-                // Check current language specifically (not fallback)
-                $hasTitle = self::hasFieldInCurrentLanguage($page, 'metaTitle');
-
-                if (!$hasTitle) {
-                    $pageId = $isSite ? 'site' : $page->id();
-                    $result = self::generateField($pageId, 'metaTitle', null, true);
-
-                    if ($result['status'] === 'success') {
-                        $generated++;
-                        $pageSkipped = false;
-                    } else {
-                        $failed++;
-                        $errors[] = self::formatGenerationError($page, 'metaTitle', $result);
-                        $pageSkipped = false;
-                    }
+            foreach ($requested as $fieldName) {
+                // The site has no OG title/description of its own
+                if ($isSite && str_starts_with($fieldName, 'og')) {
+                    continue;
                 }
-            }
 
-            // Generate description if requested
-            if ($generateDescription) {
                 // Check current language specifically (not fallback)
-                $hasDescription = self::hasFieldInCurrentLanguage($page, 'metaDescription');
-
-                if (!$hasDescription) {
-                    $pageId = $isSite ? 'site' : $page->id();
-                    $result = self::generateField($pageId, 'metaDescription', null, true);
-
-                    if ($result['status'] === 'success') {
-                        $generated++;
-                        $pageSkipped = false;
-                    } else {
-                        $failed++;
-                        $errors[] = self::formatGenerationError($page, 'metaDescription', $result);
-                        $pageSkipped = false;
-                    }
+                if (self::hasFieldInCurrentLanguage($page, $fieldName)) {
+                    continue;
                 }
-            }
 
-            // Generate OG title if requested (pages only, site doesn't have OG title)
-            if ($generateOgTitle && !$isSite) {
-                // Check current language specifically (not fallback)
-                $hasOgTitle = self::hasFieldInCurrentLanguage($page, 'ogTitle');
+                $pageSkipped = false;
+                $result = self::generateField($pageId, $fieldName, null, true);
 
-                if (!$hasOgTitle) {
-                    $result = self::generateField($page->id(), 'ogTitle', null, true);
-
-                    if ($result['status'] === 'success') {
-                        $generated++;
-                        $pageSkipped = false;
-                    } else {
-                        $failed++;
-                        $errors[] = self::formatGenerationError($page, 'ogTitle', $result);
-                        $pageSkipped = false;
-                    }
-                }
-            }
-
-            // Generate OG description if requested (pages only)
-            if ($generateOgDescription && !$isSite) {
-                // Check current language specifically (not fallback)
-                $hasOgDescription = self::hasFieldInCurrentLanguage($page, 'ogDescription');
-
-                if (!$hasOgDescription) {
-                    $result = self::generateField($page->id(), 'ogDescription', null, true);
-
-                    if ($result['status'] === 'success') {
-                        $generated++;
-                        $pageSkipped = false;
-                    } else {
-                        $failed++;
-                        $errors[] = self::formatGenerationError($page, 'ogDescription', $result);
-                        $pageSkipped = false;
-                    }
+                if ($result['status'] === 'success') {
+                    $generated++;
+                } else {
+                    $failed++;
+                    $errors[] = self::formatGenerationError($page, $fieldName, $result);
                 }
             }
 
@@ -269,14 +201,7 @@ class MetaKitController
             }
         }
 
-        // Build message
-        $fields = [];
-        if ($generateTitle) $fields[] = 'meta titles';
-        if ($generateDescription) $fields[] = 'meta descriptions';
-        if ($generateOgTitle) $fields[] = 'OG titles';
-        if ($generateOgDescription) $fields[] = 'OG descriptions';
-        $fieldText = implode(', ', $fields);
-
+        $fieldText = implode(', ', array_map(fn ($field) => self::GENERATABLE_FIELDS[$field], $requested));
         $message = "Generated {$generated} field(s) ({$fieldText}), skipped {$skipped}, failed {$failed}";
         if ($errors !== []) {
             $message .= '. First error: ' . $errors[0]['message'];
@@ -364,14 +289,6 @@ class MetaKitController
         $site = $kirby->site();
         $pages = $site->index();
 
-        $excludeTemplates = option('tearoom1.meta-kit.excludeTemplates', []);
-        $excludeStatus = option('tearoom1.meta-kit.excludeStatus', []);
-        if (!is_array($excludeTemplates)) {
-            $excludeTemplates = [$excludeTemplates];
-        }
-        if (!is_array($excludeStatus)) {
-            $excludeStatus = [$excludeStatus];
-        }
 
         // Filter by specific page IDs if provided
         $pageIdsParam = get('pageIds');
@@ -395,9 +312,7 @@ class MetaKitController
 
         // Add pages
         foreach ($pages as $page) {
-            $template = $page->intendedTemplate()->name();
-            $status = $page->status();
-            if (in_array($template, $excludeTemplates, true) || in_array($status, $excludeStatus, true)) {
+            if (self::isExcluded($page)) {
                 continue;
             }
 
@@ -728,18 +643,6 @@ class MetaKitController
                 $kirby->setCurrentLanguage($previousLanguage);
             }
         }
-    }
-
-    public static function generateDescription(string $pageId): array
-    {
-        $result = self::generateField($pageId, 'metaDescription', null, true);
-
-        // For backwards compatibility, add 'description' key
-        if ($result['status'] === 'success' && isset($result['content'])) {
-            $result['description'] = $result['content'];
-        }
-
-        return $result;
     }
 
     /**

@@ -22,7 +22,7 @@ class MetaKit
 
     public static function getConfiguredAiModel(): ?string
     {
-        $settings = ConfigHelper::getOpenRouterSettings();
+        $settings = ConfigHelper::getAiSettings();
         $model = $settings['api.model'] ?? null;
 
         return is_string($model) && trim($model) !== '' ? trim($model) : null;
@@ -95,7 +95,7 @@ class MetaKit
         }
 
         // AI needs a key, a model and an endpoint (from config or site settings)
-        $settings = ConfigHelper::getOpenRouterSettings();
+        $settings = ConfigHelper::getAiSettings();
 
         return self::$aiEnabledCache = !empty($settings['api.key'])
             && !empty($settings['api.model'])
@@ -119,7 +119,7 @@ class MetaKit
     public function __construct(Kirby $kirby)
     {
         $this->kirby = $kirby;
-        $this->options = ConfigHelper::getOpenRouterSettings();
+        $this->options = ConfigHelper::getAiSettings();
     }
 
     /**
@@ -264,7 +264,7 @@ class MetaKit
         $data = json_decode($body, true);
 
         if ($response->code() >= 400) {
-            $errorMsg = $this->formatOpenRouterError($data, $body, $model);
+            $errorMsg = $this->formatApiError($data, $body, $model);
             self::log($label . ' API Error: ' . $errorMsg);
             throw new Exception($label . ' API error: ' . $errorMsg);
         }
@@ -289,7 +289,7 @@ class MetaKit
         return $content;
     }
 
-    protected function formatOpenRouterError(?array $data, string $body, ?string $model = null): string
+    protected function formatApiError(?array $data, string $body, ?string $model = null): string
     {
         if (!is_array($data)) {
             return $this->compactErrorText($body) ?: 'Unknown API error';
@@ -313,7 +313,7 @@ class MetaKit
             $context[] = 'code: ' . $error['code'];
         }
 
-        $raw = $this->extractOpenRouterRawError($metadata['raw'] ?? null);
+        $raw = $this->extractRawApiError($metadata['raw'] ?? null);
         $message = $this->compactErrorText($message);
         if ($raw && $raw !== $message) {
             $message .= ': ' . $raw;
@@ -326,7 +326,7 @@ class MetaKit
         return $this->compactErrorText($message . ' (' . implode(', ', $context) . ')');
     }
 
-    protected function extractOpenRouterRawError($raw): ?string
+    protected function extractRawApiError($raw): ?string
     {
         if (!is_string($raw) || trim($raw) === '') {
             return null;
