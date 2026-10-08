@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/tearoom1/kirby-meta-kit/compare/v2.2.0...v2.2.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* correct grammar in AI settings info text ([cfacaa0](https://github.com/tearoom1/kirby-meta-kit/commit/cfacaa038470de164efcc1254d98ecd0e10cc2d1))
+
 ## [2.2.0](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.6...v2.2.0) (2026-10-08)
 
 
@@ -31,11 +38,4 @@
 ### Bug Fixes
 
 * use site locale for AI generation language ([c4202ab](https://github.com/tearoom1/kirby-meta-kit/commit/c4202ab93d3340158fbaebac9037e91750bf7054))
-
-## [2.1.3](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.2...v2.1.3) (2026-08-09)
-
-
-### Bug Fixes
-
-* fixed duplicate width in yml file, fixes [#1](https://github.com/tearoom1/kirby-meta-kit/issues/1) ([be8471b](https://github.com/tearoom1/kirby-meta-kit/commit/be8471b77d92c71748fba00921cdae2e4d87bcb4))
 
