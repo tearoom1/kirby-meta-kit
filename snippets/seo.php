@@ -244,22 +244,26 @@ if (!$page->isHomePage() && $page->parents()->count() > 0) {
 }
 ?>
 
+<?php
+// HEX_TAG keeps editor content like "</script>" from closing the script tag
+$jsonFlags = JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG | JSON_HEX_AMP;
+?>
 <!-- Schema.org JSON-LD -->
 <script type="application/ld+json">
-  <?= json_encode($entitySchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+  <?= json_encode($entitySchema, $jsonFlags) ?>
 </script>
 
 <script type="application/ld+json">
-  <?= json_encode($websiteSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+  <?= json_encode($websiteSchema, $jsonFlags) ?>
 </script>
 
 <script type="application/ld+json">
-  <?= json_encode($webPageSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+  <?= json_encode($webPageSchema, $jsonFlags) ?>
 </script>
 
 <?php if (isset($breadcrumbSchema)): ?>
 <script type="application/ld+json">
-  <?= json_encode($breadcrumbSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+  <?= json_encode($breadcrumbSchema, $jsonFlags) ?>
 </script>
 <?php endif; ?>
 

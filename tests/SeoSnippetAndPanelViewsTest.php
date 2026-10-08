@@ -186,6 +186,28 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         $this->assertSame('Page Description', $meta['ogDescription']);
     }
 
+    public function testSchemaJsonCannotCloseScriptTag(): void
+    {
+        $kirby = $this->makeKirby([
+            'site.txt' => "Title: Site\n----\nAppendsitename: false\n",
+            'article/default.txt' => "Title: Article\n----\nMetatitle: Evil</script><script>alert(1)</script>\n",
+        ]);
+
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('article'));
+
+        // Every closing tag belongs to one of the JSON-LD blocks
+        $this->assertSame(3, substr_count($html, '<script type="application/ld+json">'));
+        $this->assertSame(3, substr_count($html, '</script>'));
+        $this->assertStringNotContainsString('<script>alert(1)', $html);
+        $this->assertStringContainsString('Evil\u003C/script\u003E', $html);
+
+        // The decoded JSON keeps the original title
+        preg_match('~"@type": "WebPage".*?</script>~s', $html, $match);
+        $json = json_decode('{' . substr($match[0], strpos($match[0], '"@type"'), -strlen('</script>')), true);
+        $this->assertSame('Evil</script><script>alert(1)</script>', $json['name'] ?? null);
+    }
+
     private function renderSeoSnippet($page): string
     {
         $site = site();
