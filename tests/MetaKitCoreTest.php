@@ -215,7 +215,8 @@ class MetaKitCoreTest extends KirbyTestCase
 
         $content = $method->invoke(null, $page);
 
-        $this->assertStringContainsString('Test Page', $content);
+        // The title is added separately by getContentForGeneration()
+        $this->assertStringNotContainsString('Test Page', $content);
         $this->assertStringContainsString('sufficiently long test content', $content);
         $this->assertStringNotContainsString('Should Not Appear', $content);
     }

@@ -61,6 +61,10 @@ return [
         // Warning: This makes API calls on every page save
         'autoGenerate' => false,
 
+        // Minimum amount of page text (title excluded) needed for AI generation.
+        // Pages with less text are skipped instead of letting the model guess.
+        'ai.minContentLength' => 50,
+
         // ============================================
         // Sitemap Settings
         // ============================================

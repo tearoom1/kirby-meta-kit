@@ -288,7 +288,8 @@ class MetaKitControllerTest extends TestCase
 
         $content = $method->invoke(null, $page);
 
-        $this->assertStringContainsString('Test Page', $content);
+        // The title is added separately by getContentForGeneration()
+        $this->assertStringNotContainsString('Test Page', $content);
         $this->assertStringContainsString('test content', $content);
     }
 

@@ -486,60 +486,103 @@ class MetaKitController
     }
 
     /**
-     * Get content for AI generation
-     * For site: uses home page content
-     * For pages: uses page content
+     * Model whose content describes a page or the site
+     * (the site is described by its home page)
      */
-    private static function getContentForGeneration($page, bool $isSite = false): string
+    private static function getContentSource($page, bool $isSite = false)
     {
-        $kirby = kirby();
-
-        // For site, use home page content
-        if ($isSite) {
-            $homePage = $kirby->site()->homePage();
-            if ($homePage) {
-                $content = self::extractPageContent($homePage);
-                if (empty(trim($content))) {
-                    $content = $homePage->title()->value();
-                }
-            } else {
-                $content = $page->title()->value();
-            }
-        } else {
-            // Extract all page content including structured fields
-            $content = self::extractPageContent($page);
-            if (empty(trim($content))) {
-                $content = $page->title()->value();
-            }
-        }
-
-        return $content;
+        return $isSite ? (kirby()->site()->homePage() ?? $page) : $page;
     }
 
     /**
-     * Extract all text content from a page
+     * Get content for AI generation: the title plus the page text
+     * (for the site, the home page's)
+     */
+    private static function getContentForGeneration($page, bool $isSite = false): string
+    {
+        $source = self::getContentSource($page, $isSite);
+        $body = self::extractPageContent($source);
+
+        return trim($source->title()->value() . "\n\n" . $body);
+    }
+
+    /**
+     * Minimum amount of page text (title excluded) needed for AI generation;
+     * below it the model has nothing to describe and would make things up
+     */
+    public static function minContentLength(): int
+    {
+        return (int)option('tearoom1.meta-kit.ai.minContentLength', 50);
+    }
+
+    /**
+     * Whether a page has enough text of its own for AI generation
+     */
+    public static function hasEnoughContent($page, bool $isSite = false): bool
+    {
+        $body = self::extractPageContent(self::getContentSource($page, $isSite));
+        return mb_strlen(trim($body)) >= self::minContentLength();
+    }
+
+    /**
+     * Field types whose values are not page text
+     */
+    private const NON_TEXT_FIELD_TYPES = [
+        'checkboxes', 'color', 'date', 'email', 'files', 'gap', 'headline',
+        'hidden', 'info', 'line', 'link', 'multiselect', 'number', 'pages',
+        'radio', 'range', 'select', 'slug', 'tel', 'time', 'toggle', 'toggles',
+        'url', 'users',
+        'mk-title', 'mk-description', 'mk-review', 'mk-slug-info',
+    ];
+
+    /**
+     * Content field keys (lowercase) that hold page text. Only fields defined
+     * in the page's blueprint count, so leftovers from an earlier blueprint
+     * that are still in the content file are ignored. Pages without a
+     * blueprint of their own use all their fields: Kirby then falls back to
+     * its core default, which has neither fields nor sections.
+     */
+    private static function textFieldKeys($page): array
+    {
+        $blueprint = $page->blueprint();
+        $fields = $blueprint->fields();
+
+        if ($fields === [] && $blueprint->sections() === []) {
+            return array_keys($page->content()->fields());
+        }
+
+        $keys = [];
+        foreach ($fields as $name => $field) {
+            if (!in_array($field['type'] ?? 'text', self::NON_TEXT_FIELD_TYPES, true)) {
+                $keys[] = strtolower($name);
+            }
+        }
+
+        return $keys;
+    }
+
+    /**
+     * Extract the text content of a page (title excluded)
      */
     private static function extractPageContent($page): string
     {
         $texts = [];
 
-        // Add title
-        $texts[] = $page->title()->value();
-
-        // Extract from all fields
-        foreach ($page->content()->fields() as $key => $field) {
-            $keyLower = strtolower($key);
+        foreach (self::textFieldKeys($page) as $keyLower) {
             if (in_array($keyLower, ['title', 'slug', 'template', 'seo', 'ogimage', 'metatitle', 'metadescription', 'ogtitle', 'ogdescription', 'robots', 'canonicalurl', 'metaauthor'], true)) {
                 continue;
             }
 
-            $value = $page->content()->get($key);
+            $value = $page->content()->get($keyLower);
             if ($value->isEmpty()) {
                 continue;
             }
 
             // Get raw value
             $rawValue = $value->value();
+            if (!is_string($rawValue)) {
+                continue;
+            }
 
             // skip files
             if (str_starts_with(trim($rawValue), 'file:')) {
@@ -547,7 +590,7 @@ class MetaKitController
             }
 
             // Check if it's JSON (blocks, layout, structure)
-            if (is_string($rawValue) && (str_starts_with(trim($rawValue), '[') || str_starts_with(trim($rawValue), '{'))) {
+            if (str_starts_with(trim($rawValue), '[') || str_starts_with(trim($rawValue), '{')) {
                 $decoded = json_decode($rawValue, true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                     // Extract text from structured data
@@ -564,8 +607,8 @@ class MetaKitController
             if (strlen(trim($text)) > self::MIN_TEXT_LENGTH) {
                 $texts[] = $text;
             }
-
         }
+
         return implode("\n\n", array_filter($texts));
     }
 
@@ -626,7 +669,6 @@ class MetaKitController
         try {
             $metaKit = new MetaKit($kirby);
             $languageCode = $language ?: $kirby->language()?->code();
-            $content = self::getContentForGeneration($page, $isSite);
 
             $fieldTypeMap = [
                 'metaTitle' => 'title',
@@ -642,6 +684,14 @@ class MetaKitController
             if ($isSite && in_array($fieldName, ['ogTitle', 'ogDescription'], true)) {
                 return ApiResponse::error('Site does not support page-specific OG fields');
             }
+
+            if (!self::hasEnoughContent($page, $isSite)) {
+                return ApiResponse::error(
+                    'Not enough text on this page to generate metadata. Add some content or write it manually.'
+                );
+            }
+
+            $content = self::getContentForGeneration($page, $isSite);
 
             $context = [
                 'language' => $languageCode ?? MetaHelper::currentLanguageCode($kirby),

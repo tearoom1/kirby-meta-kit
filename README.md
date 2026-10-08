@@ -190,6 +190,7 @@ This is where developers set technical defaults, validation rules, and AI integr
     'sitemap.exclude' => ['error', 'drafts'],  // Page IDs or patterns
     'schema.enabled' => true,
     'autoGenerate' => false,  // Auto-generate on save (not recommended)
+    'ai.minContentLength' => 50,  // Skip AI generation for pages with less text (title excluded)
     'excludeTemplates' => [],  // Hide from panel table
     'excludeStatus' => [],  // Hide draft/unlisted pages
 
@@ -386,6 +387,12 @@ Slug validation shows:
 ## AI Generation
 
 Meta Kit's AI features are designed to save time while maintaining quality and consistency.
+
+### What the AI Reads
+
+The AI only reads fields that are defined in the page's blueprint, so leftovers from an earlier blueprint version in the content file are ignored. Pages without a blueprint of their own use all their fields. For the site, the home page's content is used.
+
+If a page has less than `ai.minContentLength` characters of text (default 50, title excluded), generation is skipped with a message instead of letting the model make something up — e.g. for a home page that only lists other pages.
 
 ### How AI Works With Validation
 
