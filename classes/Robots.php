@@ -230,8 +230,8 @@ class Robots
         if ($robotsData && $robotsData->has($key)) {
             $value = $robotsData->$key();
             if ($value && !$value->isEmpty()) {
-                // Handle toggle/boolean fields
-                if (method_exists($value, 'toBool')) {
+                // Toggles: "false" (string) must not count as enabled
+                if (is_bool($default)) {
                     return $value->toBool();
                 }
                 return $value->value();

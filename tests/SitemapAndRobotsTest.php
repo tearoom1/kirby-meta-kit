@@ -178,6 +178,23 @@ class SitemapAndRobotsTest extends KirbyTestCase
         }
     }
 
+    public function testRobotsTogglesStoredAsStringsAreRespected(): void
+    {
+        $robotsBlocks = $this->makeBlocksJson('mk-robots', [
+            'enabled' => 'true',
+            'defaultRules' => 'true',
+            'includeSitemap' => 'false',
+            'blockBadBots' => 'false',
+        ]);
+        $this->makeKirby(['site.txt' => "Title: Test Site\n----\nMetakitrobots: {$robotsBlocks}\n"]);
+
+        $content = (new \TearoomOne\Robots(kirby()))->generate();
+
+        $this->assertStringNotContainsString('Sitemap:', $content);
+        $this->assertStringNotContainsString('AhrefsBot', $content);
+        $this->assertStringContainsString('User-agent: *', $content);
+    }
+
     private const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
     private function renderSitemap(): string
