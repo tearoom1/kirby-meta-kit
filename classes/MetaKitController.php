@@ -52,10 +52,20 @@ class MetaKitController
             || in_array($page->status(), $excludeStatus, true);
     }
 
+    /**
+     * Pages Meta Kit works with: all pages including drafts, minus the ones
+     * hidden by excludeTemplates/excludeStatus. The table, bulk edit and
+     * bulk generation all use this set.
+     */
+    public static function managedPages(): \Kirby\Cms\Pages
+    {
+        return kirby()->site()->index(true)->filter(fn ($page) => !self::isExcluded($page));
+    }
+
     public static function getPages(): array
     {
         $kirby = kirby();
-        $pages = $kirby->site()->index(true);
+        $pages = self::managedPages();
         $result = [];
 
 
@@ -66,10 +76,6 @@ class MetaKitController
 
         // Add pages
         foreach ($pages as $page) {
-            if (self::isExcluded($page)) {
-                continue;
-            }
-
             $result[] = PageDataBuilder::fromModel($page);
         }
 
@@ -156,7 +162,7 @@ class MetaKitController
 
         // Get pages to process
         if (empty($pageIds)) {
-            $pages = $kirby->site()->index();
+            $pages = [$kirby->site(), ...self::managedPages()];
         } else {
             $pages = array_filter(array_map(
                 fn ($pageId) => self::getPageOrSite($pageId),
@@ -287,7 +293,7 @@ class MetaKitController
     {
         $kirby = kirby();
         $site = $kirby->site();
-        $pages = $site->index();
+        $pages = self::managedPages();
 
 
         // Filter by specific page IDs if provided
@@ -312,10 +318,6 @@ class MetaKitController
 
         // Add pages
         foreach ($pages as $page) {
-            if (self::isExcluded($page)) {
-                continue;
-            }
-
             $result[] = PageDataBuilder::fromModel($page, $builderOptions);
         }
 

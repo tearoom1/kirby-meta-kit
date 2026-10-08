@@ -58,4 +58,44 @@ class BulkGenerationTest extends KirbyTestCase
             'failed' => $result['failed'],
         ]);
     }
+
+    public function testWithoutPageIdsTheManagedPagesAreUsed(): void
+    {
+        $kirby = $this->makeKirby([
+            'site.txt' => "Title: Site\n----\nMetatitle: Site title\n",
+            'home/default.txt' => "Title: Home\n----\nText: " . self::TEXT . "\n----\nMetatitle: Home title\n",
+            '_drafts/draft/default.txt' => "Title: Draft\n----\nText: " . self::TEXT . "\n",
+            'hidden/secret.txt' => "Title: Hidden\n----\nText: " . self::TEXT . "\n",
+        ], ['tearoom1.meta-kit' => [
+            'api.key' => 'test-key',
+            'api.model' => 'test-model',
+            'api.endpoint' => self::$baseUrl . '/description',
+            'excludeTemplates' => ['secret'],
+        ]]);
+
+        $result = MetaKitController::generateAllFields(generateTitle: true);
+
+        // Only the draft was missing a title; the excluded page is left alone
+        $this->assertSame(1, $result['generated']);
+        $this->assertTrue($kirby->page('draft')->metaTitle()->isNotEmpty());
+        $this->assertTrue($kirby->page('hidden')->metaTitle()->isEmpty());
+    }
+
+    public function testBulkEditDataIncludesDraftsButNotExcludedPages(): void
+    {
+        $this->makeKirby([
+            'site.txt' => 'Title: Site',
+            '_drafts/draft/default.txt' => 'Title: Draft',
+            'hidden/secret.txt' => 'Title: Hidden',
+        ], ['tearoom1.meta-kit' => ['excludeTemplates' => ['secret']]]);
+
+        $_GET['pageIds'] = 'draft,hidden';
+        try {
+            $result = MetaKitController::getPagesWithContent();
+        } finally {
+            unset($_GET['pageIds']);
+        }
+
+        $this->assertSame(['draft'], array_column($result['data'], 'id'));
+    }
 }
