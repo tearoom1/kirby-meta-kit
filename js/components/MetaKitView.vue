@@ -213,19 +213,9 @@ import {
   paginatePages,
   getTotalPages,
   isAllCurrentPageSelected as isAllSelectedOnPage,
-  toggleSelectAllCurrentPage as toggleSelectAllOnPage
+  toggleSelectAllCurrentPage as toggleSelectAllOnPage,
+  classifyPageField
 } from '../composables/panelState.js';
-import {
-  getStatusClass,
-  getSlugValidationConfig,
-  getSlugValidationIssues
-} from '../composables/useValidation.js';
-import {
-  getEffectiveDescription,
-  isInheritedFromSite,
-  isInheritedFromLanguage
-} from '../composables/useInheritance.js';
-import { getTableTitleDisplay } from '../composables/panelDisplay.js';
 
 export default {
   components: {
@@ -326,34 +316,34 @@ export default {
     },
     statsCards() {
       return [
-        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifySlug(page), 'Slug', {
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'slug'), 'Slug', {
           detailLines: [
             'Good = slug is valid',
             'Review = slug has warnings',
             'Fix = slug has errors'
           ]
         }),
-        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyTitle(page), 'Meta Title', {
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'title'), 'Meta Title', {
           detailLines: [
             'Good = valid title, including page-title fallback',
             'Review = title length warning only',
             'Fix = missing or invalid title'
           ]
         }),
-        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyDescription(page), 'Meta Description', {
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'description'), 'Meta Description', {
           detailLines: [
             'Good = valid unique description',
             'Review = inherited from site or length warning',
             'Fix = missing or invalid description'
           ]
         }),
-        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyOgImage(page), 'OG Image', {
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'ogImage'), 'OG Image', {
           detailLines: [
             'Good = page-specific OG image',
             'Review = inherited from site'
           ]
         }),
-        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyNoindex(page), 'Noindex Pages', {
+        this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'noindex'), 'Noindex Pages', {
           attentionStatuses: ['review'],
           detailLines: [
             'Good = indexable page',
@@ -477,56 +467,13 @@ export default {
       }
     },
 
-    classifyTitle(page) {
-      const length = getTableTitleDisplay(page, this.siteSettingsData, 'meta').charCount;
-      const status = getStatusClass(page, length, 'title', this.validationSettingsData);
-      if (status === 'k-meta-kit-status-error' || !status) return 'fix';
-      if (isInheritedFromLanguage(page, 'metaTitle', this.siteSettingsData) && length) return 'review';
-      if (status === 'k-meta-kit-status-warning') return 'review';
-      return 'good';
-    },
-
-    classifyDescription(page) {
-      const desc = getEffectiveDescription(page, 'meta', this.siteSettingsData);
-      if (!desc) return 'fix';
-      const status = getStatusClass(page, desc.length, 'description', this.validationSettingsData);
-      if (status === 'k-meta-kit-status-error' || !status) return 'fix';
-
-      if (
-        isInheritedFromSite(page, 'metaDescription', this.siteSettingsData) ||
-        isInheritedFromLanguage(page, 'metaDescription', this.siteSettingsData)
-      ) {
-        return 'review';
-      }
-
-      if (status === 'k-meta-kit-status-warning') return 'review';
-      return 'good';
-    },
-
-    classifyOgImage(page) {
-      if (page.hasOgImage) return 'good';
-      if (this.siteSettingsData?.siteHasOgImage) return 'review';
-      return 'fix';
-    },
-
-    classifyNoindex(page) {
-      return page.robots && page.robots.includes('noindex') ? 'review' : 'good';
-    },
-
-    classifySlug(page) {
-      if (page.id === 'site') return 'good';
-
-      const slug = page.id.split('/').pop() || '';
-      const wordCount = slug.split(/[-_]/).filter(Boolean).length;
-      const length = slug.length;
-      const numSlashes = page.id.split('/').length - 1;
-      const cfg = getSlugValidationConfig(page, this.validationSettingsData);
-      const avgWordLength = wordCount > 0 ? Math.ceil(length / wordCount) : length;
-      const issues = getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg });
-
-      if (issues.some(issue => issue.severity === 'error')) return 'fix';
-      if (issues.some(issue => issue.severity === 'warning')) return 'review';
-      return 'good';
+    // Stats cards use the shared classifier, in their own wording
+    classifyForStats(page, field) {
+      const level = classifyPageField(page, field, {
+        siteSettings: this.siteSettingsData,
+        validationSettings: this.validationSettingsData
+      });
+      return { good: 'good', warning: 'review', error: 'fix' }[level];
     },
 
     async refreshPages() {

@@ -131,47 +131,71 @@ function classifyNoindex(page) {
   return page.robots && page.robots.includes('noindex') ? 'warning' : 'good';
 }
 
-function classifySlug(page, validationSettings = {}) {
-  if (page.id === 'site') return 'good';
-
-  const slug = page.id.split('/').pop() || '';
+/**
+ * Slug metrics and validation issues for a page (site root has no slug)
+ */
+export function getSlugAnalysis(page, validationSettings = {}) {
+  const slug = page.id === 'site' ? '' : (page.id.split('/').pop() || '');
   const wordCount = slug.split(/[-_]/).filter(Boolean).length;
   const length = slug.length;
-  const numSlashes = page.id.split('/').length - 1;
+  const numSlashes = page.id === 'site' ? 0 : page.id.split('/').length - 1;
   const cfg = getSlugValidationConfig(page, validationSettings);
   const avgWordLength = wordCount > 0 ? Math.ceil(length / wordCount) : length;
-  const issues = getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg });
+  const issues = page.id === 'site'
+    ? []
+    : getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg });
+
+  return { slug, wordCount, length, numSlashes, cfg, issues };
+}
+
+function classifySlug(page, validationSettings = {}) {
+  const { issues } = getSlugAnalysis(page, validationSettings);
 
   if (issues.some((issue) => issue.severity === 'error')) return 'error';
   if (issues.some((issue) => issue.severity === 'warning')) return 'warning';
   return 'good';
 }
 
-function hasWarningAttention(page, context = {}) {
+/**
+ * Status of one SEO aspect of a page: 'good', 'warning' or 'error'.
+ * Single source for the table colours, the stats cards and the filters.
+ *
+ * @param {Object} page
+ * @param {string} field - slug, title, description, ogTitle, ogDescription, ogImage or noindex
+ * @param {Object} context - { siteSettings, validationSettings }
+ */
+export function classifyPageField(page, field, context = {}) {
   const { siteSettings = {}, validationSettings = {} } = context;
 
-  return [
-    classifySlug(page, validationSettings),
-    classifyTitle(page, validationSettings, siteSettings),
-    classifyDescription(page, validationSettings, siteSettings),
-    classifyOgTitle(page, validationSettings, siteSettings),
-    classifyOgDescription(page, validationSettings, siteSettings),
-    classifyOgImage(page, siteSettings),
-    classifyNoindex(page)
-  ].includes('warning');
+  switch (field) {
+    case 'slug':
+      return classifySlug(page, validationSettings);
+    case 'title':
+      return classifyTitle(page, validationSettings, siteSettings);
+    case 'description':
+      return classifyDescription(page, validationSettings, siteSettings);
+    case 'ogTitle':
+      return classifyOgTitle(page, validationSettings, siteSettings);
+    case 'ogDescription':
+      return classifyOgDescription(page, validationSettings, siteSettings);
+    case 'ogImage':
+      return classifyOgImage(page, siteSettings);
+    case 'noindex':
+      return classifyNoindex(page);
+    default:
+      return 'good';
+  }
+}
+
+const ATTENTION_FIELDS = ['slug', 'title', 'description', 'ogTitle', 'ogDescription', 'ogImage'];
+
+function hasWarningAttention(page, context = {}) {
+  return [...ATTENTION_FIELDS, 'noindex']
+    .some((field) => classifyPageField(page, field, context) === 'warning');
 }
 
 function hasErrorAttention(page, context = {}) {
-  const { siteSettings = {}, validationSettings = {} } = context;
-
-  return [
-    classifySlug(page, validationSettings),
-    classifyTitle(page, validationSettings, siteSettings),
-    classifyDescription(page, validationSettings, siteSettings),
-    classifyOgTitle(page, validationSettings, siteSettings),
-    classifyOgDescription(page, validationSettings, siteSettings),
-    classifyOgImage(page, siteSettings)
-  ].includes('error');
+  return ATTENTION_FIELDS.some((field) => classifyPageField(page, field, context) === 'error');
 }
 
 function matchesAttentionFilter(page, filter, context = {}) {
@@ -189,27 +213,19 @@ function matchesAttentionFilter(page, filter, context = {}) {
   }
 }
 
-function getTypeStatus(page, filter, context = {}) {
-  const { siteSettings = {}, validationSettings = {} } = context;
+const TYPE_FILTER_FIELDS = {
+  'type-slug': 'slug',
+  'type-title': 'title',
+  'type-description': 'description',
+  'type-og-title': 'ogTitle',
+  'type-og-description': 'ogDescription',
+  'type-og-image': 'ogImage',
+  'type-noindex': 'noindex'
+};
 
-  switch (filter) {
-    case 'type-slug':
-      return classifySlug(page, validationSettings);
-    case 'type-title':
-      return classifyTitle(page, validationSettings, siteSettings);
-    case 'type-description':
-      return classifyDescription(page, validationSettings, siteSettings);
-    case 'type-og-title':
-      return classifyOgTitle(page, validationSettings, siteSettings);
-    case 'type-og-description':
-      return classifyOgDescription(page, validationSettings, siteSettings);
-    case 'type-og-image':
-      return classifyOgImage(page, siteSettings);
-    case 'type-noindex':
-      return classifyNoindex(page);
-    default:
-      return 'good';
-  }
+function getTypeStatus(page, filter, context = {}) {
+  const field = TYPE_FILTER_FIELDS[filter];
+  return field ? classifyPageField(page, field, context) : 'good';
 }
 
 export function filterPages(pages = [], activeFilters = [], searchQuery = '', context = {}) {

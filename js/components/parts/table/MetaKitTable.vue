@@ -280,13 +280,10 @@
 <script>
 import Tooltip from '../common/Tooltip.vue';
 import {
-  getRangesForPageAndType,
-  getSlugValidationConfig,
-  isOutsideRange,
   getStatusClass,
   getStatusValue,
   getLengthValidationReason,
-  getSlugValidationIssues
+  STATUS_CLASSES
 } from '../../../composables/useValidation.js';
 import {
   isTitleInherited,
@@ -296,7 +293,6 @@ import {
   getEffectiveTitle,
   getEffectiveDescription,
   getInheritanceSource,
-  isInheritedFromSite,
   isInheritedFromLanguage,
   buildTooltipText
 } from '../../../composables/useInheritance.js';
@@ -305,6 +301,13 @@ import {
   buildTitleWithSiteName,
   getTableTitleDisplay
 } from '../../../composables/panelDisplay.js';
+import { classifyPageField, getSlugAnalysis } from '../../../composables/panelState.js';
+
+const LEVEL_CLASSES = {
+  good: STATUS_CLASSES.optimal,
+  warning: STATUS_CLASSES.warning,
+  error: STATUS_CLASSES.error
+};
 
 export default {
   components: {
@@ -363,6 +366,14 @@ export default {
       }
     };
   },
+  computed: {
+    classifierContext() {
+      return {
+        siteSettings: this.siteSettings,
+        validationSettings: this.validationSettings
+      };
+    }
+  },
   methods: {
     shouldAppendSiteName(type) {
       return shouldAppendSiteName(this.siteSettings, type);
@@ -416,29 +427,19 @@ export default {
       return preview || '—';
     },
 
-    getTableTitleStatusClass(page) {
-      const baseStatus = this.getStatusClass(page, this.getTitleLength(page, 'meta'), 'title');
-      if (baseStatus === 'k-meta-kit-status-error') {
-        return baseStatus;
-      }
+    // Status colours come from the shared classifier (panelState.js);
+    // fields without a value stay uncoloured and show "—"
+    fieldStatusClass(page, field, length) {
+      if (!length) return '';
+      return LEVEL_CLASSES[classifyPageField(page, field, this.classifierContext)];
+    },
 
-      if (isInheritedFromLanguage(page, 'metaTitle', this.siteSettings) && this.getTitleLength(page, 'meta')) {
-        return 'k-meta-kit-status-warning';
-      }
-      return baseStatus;
+    getTableTitleStatusClass(page) {
+      return this.fieldStatusClass(page, 'title', this.getTitleLength(page, 'meta'));
     },
 
     getTableOgTitleStatusClass(page) {
-      const baseStatus = this.getStatusClass(page, this.getTitleLength(page, 'og'), 'ogTitle');
-      if (baseStatus === 'k-meta-kit-status-error') {
-        return baseStatus;
-      }
-
-      if (!page.hasOgTitle && isInheritedFromLanguage(page, 'metaTitle', this.siteSettings) && this.getTitleLength(page, 'og')) {
-        return 'k-meta-kit-status-warning';
-      }
-
-      return baseStatus;
+      return this.fieldStatusClass(page, 'ogTitle', this.getTitleLength(page, 'og'));
     },
 
     // Tooltip methods
@@ -621,19 +622,7 @@ export default {
 
     getDescriptionStatusClass(page) {
       const desc = getEffectiveDescription(page, 'meta', this.siteSettings);
-      const baseStatus = this.getStatusClass(page, desc?.length || 0, 'description');
-      if (baseStatus === 'k-meta-kit-status-error') {
-        return baseStatus;
-      }
-
-      if (
-        (isInheritedFromSite(page, 'metaDescription', this.siteSettings) ||
-          isInheritedFromLanguage(page, 'metaDescription', this.siteSettings)) &&
-        desc
-      ) {
-        return 'k-meta-kit-status-warning';
-      }
-      return baseStatus;
+      return this.fieldStatusClass(page, 'description', desc?.length || 0);
     },
 
     getOgTitleDisplay(page) {
@@ -648,61 +637,22 @@ export default {
 
     getOgDescriptionStatusClass(page) {
       const desc = getEffectiveDescription(page, 'og', this.siteSettings);
-      const baseStatus = this.getStatusClass(page, desc?.length || 0, 'ogDescription');
-      if (baseStatus === 'k-meta-kit-status-error') {
-        return baseStatus;
-      }
-
-      if (!page.hasOgDescription && isInheritedFromLanguage(page, 'metaDescription', this.siteSettings) && desc) {
-        return 'k-meta-kit-status-warning';
-      }
-
-      if (isInheritedFromSite(page, 'ogDescription', this.siteSettings) && desc) {
-        return 'k-meta-kit-status-warning';
-      }
-      return baseStatus;
+      return this.fieldStatusClass(page, 'ogDescription', desc?.length || 0);
     },
 
     // Slug methods
     getSlug(page) {
-      if (page.id === 'site') return '';
-      const parts = page.id.split('/');
-      return parts[parts.length - 1];
-    },
-
-    getSlugWordCount(slug) {
-      if (!slug) return 0;
-      return slug.split(/[-_]/).filter(word => word.length > 0).length;
+      return getSlugAnalysis(page, this.validationSettings).slug;
     },
 
     getSlugStatusClass(page) {
-      if (page.id === 'site') return 'k-meta-kit-status-optimal';
-
-      const slug = this.getSlug(page);
-      const wordCount = this.getSlugWordCount(slug);
-      const length = slug.length;
-      const numSlashes = page.id.split('/').length - 1;
-      const cfg = getSlugValidationConfig(page, this.validationSettings);
-      const avgWordLength = wordCount > 0 ? Math.ceil(length / wordCount) : length;
-
-      const issues = getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg });
-
-      if (issues.some(issue => issue.severity === 'error')) return 'k-meta-kit-status-error';
-      if (issues.some(issue => issue.severity === 'warning')) return 'k-meta-kit-status-warning';
-      return 'k-meta-kit-status-optimal';
+      return LEVEL_CLASSES[classifyPageField(page, 'slug', this.classifierContext)];
     },
 
     getSlugTooltip(page) {
       if (page.id === 'site') return 'Site root';
 
-      const slug = this.getSlug(page);
-      const wordCount = this.getSlugWordCount(slug);
-      const length = slug.length;
-      const numSlashes = page.id.split('/').length - 1;
-      const cfg = getSlugValidationConfig(page, this.validationSettings);
-      const avgWordLength = wordCount > 0 ? Math.ceil(length / wordCount) : length;
-      const issues = getSlugValidationIssues({ numSlashes, wordCount, length, avgWordLength, cfg });
-
+      const { slug, wordCount, length, numSlashes, cfg, issues } = getSlugAnalysis(page, this.validationSettings);
       const statusClass = this.getSlugStatusClass(page);
       const status = statusClass === 'k-meta-kit-status-error' ? 'error'
         : (statusClass === 'k-meta-kit-status-warning' ? 'warning' : 'ok');
