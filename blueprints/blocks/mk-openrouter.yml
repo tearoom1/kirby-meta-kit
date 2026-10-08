@@ -1,4 +1,4 @@
-name: OpenRouter Settings
+name: AI Settings
 icon: ai
 preview: fields
 wysiwyg: true
@@ -9,15 +9,36 @@ fields:
     text: AI features will be automatically disabled if the API key and model is not configured either here or in the config.
     theme: info
     translate: false
-  apiKey:
-    label: OpenRouter API Key
-    type: text
-    help: Your OpenRouter API key for AI-generated descriptions. Leave empty to disable AI features.
+  provider:
+    label: Provider
+    type: select
+    placeholder: OpenRouter
+    options:
+      - { value: 'mistral', text: 'Mistral (EU)' }
+      - { value: 'custom', text: 'Other OpenAI-compatible API' }
+    help: Leave empty for OpenRouter. Mistral processes your content in the EU.
     width: 1/2
     translate: false
+  apiKey:
+    label: API Key
+    type: text
+    help: API key of the selected provider. Leave empty to disable AI features.
+    width: 1/2
+    translate: false
+  endpoint:
+    label: API Endpoint
+    type: url
+    placeholder: https://example.com/v1/chat/completions
+    help: Full URL of the chat completions endpoint
+    width: 1/2
+    translate: false
+    when:
+      provider: custom
   model:
     label: AI Model
     type: select
+    when:
+      provider: ''
     options:
       - { value: 'google/gemma-4-31b-it:free', text: 'Gemma 4 31B (Free test model)' }
       - { value: 'google/gemma-4-26b-a4b-it:free', text: 'Gemma 4 26B A4B (Free test model)' }
@@ -50,7 +71,30 @@ fields:
     width: 1/2
     translate: false
     when:
+      provider: ''
       model: custom
+  mistralModel:
+    label: AI Model
+    type: select
+    placeholder: Mistral Small (default)
+    options:
+      - { value: 'mistral-small-latest', text: 'Mistral Small' }
+      - { value: 'mistral-medium-latest', text: 'Mistral Medium' }
+      - { value: 'mistral-large-latest', text: 'Mistral Large' }
+    help: Other models can be set with api.model in the config
+    width: 1/2
+    translate: false
+    when:
+      provider: mistral
+  endpointModel:
+    label: Model ID
+    type: text
+    placeholder: llama3.3
+    help: Model name as expected by the endpoint
+    width: 1/2
+    translate: false
+    when:
+      provider: custom
   temperature:
     label: Creativity Level
     type: range
@@ -72,5 +116,5 @@ fields:
       - { value: 'high', text: 'High' }
     placeholder: Model default
     width: 1/2
-    help: How long reasoning models (GPT-5/6, Gemini 3, …) think before answering. Lower is faster and cheaper. Leave empty to use the model's default. Ignored by models without reasoning.
+    help: How long reasoning models (GPT-5/6, Gemini 3, …) think before answering. Lower is faster and cheaper. Leave empty to use the model's default. Ignored by models without reasoning and by Mistral.
     translate: false

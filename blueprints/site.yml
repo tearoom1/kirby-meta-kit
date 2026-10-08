@@ -52,7 +52,7 @@ columns:
     icon: ai
     fields:
       metaKitOpenrouter:
-        label: OpenRouter Settings
+        label: AI Provider
         type: blocks
         fieldsets:
           - mk-openrouter

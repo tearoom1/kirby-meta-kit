@@ -17,7 +17,7 @@ An SEO workflow plugin for Kirby CMS with AI-assisted content generation, experi
 ### For Developers & Agencies
 - **Enforce Standards**: Set validation ranges globally or per template to ensure consistent SEO quality
 - **Client-Friendly**: Editors get immediate feedback without needing SEO expertise
-- **AI Integration**: Uses OpenRouter (free tier available) for cost-effective AI generation
+- **AI Integration**: Uses OpenRouter (free tier available), Mistral (EU) or any OpenAI-compatible API for AI generation
 - **Time-Saving**: Bulk edit hundreds of pages
 - **Complete Solution**: Meta tags, Schema.org, sitemap, robots.txt - everything in one plugin
 
@@ -166,8 +166,9 @@ This is where developers set technical defaults, validation rules, and AI integr
     'ai.enabled' => true,       // Master toggle for AI generation
     'review.enabled' => false,  // Opt-in: show experimental AI content review in the Panel
 
-    // OpenRouter API Configuration
-    'api.key' => 'sk-or-v1-YOUR-KEY',  // Get free key at openrouter.ai
+    // AI Provider Configuration
+    'api.provider' => 'openrouter',  // 'openrouter' (default), 'mistral' or 'custom' (see Choosing a Provider)
+    'api.key' => 'sk-or-v1-YOUR-KEY',  // API key of the provider; get a free key at openrouter.ai
     'api.model' => 'google/gemma-4-31b-it:free',  // See available models below
     'api.temperature' => 0.7,  // 0.1 (focused) to 1.0 (creative)
     'api.reasoning' => null,  // Reasoning effort: 'none', 'minimal', 'low', 'medium', 'high' (null = model default)
@@ -216,8 +217,9 @@ This is where editors configure site-wide content defaults and behavior:
 - Choose which field types get site name (meta only, OG only, or both)
 - Default robots directive
 
-**OpenRouter Tab (AI Settings):**
-- API key and model selection
+**AI Settings Tab:**
+- Provider (OpenRouter, Mistral or another OpenAI-compatible API), API key and model selection
+- Reasoning effort for reasoning models
 - Creativity level (temperature slider)
 - Can override config.php settings if needed
 
@@ -245,7 +247,7 @@ Settings merge in this order (lowest to highest priority):
 3. **Config File** - Developer overrides (highest priority)
 
 **Examples:**
-- AI model set in Panel can be overridden in config.php
+- AI model set in Panel can be overridden in config.php (options set to `null` in config.php don't override the Panel)
 - Validation ranges in config.php apply unless template-specific rules exist
 - Sitemap exclusions from Panel and config.php work together (combined)
 
@@ -263,7 +265,7 @@ To grant access to additional Kirby roles, list them in `allowedRoles`:
 
 Notes:
 - Admins are **always** allowed; you do not need to include `'admin'` in the list.
-- Users with any of the listed roles can read SEO data for every page (including drafts) and trigger AI generation/review, which consumes your OpenRouter quota. Only grant this to roles you trust.
+- Users with any of the listed roles can read SEO data for every page (including drafts) and trigger AI generation/review, which consumes your AI provider quota. Only grant this to roles you trust.
 - Saving generated values still goes through Kirby's normal page-update permissions, so a role allowed by `allowedRoles` cannot use Meta Kit to overwrite fields on pages they are not normally allowed to edit.
 
 ---
@@ -414,6 +416,33 @@ Get a free API key from [OpenRouter.ai](https://openrouter.ai/):
 'api.model' => 'google/gemma-4-31b-it:free',
 ```
 
+#### Choosing a Provider
+
+All providers use the same OpenAI-compatible chat completions format. Set the provider in the Panel (AI Settings) or in config.php:
+
+| `api.provider` | Endpoint | Default model | Notes |
+|---|---|---|---|
+| `openrouter` (default) | `https://openrouter.ai/api/v1/chat/completions` | `google/gemma-4-31b-it:free` | Hundreds of models from all major vendors, free tier available |
+| `mistral` | `https://api.mistral.ai/v1/chat/completions` | `mistral-small-latest` | EU company with EU data processing, useful for GDPR-sensitive projects |
+| `custom` | Set `api.endpoint` | Set `api.model` | Any OpenAI-compatible API, e.g. EU hosters like IONOS, Scaleway or OVHcloud, or a self-hosted Ollama/vLLM server |
+
+```php
+// Mistral (EU)
+'api.provider' => 'mistral',
+'api.key' => env('MISTRAL_API_KEY'),
+'api.model' => 'mistral-medium-latest',
+
+// Any OpenAI-compatible endpoint
+'api.provider' => 'custom',
+'api.endpoint' => 'https://llm.example.com/v1/chat/completions',
+'api.key' => env('LLM_API_KEY'),  // Use any placeholder if your server needs no key
+'api.model' => 'llama3.3',
+```
+
+`api.endpoint` always wins over the provider's preset endpoint. Model IDs differ between providers: an OpenRouter ID like `openai/gpt-6-luna` won't work with Mistral.
+
+#### OpenRouter Models
+
 Pick any model from OpenRouter — free or paid. The plugin sends the configured model name to OpenRouter as-is, so any model your API key can reach will work, including reasoning models such as GPT-6 or Gemini 3. In the Panel, choose **Other model** in the model dropdown to enter any model ID that isn't listed.
 
 #### Sample of available Models as of October 2026
@@ -458,7 +487,7 @@ Controls how long reasoning models (GPT-5/6, Gemini 3, DeepSeek R-series, …) t
 'high'  // Slowest, most thorough
 ```
 
-The value is sent to OpenRouter as `reasoning.effort` and is ignored by models without reasoning. Leave it empty for hybrid models like Claude: setting any value switches their reasoning on, which makes them slower and more expensive. It can also be set in the Panel under OpenRouter Settings.
+The value is sent to OpenRouter as `reasoning.effort`, to custom endpoints as `reasoning_effort` (the OpenAI parameter), and not at all to Mistral. Models without reasoning ignore it. Leave it empty for hybrid models like Claude: setting any value switches their reasoning on, which makes them slower and more expensive. It can also be set in the Panel under AI Settings.
 
 **Tone** (formal vs informal):
 Controls language formality in multilingual content.
@@ -861,7 +890,7 @@ $ogImage = $page->ogImage()->toFile();
 - **PHP**: 8.1 or higher
 - **Kirby**: 5.0+
 - **Composer**: For dependency management
-- **OpenRouter API Key**: Optional, only needed for AI features (free tier available)
+- **AI Provider API Key**: Optional, only needed for AI features (OpenRouter has a free tier)
 
 ---
 
@@ -873,7 +902,8 @@ $ogImage = $page->ogImage()->toFile();
 2. Verify model is selected
 3. Check `ai.enabled` is not set to `false`
 4. Look for errors in Kirby debug mode
-5. Check OpenRouter account has free tier or credits
+5. Check your provider account has free tier or credits
+6. With `api.provider` set to `mistral` or `custom`, make sure the model ID matches that provider
 
 ### Validation Not Showing
 

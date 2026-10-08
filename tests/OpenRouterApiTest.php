@@ -66,6 +66,31 @@ class OpenRouterApiTest extends KirbyTestCase
         $request = json_decode($this->callApi('/ok', reasoning: ' low '), true);
 
         $this->assertSame(['effort' => 'low'], $request['reasoning']);
+        $this->assertNull($request['reasoningEffort']);
+    }
+
+    public function testCustomProviderSendsOpenAiReasoningEffort(): void
+    {
+        $request = json_decode($this->callApi('/ok', reasoning: 'low', provider: 'custom'), true);
+
+        $this->assertSame('low', $request['reasoningEffort']);
+        $this->assertNull($request['reasoning']);
+    }
+
+    public function testMistralProviderSkipsOpenRouterExtras(): void
+    {
+        $request = json_decode($this->callApi('/ok', reasoning: 'low', provider: 'mistral'), true);
+
+        $this->assertNull($request['reasoning']);
+        $this->assertNull($request['reasoningEffort']);
+        $this->assertNull($request['referer']);
+    }
+
+    public function testErrorsNameTheProvider(): void
+    {
+        $this->expectExceptionMessage('Mistral API error: No auth credentials found (model: test-model, code: 401)');
+
+        $this->callApi('/ok', apiKey: 'wrong-key', provider: 'mistral');
     }
 
     public function testProviderErrorIsFormattedWithContext(): void
@@ -135,12 +160,14 @@ class OpenRouterApiTest extends KirbyTestCase
         string $apiKey = 'test-key',
         string $model = 'test-model',
         ?string $endpoint = null,
-        ?string $reasoning = null
+        ?string $reasoning = null,
+        string $provider = 'openrouter'
     ): string {
         $kirby = $this->makeKirby(
             ['site.txt' => 'Title: Test Site'],
             [
                 'tearoom1.meta-kit' => [
+                    'api.provider'    => $provider,
                     'api.endpoint'    => $endpoint ?? self::$baseUrl . $path,
                     'api.key'         => $apiKey,
                     'api.model'       => $model,

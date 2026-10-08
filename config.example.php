@@ -26,25 +26,31 @@ return [
         // API Settings (Required for AI features)
         // ============================================
 
-        // Your OpenRouter API key (get one at https://openrouter.ai/)
+        // AI provider: 'openrouter' (default), 'mistral' (EU) or 'custom'
+        // (any OpenAI-compatible API, requires 'api.endpoint')
+        'api.provider' => 'openrouter',
+
+        // API key of the provider (OpenRouter: get one at https://openrouter.ai/)
         // Leave empty to disable AI features
         'api.key' => env('OPENROUTER_API_KEY', 'your-api-key-here'),
 
         // AI model to use for description generation
-        // Pick any model from https://openrouter.ai/models
+        // OpenRouter: any model from https://openrouter.ai/models
+        // Mistral: e.g. 'mistral-small-latest', 'mistral-large-latest'
         // Leave empty to disable AI features
         'api.model' => 'google/gemma-4-31b-it:free',
 
-        // API endpoint (usually no need to change)
-        'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
+        // API endpoint: only needed for 'custom'. When set, it overrides
+        // the preset endpoint of 'openrouter' and 'mistral'.
+        // 'api.endpoint' => 'https://llm.example.com/v1/chat/completions',
 
         // Temperature for AI generation (0.1 = focused, 1.0 = creative)
         'api.temperature' => 0.7,
 
         // Reasoning effort for reasoning models (GPT-5/6, Gemini 3, …):
         // 'none', 'minimal', 'low', 'medium' or 'high'. Lower = faster and cheaper.
-        // null = model default. Ignored by models without reasoning; on hybrid
-        // models (e.g. Claude) any value switches reasoning on.
+        // null = model default. Ignored by models without reasoning and by
+        // Mistral; on hybrid models (e.g. Claude) any value switches reasoning on.
         'api.reasoning' => null,
 
         // ============================================

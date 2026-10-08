@@ -101,6 +101,75 @@ class MetaKitCoreTest extends KirbyTestCase
         $this->assertTrue(MetaKit::isAiEnabled());
     }
 
+    public function testMistralProviderUsesPresetEndpointAndDefaultModel(): void
+    {
+        $this->makeKirby([
+            'site.txt' => "Title: Test Site\n----\nMetaKitOpenrouter:\n- type: mk-openrouter\n  content:\n    provider: mistral\n    apiKey: site-key\n    model: openai/gpt-6-luna\n",
+        ]);
+
+        $settings = ConfigHelper::getOpenRouterSettings();
+
+        $this->assertSame('mistral', $settings['api.provider']);
+        $this->assertSame('https://api.mistral.ai/v1/chat/completions', $settings['api.endpoint']);
+        // The OpenRouter model field is ignored for Mistral
+        $this->assertSame('mistral-small-latest', $settings['api.model']);
+    }
+
+    public function testMistralModelFromPanel(): void
+    {
+        $this->makeKirby([
+            'site.txt' => "Title: Test Site\n----\nMetaKitOpenrouter:\n- type: mk-openrouter\n  content:\n    provider: mistral\n    apiKey: site-key\n    mistralModel: mistral-large-latest\n",
+        ]);
+
+        $this->assertSame('mistral-large-latest', ConfigHelper::getOpenRouterSettings()['api.model']);
+    }
+
+    public function testCustomProviderUsesPanelEndpointAndModel(): void
+    {
+        $this->resetAiEnabledCache();
+        $this->makeKirby([
+            'site.txt' => "Title: Test Site\n----\nMetaKitOpenrouter:\n- type: mk-openrouter\n  content:\n    provider: custom\n    apiKey: site-key\n    endpoint: https://llm.example.com/v1/chat/completions\n    endpointModel: llama3.3\n",
+        ]);
+
+        $settings = ConfigHelper::getOpenRouterSettings();
+
+        $this->assertSame('https://llm.example.com/v1/chat/completions', $settings['api.endpoint']);
+        $this->assertSame('llama3.3', $settings['api.model']);
+        $this->assertTrue(MetaKit::isAiEnabled());
+    }
+
+    public function testCustomProviderWithoutEndpointDisablesAi(): void
+    {
+        $this->resetAiEnabledCache();
+        $this->makeKirby([
+            'site.txt' => "Title: Test Site\n----\nMetaKitOpenrouter:\n- type: mk-openrouter\n  content:\n    provider: custom\n    apiKey: site-key\n    endpointModel: llama3.3\n",
+        ]);
+
+        $this->assertFalse(MetaKit::isAiEnabled());
+    }
+
+    public function testConfigOverridesPanelButNullDoesNot(): void
+    {
+        $this->makeKirby(
+            [
+                'site.txt' => "Title: Test Site\n----\nMetaKitOpenrouter:\n- type: mk-openrouter\n  content:\n    apiKey: site-key\n    model: anthropic/claude-sonnet-5.5\n    reasoning: low\n",
+            ],
+            [
+                'tearoom1.meta-kit' => [
+                    'api.model' => 'openai/gpt-6-luna',
+                    'api.key' => null,
+                    'api.reasoning' => null,
+                ],
+            ]
+        );
+
+        $settings = ConfigHelper::getOpenRouterSettings();
+
+        $this->assertSame('openai/gpt-6-luna', $settings['api.model']);
+        $this->assertSame('site-key', $settings['api.key']);
+        $this->assertSame('low', $settings['api.reasoning']);
+    }
+
     public function testEmptyCustomSiteModelDisablesAi(): void
     {
         $this->resetAiEnabledCache();

@@ -38,11 +38,11 @@ class MetaKit
     public static function getAiAccessErrorMessage(): string
     {
         if (!self::isAiEnabled()) {
-            return 'Configure an OpenRouter API key and model to use AI generation.';
+            return 'Configure an AI provider API key and model to use AI generation.';
         }
 
         if (self::getConfiguredAiModel() === null) {
-            return 'Configure an OpenRouter model to use AI generation.';
+            return 'Configure an AI model to use AI generation.';
         }
 
         return '';
@@ -57,27 +57,17 @@ class MetaKit
             return self::$aiEnabledCache;
         }
 
-        $kirby = kirby();
-
         // Check explicit disable in config
         if (!option('tearoom1.meta-kit.ai.enabled', true)) {
             return self::$aiEnabledCache = false;
         }
 
-        // Check if model is configured (either in config or site settings)
-        $configModel = option('tearoom1.meta-kit.api.model');
-        $configKey = option('tearoom1.meta-kit.api.key');
+        // AI needs a key, a model and an endpoint (from config or site settings)
+        $settings = ConfigHelper::getOpenRouterSettings();
 
-        // Get site settings
-        $openrouter = MetaHelper::getSeoData($kirby->site()->metaKitOpenrouter());
-        $siteModel = $openrouter ? ConfigHelper::getSiteModel($openrouter) : null;
-        $siteKey = $openrouter ? $openrouter->apiKey()->value() : null;
-
-        // AI is disabled if both model and key are empty
-        $hasModel = !empty($configModel) || !empty($siteModel);
-        $hasKey = !empty($configKey) || !empty($siteKey);
-
-        return self::$aiEnabledCache = $hasModel && $hasKey;
+        return self::$aiEnabledCache = !empty($settings['api.key'])
+            && !empty($settings['api.model'])
+            && !empty($settings['api.endpoint']);
     }
 
     public static function isReviewEnabled(): bool
@@ -172,7 +162,7 @@ class MetaKit
     }
 
     /**
-     * Send a prompt to the OpenRouter API and return the raw text response.
+     * Send a prompt to the configured AI provider and return the raw text response.
      *
      * Shared by generateTitle() and generateDescription() to avoid duplication.
      *
@@ -180,17 +170,24 @@ class MetaKit
      */
     protected function callApi(string $prompt, int $maxTokens): string
     {
+        $provider = $this->options['api.provider'] ?? 'openrouter';
+        $label = ConfigHelper::AI_PROVIDERS[$provider]['label'] ?? 'AI';
+        $endpoint = $this->options['api.endpoint'] ?? null;
         $apiKey = $this->options['api.key'] ?? null;
         $model = is_string($this->options['api.model'] ?? null)
             ? trim($this->options['api.model'])
             : null;
 
         if (empty($apiKey)) {
-            throw new Exception('OpenRouter API key is not configured');
+            throw new Exception($label . ' API key is not configured');
         }
 
         if ($model === null || $model === '') {
-            throw new Exception('OpenRouter model is not configured');
+            throw new Exception($label . ' model is not configured');
+        }
+
+        if (empty($endpoint)) {
+            throw new Exception($label . ' API endpoint is not configured');
         }
 
         $payload = [
@@ -203,21 +200,31 @@ class MetaKit
         ];
 
         // Only sent when configured: on hybrid models (e.g. Claude) any effort
-        // switches reasoning on, so leaving it out keeps the model's default
+        // switches reasoning on, so leaving it out keeps the model's default.
+        // Not sent to Mistral, which doesn't document an effort parameter.
         $reasoning = $this->options['api.reasoning'] ?? null;
         if (is_string($reasoning) && trim($reasoning) !== '') {
-            $payload['reasoning'] = ['effort' => trim($reasoning)];
+            if ($provider === 'openrouter') {
+                $payload['reasoning'] = ['effort' => trim($reasoning)];
+            } elseif ($provider === 'custom') {
+                $payload['reasoning_effort'] = trim($reasoning);
+            }
+        }
+
+        $headers = [
+            'Authorization' => 'Bearer ' . $apiKey,
+            'Content-Type' => 'application/json',
+        ];
+        if ($provider === 'openrouter') {
+            // Attribution for OpenRouter's app rankings
+            $headers['HTTP-Referer'] = $this->kirby->url();
         }
 
         // Kirby's built-in HTTP client; it doesn't throw on 4xx/5xx responses
-        $response = Remote::request($this->options['api.endpoint'], [
+        $response = Remote::request($endpoint, [
             'method'  => 'POST',
             'timeout' => 60,
-            'headers' => [
-                'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type' => 'application/json',
-                'HTTP-Referer' => $this->kirby->url(),
-            ],
+            'headers' => $headers,
             'data' => json_encode($payload),
         ]);
 
@@ -226,14 +233,14 @@ class MetaKit
 
         if ($response->code() >= 400) {
             $errorMsg = $this->formatOpenRouterError($data, $body, $model);
-            self::log('OpenRouter API Error: ' . $errorMsg);
-            throw new Exception('OpenRouter API error: ' . $errorMsg);
+            self::log($label . ' API Error: ' . $errorMsg);
+            throw new Exception($label . ' API error: ' . $errorMsg);
         }
 
         if (!isset($data['choices'][0])) {
             $errorMsg = $data['error']['message'] ?? 'Unknown API error';
-            self::log('OpenRouter API Error: ' . $errorMsg);
-            throw new Exception('OpenRouter API error: ' . $errorMsg);
+            self::log($label . ' API Error: ' . $errorMsg);
+            throw new Exception($label . ' API error: ' . $errorMsg);
         }
 
         $content = $data['choices'][0]['message']['content'] ?? null;
@@ -243,8 +250,8 @@ class MetaKit
                 ? 'The model used up its token limit before returning any text'
                 : 'The model returned an empty response';
             $errorMsg .= ' (model: ' . $model . ')';
-            self::log('OpenRouter API Error: ' . $errorMsg);
-            throw new Exception('OpenRouter API error: ' . $errorMsg);
+            self::log($label . ' API Error: ' . $errorMsg);
+            throw new Exception($label . ' API error: ' . $errorMsg);
         }
 
         return $content;

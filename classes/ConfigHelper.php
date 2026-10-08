@@ -11,6 +11,28 @@ use Kirby\Content\Field;
 class ConfigHelper
 {
     private static $siteSettingsCache = null;
+
+    /**
+     * Supported AI providers. All of them speak the OpenAI chat completions
+     * format; 'custom' takes its endpoint from the config or the panel.
+     */
+    public const AI_PROVIDERS = [
+        'openrouter' => [
+            'label' => 'OpenRouter',
+            'endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
+            'model' => 'google/gemma-4-31b-it:free',
+        ],
+        'mistral' => [
+            'label' => 'Mistral',
+            'endpoint' => 'https://api.mistral.ai/v1/chat/completions',
+            'model' => 'mistral-small-latest',
+        ],
+        'custom' => [
+            'label' => 'AI',
+            'endpoint' => null,
+            'model' => null,
+        ],
+    ];
     /**
      * Get string value from field with fallback
      */
@@ -123,13 +145,12 @@ class ConfigHelper
     }
 
     /**
-     * Get OpenRouter settings from site panel or config
+     * Get AI provider settings from site panel or config
      */
     public static function getOpenRouterSettings(): array
     {
         $defaults = [
-            'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
-            'api.model' => 'google/gemma-4-31b-it:free',
+            'api.provider' => 'openrouter',
             'api.temperature' => 0.7,
             'api.reasoning' => null,
             'ai.tone' => 'formal',
@@ -139,8 +160,15 @@ class ConfigHelper
         ];
 
         $siteSettings = [];
+        $siteEndpoint = null;
         $openrouter = MetaHelper::getSeoData(kirby()->site()->metaKitOpenrouter());
         if ($openrouter) {
+            if ($openrouter->provider()->isNotEmpty()) {
+                $siteSettings['api.provider'] = $openrouter->provider()->value();
+            }
+            if ($openrouter->endpoint()->isNotEmpty()) {
+                $siteEndpoint = trim($openrouter->endpoint()->value());
+            }
             if ($openrouter->apiKey()->isNotEmpty()) {
                 $siteSettings['api.key'] = $openrouter->apiKey()->value();
             }
@@ -156,18 +184,46 @@ class ConfigHelper
             }
         }
 
-        return self::mergeOptions($defaults, $siteSettings);
+        $options = self::mergeOptions($defaults, $siteSettings);
+
+        // Unknown provider names are treated as a custom endpoint
+        $provider = (string)$options['api.provider'];
+        if (!isset(self::AI_PROVIDERS[$provider])) {
+            $provider = 'custom';
+        }
+        $options['api.provider'] = $provider;
+
+        // An explicit api.endpoint in config.php wins over the provider preset
+        if (empty($options['api.endpoint'])) {
+            $options['api.endpoint'] = $provider === 'custom'
+                ? $siteEndpoint
+                : self::AI_PROVIDERS[$provider]['endpoint'];
+        }
+
+        // An explicitly empty model (e.g. '' in config.php) disables AI
+        if (!array_key_exists('api.model', $options)) {
+            $options['api.model'] = self::AI_PROVIDERS[$provider]['model'];
+        }
+
+        return $options;
     }
 
     /**
-     * Resolve the model chosen in the OpenRouter panel settings,
-     * using the custom model ID when "Other model" is selected
+     * Resolve the model chosen in the panel AI settings for the selected
+     * provider, using the custom model ID when "Other model" is selected.
+     * Returns null when no model is chosen (provider default applies) and
+     * '' when "Other model" is chosen without an ID (AI stays disabled).
      */
     public static function getSiteModel($openrouter): ?string
     {
-        $model = trim((string)$openrouter->model()->value());
+        $model = match ((string)$openrouter->provider()->value()) {
+            '' => trim((string)$openrouter->model()->value()),
+            'mistral' => trim((string)$openrouter->mistralModel()->value()),
+            default => trim((string)$openrouter->endpointModel()->value()),
+        };
+
         if ($model === 'custom') {
-            $model = trim((string)$openrouter->customModel()->value());
+            return trim((string)$openrouter->customModel()->value());
         }
 
         return $model !== '' ? $model : null;

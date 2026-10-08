@@ -29,6 +29,7 @@ switch ($path) {
                         'maxTokens'   => $body['max_tokens'] ?? null,
                         'temperature' => $body['temperature'] ?? null,
                         'reasoning'   => $body['reasoning'] ?? null,
+                        'reasoningEffort' => $body['reasoning_effort'] ?? null,
                         'prompt'      => $body['messages'][0]['content'] ?? null,
                     ]),
                 ],
