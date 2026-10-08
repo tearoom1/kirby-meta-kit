@@ -57,7 +57,10 @@ $isArticle = in_array(
     true
 );
 $dateField = $page->content()->get(option('tearoom1.meta-kit.opengraph.dateField', 'date'));
-$publishedTime = $isArticle && $dateField->isNotEmpty() ? $dateField->toDate('c') : null;
+// Via the timestamp: toDate() formats with the configured date.handler
+// (e.g. intl), where "c" is not an ISO 8601 date
+$publishedTimestamp = $isArticle && $dateField->isNotEmpty() ? $dateField->toTimestamp() : false;
+$publishedTime = $publishedTimestamp ? date('c', $publishedTimestamp) : null;
 $modifiedTime = $isArticle ? date('c', $page->modified()) : null;
 ?>
 

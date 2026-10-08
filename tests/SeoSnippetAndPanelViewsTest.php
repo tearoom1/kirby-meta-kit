@@ -252,6 +252,19 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         $this->assertStringContainsString('<meta property="article:published_time" content="2026-01-02T', $html);
     }
 
+    public function testArticleDateIsIsoWithIntlDateHandler(): void
+    {
+        $kirby = $this->makeKirby([
+            'site.txt' => 'Title: Site',
+            'post/article.txt' => "Title: Post\n----\nDate: 2025-09-02\n",
+        ], ['date.handler' => 'intl']);
+
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('post'));
+
+        $this->assertMatchesRegularExpression('~<meta property="article:published_time" content="2025-09-02T00:00:00[+-]\d\d:\d\d">~', $html);
+    }
+
     public function testImageAltTextAndLargeCardWithImage(): void
     {
         $kirby = $this->makeKirby([
