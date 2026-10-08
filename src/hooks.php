@@ -86,39 +86,33 @@ return [
         if (
             !$autoGenerate ||
             !TearoomOne\MetaKit::isAiEnabled() ||
-            $newPage->intendedTemplate()->name() === "error"
+            $newPage->intendedTemplate()->name() === "error" ||
+            // Only the current language counts, not a fallback translation
+            TearoomOne\MetaKitController::hasFieldInCurrentLanguage($newPage, "metaDescription") ||
+            !TearoomOne\MetaKitController::hasEnoughContent($newPage)
         ) {
             return;
         }
 
-        try {
-            // Check if metaDescription is empty (flat field)
-            if ($newPage->metaDescription()->isNotEmpty()) {
-                return;
-            }
+        $pageId = $newPage->id();
+        $languageCode = kirby()->language()?->code();
 
-            $content = $newPage->text()->toString();
-            if (!empty($content)) {
-                $metaKit = new TearoomOne\MetaKit(kirby());
-                $languageCode = TearoomOne\MetaHelper::currentLanguageCode(kirby());
-                $description = $metaKit->generateDescription($content, [
-                    "language" => $languageCode,
-                ]);
+        // Generate after the response so saving isn't blocked by the API call;
+        // the generator's own update re-enters this hook and stops above
+        TearoomOne\MetaKit::afterResponse(function () use ($pageId, $languageCode) {
+            $result = TearoomOne\MetaKitController::generateField(
+                $pageId,
+                "metaDescription",
+                $languageCode,
+                true
+            );
 
-                if ($description) {
-                    // Update flat field directly
-                    $newPage->update(
-                        [
-                            "metaDescription" => $description,
-                        ],
-                        kirby()->language()?->code(),
-                    );
-                }
+            if (($result["status"] ?? null) !== "success") {
+                TearoomOne\MetaKit::log(
+                    "Meta Kit auto-generate error: " . ($result["message"] ?? "unknown error")
+                );
             }
-        } catch (Exception $e) {
-            // Silently fail - don't break the save operation
-            TearoomOne\MetaKit::log("Meta Kit auto-generate error: " . $e->getMessage());
-        }
+        });
     },
     "site.update:after" => function () {
         TearoomOne\ConfigHelper::clearCache();

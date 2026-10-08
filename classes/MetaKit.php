@@ -28,6 +28,38 @@ class MetaKit
         return is_string($model) && trim($model) !== '' ? trim($model) : null;
     }
 
+    /**
+     * Replaces the after-response runner, e.g. in tests
+     * @var \Closure(\Closure): void|null
+     */
+    public static ?\Closure $deferHandler = null;
+
+    /**
+     * Run a task after the response was sent, so slow API calls don't keep
+     * the editor waiting. On PHP-FPM the request is finished first; on other
+     * SAPIs the task still runs at shutdown, after the page output.
+     */
+    public static function afterResponse(\Closure $task): void
+    {
+        if (self::$deferHandler !== null) {
+            (self::$deferHandler)($task);
+            return;
+        }
+
+        register_shutdown_function(static function () use ($task) {
+            ignore_user_abort(true);
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            }
+
+            try {
+                $task();
+            } catch (\Throwable $e) {
+                self::log('Meta Kit deferred task error: ' . $e->getMessage());
+            }
+        });
+    }
+
     public static function log(string $message): void
     {
         if (function_exists('kirbylog')) {

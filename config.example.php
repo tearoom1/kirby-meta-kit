@@ -57,8 +57,9 @@ return [
         // SEO Settings
         // ============================================
 
-        // Auto-generate descriptions when pages are saved
-        // Warning: This makes API calls on every page save
+        // Auto-generate a missing meta description when a page is saved.
+        // Runs after the response is sent (PHP-FPM), so saving isn't blocked,
+        // but it still makes an API call for every save of such a page.
         'autoGenerate' => false,
 
         // Minimum amount of page text (title excluded) needed for AI generation.

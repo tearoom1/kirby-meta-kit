@@ -37,6 +37,13 @@ switch ($path) {
         ]);
         return;
 
+    case '/description':
+        // A 150-character meta description, within the default optimal range
+        echo json_encode(['choices' => [['message' => [
+            'content' => str_pad('Generated description for testing', 150, '.'),
+        ]]]]);
+        return;
+
     case '/provider-error':
         http_response_code(429);
         echo json_encode([

@@ -189,7 +189,7 @@ This is where developers set technical defaults, validation rules, and AI integr
     'sitemap.enabled' => true,
     'sitemap.exclude' => ['error', 'drafts'],  // Page IDs or patterns
     'schema.enabled' => true,
-    'autoGenerate' => false,  // Auto-generate on save (not recommended)
+    'autoGenerate' => false,  // Generate a missing meta description after saving a page
     'ai.minContentLength' => 50,  // Skip AI generation for pages with less text (title excluded)
     'excludeTemplates' => [],  // Hide from panel table
     'excludeStatus' => [],  // Hide draft/unlisted pages
