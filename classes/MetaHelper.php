@@ -7,6 +7,7 @@ use Kirby\Cms\Language;
 use Kirby\Cms\Page;
 use Kirby\Cms\Site;
 use Kirby\Content\Field;
+use Kirby\Toolkit\Str;
 
 class MetaHelper
 {
@@ -56,19 +57,44 @@ class MetaHelper
         return $title;
     }
 
-    public static function buildDescription(Page $page, Site $site, int $maxLength = 160): string
+    public static function buildDescription(Page $page, Site $site, ?int $maxLength = null): string
     {
+        $maxLength ??= self::outputLimit('description', $page);
+
         // Check page SEO field directly (flat field)
         if ($page->metaDescription()->isNotEmpty()) {
-            return $page->metaDescription()->excerpt($maxLength);
+            return self::limitText($page->metaDescription()->kirbytext()->value(), $maxLength);
         }
 
         // Fall back to site default description (flat field)
         if ($site->metaDescription()->isNotEmpty()) {
-            return $site->metaDescription()->excerpt($maxLength);
+            return self::limitText($site->metaDescription()->kirbytext()->value(), $maxLength);
         }
 
         return '';
+    }
+
+    /**
+     * Plain-text excerpt that never exceeds $maxLength, ellipsis included
+     */
+    public static function limitText(string $text, int $maxLength): string
+    {
+        $plain = Str::excerpt($text, 0);
+        if (mb_strlen($plain) <= $maxLength) {
+            return $plain;
+        }
+
+        return Str::excerpt($plain, $maxLength - 2, rep: ' …');
+    }
+
+    /**
+     * Longest text the output keeps for a field type: the upper end of the
+     * warning range, so every length the panel accepts is rendered in full
+     */
+    public static function outputLimit(string $fieldType, Page $page): int
+    {
+        $ranges = ConfigHelper::getValidationRanges($fieldType, $page->intendedTemplate()->name());
+        return (int)($ranges['warning']['max'] ?? $ranges['optimal']['max']);
     }
 
     /**
@@ -129,16 +155,18 @@ class MetaHelper
         return $lang . '_' . $region;
     }
 
-    public static function buildOgDescription(Page $page, Site $site, ?string $metaDescription = null, int $maxLength = 160): string
+    public static function buildOgDescription(Page $page, Site $site, ?string $metaDescription = null, ?int $maxLength = null): string
     {
+        $maxLength ??= self::outputLimit('ogDescription', $page);
+
         // Check OG-specific description first (flat field)
         if ($page->ogDescription()->isNotEmpty()) {
-            return $page->ogDescription()->excerpt($maxLength);
+            return self::limitText($page->ogDescription()->kirbytext()->value(), $maxLength);
         }
 
         // Fall back to meta description (flat field)
         if ($page->metaDescription()->isNotEmpty()) {
-            return $page->metaDescription()->excerpt($maxLength);
+            return self::limitText($page->metaDescription()->kirbytext()->value(), $maxLength);
         }
 
         // Use provided meta description
@@ -148,7 +176,7 @@ class MetaHelper
 
         // Fall back to site default description (flat field)
         if ($site->metaDescription()->isNotEmpty()) {
-            return $site->metaDescription()->excerpt($maxLength);
+            return self::limitText($site->metaDescription()->kirbytext()->value(), $maxLength);
         }
 
         return '';

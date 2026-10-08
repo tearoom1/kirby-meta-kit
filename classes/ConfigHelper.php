@@ -110,15 +110,84 @@ class ConfigHelper
         self::$siteSettingsCache = null;
     }
 
+    private static ?array $validationDefaults = null;
+
+    /**
+     * Built-in validation ranges, shared with the panel JS
+     * (config/validation-defaults.json is the single source)
+     */
+    public static function getValidationDefaults(): array
+    {
+        return self::$validationDefaults ??= json_decode(
+            file_get_contents(dirname(__DIR__) . '/config/validation-defaults.json'),
+            true
+        );
+    }
+
+    /**
+     * Fully resolved validation settings: built-in defaults, overridden by
+     * the `validation` option. Template rules are merged on top of the global
+     * ones and accept both `templates.x.title` and `templates.x.ranges.title`.
+     * Partial rules (e.g. only `optimal.max`) keep the remaining values.
+     */
+    public static function getValidationSettings(): array
+    {
+        $validation = option('tearoom1.meta-kit.validation', []);
+        $validation = is_array($validation) ? $validation : [];
+        $defaults = self::getValidationDefaults();
+
+        $ranges = self::mergeRules($defaults['ranges'], $validation['ranges'] ?? []);
+        $slug = self::mergeRules($defaults['slug'], $validation['slug'] ?? []);
+
+        $templates = [];
+        foreach ($validation['templates'] ?? [] as $template => $config) {
+            if (!is_array($config)) {
+                continue;
+            }
+
+            $templates[$template] = [
+                'ranges' => self::mergeRules($ranges, $config['ranges'] ?? $config),
+                'slug' => self::mergeRules($slug, $config['slug'] ?? []),
+            ];
+        }
+
+        return [
+            'ranges' => $ranges,
+            'slug' => $slug,
+            'templates' => $templates,
+        ];
+    }
+
+    /**
+     * Merge override rules into base rules, per optimal/warning min/max value
+     */
+    private static function mergeRules(array $base, mixed $overrides): array
+    {
+        if (!is_array($overrides)) {
+            return $base;
+        }
+
+        foreach ($base as $key => $rule) {
+            $override = $overrides[$key] ?? null;
+            if (!is_array($override)) {
+                continue;
+            }
+
+            foreach (['optimal', 'warning'] as $level) {
+                if (is_array($override[$level] ?? null)) {
+                    $base[$key][$level] = array_merge($rule[$level], $override[$level]);
+                }
+            }
+        }
+
+        return $base;
+    }
+
     /**
      * Get validation ranges for a field type, with template-specific override support
      */
     public static function getValidationRanges(string $fieldType, ?string $template = null): array
     {
-        $validation = option('tearoom1.meta-kit.validation', []);
-        $ranges = $validation['ranges'] ?? [];
-        $templates = $validation['templates'] ?? [];
-
         // Map field types to config keys
         $fieldKey = match ($fieldType) {
             'title', 'metaTitle' => 'title',
@@ -128,20 +197,19 @@ class ConfigHelper
             default => 'title'
         };
 
-        // Check for template-specific ranges
-        if ($template && isset($templates[$template][$fieldKey])) {
-            return $templates[$template][$fieldKey];
-        }
+        $settings = self::getValidationSettings();
+        $ranges = $settings['templates'][$template ?? '']['ranges'] ?? $settings['ranges'];
 
-        // Default ranges by field type
-        $defaults = [
-            'title' => ['optimal' => ['min' => 20, 'max' => 60], 'warning' => ['min' => 15, 'max' => 75]],
-            'ogTitle' => ['optimal' => ['min' => 20, 'max' => 60], 'warning' => ['min' => 15, 'max' => 75]],
-            'description' => ['optimal' => ['min' => 140, 'max' => 160], 'warning' => ['min' => 126, 'max' => 176]],
-            'ogDescription' => ['optimal' => ['min' => 140, 'max' => 160], 'warning' => ['min' => 126, 'max' => 176]],
-        ];
+        return $ranges[$fieldKey];
+    }
 
-        return $ranges[$fieldKey] ?? $defaults[$fieldKey] ?? $defaults['title'];
+    /**
+     * Slug rules for a template (template rules merged over the global ones)
+     */
+    public static function getSlugValidation(?string $template = null): array
+    {
+        $settings = self::getValidationSettings();
+        return $settings['templates'][$template ?? '']['slug'] ?? $settings['slug'];
     }
 
     /**
@@ -154,7 +222,6 @@ class ConfigHelper
             'api.temperature' => 0.7,
             'api.reasoning' => null,
             'ai.tone' => 'formal',
-            'maxDescriptionLength' => 160,
             'ai.prompt.title' => "Write a clear, direct meta title {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be specific and factual. Focus on what the page is actually about. {tone} Write ONLY the title, nothing else.\n\nTitle:",
             'ai.prompt.description' => "Write a clear, informative meta description {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be direct and specific. Describe what the page actually contains. {tone} Write ONLY the description, nothing else.\n\nDescription:",
         ];

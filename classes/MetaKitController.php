@@ -76,7 +76,7 @@ class MetaKitController
             'pages' => $result,
             'aiEnabled' => \TearoomOne\MetaKit::isAiEnabled(),
             'reviewEnabled' => \TearoomOne\MetaKit::isReviewEnabled(),
-            'validationSettings' => option('tearoom1.meta-kit.validation', []),
+            'validationSettings' => ConfigHelper::getValidationSettings(),
             'siteSettings' => self::getSiteSettings()
         ];
     }

@@ -3,21 +3,11 @@
  * Centralizes validation ranges and status calculations
  */
 
-// Default SEO length ranges for different field types
-export const DEFAULT_SEO_RANGES = {
-  title: { optimal: { min: 20, max: 60 }, warning: { min: 15, max: 75 } },
-  ogTitle: { optimal: { min: 20, max: 60 }, warning: { min: 15, max: 75 } },
-  description: { optimal: { min: 140, max: 160 }, warning: { min: 126, max: 176 } },
-  ogDescription: { optimal: { min: 150, max: 250 }, warning: { min: 135, max: 300 } }
-};
+import validationDefaults from '../../config/validation-defaults.json' with { type: 'json' };
 
-// Default slug validation ranges
-export const DEFAULT_SLUG_RANGES = {
-  depth: { optimal: { min: 0, max: 2 }, warning: { min: 0, max: 3 } },
-  words: { optimal: { min: 1, max: 8 }, warning: { min: 1, max: 10 } },
-  length: { optimal: { min: 1, max: 60 }, warning: { min: 1, max: 70 } },
-  wordLength: { optimal: { min: 1, max: 15 }, warning: { min: 1, max: 20 } }
-};
+// Default ranges, shared with PHP (ConfigHelper::getValidationDefaults)
+export const DEFAULT_SEO_RANGES = validationDefaults.ranges;
+export const DEFAULT_SLUG_RANGES = validationDefaults.slug;
 
 // Status CSS class mappings
 export const STATUS_CLASSES = {

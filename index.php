@@ -39,34 +39,7 @@ App::plugin(
             'ai.tone' => 'formal',
             // api.* defaults live in ConfigHelper::getOpenRouterSettings(); defining
             // them here would override the AI settings made in the panel
-            'maxDescriptionLength' => 160,
-            'validation' => [
-                'ranges' => [
-                    'title' => ['optimal' => ['min' => 20, 'max' => 60], 'warning' => ['min' => 15, 'max' => 75]],
-                    'ogTitle' => ['optimal' => ['min' => 20, 'max' => 60], 'warning' => ['min' => 15, 'max' => 75]],
-                    'description' => ['optimal' => ['min' => 140, 'max' => 160], 'warning' => ['min' => 126, 'max' => 176]],
-                    'ogDescription' => ['optimal' => ['min' => 150, 'max' => 250], 'warning' => ['min' => 135, 'max' => 300]],
-                ],
-                'slug' => [
-                    'depth' => [
-                        'optimal' => ['min' => 0, 'max' => 2],
-                        'warning' => ['min' => 0, 'max' => 3],
-                    ],
-                    'words' => [
-                        'optimal' => ['min' => 1, 'max' => 8],
-                        'warning' => ['min' => 1, 'max' => 10],
-                    ],
-                    'length' => [
-                        'optimal' => ['min' => 3, 'max' => 60],
-                        'warning' => ['min' => 2, 'max' => 70],
-                    ],
-                    'wordLength' => [
-                        'optimal' => ['min' => 1, 'max' => 15],
-                        'warning' => ['min' => 1, 'max' => 20],
-                    ],
-                ],
-                'templates' => []
-            ],
+            // validation defaults live in config/validation-defaults.json
             'excludeTemplates' => [],
             'excludeStatus' => [],
             'sitemap.exclude' => ['error'],

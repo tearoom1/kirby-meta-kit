@@ -57,9 +57,6 @@ return [
         // SEO Settings
         // ============================================
 
-        // Maximum length for generated descriptions
-        'maxDescriptionLength' => 160,
-
         // Auto-generate descriptions when pages are saved
         // Warning: This makes API calls on every page save
         'autoGenerate' => false,
