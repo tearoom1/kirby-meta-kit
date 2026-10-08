@@ -9,7 +9,7 @@
         :size="buttonSize"
         :disabled="isGenerating"
         @click="$emit('generate')"
-        :title="buttonSize === 'xs' ? 'AI Generate' : undefined"
+        :title="buttonSize === 'xs' ? $t('meta-kit.generate.ai') : undefined"
       >
         <template v-if="buttonSize !== 'xs'">{{ $t('meta-kit.generate.ai') }}</template>
       </k-button>
@@ -27,7 +27,7 @@
         <span v-if="value"
               class="k-meta-kit-field-length"
               :class="statusClass">
-          {{ value.length }} chars
+          {{ $t('meta-kit.chars', { count: value.length }) }}
         </span>
       </span>
     </div>
@@ -39,6 +39,8 @@
 </template>
 
 <script>
+import { getFieldLengthStatus } from '../../../composables/useValidation.js';
+
 export default {
   props: {
     value: String,
@@ -78,33 +80,28 @@ export default {
       type: String,
       default: 'meta',
       validator: value => ['meta', 'og'].includes(value)
+    },
+    // Page template and validation settings: same ranges as the table
+    template: {
+      type: String,
+      default: null
+    },
+    validationSettings: {
+      type: Object,
+      default: () => ({})
     }
   },
   computed: {
     statusClass() {
       if (!this.value) return '';
 
-      const length = this.value.length;
-
-      // Different optimal ranges for meta vs OG
-      let optimal, warning;
-      if (this.type === 'og') {
-        optimal = { min: 150, max: 185 };
-        warning = { min: 135, max: 200 };
-      } else {
-        optimal = { min: 140, max: 160 };
-        warning = { min: 126, max: 176 };
-      }
-
-      if (length >= optimal.min && length <= optimal.max) {
-        return 'k-meta-kit-status-success';
-      }
-
-      if (length >= warning.min && length <= warning.max) {
-        return 'k-meta-kit-status-warning';
-      }
-
-      return 'k-meta-kit-status-error';
+      const status = getFieldLengthStatus(
+        this.value.length,
+        this.template,
+        this.type === 'og' ? 'ogDescription' : 'description',
+        this.validationSettings
+      );
+      return status ? `k-meta-kit-status-${status}` : '';
     }
   }
 };

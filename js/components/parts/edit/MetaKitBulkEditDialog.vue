@@ -1,6 +1,6 @@
 <template>
   <k-dialog ref="dialog" class="k-meta-kit-dialog k-meta-kit-dialog-bulk" size="huge" :cancel-button="false" :submit-button="false" @submit.prevent="saveAll">
-    <k-headline>Edit Selected Pages ({{ pages.length }})</k-headline>
+    <k-headline>{{ $t('meta-kit.bulkEdit.title', { count: pages.length }) }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
       <k-icon class="k-meta-kit-spinner" type="loader"/>
@@ -15,14 +15,14 @@
           @click="activeTab = 'meta'"
           size="sm"
         >
-          Meta Tags
+          {{ $t('meta-kit.bulkEdit.tab.meta') }}
         </k-button>
         <k-button
           :class="activeTab === 'og' ? 'active' : ''"
           @click="activeTab = 'og'"
           size="sm"
         >
-          Social Media (OG)
+          {{ $t('meta-kit.bulkEdit.tab.og') }}
         </k-button>
       </div>
 
@@ -36,6 +36,8 @@
 
           <!-- Meta Title -->
           <meta-kit-title-field
+            :template="page.template"
+            :validation-settings="validationSettings"
             :label="$t('meta-kit.field.metaTitle')"
             :value="editedFields[page.id].metaTitle"
             @input="editedFields[page.id].metaTitle = $event"
@@ -51,6 +53,8 @@
 
           <!-- Meta Description -->
           <meta-kit-description-field
+            :template="page.template"
+            :validation-settings="validationSettings"
             :label="$t('meta-kit.field.metaDescription')"
             :value="editedFields[page.id].metaDescription"
             @input="editedFields[page.id].metaDescription = $event"
@@ -73,6 +77,8 @@
 
           <!-- OG Title -->
           <meta-kit-title-field
+            :template="page.template"
+            :validation-settings="validationSettings"
             :label="$t('meta-kit.field.ogTitle')"
             :value="editedFields[page.id].ogTitle"
             @input="editedFields[page.id].ogTitle = $event"
@@ -89,6 +95,8 @@
 
           <!-- OG Description -->
           <meta-kit-description-field
+            :template="page.template"
+            :validation-settings="validationSettings"
             :label="$t('meta-kit.field.ogDescription')"
             :value="editedFields[page.id].ogDescription"
             @input="editedFields[page.id].ogDescription = $event"
@@ -142,6 +150,10 @@ export default {
     MetaKitDescriptionField
   },
   props: {
+    validationSettings: {
+      type: Object,
+      default: () => ({})
+    },
     api: {
       type: Object,
       required: true

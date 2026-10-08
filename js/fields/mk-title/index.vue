@@ -13,7 +13,7 @@
     />
     <template #footer>
       <div v-if="titlePreview && shouldAppendSiteName" class="k-mk-title-preview">
-        Preview: {{ titlePreview }}
+        {{ $t('meta-kit.preview.label', { title: titlePreview }) }}
       </div>
       <k-text :theme="validation.theme">
         <span class="k-mk-validation-row">

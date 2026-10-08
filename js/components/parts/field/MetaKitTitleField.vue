@@ -9,7 +9,7 @@
         :size="buttonSize"
         :disabled="isGenerating"
         @click="$emit('generate')"
-        :title="buttonSize === 'xs' ? 'AI Generate' : undefined"
+        :title="buttonSize === 'xs' ? $t('meta-kit.generate.ai') : undefined"
       >
         <template v-if="buttonSize !== 'xs'">{{ $t('meta-kit.generate.ai') }}</template>
       </k-button>
@@ -28,7 +28,7 @@
         <span v-if="value"
               class="k-meta-kit-field-length"
               :class="statusClass">
-          {{ charCount }} chars
+          {{ $t('meta-kit.chars', { count: charCount }) }}
         </span>
       </span>
     </div>
@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import { getFieldLengthStatus } from '../../../composables/useValidation.js';
 import { getFieldTitleDisplay, shouldAppendSiteName } from '../../../composables/panelDisplay.js';
 
 export default {
@@ -89,6 +90,15 @@ export default {
       type: String,
       default: 'meta',
       validator: value => ['meta', 'og'].includes(value)
+    },
+    // Page template and validation settings: same ranges as the table
+    template: {
+      type: String,
+      default: null
+    },
+    validationSettings: {
+      type: Object,
+      default: () => ({})
     }
   },
   computed: {
@@ -152,25 +162,13 @@ export default {
         finalLength = this.fullTitle.length;
       }
 
-      // Different optimal ranges for meta vs OG
-      let optimal, warning;
-      if (this.type === 'og') {
-        optimal = { min: 40, max: 60 };
-        warning = { min: 35, max: 70 };
-      } else {
-        optimal = { min: 50, max: 60 };
-        warning = { min: 45, max: 66 };
-      }
-
-      if (finalLength >= optimal.min && finalLength <= optimal.max) {
-        return 'k-meta-kit-status-success';
-      }
-
-      if (finalLength >= warning.min && finalLength <= warning.max) {
-        return 'k-meta-kit-status-warning';
-      }
-
-      return 'k-meta-kit-status-error';
+      const status = getFieldLengthStatus(
+        finalLength,
+        this.template,
+        this.type === 'og' ? 'ogTitle' : 'title',
+        this.validationSettings
+      );
+      return status ? `k-meta-kit-status-${status}` : '';
     }
   }
 };

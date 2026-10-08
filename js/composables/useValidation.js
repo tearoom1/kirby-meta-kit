@@ -129,6 +129,22 @@ export function getStatusClass(page, length, type, validationSettings = {}) {
 }
 
 /**
+ * Length status of an edit field, with the same ranges as the table
+ * (template rules from the validation settings included)
+ * @param {number} length
+ * @param {string|null} template - page template
+ * @param {string} type - title, ogTitle, description or ogDescription
+ * @param {Object} validationSettings
+ * @returns {string} 'success', 'warning', 'error' or '' when empty
+ */
+export function getFieldLengthStatus(length, template, type, validationSettings = {}) {
+  const statusClass = getStatusClass({ template }, length, type, validationSettings);
+  if (!statusClass) return '';
+  if (statusClass === STATUS_CLASSES.optimal) return 'success';
+  return statusClass === STATUS_CLASSES.warning ? 'warning' : 'error';
+}
+
+/**
  * Extract status value from status class
  * @param {string} statusClass - Full CSS class name
  * @returns {string} Status value (optimal, warning, error)

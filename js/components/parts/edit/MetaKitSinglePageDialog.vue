@@ -1,6 +1,6 @@
 <template>
   <k-dialog ref="dialog" size="large" class="k-meta-kit-dialog" :cancel-button="false"  :submit-button="false" @submit.prevent="save">
-    <k-headline v-if="page">Edit: {{ page.title }}</k-headline>
+    <k-headline v-if="page">{{ $t('meta-kit.edit.title', { page: page.title }) }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
       <k-icon class="k-meta-kit-spinner" type="loader"/>
@@ -11,6 +11,8 @@
       <!-- Meta Title -->
       <div class="k-meta-kit-single-field">
         <meta-kit-title-field
+            :template="page.template"
+            :validation-settings="validationSettings"
           :label="$t('meta-kit.field.metaTitle')"
           :value="editedFields.metaTitle"
           @input="editedFields.metaTitle = $event"
@@ -28,6 +30,8 @@
       <!-- Meta Description -->
       <div class="k-meta-kit-single-field">
         <meta-kit-description-field
+            :template="page.template"
+            :validation-settings="validationSettings"
           :label="$t('meta-kit.field.metaDescription')"
           :value="editedFields.metaDescription"
           @input="editedFields.metaDescription = $event"
@@ -44,6 +48,8 @@
       <!-- OG Title -->
       <div v-if="!isSitePage" class="k-meta-kit-single-field">
         <meta-kit-title-field
+            :template="page.template"
+            :validation-settings="validationSettings"
           :label="$t('meta-kit.field.ogTitle')"
           :value="editedFields.ogTitle"
           @input="editedFields.ogTitle = $event"
@@ -63,6 +69,8 @@
       <!-- OG Description -->
       <div v-if="!isSitePage" class="k-meta-kit-single-field">
         <meta-kit-description-field
+            :template="page.template"
+            :validation-settings="validationSettings"
           :label="$t('meta-kit.field.ogDescription')"
           :value="editedFields.ogDescription"
           @input="editedFields.ogDescription = $event"
@@ -132,6 +140,10 @@ export default {
     MetaKitDescriptionField
   },
   props: {
+    validationSettings: {
+      type: Object,
+      default: () => ({})
+    },
     api: {
       type: Object,
       required: true

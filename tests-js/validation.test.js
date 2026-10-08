@@ -204,3 +204,21 @@ test('getSlugValidationConfig merges template-specific slug rules', () => {
   assert.deepEqual(cfg.depth.optimal, { min: 1, max: 1 });
   assert.deepEqual(cfg.words, DEFAULT_SLUG_RANGES.words);
 });
+
+import { getFieldLengthStatus } from '../js/composables/useValidation.js';
+
+test('edit fields use the same ranges as the table, template rules included', () => {
+  // Defaults: title optimal 20-60, warning 15-75
+  assert.equal(getFieldLengthStatus(28, 'article', 'ogTitle', {}), 'success');
+  assert.equal(getFieldLengthStatus(70, null, 'title', {}), 'warning');
+  assert.equal(getFieldLengthStatus(90, null, 'title', {}), 'error');
+  assert.equal(getFieldLengthStatus(0, null, 'title', {}), '');
+
+  // Template ranges (here: article titles 40-60)
+  const settings = { templates: { article: { ranges: { ogTitle: { optimal: { min: 40, max: 60 }, warning: { min: 15, max: 75 } } } } } };
+  assert.equal(getFieldLengthStatus(28, 'article', 'ogTitle', settings), 'warning');
+  assert.equal(getFieldLengthStatus(28, 'default', 'ogTitle', settings), 'success');
+
+  // OG descriptions: default optimal 150-250
+  assert.equal(getFieldLengthStatus(200, null, 'ogDescription', {}), 'success');
+});

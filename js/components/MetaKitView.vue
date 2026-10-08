@@ -153,6 +153,7 @@
     <!-- Bulk Edit Dialog -->
     <meta-kit-bulk-edit-dialog
       ref="allPagesDialog"
+      :validation-settings="validationSettingsData"
       :api="$api"
       :site-settings="siteSettingsData"
       :ai-enabled="aiEnabled"
@@ -162,6 +163,7 @@
     <!-- Single Page Edit Dialog -->
     <meta-kit-single-page-dialog
       ref="singlePageDialog"
+      :validation-settings="validationSettingsData"
       :api="$api"
       :site-settings="siteSettingsData"
       :ai-enabled="aiEnabled"
