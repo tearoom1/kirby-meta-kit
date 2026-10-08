@@ -312,6 +312,9 @@ class ConfigHelper
         $defaults = [
             'sitemap.exclude' => ['error'],
             'sitemap.includeUnlisted' => false,
+            'sitemap.images' => true,
+            'sitemap.cache' => true,
+            'sitemap.cacheDuration' => 60,
             'sitemap.changefreq.default' => 'monthly',
             'sitemap.changefreq.templates' => [
                 'home' => 'daily',

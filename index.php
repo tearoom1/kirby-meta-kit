@@ -31,7 +31,8 @@ App::plugin(
             'cache' => [
                 'performer' => [
                     'active' => true
-                ]
+                ],
+                'sitemap' => true
             ],
             'allowedRoles' => [], // Additional Kirby roles allowed to use the plugin (admins always allowed). Example: ['editor', 'client']
             'ai.enabled' => true,

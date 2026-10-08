@@ -16,6 +16,85 @@ class Sitemap
         $this->options = ConfigHelper::getSitemapSettings();
     }
 
+    /**
+     * The sitemap XML, from the plugin cache when possible. The cache is
+     * flushed whenever pages, files or the site change (see hooks.php);
+     * the duration only covers changes made outside of Kirby.
+     */
+    public static function render(Kirby $kirby): string
+    {
+        $sitemap = new static($kirby);
+
+        if (($sitemap->options['sitemap.cache'] ?? true) !== true) {
+            return $sitemap->toXml();
+        }
+
+        $cache = $kirby->cache('tearoom1.meta-kit.sitemap');
+        $key = 'sitemap';
+
+        if (($xml = $cache->get($key)) !== null) {
+            return $xml;
+        }
+
+        $xml = $sitemap->toXml();
+        $cache->set($key, $xml, (int)($sitemap->options['sitemap.cacheDuration'] ?? 60));
+
+        return $xml;
+    }
+
+    public static function flushCache(): void
+    {
+        kirby()->cache('tearoom1.meta-kit.sitemap')->flush();
+    }
+
+    public function toXml(): string
+    {
+        $multilang = $this->kirby->multilang();
+        $withImages = ($this->options['sitemap.images'] ?? true) === true;
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'
+            . ($multilang ? ' xmlns:xhtml="http://www.w3.org/1999/xhtml"' : '')
+            . ($withImages ? ' xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"' : '')
+            . '>';
+
+        foreach ($this->generate() as $item) {
+            $xml .= "\n    <url>";
+            $xml .= "\n        <loc>" . htmlspecialchars($item['url']) . "</loc>";
+            $xml .= "\n        <lastmod>" . $item['lastmod'] . "</lastmod>";
+            $xml .= "\n        <changefreq>" . $item['changefreq'] . "</changefreq>";
+            $xml .= "\n        <priority>" . $item['priority'] . "</priority>";
+
+            // Add alternate language links
+            foreach ($item['alternates'] ?? [] as $alternate) {
+                $xml .= "\n        <xhtml:link rel=\"alternate\" hreflang=\"" .
+                    htmlspecialchars($alternate['lang']) . "\" href=\"" .
+                    htmlspecialchars($alternate['url']) . "\" />";
+            }
+
+            foreach ($item['images'] ?? [] as $image) {
+                $xml .= "\n        <image:image><image:loc>" . htmlspecialchars($image) . "</image:loc></image:image>";
+            }
+
+            $xml .= "\n    </url>";
+        }
+
+        return $xml . "\n</urlset>";
+    }
+
+    /**
+     * Image URLs of a page for the image sitemap (Google reads up to 1000)
+     */
+    protected function images(Page $page): array
+    {
+        if (($this->options['sitemap.images'] ?? true) !== true) {
+            return [];
+        }
+
+        return array_values($page->images()->limit(1000)->map(fn ($image) => $image->url())->data());
+    }
+
     public function generate(): array
     {
         $sitemap = [];
@@ -52,7 +131,8 @@ class Sitemap
                         'lastmod' => (date('c', $timestamp)),
                         'changefreq' => $this->getChangeFrequency($page),
                         'priority' => $this->getPriority($page),
-                        'alternates' => $alternates
+                        'alternates' => $alternates,
+                        'images' => $this->images($page)
                     ];
                 }
             } else {
@@ -61,7 +141,8 @@ class Sitemap
                     'url' => $page->url(),
                     'lastmod' =>  (date('c', $timestamp)),
                     'changefreq' => $this->getChangeFrequency($page),
-                    'priority' => $this->getPriority($page)
+                    'priority' => $this->getPriority($page),
+                    'images' => $this->images($page)
                 ];
             }
         }

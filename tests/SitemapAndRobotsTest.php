@@ -177,4 +177,83 @@ class SitemapAndRobotsTest extends KirbyTestCase
             $this->assertContains('x-default', $hreflangs);
         }
     }
+
+    private const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+
+    private function renderSitemap(): string
+    {
+        $route = require __DIR__ . '/../src/routes/sitemap.php';
+        return $route()->body();
+    }
+
+    public function testSitemapListsPageImages(): void
+    {
+        $kirby = $this->makeKirby([
+            'site.txt' => 'Title: Site',
+            '1_about/default.txt' => 'Title: About',
+        ]);
+        file_put_contents($kirby->root('content') . '/1_about/tea.png', base64_decode(self::PNG));
+
+        $xml = $this->renderSitemap();
+
+        $this->assertStringContainsString('xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"', $xml);
+        $this->assertMatchesRegularExpression('~<image:image><image:loc>[^<]*/tea\.png</image:loc></image:image>~', $xml);
+        $this->assertNotFalse(simplexml_load_string($xml), 'sitemap must be valid XML');
+    }
+
+    public function testSitemapImagesCanBeDisabled(): void
+    {
+        $kirby = $this->makeKirby(
+            ['site.txt' => 'Title: Site', '1_about/default.txt' => 'Title: About'],
+            ['tearoom1.meta-kit' => ['sitemap.images' => false]]
+        );
+        file_put_contents($kirby->root('content') . '/1_about/tea.png', base64_decode(self::PNG));
+
+        $xml = $this->renderSitemap();
+
+        $this->assertStringContainsString('/about</loc>', $xml);
+        $this->assertStringNotContainsString('image:', $xml);
+    }
+
+    private function addPageOutsideKirby($kirby, string $folder): void
+    {
+        mkdir($kirby->root('content') . '/' . $folder);
+        file_put_contents($kirby->root('content') . '/' . $folder . '/default.txt', 'Title: Contact');
+        $kirby->site()->purge();
+    }
+
+    public function testSitemapIsCachedUntilFlushed(): void
+    {
+        // The plugin isn't registered in these tests, so the cache is
+        // configured by its core key (PageMethodsTest covers the plugin setup)
+        $kirby = $this->makeKirby(
+            ['site.txt' => 'Title: Site', '1_about/default.txt' => 'Title: About'],
+            ['cache' => ['tearoom1.meta-kit.sitemap' => true]]
+        );
+
+        $first = $this->renderSitemap();
+        $this->assertStringContainsString('/about</loc>', $first);
+
+        // A page added outside of Kirby's API doesn't flush the cache…
+        $this->addPageOutsideKirby($kirby, '2_contact');
+        $this->assertSame($first, $this->renderSitemap());
+
+        // …the page/file/site hooks do
+        $hooks = require __DIR__ . '/../src/hooks.php';
+        $hooks['page.*:after']();
+        $this->assertStringContainsString('/contact</loc>', $this->renderSitemap());
+    }
+
+    public function testSitemapCacheCanBeDisabled(): void
+    {
+        $kirby = $this->makeKirby(
+            ['site.txt' => 'Title: Site', '1_about/default.txt' => 'Title: About'],
+            ['cache' => ['tearoom1.meta-kit.sitemap' => true], 'tearoom1.meta-kit' => ['sitemap.cache' => false]]
+        );
+
+        $this->renderSitemap();
+        $this->addPageOutsideKirby($kirby, '2_contact');
+
+        $this->assertStringContainsString('/contact</loc>', $this->renderSitemap());
+    }
 }

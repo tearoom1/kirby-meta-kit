@@ -78,6 +78,14 @@ return [
         // Enable/disable sitemap generation at /sitemap.xml
         'sitemap.enabled' => true,
 
+        // List each page's images in the sitemap (Google image sitemap)
+        'sitemap.images' => true,
+
+        // Cache the sitemap; page, file and site changes clear the cache.
+        // The duration (minutes) only matters for changes made outside Kirby.
+        'sitemap.cache' => true,
+        'sitemap.cacheDuration' => 60,
+
         // Pages to exclude from sitemap (array of page IDs)
         'sitemap.exclude' => [
             'error',

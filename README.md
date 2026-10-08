@@ -654,7 +654,9 @@ XML sitemap available at `/sitemap.xml` with:
 - Multilingual support with hreflang
 - Configurable priorities
 - Last modified dates
+- Page images (image sitemap)
 - Styled XML view for human readability
+- Cached; the cache is cleared whenever pages, files or the site change
 
 **Configuration:**
 
@@ -662,6 +664,9 @@ XML sitemap available at `/sitemap.xml` with:
 'sitemap.enabled' => true,
 'sitemap.exclude' => ['error', 'drafts', 'admin'],  // Page IDs to exclude
 'sitemap.includeUnlisted' => false,  // Include unlisted pages (default: false)
+'sitemap.images' => true,  // List each page's images as <image:image> (default: true)
+'sitemap.cache' => true,  // Cache the XML (default: true)
+'sitemap.cacheDuration' => 60,  // Minutes; only matters for changes made outside Kirby, e.g. via FTP
 
 // Change frequency configuration
 'sitemap.changefreq.default' => 'monthly',  // Default for all pages

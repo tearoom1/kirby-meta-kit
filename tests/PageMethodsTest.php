@@ -6,8 +6,9 @@ use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use TearoomOne\ConfigHelper;
 
 /**
- * Loads the full plugin (index.php registers it globally), so every test
- * runs in its own process to keep the other tests plugin-free.
+ * Tests that need the registered plugin (page methods, plugin options).
+ * index.php registers it globally, so every test runs in its own process
+ * to keep the other tests plugin-free.
  */
 class PageMethodsTest extends KirbyTestCase
 {
@@ -41,5 +42,13 @@ class PageMethodsTest extends KirbyTestCase
         $this->makePluginKirby(['site.txt' => 'Title: Site']);
 
         $this->assertSame(ConfigHelper::getAiSettings(), ConfigHelper::getOpenRouterSettings());
+    }
+
+    #[RunInSeparateProcess]
+    public function testPluginEnablesTheSitemapCache(): void
+    {
+        $kirby = $this->makePluginKirby(['site.txt' => 'Title: Site']);
+
+        $this->assertNotInstanceOf(\Kirby\Cache\NullCache::class, $kirby->cache('tearoom1.meta-kit.sitemap'));
     }
 }

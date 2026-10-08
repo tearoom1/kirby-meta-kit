@@ -116,5 +116,13 @@ return [
     },
     "site.update:after" => function () {
         TearoomOne\ConfigHelper::clearCache();
+        TearoomOne\Sitemap::flushCache();
+    },
+    // Any page or file change can alter the sitemap
+    "page.*:after" => function () {
+        TearoomOne\Sitemap::flushCache();
+    },
+    "file.*:after" => function () {
+        TearoomOne\Sitemap::flushCache();
     },
 ];
