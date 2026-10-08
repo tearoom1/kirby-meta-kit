@@ -1,3 +1,16 @@
+## [2.2.0](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.6...v2.2.0) (2026-10-08)
+
+
+### Features
+
+* support Mistral and other OpenAI-compatible AI providers ([2b209cb](https://github.com/tearoom1/kirby-meta-kit/commit/2b209cb1d91e40d76c0dd6df4c5b264e065309fc))
+
+
+### Bug Fixes
+
+* let AI settings from the panel take effect ([8cd5309](https://github.com/tearoom1/kirby-meta-kit/commit/8cd5309fb4fdb2902a7087a312c3e9f396779057))
+* send 'site' as pageId from site-level title and description fields ([5151ac5](https://github.com/tearoom1/kirby-meta-kit/commit/5151ac5b2ff1c402dfcf0fa66b2571a495b7d8a1))
+
 ## [2.1.6](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.5...v2.1.6) (2026-10-08)
 
 
@@ -25,11 +38,4 @@
 ### Bug Fixes
 
 * fixed duplicate width in yml file, fixes [#1](https://github.com/tearoom1/kirby-meta-kit/issues/1) ([be8471b](https://github.com/tearoom1/kirby-meta-kit/commit/be8471b77d92c71748fba00921cdae2e4d87bcb4))
-
-## [2.1.2](https://github.com/tearoom1/kirby-meta-kit/compare/v2.1.1...v2.1.2) (2026-07-09)
-
-
-### Bug Fixes
-
-* enforce tested PHP compatibility ([2457fd7](https://github.com/tearoom1/kirby-meta-kit/commit/2457fd7f71f20f644a0108ed4d244d7eb9b46c35))
 
