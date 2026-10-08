@@ -28,6 +28,7 @@ switch ($path) {
                         'model'       => $body['model'] ?? null,
                         'maxTokens'   => $body['max_tokens'] ?? null,
                         'temperature' => $body['temperature'] ?? null,
+                        'reasoning'   => $body['reasoning'] ?? null,
                         'prompt'      => $body['messages'][0]['content'] ?? null,
                     ]),
                 ],
@@ -51,6 +52,15 @@ switch ($path) {
 
     case '/no-choices':
         echo json_encode(['error' => ['message' => 'Model is overloaded']]);
+        return;
+
+    case '/reasoning-exhausted':
+        echo json_encode([
+            'choices' => [[
+                'finish_reason' => 'length',
+                'message'       => ['content' => '', 'reasoning' => 'Thinking about the title…'],
+            ]],
+        ]);
         return;
 
     case '/html-error':

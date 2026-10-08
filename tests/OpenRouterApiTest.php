@@ -55,9 +55,17 @@ class OpenRouterApiTest extends KirbyTestCase
         $this->assertStringStartsWith('application/json', (string)$request['contentType']);
         $this->assertNotEmpty($request['referer']);
         $this->assertSame('test-model', $request['model']);
-        $this->assertSame(123, $request['maxTokens']);
+        $this->assertSame(123 + MetaKit::REASONING_TOKEN_BUDGET, $request['maxTokens']);
         $this->assertEquals(0.3, $request['temperature']);
         $this->assertSame('Write a title', $request['prompt']);
+        $this->assertNull($request['reasoning']);
+    }
+
+    public function testConfiguredReasoningEffortIsSent(): void
+    {
+        $request = json_decode($this->callApi('/ok', reasoning: ' low '), true);
+
+        $this->assertSame(['effort' => 'low'], $request['reasoning']);
     }
 
     public function testProviderErrorIsFormattedWithContext(): void
@@ -81,6 +89,15 @@ class OpenRouterApiTest extends KirbyTestCase
         $this->expectExceptionMessage('OpenRouter API error: Model is overloaded');
 
         $this->callApi('/no-choices');
+    }
+
+    public function testEmptyContentAfterReasoningThrows(): void
+    {
+        $this->expectExceptionMessage(
+            'OpenRouter API error: The model used up its token limit before returning any text (model: test-model)'
+        );
+
+        $this->callApi('/reasoning-exhausted');
     }
 
     public function testNonJsonErrorBodyIsCompacted(): void
@@ -117,7 +134,8 @@ class OpenRouterApiTest extends KirbyTestCase
         int $maxTokens = 50,
         string $apiKey = 'test-key',
         string $model = 'test-model',
-        ?string $endpoint = null
+        ?string $endpoint = null,
+        ?string $reasoning = null
     ): string {
         $kirby = $this->makeKirby(
             ['site.txt' => 'Title: Test Site'],
@@ -127,6 +145,7 @@ class OpenRouterApiTest extends KirbyTestCase
                     'api.key'         => $apiKey,
                     'api.model'       => $model,
                     'api.temperature' => 0.3,
+                    'api.reasoning'   => $reasoning,
                 ],
             ]
         );

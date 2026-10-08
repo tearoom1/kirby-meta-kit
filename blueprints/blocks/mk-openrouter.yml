@@ -20,23 +20,37 @@ fields:
     type: select
     options:
       - { value: 'google/gemma-4-31b-it:free', text: 'Gemma 4 31B (Free test model)' }
-      - { value: 'meta-llama/llama-3.2-3b-instruct:free', text: 'Llama 3.2 3B (Free test model)' }
-      - { value: 'nvidia/nemotron-3-nano-30b-a3b:free', text: 'Nemotron 3 Nano 30B (Free test model)' }
-      - { value: 'openai/gpt-5', text: 'GPT-5 (Paid)' }
+      - { value: 'google/gemma-4-26b-a4b-it:free', text: 'Gemma 4 26B A4B (Free test model)' }
+      - { value: 'openai/gpt-6-luna', text: 'GPT-6 Luna (Paid)' }
+      - { value: 'openai/gpt-6-sol', text: 'GPT-6 Sol (Paid)' }
       - { value: 'openai/gpt-5-mini', text: 'GPT-5 Mini (Paid)' }
+      - { value: 'openai/gpt-5', text: 'GPT-5 (Paid)' }
       - { value: 'openai/gpt-4o-mini', text: 'GPT-4o Mini (Paid)' }
       - { value: 'openai/gpt-4o', text: 'GPT-4o (Paid)' }
-      - { value: 'anthropic/claude-sonnet-4.5', text: 'Claude Sonnet 4.5 (Paid)' }
+      - { value: 'anthropic/claude-haiku-5.5', text: 'Claude Haiku 5.5 (Paid)' }
+      - { value: 'anthropic/claude-sonnet-5.5', text: 'Claude Sonnet 5.5 (Paid)' }
       - { value: 'anthropic/claude-haiku-4.5', text: 'Claude Haiku 4.5 (Paid)' }
-      - { value: 'anthropic/claude-3.5-sonnet', text: 'Claude 3.5 Sonnet (Paid)' }
-      - { value: 'google/gemini-pro-1.5', text: 'Gemini 1.5 Pro (Paid)' }
-      - { value: 'google/gemini-flash-1.5', text: 'Gemini 1.5 Flash (Paid)' }
+      - { value: 'anthropic/claude-sonnet-4.5', text: 'Claude Sonnet 4.5 (Paid)' }
+      - { value: 'google/gemini-3.5-flash', text: 'Gemini 3.5 Flash (Paid)' }
+      - { value: 'google/gemini-3.1-flash-lite', text: 'Gemini 3.1 Flash Lite (Paid)' }
+      - { value: 'mistralai/mistral-large-4-0', text: 'Mistral Large 4 (Paid)' }
       - { value: 'mistralai/mistral-large', text: 'Mistral Large (Paid)' }
       - { value: 'meta-llama/llama-3.3-70b-instruct', text: 'Llama 3.3 70B (Paid)' }
+      - { value: 'deepseek/deepseek-v4-flash', text: 'DeepSeek V4 Flash (Paid)' }
       - { value: 'deepseek/deepseek-chat', text: 'DeepSeek Chat V3 (Paid)' }
+      - { value: 'custom', text: 'Other model (enter model ID)' }
     default: "google/gemma-4-31b-it:free"
     width: 1/2
     translate: false
+  customModel:
+    label: Custom Model ID
+    type: text
+    placeholder: openai/gpt-6-luna
+    help: Any model ID from <a href="https://openrouter.ai/models" target="_blank">openrouter.ai/models</a>
+    width: 1/2
+    translate: false
+    when:
+      model: custom
   temperature:
     label: Creativity Level
     type: range
@@ -45,5 +59,18 @@ fields:
     step: 0.1
     default: 0.7
     width: 1/2
-    help: Higher values make output more random, lower values more focused
+    help: Higher values make output more random, lower values more focused. Ignored by models that don't support it.
+    translate: false
+  reasoning:
+    label: Reasoning Effort
+    type: select
+    options:
+      - { value: 'none', text: 'None (fastest)' }
+      - { value: 'minimal', text: 'Minimal' }
+      - { value: 'low', text: 'Low' }
+      - { value: 'medium', text: 'Medium' }
+      - { value: 'high', text: 'High' }
+    placeholder: Model default
+    width: 1/2
+    help: How long reasoning models (GPT-5/6, Gemini 3, …) think before answering. Lower is faster and cheaper. Leave empty to use the model's default. Ignored by models without reasoning.
     translate: false

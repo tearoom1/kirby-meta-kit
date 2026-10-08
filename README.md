@@ -170,6 +170,7 @@ This is where developers set technical defaults, validation rules, and AI integr
     'api.key' => 'sk-or-v1-YOUR-KEY',  // Get free key at openrouter.ai
     'api.model' => 'google/gemma-4-31b-it:free',  // See available models below
     'api.temperature' => 0.7,  // 0.1 (focused) to 1.0 (creative)
+    'api.reasoning' => null,  // Reasoning effort: 'none', 'minimal', 'low', 'medium', 'high' (null = model default)
 
     // AI Behavior
     'ai.tone' => 'formal',  // 'formal' (Sie/vous) or 'informal' (du/tu)
@@ -413,33 +414,28 @@ Get a free API key from [OpenRouter.ai](https://openrouter.ai/):
 'api.model' => 'google/gemma-4-31b-it:free',
 ```
 
-Pick any model from OpenRouter — free or paid. The plugin sends the configured model name to OpenRouter as-is, so any model your API key can reach will work.
+Pick any model from OpenRouter — free or paid. The plugin sends the configured model name to OpenRouter as-is, so any model your API key can reach will work, including reasoning models such as GPT-6 or Gemini 3. In the Panel, choose **Other model** in the model dropdown to enter any model ID that isn't listed.
 
-#### Sample of available Models as of June 2026
+#### Sample of available Models as of October 2026
 
 **Free Tier (No cost):**
 - `google/gemma-4-31b-it:free` (default)
-- `meta-llama/llama-3.2-3b-instruct:free`
-- `nvidia/nemotron-3-nano-30b-a3b:free`
-- `stepfun/step-3.5-flash:free`
+- `google/gemma-4-26b-a4b-it:free`
 - `nvidia/nemotron-3-super-120b-a12b:free`
-- `google/gemma-3-27b-it:free`
-- `meta-llama/llama-3.3-70b-instruct:free`
-- `deepseek/deepseek-r1-0528-qwen3-8b:free`
 - Many more available [here](https://openrouter.ai/collections/free-models)
 
 **Paid Models (Higher quality):**
-- `openai/gpt-5.4` or `openai/gpt-5-mini`
-- `anthropic/claude-sonnet-4.6`
-- `google/gemini-2.5-pro`
-- `xiaomi/mimo-v2-pro`
-- `meta-llama/llama-4-maverick`
+- `openai/gpt-6-luna` or `openai/gpt-5-mini`
+- `anthropic/claude-haiku-5.5` or `anthropic/claude-sonnet-5.5`
+- `google/gemini-3.5-flash`
+- `mistralai/mistral-large-4-0`
+- `deepseek/deepseek-v4-flash`
 - Find more on OpenRouter. See also the [rankings](https://openrouter.ai/rankings)
 
 #### AI Behavior Settings
 
 **Temperature** (0.1 - 1.0):
-Controls creativity and variation in generated content.
+Controls creativity and variation in generated content. Models that don't support it (e.g. GPT-6) ignore it.
 
 ```php
 'api.temperature' => 0.7,  // Default: balanced
@@ -449,6 +445,20 @@ Controls creativity and variation in generated content.
 0.7  // Balanced (recommended for most use cases)
 0.9  // Creative, varied (good for blog posts, social media)
 ```
+
+**Reasoning Effort** (`none`, `minimal`, `low`, `medium`, `high`):
+Controls how long reasoning models (GPT-5/6, Gemini 3, DeepSeek R-series, …) think before answering. Short texts like titles and descriptions rarely need much thinking, so `low` or `none` makes generation noticeably faster and cheaper.
+
+```php
+'api.reasoning' => null,  // Default: the model's own default effort
+
+// Examples:
+'none'  // Fastest, no thinking (where the model allows turning it off)
+'low'   // Recommended for GPT-6 and similar models
+'high'  // Slowest, most thorough
+```
+
+The value is sent to OpenRouter as `reasoning.effort` and is ignored by models without reasoning. Leave it empty for hybrid models like Claude: setting any value switches their reasoning on, which makes them slower and more expensive. It can also be set in the Panel under OpenRouter Settings.
 
 **Tone** (formal vs informal):
 Controls language formality in multilingual content.

@@ -83,6 +83,40 @@ class MetaKitCoreTest extends KirbyTestCase
         $this->assertTrue(MetaKit::isAiEnabled());
     }
 
+    public function testCustomSiteModelIsUsedWhenOtherModelIsSelected(): void
+    {
+        $this->resetAiEnabledCache();
+        $this->makeKirby(
+            [
+                'site.txt' => "Title: Test Site\n----\nMetaKitOpenrouter:\n- type: mk-openrouter\n  content:\n    apiKey: site-key\n    model: custom\n    customModel: ' openai/gpt-6-luna '\n",
+            ],
+            [
+                'tearoom1.meta-kit.api.key' => null,
+                'tearoom1.meta-kit.api.model' => null,
+            ]
+        );
+        ConfigHelper::clearCache();
+
+        $this->assertSame('openai/gpt-6-luna', ConfigHelper::getOpenRouterSettings()['api.model']);
+        $this->assertTrue(MetaKit::isAiEnabled());
+    }
+
+    public function testEmptyCustomSiteModelDisablesAi(): void
+    {
+        $this->resetAiEnabledCache();
+        $this->makeKirby(
+            [
+                'site.txt' => "Title: Test Site\n----\nMetaKitOpenrouter:\n- type: mk-openrouter\n  content:\n    apiKey: site-key\n    model: custom\n",
+            ],
+            [
+                'tearoom1.meta-kit.api.key' => null,
+                'tearoom1.meta-kit.api.model' => null,
+            ]
+        );
+
+        $this->assertFalse(MetaKit::isAiEnabled());
+    }
+
     public function testGetPagesWithContentDefaultIncludesSite(): void
     {
         $this->makeKirby([

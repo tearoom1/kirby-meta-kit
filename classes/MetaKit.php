@@ -11,6 +11,13 @@ class MetaKit
     protected $kirby;
     protected $options;
 
+    /**
+     * Extra output tokens on top of each call's answer budget. Reasoning models
+     * (GPT-5/6, Gemini 3, …) count their thinking against max_tokens and would
+     * otherwise run out before writing any text. Only used tokens are billed.
+     */
+    public const REASONING_TOKEN_BUDGET = 4000;
+
     private static ?bool $aiEnabledCache = null;
 
     public static function getConfiguredAiModel(): ?string
@@ -63,7 +70,7 @@ class MetaKit
 
         // Get site settings
         $openrouter = MetaHelper::getSeoData($kirby->site()->metaKitOpenrouter());
-        $siteModel = $openrouter ? $openrouter->model()->value() : null;
+        $siteModel = $openrouter ? ConfigHelper::getSiteModel($openrouter) : null;
         $siteKey = $openrouter ? $openrouter->apiKey()->value() : null;
 
         // AI is disabled if both model and key are empty
@@ -186,23 +193,32 @@ class MetaKit
             throw new Exception('OpenRouter model is not configured');
         }
 
+        $payload = [
+            'model' => $model,
+            'messages' => [
+                ['role' => 'user', 'content' => $prompt]
+            ],
+            'max_tokens' => $maxTokens + self::REASONING_TOKEN_BUDGET,
+            'temperature' => $this->options['api.temperature'] ?? 0.7,
+        ];
+
+        // Only sent when configured: on hybrid models (e.g. Claude) any effort
+        // switches reasoning on, so leaving it out keeps the model's default
+        $reasoning = $this->options['api.reasoning'] ?? null;
+        if (is_string($reasoning) && trim($reasoning) !== '') {
+            $payload['reasoning'] = ['effort' => trim($reasoning)];
+        }
+
         // Kirby's built-in HTTP client; it doesn't throw on 4xx/5xx responses
         $response = Remote::request($this->options['api.endpoint'], [
             'method'  => 'POST',
-            'timeout' => 30,
+            'timeout' => 60,
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
                 'HTTP-Referer' => $this->kirby->url(),
             ],
-            'data' => json_encode([
-                'model' => $model,
-                'messages' => [
-                    ['role' => 'user', 'content' => $prompt]
-                ],
-                'max_tokens' => $maxTokens,
-                'temperature' => $this->options['api.temperature'] ?? 0.7,
-            ]),
+            'data' => json_encode($payload),
         ]);
 
         $body = (string)$response->content();
@@ -214,13 +230,24 @@ class MetaKit
             throw new Exception('OpenRouter API error: ' . $errorMsg);
         }
 
-        if (!isset($data['choices'][0]['message']['content'])) {
+        if (!isset($data['choices'][0])) {
             $errorMsg = $data['error']['message'] ?? 'Unknown API error';
             self::log('OpenRouter API Error: ' . $errorMsg);
             throw new Exception('OpenRouter API error: ' . $errorMsg);
         }
 
-        return $data['choices'][0]['message']['content'];
+        $content = $data['choices'][0]['message']['content'] ?? null;
+        if (!is_string($content) || trim($content) === '') {
+            $finishReason = $data['choices'][0]['finish_reason'] ?? null;
+            $errorMsg = $finishReason === 'length'
+                ? 'The model used up its token limit before returning any text'
+                : 'The model returned an empty response';
+            $errorMsg .= ' (model: ' . $model . ')';
+            self::log('OpenRouter API Error: ' . $errorMsg);
+            throw new Exception('OpenRouter API error: ' . $errorMsg);
+        }
+
+        return $content;
     }
 
     protected function formatOpenRouterError(?array $data, string $body, ?string $model = null): string
@@ -490,7 +517,13 @@ class MetaKit
                     $optimalMax
                 );
 
-                $description = $this->callApi($retryPrompt, 100);
+                try {
+                    $description = $this->callApi($retryPrompt, 100);
+                } catch (\Throwable $e) {
+                    // Keep the first usable description if a retry fails
+                    self::log('Meta Kit Retry Error: ' . $e->getMessage());
+                    break;
+                }
                 if (!$description) {
                     break;
                 }

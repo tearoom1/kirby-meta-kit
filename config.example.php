@@ -41,6 +41,12 @@ return [
         // Temperature for AI generation (0.1 = focused, 1.0 = creative)
         'api.temperature' => 0.7,
 
+        // Reasoning effort for reasoning models (GPT-5/6, Gemini 3, …):
+        // 'none', 'minimal', 'low', 'medium' or 'high'. Lower = faster and cheaper.
+        // null = model default. Ignored by models without reasoning; on hybrid
+        // models (e.g. Claude) any value switches reasoning on.
+        'api.reasoning' => null,
+
         // ============================================
         // SEO Settings
         // ============================================

@@ -127,6 +127,7 @@ class ConfigHelper
             'api.endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
             'api.model' => 'google/gemma-4-31b-it:free',
             'api.temperature' => 0.7,
+            'api.reasoning' => null,
             'ai.tone' => 'formal',
             'maxDescriptionLength' => 160,
             'ai.prompt.title' => "Write a clear, direct meta title {optimal_length} in {language} for the following content:\n\n{content}\n\nAvoid marketing clichés like 'Discover', 'Unlock', 'Explore'. Be specific and factual. Focus on what the page is actually about. {tone} Write ONLY the title, nothing else.\n\nTitle:",
@@ -139,15 +140,33 @@ class ConfigHelper
             if ($openrouter->apiKey()->isNotEmpty()) {
                 $siteSettings['api.key'] = $openrouter->apiKey()->value();
             }
-            if ($openrouter->model()->isNotEmpty()) {
-                $siteSettings['api.model'] = $openrouter->model()->value();
+            $siteModel = self::getSiteModel($openrouter);
+            if ($siteModel !== null) {
+                $siteSettings['api.model'] = $siteModel;
             }
             if ($openrouter->temperature()->isNotEmpty()) {
                 $siteSettings['api.temperature'] = $openrouter->temperature()->toFloat();
             }
+            if ($openrouter->reasoning()->isNotEmpty()) {
+                $siteSettings['api.reasoning'] = $openrouter->reasoning()->value();
+            }
         }
 
         return self::mergeOptions($defaults, $siteSettings);
+    }
+
+    /**
+     * Resolve the model chosen in the OpenRouter panel settings,
+     * using the custom model ID when "Other model" is selected
+     */
+    public static function getSiteModel($openrouter): ?string
+    {
+        $model = trim((string)$openrouter->model()->value());
+        if ($model === 'custom') {
+            $model = trim((string)$openrouter->customModel()->value());
+        }
+
+        return $model !== '' ? $model : null;
     }
 
     /**
