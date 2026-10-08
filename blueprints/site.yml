@@ -75,6 +75,44 @@ columns:
         empty: false
         pretty: true
 
+  redirects:
+    width: 1/1
+    type: fields
+    label: Redirects
+    icon: shuffle
+    fields:
+      metaKitRedirects:
+        label: Redirects
+        type: structure
+        help: Added automatically when a page gets a new URL (new slug or moved). Old URLs, including those of subpages, redirect with 301 to the page's current URL. Delete an entry to stop redirecting.
+        translate: false
+        sortBy: created desc
+        columns:
+          from: true
+          to: true
+          created: true
+        fields:
+          from:
+            label: Old path
+            type: text
+            placeholder: /journal/old-slug
+            required: true
+          to:
+            label: Page
+            type: pages
+            max: 1
+            required: true
+          language:
+            label: Language
+            type: text
+            width: 1/2
+            help: Language code for the target URL (multilingual sites)
+          created:
+            label: Created
+            type: date
+            time: true
+            width: 1/2
+
   robots:
     width: 1/1
     type: fields

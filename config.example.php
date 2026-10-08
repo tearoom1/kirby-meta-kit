@@ -81,6 +81,10 @@ return [
         // List each page's images in the sitemap (Google image sitemap)
         'sitemap.images' => true,
 
+        // Redirect old URLs (301) after a page's slug changes or it is moved.
+        // Disable if another plugin handles redirects.
+        'redirects.enabled' => true,
+
         // Publish /llms.txt, a Markdown page overview for AI assistants
         // (overrides the toggle in the panel's robots.txt settings)
         // 'llms.enabled' => true,

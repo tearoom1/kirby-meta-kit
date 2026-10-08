@@ -203,6 +203,7 @@ This is where developers set technical defaults, validation rules, and AI integr
         'includeSitemap' => true,
     ],
     'llms.enabled' => false,  // Publish /llms.txt (overrides the panel toggle)
+    'redirects.enabled' => true,  // 301 redirects from old URLs after slug changes and moves
 
 ];
 ```
@@ -763,6 +764,16 @@ robots.txt available at `/robots.txt` with:
 ```
 
 **AI crawlers:** "Block AI Training Crawlers" (panel, Advanced tab) or `'robots' => ['blockAiCrawlers' => true]` disallows crawlers that collect content for training AI models: GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended, Applebot-Extended, Meta-ExternalAgent, Bytespider, Amazonbot and a few more. Assistants that fetch a page to answer a question and link to it (OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, Perplexity-User) stay allowed, so the site can still be cited in AI answers. Add them as custom rules if you want to block those as well.
+
+### Redirects
+
+When a page gets a new URL — a new slug in any language or a move to another parent — Meta Kit records the old path and redirects it (and the paths of all subpages) with **301** to the page's current URL. The target is stored as page UUID, so renaming a page several times never builds redirect chains, and renaming it back removes the now unused entry.
+
+Entries are listed under **Site → SEO & Sitemap → Redirects**, where editors can also delete them or add their own. Redirects only apply when no page exists at the requested URL.
+
+```php
+'redirects.enabled' => true,  // default; set to false if another plugin handles redirects
+```
 
 ### llms.txt
 

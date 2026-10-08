@@ -118,6 +118,21 @@ return [
         TearoomOne\ConfigHelper::clearCache();
         TearoomOne\Sitemap::flushCache();
     },
+    // Keep old URLs working with 301 redirects
+    "page.changeSlug:after" => function ($newPage, $oldPage) {
+        TearoomOne\Redirects::record($newPage, $oldPage);
+    },
+    "page.move:after" => function ($newPage, $oldPage) {
+        TearoomOne\Redirects::record($newPage, $oldPage);
+    },
+    "route:after" => function ($route, $path, $method, $result, $final) {
+        if ($final !== true || $result !== null || $method !== "GET") {
+            return $result;
+        }
+
+        $url = TearoomOne\Redirects::find(kirby()->request()->path()->toString());
+        return $url ? Kirby\Http\Response::redirect($url, 301) : $result;
+    },
     // Any page or file change can alter the sitemap
     "page.*:after" => function () {
         TearoomOne\Sitemap::flushCache();
