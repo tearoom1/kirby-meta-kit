@@ -546,3 +546,11 @@
 .k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-review-list li::marker { color: var(--mk2-muted); }
 .k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-review-empty { padding-left: 1rem; color: var(--mk2-muted); font-size: var(--text-sm); }
 .k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-review-keyphrases { padding-left: 1rem; }
+
+/* OG image: a check is enough; dimmed when the site image is used */
+.k-mk2-table .k-mk2-image-col { width: 1%; text-align: center; white-space: nowrap; }
+.k-mk2-image { display: inline-flex; align-items: center; justify-content: center; min-width: 1rem; }
+.k-mk2-image .k-icon { --icon-size: 15px; }
+.k-mk2-image .is-own { color: var(--color-text); }
+.k-mk2-image .is-site { color: var(--mk2-muted); opacity: 0.55; }
+.k-mk2-image .k-mk2-dot { margin: 0; }

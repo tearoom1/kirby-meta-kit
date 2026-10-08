@@ -19,12 +19,12 @@
               <th>{{ $t('meta-kit.field.metaDescription.short') }}</th>
               <th>{{ $t('meta-kit.field.ogTitle') }}</th>
               <th>{{ $t('meta-kit.field.ogDescription.short') }}</th>
-              <th>{{ $t('meta-kit.field.ogImage.short') }}</th>
+              <th class="k-mk2-image-col">{{ $t('meta-kit.field.ogImage.short') }}</th>
             </template>
             <template v-else>
               <th>{{ $t(isOg ? 'meta-kit.field.ogTitle' : 'meta-kit.field.metaTitle') }}</th>
               <th>{{ $t(isOg ? 'meta-kit.field.ogDescription' : 'meta-kit.field.metaDescription') }}</th>
-              <th v-if="isOg">{{ $t('meta-kit.field.ogImage.short') }}</th>
+              <th v-if="isOg" class="k-mk2-image-col">{{ $t('meta-kit.field.ogImage.short') }}</th>
             </template>
             <th class="k-mk2-actions">
               <Tooltip>
@@ -99,11 +99,12 @@
                   </span>
                 </Tooltip>
               </td>
-              <td>
+              <td class="k-mk2-image-col">
                 <Tooltip>
                   <template #tip><div class="k-mk2-tip-body"><p class="k-mk2-tip-line">{{ imageTip(page) }}</p></div></template>
-                  <span class="k-mk2-cell">
-                    <i :class="['k-mk2-dot', dot(page, 'ogImage')]"></i><span v-if="imageLabel(page)">{{ imageLabel(page) }}</span>
+                  <span class="k-mk2-image">
+                    <k-icon v-if="imageState(page) !== 'none'" type="check" :class="'is-' + imageState(page)" />
+                    <i v-else class="k-mk2-dot is-error"></i>
                   </span>
                 </Tooltip>
               </td>
@@ -124,10 +125,14 @@
                   </div>
                 </Tooltip>
               </td>
-              <td v-if="isOg">
-                <span class="k-mk2-cell">
-                  <i :class="['k-mk2-dot', dot(page, 'ogImage')]"></i><span v-if="imageLabel(page)">{{ imageLabel(page) }}</span>
-                </span>
+              <td v-if="isOg" class="k-mk2-image-col">
+                <Tooltip>
+                  <template #tip><div class="k-mk2-tip-body"><p class="k-mk2-tip-line">{{ imageTip(page) }}</p></div></template>
+                  <span class="k-mk2-image">
+                    <k-icon v-if="imageState(page) !== 'none'" type="check" :class="'is-' + imageState(page)" />
+                    <i v-else class="k-mk2-dot is-error"></i>
+                  </span>
+                </Tooltip>
               </td>
             </template>
 
@@ -248,11 +253,11 @@ export default {
     statusIcon(page) {
       return { listed: 'status-listed', unlisted: 'status-unlisted', draft: 'status-draft' }[page.status] || null;
     },
-    // Only own and missing images get a word; the site image is the quiet default
-    imageLabel(page) {
-      if (page.hasOgImage) return this.$t('meta-kit.v2.image.own');
-      if (this.siteSettings?.siteHasOgImage) return '';
-      return this.$t('meta-kit.v2.image.none');
+    // A check for an image (dimmed when the site image is used), a red dot when none applies
+    imageState(page) {
+      if (page.hasOgImage) return 'own';
+      if (this.siteSettings?.siteHasOgImage) return 'site';
+      return 'none';
     },
     imageTip(page) {
       if (page.hasOgImage) return this.$t('meta-kit.ogImage.own');
