@@ -222,7 +222,8 @@ export default {
     close() {
       document.removeEventListener('keydown', this.handleKeydown);
       this.resetSaveFeedback();
-      this.$refs.dialog.close();
+      // Kirby 5: the dialog lives in the panel-wide dialog state; k-dialog.close() only emits
+      this.$panel.dialog.close();
       this.page = null;
     },
 
