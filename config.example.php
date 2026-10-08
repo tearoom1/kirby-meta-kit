@@ -81,6 +81,10 @@ return [
         // List each page's images in the sitemap (Google image sitemap)
         'sitemap.images' => true,
 
+        // Publish /llms.txt, a Markdown page overview for AI assistants
+        // (overrides the toggle in the panel's robots.txt settings)
+        // 'llms.enabled' => true,
+
         // Cache the sitemap; page, file and site changes clear the cache.
         // The duration (minutes) only matters for changes made outside Kirby.
         'sitemap.cache' => true,

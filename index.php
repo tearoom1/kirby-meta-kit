@@ -14,6 +14,7 @@ $classes = [
     'TearoomOne\MetaKit' => 'classes/MetaKit.php',
     'TearoomOne\Sitemap' => 'classes/Sitemap.php',
     'TearoomOne\Robots' => 'classes/Robots.php',
+    'TearoomOne\LlmsTxt' => 'classes/LlmsTxt.php',
     'TearoomOne\MetaKitController' => 'classes/MetaKitController.php',
     'TearoomOne\PageDataBuilder' => 'classes/PageDataBuilder.php',
     'TearoomOne\ApiResponse' => 'classes/ApiResponse.php',

@@ -25,6 +25,29 @@ class Robots
         'AspiegelBot',
     ];
 
+    /**
+     * Crawlers that collect content for training AI models. Assistants that
+     * fetch pages to answer and cite (OAI-SearchBot, ChatGPT-User,
+     * Claude-SearchBot, Claude-User, Perplexity-User) are deliberately not
+     * listed, so the site can still appear in AI answers with a link.
+     */
+    const AI_TRAINING_CRAWLERS = [
+        'GPTBot',
+        'ClaudeBot',
+        'anthropic-ai',
+        'CCBot',
+        'Google-Extended',
+        'Applebot-Extended',
+        'Meta-ExternalAgent',
+        'Bytespider',
+        'Amazonbot',
+        'cohere-training-data-crawler',
+        'Diffbot',
+        'ImagesiftBot',
+        'Omgilibot',
+        'Timpibot',
+    ];
+
     public function __construct(Kirby $kirby)
     {
         $this->kirby = $kirby;
@@ -74,6 +97,16 @@ class Robots
         if ($blockBadBots || ($this->config['blockBadBots'] ?? false)) {
             $lines = array_merge($lines, $this->generateBadBotRules());
             $lines[] = "";
+        }
+
+        // Block AI training crawlers if enabled
+        if ($this->getOption($robotsData, 'blockAiCrawlers', false)) {
+            $lines[] = "# Block crawlers that collect content for AI training";
+            foreach (self::AI_TRAINING_CRAWLERS as $bot) {
+                $lines[] = "User-agent: " . $bot;
+                $lines[] = "Disallow: /";
+                $lines[] = "";
+            }
         }
 
         // Add default rules if enabled

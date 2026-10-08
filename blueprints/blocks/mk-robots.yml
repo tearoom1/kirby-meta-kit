@@ -111,6 +111,23 @@ tabs:
         when:
           enabled: true
         translate: false
+      blockAiCrawlers:
+        label: Block AI Training Crawlers
+        type: toggle
+        default: false
+        help: |
+          Ask crawlers that collect content for AI training to stay away
+          (GPTBot, ClaudeBot, CCBot, Google-Extended, …). AI assistants that
+          look up and link to pages (ChatGPT search, Claude, Perplexity) stay allowed.
+        when:
+          enabled: true
+        translate: false
+      llmsTxt:
+        label: Provide llms.txt
+        type: toggle
+        default: false
+        help: Publish /llms.txt, a Markdown overview of your pages for AI assistants (same pages as the sitemap)
+        translate: false
       customDirectives:
         label: Custom Directives
         type: textarea

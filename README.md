@@ -198,9 +198,11 @@ This is where developers set technical defaults, validation rules, and AI integr
     'robots' => [
         'enabled' => true,
         'blockBadBots' => true,  // Block AhrefsBot, SemrushBot, etc.
+        'blockAiCrawlers' => false,  // Block AI training crawlers (GPTBot, ClaudeBot, …)
         'defaultRules' => true,
         'includeSitemap' => true,
     ],
+    'llms.enabled' => false,  // Publish /llms.txt (overrides the panel toggle)
 
 ];
 ```
@@ -725,6 +727,7 @@ XML sitemap available at `/sitemap.xml` with:
 robots.txt available at `/robots.txt` with:
 - User agent specific rules
 - Bad bot blocking (AhrefsBot, SemrushBot, etc.)
+- AI training crawler blocking (optional, see below)
 - Sitemap reference
 - Crawl delay configuration
 - Custom directives
@@ -756,6 +759,12 @@ robots.txt available at `/robots.txt` with:
     ],
 ]
 ```
+
+**AI crawlers:** "Block AI Training Crawlers" (panel, Advanced tab) or `'robots' => ['blockAiCrawlers' => true]` disallows crawlers that collect content for training AI models: GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended, Applebot-Extended, Meta-ExternalAgent, Bytespider, Amazonbot and a few more. Assistants that fetch a page to answer a question and link to it (OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, Perplexity-User) stay allowed, so the site can still be cited in AI answers. Add them as custom rules if you want to block those as well.
+
+### llms.txt
+
+With "Provide llms.txt" (panel, Robots.txt → Advanced) or `'llms.enabled' => true`, Meta Kit serves [`/llms.txt`](https://llmstxt.org): a Markdown overview for AI assistants with the site title, the default description and a link list of the same pages as the sitemap (meta title and own meta description per page), grouped by top-level section. It is off by default and cached together with the sitemap.
 
 ### Schema.org Structured Data
 

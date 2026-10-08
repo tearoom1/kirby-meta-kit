@@ -84,6 +84,17 @@ class Sitemap
     }
 
     /**
+     * Pages listed in the sitemap (and in llms.txt)
+     */
+    public function pages(): array
+    {
+        return array_values(array_filter(
+            $this->kirby->site()->index()->values(),
+            fn ($page) => $this->shouldInclude($page)
+        ));
+    }
+
+    /**
      * Image URLs of a page for the image sitemap (Google reads up to 1000)
      */
     protected function images(Page $page): array

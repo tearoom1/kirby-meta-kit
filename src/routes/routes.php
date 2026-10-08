@@ -19,4 +19,8 @@ return [
         "pattern" => "robots.txt",
         "action" => require __DIR__ . "/robots.txt.php",
     ],
+    [
+        "pattern" => "llms.txt",
+        "action" => require __DIR__ . "/llms.txt.php",
+    ],
 ];
