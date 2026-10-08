@@ -383,6 +383,12 @@
 .k-mk2-content-meta { padding-left: 0.9rem; display: flex; align-items: center; gap: 0.25rem; }
 .k-mk2-content-meta .k-mk2-pill { margin-left: 0.15rem; }
 
+/* Toolbar (v2): when the row gets too narrow, the controls move to a second
+   line as a whole instead of single buttons dropping down */
+.k-panel.k-mk2 .k-meta-kit-actions { flex-wrap: wrap; row-gap: var(--spacing-3); }
+.k-panel.k-mk2 .k-meta-kit-actions > .k-button-group { flex-shrink: 0; }
+.k-panel.k-mk2 .k-meta-kit-controls { margin-left: auto; min-width: min(100%, max-content); justify-content: flex-end; }
+
 /* Controls (v2): same surfaces, borders and radii as the cards */
 .k-panel.k-mk2 .k-meta-kit-view-select-input,
 .k-panel.k-mk2 .k-meta-kit-pagesize-select,
