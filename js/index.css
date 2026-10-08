@@ -8,6 +8,7 @@
 @import './styles/loading.css';
 @import './styles/review.css';
 @import './styles/print.css';
+@import './styles/v2.css';
 
 /* SEO Preview Section */
 .k-seo-preview-section {

@@ -2,15 +2,16 @@
 
 use TearoomOne\MetaKitController;
 
-return [
-    'label' => 'Meta Kit',
+// $variant: 'v1' (current design) or 'v2' (temporary design comparison)
+return fn (string $variant = 'v1') => [
+    'label' => $variant === 'v2' ? 'Meta Kit (Neu)' : 'Meta Kit',
     'icon' => 'wand',
     'menu' => fn () => MetaKitController::canAccess(),
-    'link' => 'meta-kit',
+    'link' => $variant === 'v2' ? 'meta-kit-v2' : 'meta-kit',
     'views' => [
         [
-            'pattern' => 'meta-kit',
-            'action' => function () {
+            'pattern' => $variant === 'v2' ? 'meta-kit-v2' : 'meta-kit',
+            'action' => function () use ($variant) {
                 if (!MetaKitController::canAccess()) {
                     throw new \Kirby\Exception\PermissionException('You are not allowed to access Meta Kit');
                 }
@@ -35,7 +36,8 @@ return [
                         'aiEnabled' => $data['aiEnabled'],
                         'reviewEnabled' => $data['reviewEnabled'],
                         'siteSettings' => $data['siteSettings'],
-                        'validationSettings' => $data['validationSettings'] ?? []
+                        'validationSettings' => $data['validationSettings'] ?? [],
+                        'variant' => $variant
                     ]
                 ];
             }

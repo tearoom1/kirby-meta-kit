@@ -3,15 +3,17 @@
     <k-button-group>
       <k-button
         icon="edit"
+        :title="variant === 'v2' && !hasSelection ? scopeHint : null"
         :disabled="selectedCount === 0"
         @click="$emit('edit-selected')"
       >
-        {{ $t('meta-kit.actions.edit') }}<span v-if="selectedCount > 0"> ({{ selectedCount }})</span>
+        {{ variant === 'v2' ? $t('meta-kit.v2.edit') : $t('meta-kit.actions.edit') }}<span v-if="selectedCount > 0"> ({{ selectedCount }})</span>
       </k-button>
       <k-button
         v-if="aiEnabled"
         icon="sparkling"
         class="k-meta-kit-button-ai-generate"
+        :title="variant === 'v2' && !hasSelection ? scopeHint : null"
         :disabled="isGenerating || selectedCount === 0"
         :progress="isGenerating"
         @click="$emit('generate-missing')"
@@ -43,6 +45,24 @@ export default {
     isGenerating: {
       type: Boolean,
       default: false
+    },
+    // Temporary design comparison: v2 acts on the filtered pages without a selection
+    variant: {
+      type: String,
+      default: 'v1'
+    },
+    hasSelection: {
+      type: Boolean,
+      default: false
+    },
+    isFiltered: {
+      type: Boolean,
+      default: false
+    }
+  },
+  computed: {
+    scopeHint() {
+      return this.$t(this.isFiltered ? 'meta-kit.v2.scope.filtered' : 'meta-kit.v2.scope.all');
     }
   }
 };

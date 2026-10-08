@@ -61,7 +61,16 @@
     </div>
 
     <!-- Stats Cards -->
+    <meta-kit-overview-v2
+      v-if="isV2"
+      :cards="statsCards"
+      :total-count="pagesData.length"
+      :active-area="activeArea"
+      :filtered-count="filteredPages.length"
+      @select-area="selectArea"
+    />
     <meta-kit-stats
+      v-else
       :filtered-count="filteredPages.length"
       :total-count="pagesData.length"
       :cards="statsCards"
@@ -70,7 +79,10 @@
 
     <!-- Actions & Filters -->
     <meta-kit-actions
-      :selected-count="selectedPages.length"
+      :selected-count="isV2 ? actionPageIds.length : selectedPages.length"
+      :variant="variant"
+      :has-selection="selectedPages.length > 0"
+      :is-filtered="!!(searchQuery || activeFilters.length)"
       :ai-enabled="aiEnabled"
       :review-enabled="reviewEnabled"
       :is-generating="isGeneratingAll"
@@ -90,7 +102,26 @@
     </meta-kit-actions>
 
     <!-- Pages Table -->
+    <meta-kit-table-v2
+      v-if="isV2 && !showPreviewInTable"
+      :pages="paginatedPages"
+      :start-index="(currentPage - 1) * pageSize"
+      :selected-pages="selectedPages"
+      :is-all-selected="isAllCurrentPageSelected"
+      :ai-enabled="aiEnabled"
+      :review-enabled="reviewEnabled"
+      :site-settings="siteSettingsData"
+      :validation-settings="validationSettingsData"
+      :duplicates="duplicates"
+      :all-pages="pagesData"
+      @toggle-select-all="toggleSelectAllCurrentPage"
+      @toggle-page="togglePageSelection"
+      @review-page="reviewSinglePage"
+      @edit-page="editSinglePageMetadata"
+      @generate-page="openSinglePageGenerate"
+    />
     <meta-kit-table
+      v-else
       :pages="paginatedPages"
       :start-index="(currentPage - 1) * pageSize"
       :selected-pages="selectedPages"
@@ -178,14 +209,34 @@
     <!-- Bulk Generation Dialog (used for both bulk and single-page AI generate) -->
     <meta-kit-bulk-generate-dialog
       ref="bulkGenerateDialog"
-      :selected-count="singleGeneratePageId ? 1 : selectedPages.length"
+      :selected-count="singleGeneratePageId ? 1 : actionPageIds.length"
       @generate="performBulkGeneration"
     />
 
     <!-- Review generated suggestions before saving -->
+    <meta-kit-suggestions-dialog-v2
+      v-if="isV2"
+      ref="suggestionsDialog"
+      :language="language"
+      :pages="pagesData"
+      :site-settings="siteSettingsData"
+      :validation-settings="validationSettingsData"
+      @save="saveSuggestions"
+    />
     <meta-kit-suggestions-dialog
+      v-else
       ref="suggestionsDialog"
       @save="saveSuggestions"
+    />
+
+    <!-- V2: actions for the selected pages -->
+    <meta-kit-selection-bar
+      v-if="isV2 && selectedPages.length > 0"
+      :count="selectedPages.length"
+      :ai-enabled="aiEnabled"
+      @edit="showSelectedPagesDialog"
+      @generate="generateAllDescriptions"
+      @clear="selectedPages = []"
     />
 
     <!-- Loading Overlay -->
@@ -226,6 +277,11 @@ import MetaKitSinglePageDialog from './parts/edit/MetaKitSinglePageDialog.vue';
 import MetaKitBulkEditDialog from './parts/edit/MetaKitBulkEditDialog.vue';
 import MetaKitReviewDialog from './parts/edit/MetaKitReviewDialog.vue';
 import MetaKitSuggestionsDialog from './parts/edit/MetaKitSuggestionsDialog.vue';
+// Temporary design comparison (variant v2)
+import MetaKitOverviewV2 from './parts/v2/MetaKitOverviewV2.vue';
+import MetaKitTableV2 from './parts/v2/MetaKitTableV2.vue';
+import MetaKitSuggestionsDialogV2 from './parts/v2/MetaKitSuggestionsDialogV2.vue';
+import MetaKitSelectionBar from './parts/v2/MetaKitSelectionBar.vue';
 import {
   GENERATION_FIELDS,
   planGeneration,
@@ -245,6 +301,16 @@ import {
   findDuplicates
 } from '../composables/panelState.js';
 
+// V2: filters behind each stats tile ("needs attention" in that area)
+const AREA_FILTERS = {
+  slug: ['type-slug', 'warning', 'error'],
+  title: ['type-title', 'warning', 'error'],
+  description: ['type-description', 'warning', 'error'],
+  ogImage: ['type-og-image', 'warning', 'error'],
+  duplicates: ['type-duplicates', 'warning'],
+  noindex: ['type-noindex', 'warning']
+};
+
 export default {
   components: {
     MetaKitTable,
@@ -253,6 +319,10 @@ export default {
     MetaKitBulkEditDialog,
     MetaKitReviewDialog,
     MetaKitSuggestionsDialog,
+    MetaKitOverviewV2,
+    MetaKitTableV2,
+    MetaKitSuggestionsDialogV2,
+    MetaKitSelectionBar,
     MetaKitStats,
     MetaKitFilters,
     MetaKitActions
@@ -280,6 +350,11 @@ export default {
         siteMetaTitle: '',
         titleSeparator: '|'
       })
+    },
+    // 'v2' = temporary new design, shown as a second panel area
+    variant: {
+      type: String,
+      default: 'v1'
     }
   },
   data() {
@@ -296,7 +371,7 @@ export default {
       // Pagination & Selection
       selectedPages: [],
       currentPage: 1,
-      pageSize: 10,
+      pageSize: this.variant === 'v2' ? 25 : 10,
       searchQuery: '',
       activeFilters: [],
       sortBy: 'default',
@@ -319,6 +394,24 @@ export default {
       return this.$t('meta-kit.sponsor.text');
     },
 
+    isV2() {
+      return this.variant === 'v2';
+    },
+    // V2: bulk actions use the selection, or all filtered pages without one
+    actionPageIds() {
+      if (this.selectedPages.length > 0 || !this.isV2) {
+        return this.selectedPages;
+      }
+      return this.filteredPages.map((page) => page.id);
+    },
+    // V2: the stats area whose filter is active (set by clicking its tile)
+    activeArea() {
+      return Object.keys(AREA_FILTERS).find((area) => {
+        const filters = AREA_FILTERS[area];
+        return filters.length === this.activeFilters.length
+          && filters.every((filter) => this.activeFilters.includes(filter));
+      }) || null;
+    },
     duplicates() {
       return findDuplicates(this.pagesData);
     },
@@ -345,6 +438,7 @@ export default {
     statsCards() {
       return [
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'slug'), this.$t('meta-kit.field.slug'), {
+          key: 'slug',
           detailLines: [
             this.$t('meta-kit.stats.slug.good'),
             this.$t('meta-kit.stats.slug.review'),
@@ -352,6 +446,7 @@ export default {
           ]
         }),
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'title'), this.$t('meta-kit.field.metaTitle'), {
+          key: 'title',
           detailLines: [
             this.$t('meta-kit.stats.title.good'),
             this.$t('meta-kit.stats.title.review'),
@@ -359,6 +454,7 @@ export default {
           ]
         }),
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'description'), this.$t('meta-kit.field.metaDescription'), {
+          key: 'description',
           detailLines: [
             this.$t('meta-kit.stats.description.good'),
             this.$t('meta-kit.stats.description.review'),
@@ -366,12 +462,14 @@ export default {
           ]
         }),
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'ogImage'), this.$t('meta-kit.field.ogImage'), {
+          key: 'ogImage',
           detailLines: [
             this.$t('meta-kit.stats.ogImage.good'),
             this.$t('meta-kit.stats.ogImage.review')
           ]
         }),
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'duplicates'), this.$t('meta-kit.field.duplicates'), {
+          key: 'duplicates',
           attentionStatuses: ['review'],
           detailLines: [
             this.$t('meta-kit.stats.duplicates.good'),
@@ -379,6 +477,7 @@ export default {
           ]
         }),
         this.buildStatusBuckets(this.pagesData, this.filteredPages, (page) => this.classifyForStats(page, 'noindex'), this.$t('meta-kit.field.noindex'), {
+          key: 'noindex',
           attentionStatuses: ['review'],
           detailLines: [
             this.$t('meta-kit.stats.noindex.good'),
@@ -521,6 +620,10 @@ export default {
       }
     },
 
+    selectArea(area) {
+      this.activeFilters = !area || this.activeArea === area ? [] : [...AREA_FILTERS[area]];
+    },
+
     // Open the field-selection dialog for a single page's AI generation
     openSinglePageGenerate(pageId) {
       this.singleGeneratePageId = pageId;
@@ -542,7 +645,7 @@ export default {
       // Single-page mode when triggered from the table row AI button
       const pageIds = this.singleGeneratePageId
         ? [this.singleGeneratePageId]
-        : this.selectedPages;
+        : this.actionPageIds;
       this.singleGeneratePageId = null;
 
       const pages = this.pagesData.filter((page) => pageIds.includes(page.id));
@@ -663,8 +766,8 @@ export default {
       this.selectedPages = toggleSelectAllOnPage(this.paginatedPages, this.selectedPages);
     },
     async showSelectedPagesDialog() {
-      if (this.selectedPages.length === 0) return;
-      this.$refs.allPagesDialog.open(this.selectedPages);
+      if (this.actionPageIds.length === 0) return;
+      this.$refs.allPagesDialog.open(this.actionPageIds);
     }
   }
 };

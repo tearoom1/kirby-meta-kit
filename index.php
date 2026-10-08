@@ -79,7 +79,9 @@ App::plugin(
             'meta-kit/seo' => __DIR__ . '/snippets/seo.php',
         ],
         'areas' => [
-            'meta-kit' => require __DIR__ . '/src/areas/meta-kit.php',
+            'meta-kit' => (require __DIR__ . '/src/areas/meta-kit.php')('v1'),
+            // Temporary: new design side by side with the current one
+            'meta-kit-v2' => (require __DIR__ . '/src/areas/meta-kit.php')('v2'),
         ],
         'hooks' => require __DIR__ . '/src/hooks.php',
         'api' => [

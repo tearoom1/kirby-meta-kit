@@ -137,7 +137,7 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         );
 
         $_GET['language'] = 'de';
-        $area = require __DIR__ . '/../src/areas/meta-kit.php';
+        $area = (require __DIR__ . '/../src/areas/meta-kit.php')();
         $view = $area['views'][0];
         $this->resetPluginCaches();
         $result = $view['action']();
@@ -151,6 +151,12 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         $this->assertArrayHasKey('languages', $result['props']);
         $this->assertSame('de', $result['props']['language']);
         $this->assertSame('de', $kirby->language()->code());
+        $this->assertSame('v1', $result['props']['variant']);
+
+        // Temporary second area for the design comparison
+        $v2 = (require __DIR__ . '/../src/areas/meta-kit.php')('v2');
+        $this->assertSame('meta-kit-v2', $v2['link']);
+        $this->assertSame('v2', $v2['views'][0]['action']()['props']['variant']);
     }
 
     public function testSeoPreviewSectionComputedMetaUsesHelperOutput(): void
