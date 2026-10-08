@@ -1,5 +1,40 @@
 <template>
   <div class="k-meta-kit-controls">
+    <!-- Display: preferences (view, inherited values, page size), remembered per browser -->
+    <div class="k-meta-kit-filter-dropdown k-meta-kit-display-dropdown">
+      <button
+        class="k-meta-kit-filter-button"
+        :class="{ 'active': openMenu === 'display' }"
+        @click="toggleMenu('display')"
+      >
+        <k-icon type="preview" />
+        <span>{{ $t('meta-kit.display') }}</span>
+        <k-icon :type="openMenu === 'display' ? 'angle-up' : 'angle-down'" />
+      </button>
+
+      <div v-if="openMenu === 'display'" class="k-meta-kit-filter-dropdown-content">
+        <div class="k-meta-kit-filter-group">
+          <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.view') }}</div>
+          <div class="k-mk2-seg" role="radiogroup">
+            <button v-for="option in VIEW_OPTIONS" :key="option" type="button" :class="{ 'is-on': viewMode === option }" @click="updateViewMode(option)">{{ $t('meta-kit.view.' + option) }}</button>
+          </div>
+        </div>
+        <div class="k-meta-kit-filter-group">
+          <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.inheritance') }}</div>
+          <div class="k-mk2-seg" role="radiogroup">
+            <button v-for="option in INHERITANCE_OPTIONS" :key="option" type="button" :class="{ 'is-on': inheritance === option }" @click="$emit('update:inheritance', option)">{{ $t('meta-kit.inheritance.' + option) }}</button>
+          </div>
+        </div>
+        <div class="k-meta-kit-filter-group">
+          <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.pagination.perPageLabel') }}</div>
+          <div class="k-mk2-seg" role="radiogroup">
+            <button v-for="option in PAGE_SIZES" :key="option" type="button" :class="{ 'is-on': pageSize === option }" @click="$emit('update:page-size', option)">{{ option === ALL_PAGES ? $t('meta-kit.pagination.all') : option }}</button>
+          </div>
+        </div>
+        <div class="k-meta-kit-filter-group k-mk2-display-foot">{{ $t('meta-kit.display.remembered') }}</div>
+      </div>
+    </div>
+
     <!-- Sort: an icon in the box instead of a word in front of it -->
     <div class="k-meta-kit-sort-select">
       <label class="k-meta-kit-sort-icon" for="k-meta-kit-sort-mode" :title="$t('meta-kit.sort')"><k-icon type="order-alpha-asc" /></label>
@@ -37,41 +72,6 @@
       >
         <k-icon type="cancel"/>
       </button>
-    </div>
-
-    <!-- Display: preferences (view, inherited values, page size), remembered per browser -->
-    <div class="k-meta-kit-filter-dropdown k-meta-kit-display-dropdown">
-      <button
-        class="k-meta-kit-filter-button"
-        :class="{ 'active': openMenu === 'display' }"
-        @click="toggleMenu('display')"
-      >
-        <k-icon type="preview" />
-        <span>{{ $t('meta-kit.display') }}</span>
-        <k-icon :type="openMenu === 'display' ? 'angle-up' : 'angle-down'" />
-      </button>
-
-      <div v-if="openMenu === 'display'" class="k-meta-kit-filter-dropdown-content">
-        <div class="k-meta-kit-filter-group">
-          <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.view') }}</div>
-          <div class="k-mk2-seg" role="radiogroup">
-            <button v-for="option in VIEW_OPTIONS" :key="option" type="button" :class="{ 'is-on': viewMode === option }" @click="updateViewMode(option)">{{ $t('meta-kit.view.' + option) }}</button>
-          </div>
-        </div>
-        <div class="k-meta-kit-filter-group">
-          <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.inheritance') }}</div>
-          <div class="k-mk2-seg" role="radiogroup">
-            <button v-for="option in INHERITANCE_OPTIONS" :key="option" type="button" :class="{ 'is-on': inheritance === option }" @click="$emit('update:inheritance', option)">{{ $t('meta-kit.inheritance.' + option) }}</button>
-          </div>
-        </div>
-        <div class="k-meta-kit-filter-group">
-          <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.pagination.perPageLabel') }}</div>
-          <div class="k-mk2-seg" role="radiogroup">
-            <button v-for="option in PAGE_SIZES" :key="option" type="button" :class="{ 'is-on': pageSize === option }" @click="$emit('update:page-size', option)">{{ option === ALL_PAGES ? $t('meta-kit.pagination.all') : option }}</button>
-          </div>
-        </div>
-        <div class="k-meta-kit-filter-group k-mk2-display-foot">{{ $t('meta-kit.display.remembered') }}</div>
-      </div>
     </div>
 
     <div class="k-meta-kit-filter-dropdown">
