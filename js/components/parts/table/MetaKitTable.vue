@@ -217,21 +217,21 @@
         <!-- OG Image (only in OG mode) -->
         <td class="k-meta-kit-table-center" v-if="!showPreview || previewMode === 'og'">
           <template v-if="page.hasOgImage">
-            <Tooltip content="Has OG image">
+            <Tooltip :content="$t('meta-kit.ogImage.own')">
               <span class="k-meta-kit-og-image-indicator">
                 <k-icon type="check" class="k-meta-kit-icon-success"/>
               </span>
             </Tooltip>
           </template>
           <template v-else-if="!page.hasOgImage && siteSettings.siteHasOgImage">
-            <Tooltip content="OG image inherited from site">
+            <Tooltip :content="$t('meta-kit.ogImage.site')">
               <span class="k-meta-kit-og-image-indicator k-meta-kit-inherited">
                 <k-icon type="check" class="k-meta-kit-icon-success"/>
               </span>
             </Tooltip>
           </template>
           <template v-else>
-            <Tooltip content="No OG image">
+            <Tooltip :content="$t('meta-kit.ogImage.none')">
               <span>—</span>
             </Tooltip>
           </template>
