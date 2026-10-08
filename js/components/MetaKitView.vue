@@ -89,6 +89,7 @@
           :active-filters.sync="activeFilters"
           :sort-by.sync="sortBy"
           :inheritance.sync="inheritance"
+          :page-size.sync="pageSize"
         />
       </template>
     </meta-kit-actions>
@@ -115,12 +116,8 @@
       @generate-page="openSinglePageGenerate"
     />
 
-    <!-- Pagination + Page Size -->
+    <!-- Pagination (the page size lives in the Display menu) -->
     <div class="k-meta-kit-pagination">
-      <!-- left: empty balancing column -->
-      <div></div>
-
-      <!-- center: page nav -->
       <div class="k-meta-kit-pagination-nav">
         <template v-if="totalPages > 1">
           <k-button
@@ -139,19 +136,6 @@
             @click="nextPage"
           />
         </template>
-      </div>
-
-      <!-- right: page size selector -->
-      <div class="k-meta-kit-pagination-end">
-        <select
-          class="k-meta-kit-pagesize-select"
-          :value="pageSize"
-          @change="changePageSize($event.target.value)"
-        >
-          <option v-for="option in pageSizeOptions" :key="option.value" :value="option.value">
-            {{ option.text }}
-          </option>
-        </select>
       </div>
     </div>
 
@@ -268,6 +252,26 @@ import {
   findDuplicates
 } from '../composables/panelState.js';
 
+const DISPLAY_STORE = 'meta-kit:display';
+const TABLE_STORE = 'meta-kit:table';
+
+// Storage can be missing or blocked (private mode, disabled site data)
+function readStore(storage, key) {
+  try {
+    const raw = storage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    return null;
+  }
+}
+function writeStore(storage, key, value) {
+  try {
+    storage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    // nothing to do: the setting simply isn't remembered
+  }
+}
+
 // Filters behind each stats tile ("needs attention" in that area)
 const AREA_FILTERS = {
   slug: ['type-slug', 'warning', 'error'],
@@ -346,12 +350,6 @@ export default {
     };
   },
   computed: {
-    pageSizeOptions() {
-      return [
-        ...[10, 25, 50, 100].map((value) => ({ value, text: this.$t('meta-kit.pagination.perPage', { count: value }) })),
-        { value: 99999, text: this.$t('meta-kit.pagination.all') }
-      ];
-    },
     sponsorText() {
       return this.$t('meta-kit.sponsor.text');
     },
@@ -446,18 +444,62 @@ export default {
       ];
     }
   },
+  created() {
+    // Display preferences come back in every session, the table state only
+    // within this tab (so a jump into the page editor and back keeps it)
+    const display = readStore(localStorage, DISPLAY_STORE);
+    if (display) {
+      if (['count', 'meta', 'og'].includes(display.view)) {
+        this.showPreviewInTable = display.view !== 'count';
+        this.previewMode = display.view === 'og' ? 'og' : 'meta';
+      }
+      if (['none', 'dimmed', 'marked'].includes(display.inheritance)) this.inheritance = display.inheritance;
+      if (Number.isInteger(display.pageSize) && display.pageSize > 0) this.pageSize = display.pageSize;
+    }
+    const table = readStore(sessionStorage, TABLE_STORE);
+    if (table) {
+      if (typeof table.searchQuery === 'string') this.searchQuery = table.searchQuery;
+      if (Array.isArray(table.activeFilters)) this.activeFilters = table.activeFilters.filter((f) => typeof f === 'string');
+      if (typeof table.sortBy === 'string') this.sortBy = table.sortBy;
+    }
+  },
   watch: {
     searchQuery() {
       this.currentPage = 1;
+      this.saveTableState();
     },
     activeFilters() {
       this.currentPage = 1;
+      this.saveTableState();
     },
     sortBy() {
       this.currentPage = 1;
-    }
+      this.saveTableState();
+    },
+    pageSize() {
+      this.currentPage = 1;
+      this.saveDisplayState();
+    },
+    showPreviewInTable: 'saveDisplayState',
+    previewMode: 'saveDisplayState',
+    inheritance: 'saveDisplayState'
   },
   methods: {
+    saveDisplayState() {
+      writeStore(localStorage, DISPLAY_STORE, {
+        view: this.showPreviewInTable ? this.previewMode : 'count',
+        inheritance: this.inheritance,
+        pageSize: this.pageSize
+      });
+    },
+    saveTableState() {
+      writeStore(sessionStorage, TABLE_STORE, {
+        searchQuery: this.searchQuery,
+        activeFilters: this.activeFilters,
+        sortBy: this.sortBy
+      });
+    },
+
     buildStatusBuckets(allPages, filteredPages, classify, label, options = {}) {
       const attentionStatuses = options.attentionStatuses || ['review', 'fix'];
       const summarize = (pages) => pages.reduce((acc, page) => {
@@ -693,10 +735,6 @@ export default {
       window.location.href = baseUrl + '?language=' + langCode;
     },
 
-    changePageSize(newSize) {
-      this.pageSize = parseInt(newSize);
-      this.currentPage = 1;
-    },
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;

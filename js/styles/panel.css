@@ -392,6 +392,37 @@
 .k-panel.k-mk2 .k-meta-kit-actions > .k-button-group { flex-shrink: 0; }
 .k-panel.k-mk2 .k-meta-kit-controls { margin-left: auto; min-width: min(100%, max-content); justify-content: flex-end; }
 
+/* Sort: icon inside the box, no word label */
+.k-panel.k-mk2 .k-meta-kit-sort-select {
+  display: inline-flex;
+  align-items: center;
+  background: var(--input-color-back, var(--mk2-surface));
+  border: 1px solid var(--input-color-border, var(--mk2-line));
+  border-radius: 0.375rem;
+}
+.k-panel.k-mk2 .k-meta-kit-sort-icon { display: inline-flex; padding: 0 0 0 0.6rem; color: var(--mk2-muted); cursor: pointer; }
+.k-panel.k-mk2 .k-meta-kit-sort-select .k-meta-kit-view-select-input { border: 0; background: transparent; }
+
+/* Display menu: segmented controls for view, inherited values and page size */
+.k-panel.k-mk2 .k-meta-kit-display-dropdown .k-meta-kit-filter-dropdown-content { width: 22rem; max-width: min(22rem, calc(100vw - 2rem)); }
+.k-mk2-seg { display: inline-flex; flex-wrap: wrap; gap: 0.125rem; padding: 0.1875rem; border-radius: 0.5rem; background: var(--mk2-hover); }
+.k-mk2-seg button {
+  padding: 0.3rem 0.65rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: none;
+  color: var(--mk2-muted);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.k-mk2-seg button:hover { color: var(--color-text); }
+.k-mk2-seg button.is-on { background: var(--mk2-surface); color: var(--color-text); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
+.k-panel.k-mk2 .k-mk2-display-foot { font-size: var(--text-xs); color: var(--mk2-muted); }
+
+/* Pagination: centred, the page size moved into the Display menu */
+.k-panel.k-mk2 .k-meta-kit-pagination { display: flex; justify-content: center; }
+
 /* Controls (v2): same surfaces, borders and radii as the cards */
 .k-panel.k-mk2 .k-meta-kit-view-select-input,
 .k-panel.k-mk2 .k-meta-kit-pagesize-select,

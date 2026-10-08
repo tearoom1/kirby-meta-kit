@@ -1,22 +1,8 @@
 <template>
   <div class="k-meta-kit-controls">
-    <div class="k-meta-kit-view-select">
-      <label class="k-meta-kit-view-select-label" for="k-meta-kit-view-mode">{{ $t('meta-kit.view') }}</label>
-      <select
-        id="k-meta-kit-view-mode"
-        class="k-meta-kit-view-select-input"
-        :value="viewMode"
-        @change="updateViewMode($event.target.value)"
-        :title="$t('meta-kit.view.choose')"
-      >
-        <option value="count">{{ $t('meta-kit.view.count') }}</option>
-        <option value="meta">{{ $t('meta-kit.view.meta') }}</option>
-        <option value="og">{{ $t('meta-kit.view.og') }}</option>
-      </select>
-    </div>
-
-    <div class="k-meta-kit-view-select k-meta-kit-sort-select">
-      <label class="k-meta-kit-view-select-label" for="k-meta-kit-sort-mode">{{ $t('meta-kit.sort') }}</label>
+    <!-- Sort: an icon in the box instead of a word in front of it -->
+    <div class="k-meta-kit-sort-select">
+      <label class="k-meta-kit-sort-icon" for="k-meta-kit-sort-mode" :title="$t('meta-kit.sort')"><k-icon type="order-alpha-asc" /></label>
       <select
         id="k-meta-kit-sort-mode"
         class="k-meta-kit-view-select-input"
@@ -32,21 +18,6 @@
         <option value="level-desc">{{ $t('meta-kit.sort.levelDesc') }}</option>
         <option value="status">{{ $t('meta-kit.status') }}</option>
         <option value="template">{{ $t('meta-kit.template') }}</option>
-      </select>
-    </div>
-
-    <div class="k-meta-kit-view-select k-meta-kit-inheritance-select">
-      <label class="k-meta-kit-view-select-label" for="k-meta-kit-inheritance-mode">{{ $t('meta-kit.inheritance') }}</label>
-      <select
-        id="k-meta-kit-inheritance-mode"
-        class="k-meta-kit-view-select-input"
-        :value="inheritance"
-        @change="$emit('update:inheritance', $event.target.value)"
-        :title="$t('meta-kit.inheritance.choose')"
-      >
-        <option value="none">{{ $t('meta-kit.inheritance.none') }}</option>
-        <option value="dimmed">{{ $t('meta-kit.inheritance.dimmed') }}</option>
-        <option value="marked">{{ $t('meta-kit.inheritance.marked') }}</option>
       </select>
     </div>
 
@@ -68,19 +39,54 @@
       </button>
     </div>
 
+    <!-- Display: preferences (view, inherited values, page size), remembered per browser -->
+    <div class="k-meta-kit-filter-dropdown k-meta-kit-display-dropdown">
+      <button
+        class="k-meta-kit-filter-button"
+        :class="{ 'active': openMenu === 'display' }"
+        @click="toggleMenu('display')"
+      >
+        <k-icon type="preview" />
+        <span>{{ $t('meta-kit.display') }}</span>
+        <k-icon :type="openMenu === 'display' ? 'angle-up' : 'angle-down'" />
+      </button>
+
+      <div v-if="openMenu === 'display'" class="k-meta-kit-filter-dropdown-content">
+        <div class="k-meta-kit-filter-group">
+          <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.view') }}</div>
+          <div class="k-mk2-seg" role="radiogroup">
+            <button v-for="option in VIEW_OPTIONS" :key="option" type="button" :class="{ 'is-on': viewMode === option }" @click="updateViewMode(option)">{{ $t('meta-kit.view.' + option) }}</button>
+          </div>
+        </div>
+        <div class="k-meta-kit-filter-group">
+          <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.inheritance') }}</div>
+          <div class="k-mk2-seg" role="radiogroup">
+            <button v-for="option in INHERITANCE_OPTIONS" :key="option" type="button" :class="{ 'is-on': inheritance === option }" @click="$emit('update:inheritance', option)">{{ $t('meta-kit.inheritance.' + option) }}</button>
+          </div>
+        </div>
+        <div class="k-meta-kit-filter-group">
+          <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.pagination.perPageLabel') }}</div>
+          <div class="k-mk2-seg" role="radiogroup">
+            <button v-for="option in PAGE_SIZES" :key="option" type="button" :class="{ 'is-on': pageSize === option }" @click="$emit('update:page-size', option)">{{ option === ALL_PAGES ? $t('meta-kit.pagination.all') : option }}</button>
+          </div>
+        </div>
+        <div class="k-meta-kit-filter-group k-mk2-display-foot">{{ $t('meta-kit.display.remembered') }}</div>
+      </div>
+    </div>
+
     <div class="k-meta-kit-filter-dropdown">
       <button
         class="k-meta-kit-filter-button"
-        @click="toggleFilterDropdown"
-        :class="{ 'active': isDropdownOpen || activeFilters.length > 0 }"
+        @click="toggleMenu('filters')"
+        :class="{ 'active': openMenu === 'filters' || activeFilters.length > 0 }"
       >
         <k-icon type="filter" />
         <span>{{ $t('meta-kit.filters') }}</span>
         <span v-if="activeFilters.length > 0" class="k-meta-kit-filter-count">{{ activeFilters.length }}</span>
-        <k-icon :type="isDropdownOpen ? 'angle-up' : 'angle-down'" />
+        <k-icon :type="openMenu === 'filters' ? 'angle-up' : 'angle-down'" />
       </button>
 
-      <div v-if="isDropdownOpen" class="k-meta-kit-filter-dropdown-content">
+      <div v-if="openMenu === 'filters'" class="k-meta-kit-filter-dropdown-content">
         <div class="k-meta-kit-filter-group k-meta-kit-filter-group-grid">
           <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.filter.state') }}</div>
           <label class="k-meta-kit-filter-option">
@@ -241,7 +247,7 @@
           </label>
         </div>
 
-        <div v-if="activeFilters.length > 0" class="k-meta-kit-filter-actions">
+        <div v-if="activeFilters.length > 0 || searchQuery" class="k-meta-kit-filter-actions">
           <button @click="clearFilters" class="k-meta-kit-filter-clear">
             {{ $t('meta-kit.filter.clear') }}
           </button>
@@ -253,6 +259,11 @@
 </template>
 
 <script>
+const VIEW_OPTIONS = ['count', 'meta', 'og'];
+const INHERITANCE_OPTIONS = ['none', 'dimmed', 'marked'];
+const ALL_PAGES = 99999;
+const PAGE_SIZES = [10, 25, 50, 100, ALL_PAGES];
+
 export default {
   props: {
     showPreview: {
@@ -280,12 +291,21 @@ export default {
     inheritance: {
       type: String,
       default: 'dimmed',
-      validator: value => ['none', 'dimmed', 'marked'].includes(value)
+      validator: value => INHERITANCE_OPTIONS.includes(value)
+    },
+    pageSize: {
+      type: Number,
+      default: 25
     }
   },
   data() {
     return {
-      isDropdownOpen: false
+      VIEW_OPTIONS,
+      INHERITANCE_OPTIONS,
+      PAGE_SIZES,
+      ALL_PAGES,
+      // 'display' | 'filters' | null
+      openMenu: null
     };
   },
   computed: {
@@ -307,8 +327,8 @@ export default {
       this.$emit('update:preview-mode', mode);
       this.$emit('update:show-preview', true);
     },
-    toggleFilterDropdown() {
-      this.isDropdownOpen = !this.isDropdownOpen;
+    toggleMenu(menu) {
+      this.openMenu = this.openMenu === menu ? null : menu;
     },
     isFilterActive(filter) {
       if (filter === 'attention') {
@@ -337,15 +357,17 @@ export default {
 
       this.$emit('update:active-filters', Array.from(filters));
     },
+    // Clears the filters and the search; the display preferences stay
     clearFilters() {
       this.$emit('update:active-filters', []);
-      this.isDropdownOpen = false;
+      this.$emit('update:search-query', '');
+      this.openMenu = null;
     }
   },
   mounted() {
     this._outsideClickHandler = (e) => {
       if (!this.$el.contains(e.target)) {
-        this.isDropdownOpen = false;
+        this.openMenu = null;
       }
     };
     document.addEventListener('click', this._outsideClickHandler);

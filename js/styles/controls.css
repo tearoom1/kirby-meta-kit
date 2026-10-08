@@ -97,12 +97,6 @@
     width: 110px;
   }
 
-  @media (max-width: 1420px) {
-    .k-meta-kit-sort-select {
-      display: none;
-    }
-  }
-
   /* Filter Dropdown */
 
   .k-meta-kit-filter-dropdown {
