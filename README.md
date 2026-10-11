@@ -213,3 +213,14 @@ Meta Kit is fully MIT-licensed — no paywalls, no feature gates. If it saves yo
 - [Buy Me a Coffee](https://buymeacoffee.com/tearoom1)
 
 [![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/tearoom1)
+
+## Screenshots
+
+Screenshots use fictional Cedar & Leaf sample content at 1600 × 902 pixels. The main image uses the light theme.
+
+| View | Light | Dark |
+| --- | --- | --- |
+| Overview | [Light](screenshot.jpg) | [Dark](screenshot-dark.jpg) |
+| Page SEO | [Light](docs/screenshots/page-seo.jpg) | [Dark](docs/screenshots/page-seo-dark.jpg) |
+| Site settings | [Light](docs/screenshots/site-settings.jpg) | [Dark](docs/screenshots/site-settings-dark.jpg) |
+| Bulk editing | [Light](docs/screenshots/bulk-edit.jpg) | [Dark](docs/screenshots/bulk-edit-dark.jpg) |
