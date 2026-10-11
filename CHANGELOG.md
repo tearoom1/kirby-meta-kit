@@ -1,3 +1,10 @@
+## [3.1.2](https://github.com/tearoom1/kirby-meta-kit/compare/v3.1.1...v3.1.2) (2026-10-11)
+
+
+### Bug Fixes
+
+* keep overview cards together on desktop ([77f5548](https://github.com/tearoom1/kirby-meta-kit/commit/77f554895ce3d0f8e4d2cd9bd65cf44b7809a3d1))
+
 ## [3.1.1](https://github.com/tearoom1/kirby-meta-kit/compare/v3.1.0...v3.1.1) (2026-10-08)
 
 
@@ -71,11 +78,4 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
 * page methods use the panel's content detection ([fb41eb5](https://github.com/tearoom1/kirby-meta-kit/commit/fb41eb54e36018964754e4b917547dac05cda832))
 * robots.txt toggles stored as "false" no longer count as enabled ([2a60d56](https://github.com/tearoom1/kirby-meta-kit/commit/2a60d566072aebde75cebce9813407cdaef5c359))
 * translate the OG image tooltips in the table ([207fa0d](https://github.com/tearoom1/kirby-meta-kit/commit/207fa0d4ecf730d86e782a47e4d16359e9b2bbd6))
-
-## [2.2.1](https://github.com/tearoom1/kirby-meta-kit/compare/v2.2.0...v2.2.1) (2026-10-08)
-
-
-### Bug Fixes
-
-* correct grammar in AI settings info text ([cfacaa0](https://github.com/tearoom1/kirby-meta-kit/commit/cfacaa038470de164efcc1254d98ecd0e10cc2d1))
 
