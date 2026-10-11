@@ -1,6 +1,9 @@
 <template>
   <section class="k-mk2-overview">
-    <div class="k-mk2-tiles">
+    <div
+      class="k-mk2-tiles"
+      :style="{ '--mk2-card-count': attentionCards.length + (goodCards.length ? 1 : 0) }"
+    >
       <button
         v-for="card in attentionCards"
         :key="card.key"

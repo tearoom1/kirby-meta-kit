@@ -75,12 +75,26 @@
 .k-mk2-sub > .k-mk2-pill { margin-left: 0; }
 
 /* Overview */
-.k-mk2-overview { display: flex; flex-direction: column; gap: var(--spacing-3); margin-bottom: var(--spacing-6); }
+.k-mk2-overview {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
+}
 .k-mk2-tiles {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.5rem), 1fr));
   gap: var(--spacing-3);
 }
+
+/* Fit every summary card into one row when the Panel content is wide enough. */
+@container (min-width: 50rem) {
+  .k-mk2-tiles {
+    grid-template-columns: repeat(var(--mk2-card-count), minmax(0, 1fr));
+  }
+}
+
 .k-mk2-tile {
   display: flex;
   flex-direction: column;
