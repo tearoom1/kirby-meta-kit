@@ -30,6 +30,9 @@
     "php": "^8.2",
     "getkirby/composer-installer": "^1.2"
   },
+  "conflict": {
+    "getkirby/cms": "<5.0"
+  },
   "require-dev": {
     "getkirby/cms": "^5.0",
     "phpunit/phpunit": "^10.5"
