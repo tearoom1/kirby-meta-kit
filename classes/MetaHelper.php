@@ -196,6 +196,30 @@ class MetaHelper
     }
 
     /**
+     * Modification timestamp of a page in a language, or null when unknown.
+     *
+     * Kirby returns null when the language has no content file of its own
+     * (the translation falls back to the default language). Then the default
+     * language's content file counts. Without any content file the result is
+     * null: callers must leave the date out instead of using the current time.
+     *
+     * @param string|null $languageCode Language to check, null for the current one
+     */
+    public static function modifiedTimestamp(Page $page, ?string $languageCode = null): ?int
+    {
+        $modified = $page->modified(null, null, $languageCode);
+
+        if (is_int($modified) === false) {
+            $default = $page->kirby()->defaultLanguage()?->code();
+            if ($default !== null && $default !== $languageCode) {
+                $modified = $page->modified(null, null, $default);
+            }
+        }
+
+        return is_int($modified) && $modified > 0 ? $modified : null;
+    }
+
+    /**
      * Site title as a string, empty when the site has no title
      */
     public static function siteTitle(Site $site): string

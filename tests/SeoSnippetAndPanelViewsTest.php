@@ -236,6 +236,57 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         $this->assertStringNotContainsString('"@type": "Article"', $html);
     }
 
+    public function testArticleModifiedTimeFallsBackToDefaultLanguageWhenTranslationFileIsMissing(): void
+    {
+        $kirby = $this->makeKirby(
+            [
+                'site.de.txt' => "Title: Site DE\n",
+                'site.en.txt' => "Title: Site EN\n",
+                'post/article.de.txt' => "Title: Beitrag\n----\nDate: 2025-09-02\n",
+            ],
+            [],
+            [
+                ['code' => 'de', 'name' => 'Deutsch', 'default' => true],
+                ['code' => 'en', 'name' => 'English'],
+            ]
+        );
+
+        $modified = mktime(12, 0, 0, 1, 15, 2024);
+        touch($kirby->root('content') . '/post/article.de.txt', $modified);
+        clearstatcache();
+        $expected = date('c', $modified);
+
+        // English has no content file of its own: the German file's time counts, never "now"
+        $kirby->setCurrentLanguage('en');
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('post'));
+        $this->assertStringContainsString('<meta property="article:modified_time" content="' . $expected . '">', $html);
+        $this->assertStringContainsString('"dateModified": "' . $expected . '"', $html);
+
+        $kirby->setCurrentLanguage('de');
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('post'));
+        $this->assertStringContainsString('<meta property="article:modified_time" content="' . $expected . '">', $html);
+    }
+
+    public function testArticleModifiedTimeIsOmittedWithoutAnyContentFile(): void
+    {
+        $kirby = $this->makeKirby(
+            [
+                'site.txt' => "Title: Tea Room\n",
+                'post/photo.jpg' => '',
+            ],
+            ['tearoom1.meta-kit.opengraph.articleTemplates' => ['default']]
+        );
+
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('post'));
+
+        $this->assertStringContainsString('"@type": "Article"', $html);
+        $this->assertStringNotContainsString('article:modified_time', $html);
+        $this->assertStringNotContainsString('dateModified', $html);
+    }
+
     public function testArticleTemplatesAreConfigurable(): void
     {
         $kirby = $this->makeKirby([

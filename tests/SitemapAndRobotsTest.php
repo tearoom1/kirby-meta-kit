@@ -212,6 +212,41 @@ class SitemapAndRobotsTest extends KirbyTestCase
         }
     }
 
+    public function testSitemapLastmodFallsBackToDefaultLanguageAndIsOmittedWithoutContentFile(): void
+    {
+        $kirby = $this->makeKirby(
+            [
+                'site.de.txt' => "Title: Site DE\n",
+                'site.en.txt' => "Title: Site EN\n",
+                '1_listed/default.de.txt' => "Title: Listed DE\n",
+                '2_bare/photo.jpg' => '',
+            ],
+            [],
+            [
+                ['code' => 'de', 'name' => 'Deutsch', 'default' => true],
+                ['code' => 'en', 'name' => 'English'],
+            ]
+        );
+
+        $modified = mktime(12, 0, 0, 1, 15, 2024);
+        touch($kirby->root('content') . '/1_listed/default.de.txt', $modified);
+        clearstatcache();
+
+        $entries = (new Sitemap($kirby))->generate();
+        $byUrl = array_column($entries, 'lastmod', 'url');
+
+        // Missing English file: the German file's time, never "now"
+        $this->assertSame(date('c', $modified), $byUrl[$kirby->page('listed')->url('de')]);
+        $this->assertSame(date('c', $modified), $byUrl[$kirby->page('listed')->url('en')]);
+        // No content file at all: no lastmod
+        $this->assertNull($byUrl[$kirby->page('bare')->url('de')]);
+        $this->assertNull($byUrl[$kirby->page('bare')->url('en')]);
+
+        $xml = (new Sitemap($kirby))->toXml();
+        $this->assertSame(2, substr_count($xml, '<lastmod>'));
+        $this->assertStringNotContainsString('<lastmod></lastmod>', $xml);
+    }
+
     public function testRobotsTogglesStoredAsStringsAreRespected(): void
     {
         $robotsBlocks = $this->makeBlocksJson('mk-robots', [

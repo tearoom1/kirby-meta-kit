@@ -61,7 +61,10 @@ $dateField = $page->content()->get(option('tearoom1.meta-kit.opengraph.dateField
 // (e.g. intl), where "c" is not an ISO 8601 date
 $publishedTimestamp = $isArticle && $dateField->isNotEmpty() ? $dateField->toTimestamp() : false;
 $publishedTime = $publishedTimestamp ? date('c', $publishedTimestamp) : null;
-$modifiedTime = $isArticle ? date('c', $page->modified()) : null;
+// Never the current time: a missing translation file falls back to the
+// default language, without any content file the date is left out
+$modifiedTimestamp = $isArticle ? MetaHelper::modifiedTimestamp($page) : null;
+$modifiedTime = $modifiedTimestamp !== null ? date('c', $modifiedTimestamp) : null;
 
 // Site title may be missing (null): never pass it to esc() unchecked
 $siteTitle = MetaHelper::siteTitle($site);
@@ -254,6 +257,9 @@ if ($isArticle) {
             'name' => $schemaName,
         ],
     ];
+    if ($modifiedTime === null) {
+        unset($articleSchema['dateModified']);
+    }
     if ($publishedTime) {
         $articleSchema['datePublished'] = $publishedTime;
     }

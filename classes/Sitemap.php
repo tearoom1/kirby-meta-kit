@@ -107,7 +107,9 @@ class Sitemap
         foreach ($this->generate() as $item) {
             $xml .= "\n    <url>";
             $xml .= "\n        <loc>" . htmlspecialchars($item['url']) . "</loc>";
-            $xml .= "\n        <lastmod>" . $item['lastmod'] . "</lastmod>";
+            if ($item['lastmod'] !== null) {
+                $xml .= "\n        <lastmod>" . $item['lastmod'] . "</lastmod>";
+            }
             $xml .= "\n        <changefreq>" . $item['changefreq'] . "</changefreq>";
             $xml .= "\n        <priority>" . $item['priority'] . "</priority>";
 
@@ -151,6 +153,17 @@ class Sitemap
         return array_values($page->images()->limit(1000)->map(fn ($image) => $image->url())->data());
     }
 
+    /**
+     * ISO 8601 modification date of a page in a language, null when unknown
+     * (the entry then has no <lastmod>, never the current time)
+     */
+    protected function lastmod(Page $page, ?string $languageCode = null): ?string
+    {
+        $timestamp = MetaHelper::modifiedTimestamp($page, $languageCode);
+
+        return $timestamp !== null ? date('c', $timestamp) : null;
+    }
+
     public function generate(): array
     {
         $sitemap = [];
@@ -163,7 +176,6 @@ class Sitemap
             }
 
             // For multilanguage sites, add entry for each language
-            $timestamp = $page->modified() ?? time();
             if ($isMultilang) {
                 $defaultLanguage = $this->kirby->defaultLanguage();
 
@@ -184,7 +196,7 @@ class Sitemap
                 foreach ($this->kirby->languages() as $language) {
                     $sitemap[] = [
                         'url' => $page->url($language->code()),
-                        'lastmod' => (date('c', $timestamp)),
+                        'lastmod' => $this->lastmod($page, $language->code()),
                         'changefreq' => $this->getChangeFrequency($page),
                         'priority' => $this->getPriority($page),
                         'alternates' => $alternates,
@@ -195,7 +207,7 @@ class Sitemap
                 // Single language site
                 $sitemap[] = [
                     'url' => $page->url(),
-                    'lastmod' =>  (date('c', $timestamp)),
+                    'lastmod' => $this->lastmod($page),
                     'changefreq' => $this->getChangeFrequency($page),
                     'priority' => $this->getPriority($page),
                     'images' => $this->images($page)
