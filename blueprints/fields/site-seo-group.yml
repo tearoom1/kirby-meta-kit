@@ -70,7 +70,6 @@ fields:
     label: meta-kit.bp.site-seo-group.metaDescription.label
     type: mk-description
     fieldType: meta
-    maxlength: 180
     help: meta-kit.bp.site-seo-group.metaDescription.help
     width: 1/2
 

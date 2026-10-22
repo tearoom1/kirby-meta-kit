@@ -57,21 +57,36 @@ class MetaHelper
         return $title;
     }
 
+    /**
+     * Meta description for the output: the stored text in full, as plain text.
+     * The length ranges only guide new input in the Panel; pass $maxLength to
+     * shorten explicitly (e.g. for a derived fallback).
+     */
     public static function buildDescription(Page $page, Site $site, ?int $maxLength = null): string
     {
-        $maxLength ??= self::outputLimit('description', $page);
-
         // Check page SEO field directly (flat field)
         if ($page->metaDescription()->isNotEmpty()) {
-            return self::limitText($page->metaDescription()->kirbytext()->value(), $maxLength);
+            return self::outputText($page->metaDescription()->kirbytext()->value(), $maxLength);
         }
 
         // Fall back to site default description (flat field)
         if ($site->metaDescription()->isNotEmpty()) {
-            return self::limitText($site->metaDescription()->kirbytext()->value(), $maxLength);
+            return self::outputText($site->metaDescription()->kirbytext()->value(), $maxLength);
         }
 
         return '';
+    }
+
+    /**
+     * Plain text of a stored value, shortened only when a limit is given
+     */
+    public static function outputText(string $text, ?int $maxLength = null): string
+    {
+        if ($maxLength === null) {
+            return trim(Str::excerpt($text, 0));
+        }
+
+        return self::limitText($text, $maxLength);
     }
 
     /**
@@ -88,8 +103,8 @@ class MetaHelper
     }
 
     /**
-     * Longest text the output keeps for a field type: the upper end of the
-     * warning range, so every length the panel accepts is rendered in full
+     * Upper end of the warning range for a field type. No longer applied to
+     * stored values in the output; kept for callers that shorten derived text.
      */
     public static function outputLimit(string $fieldType, Page $page): int
     {
@@ -157,16 +172,14 @@ class MetaHelper
 
     public static function buildOgDescription(Page $page, Site $site, ?string $metaDescription = null, ?int $maxLength = null): string
     {
-        $maxLength ??= self::outputLimit('ogDescription', $page);
-
         // Check OG-specific description first (flat field)
         if ($page->ogDescription()->isNotEmpty()) {
-            return self::limitText($page->ogDescription()->kirbytext()->value(), $maxLength);
+            return self::outputText($page->ogDescription()->kirbytext()->value(), $maxLength);
         }
 
         // Fall back to meta description (flat field)
         if ($page->metaDescription()->isNotEmpty()) {
-            return self::limitText($page->metaDescription()->kirbytext()->value(), $maxLength);
+            return self::outputText($page->metaDescription()->kirbytext()->value(), $maxLength);
         }
 
         // Use provided meta description
@@ -176,9 +189,17 @@ class MetaHelper
 
         // Fall back to site default description (flat field)
         if ($site->metaDescription()->isNotEmpty()) {
-            return self::limitText($site->metaDescription()->kirbytext()->value(), $maxLength);
+            return self::outputText($site->metaDescription()->kirbytext()->value(), $maxLength);
         }
 
         return '';
+    }
+
+    /**
+     * Site title as a string, empty when the site has no title
+     */
+    public static function siteTitle(Site $site): string
+    {
+        return trim((string)$site->title()->value());
     }
 }

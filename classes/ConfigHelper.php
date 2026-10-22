@@ -93,7 +93,7 @@ class ConfigHelper
         self::$siteSettingsCache = [
             'appendSiteName' => self::getBool($site->appendSiteName(), true),
             'appendSiteNameTo' => self::getString($site->appendSiteNameTo(), 'meta,og'),
-            'siteMetaTitle' => self::getString($site->metaTitle()) ?: $site->title()->value(),
+            'siteMetaTitle' => self::getString($site->metaTitle()) ?: (string)$site->title()->value(),
             'siteMetaDescription' => self::getString($site->metaDescription()),
             'siteHasOgImage' => $site->ogImage()->isNotEmpty(),
             'titleSeparator' => self::getString($site->titleSeparator(), '|'),

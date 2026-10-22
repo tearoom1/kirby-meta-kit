@@ -58,7 +58,7 @@ class ValidationSettingsTest extends KirbyTestCase
         $this->assertSame(['min' => 0, 'max' => 2], $slug['depth']['optimal']);
     }
 
-    public function testOutputKeepsTextsWithinTheWarningRange(): void
+    public function testOutputKeepsStoredTextsInFull(): void
     {
         $og = str_repeat('word ', 50); // 250 characters, within the og range (max 300)
         $meta = str_repeat('a', 170);  // within the description warning range (max 176)
@@ -73,7 +73,8 @@ class ValidationSettingsTest extends KirbyTestCase
 
         $this->assertSame($meta, MetaHelper::buildDescription($kirby->page('a'), $site));
         $this->assertSame(trim($og), MetaHelper::buildOgDescription($kirby->page('a'), $site));
-        $this->assertLessThanOrEqual(300, mb_strlen(MetaHelper::buildOgDescription($kirby->page('b'), $site)));
+        // Longer than the og warning range (300): still rendered in full
+        $this->assertSame(trim($long), MetaHelper::buildOgDescription($kirby->page('b'), $site));
     }
 
     public function testOutputLimitFollowsTemplateRanges(): void

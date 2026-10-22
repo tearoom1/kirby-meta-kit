@@ -62,12 +62,17 @@ $dateField = $page->content()->get(option('tearoom1.meta-kit.opengraph.dateField
 $publishedTimestamp = $isArticle && $dateField->isNotEmpty() ? $dateField->toTimestamp() : false;
 $publishedTime = $publishedTimestamp ? date('c', $publishedTimestamp) : null;
 $modifiedTime = $isArticle ? date('c', $page->modified()) : null;
+
+// Site title may be missing (null): never pass it to esc() unchecked
+$siteTitle = MetaHelper::siteTitle($site);
 ?>
 
 <?php if ($enableMeta): ?>
     <!-- SEO Meta Tags -->
     <title><?= esc($metaTitle) ?></title>
+<?php if ($metaDescription !== ''): ?>
     <meta name="description" content="<?= esc($metaDescription) ?>">
+<?php endif; ?>
     <link rel="canonical" href="<?= esc($canonical) ?>">
 
     <!-- Alternate language versions -->
@@ -79,7 +84,7 @@ $modifiedTime = $isArticle ? date('c', $page->modified()) : null;
 <?php endif; ?>
 
     <!-- No index if needed -->
-<?php if ($robots !== null && $robots !== 'index, follow' && strlen($robots) > 1): ?>
+<?php if ($robots !== null && $robots !== 'index, follow' && strlen(trim($robots)) > 1): ?>
     <meta name="robots" content="<?= esc($robots) ?>">
 <?php endif; ?>
 
@@ -96,9 +101,13 @@ $modifiedTime = $isArticle ? date('c', $page->modified()) : null;
 <?php if ($enableOpengraph): ?>
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="<?= $isArticle ? 'article' : 'website' ?>">
-    <meta property="og:site_name" content="<?= esc($site->title()->value()) ?>">
+<?php if ($siteTitle !== ''): ?>
+    <meta property="og:site_name" content="<?= esc($siteTitle) ?>">
+<?php endif; ?>
     <meta property="og:url" content="<?= esc($page->url()) ?>">
+<?php if ($ogTitle !== ''): ?>
     <meta property="og:title" content="<?= esc($ogTitle) ?>">
+<?php endif; ?>
 <?php if (!empty($ogDescription)): ?>
     <meta property="og:description" content="<?= esc($ogDescription) ?>">
 <?php endif; ?>
@@ -127,7 +136,9 @@ $modifiedTime = $isArticle ? date('c', $page->modified()) : null;
 
     <!-- Twitter -->
     <meta name="twitter:card" content="<?= $ogImage ? 'summary_large_image' : 'summary' ?>">
+<?php if ($ogTitle !== ''): ?>
     <meta name="twitter:title" content="<?= esc($ogTitle) ?>">
+<?php endif; ?>
 <?php if (!empty($ogDescription)): ?>
     <meta name="twitter:description" content="<?= esc($ogDescription) ?>">
 <?php endif; ?>
@@ -144,7 +155,7 @@ $modifiedTime = $isArticle ? date('c', $page->modified()) : null;
 <?php
 // Entity Schema (Organization or Person)
 $schemaType = $site->schemaType()->isNotEmpty() ? $site->schemaType()->value() : 'Organization';
-$schemaName = $site->schemaName()->isNotEmpty() ? $site->schemaName()->value() : $site->title()->value();
+$schemaName = $site->schemaName()->isNotEmpty() ? $site->schemaName()->value() : $siteTitle;
 
 $entitySchema = [
     '@context' => 'https://schema.org',
@@ -186,7 +197,7 @@ if ($site->metaKitSocialSites()->isNotEmpty()) {
 $websiteSchema = [
     '@context' => 'https://schema.org',
     '@type' => 'WebSite',
-    'name' => $site->title()->value(),
+    'name' => $siteTitle,
     'url' => $site->url(),
     'publisher' => [
         '@type' => $schemaType,
@@ -218,7 +229,7 @@ $webPageSchema = [
     'isPartOf' => [
         '@type' => 'WebSite',
         'url' => $site->url(),
-        'name' => $site->title()->value(),
+        'name' => $siteTitle,
     ],
 ];
 
@@ -263,7 +274,7 @@ if (!$page->isHomePage() && $page->parents()->count() > 0) {
     $breadcrumbItems[] = [
         '@type' => 'ListItem',
         'position' => $position++,
-        'name' => $site->title()->value(),
+        'name' => $siteTitle !== '' ? $siteTitle : (string)$site->homePage()?->title()->value(),
         'item' => $site->url(),
     ];
 
@@ -294,6 +305,25 @@ if (!$page->isHomePage() && $page->parents()->count() > 0) {
 ?>
 
 <?php
+// Empty values (no site title, no description) are left out instead of
+// being rendered as "" or null
+$withoutEmpty = static function (array $data) use (&$withoutEmpty): array {
+    foreach ($data as $key => $value) {
+        if (is_array($value)) {
+            $data[$key] = $withoutEmpty($value);
+        } elseif ($value === null || $value === '') {
+            unset($data[$key]);
+        }
+    }
+    return $data;
+};
+$entitySchema = $withoutEmpty($entitySchema);
+$websiteSchema = $withoutEmpty($websiteSchema);
+$webPageSchema = $withoutEmpty($webPageSchema);
+if (isset($articleSchema)) {
+    $articleSchema = $withoutEmpty($articleSchema);
+}
+
 // HEX_TAG keeps editor content like "</script>" from closing the script tag
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG | JSON_HEX_AMP;
 ?>

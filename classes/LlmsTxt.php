@@ -52,7 +52,7 @@ class LlmsTxt
         $site = $this->kirby->site();
         $summary = ConfigHelper::getSiteSettings()['siteMetaDescription'] ?? '';
 
-        $lines = ['# ' . $this->clean($site->title()->value())];
+        $lines = ['# ' . $this->clean(MetaHelper::siteTitle($site))];
         if ($summary !== '') {
             $lines[] = '';
             $lines[] = '> ' . $this->clean($summary);

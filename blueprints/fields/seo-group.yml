@@ -15,7 +15,6 @@ fields:
     label: meta-kit.bp.meta-group.metaDescription.label
     type: mk-description
     fieldType: meta
-    maxlength: 180
     help: meta-kit.bp.meta-group.metaDescription.help
 
   metaAuthor:
@@ -65,7 +64,6 @@ fields:
     label: meta-kit.bp.meta-group.ogDescription.label
     type: mk-description
     fieldType: og
-    maxlength: 310
     help: meta-kit.bp.meta-group.ogDescription.help
 
   ogImage:
