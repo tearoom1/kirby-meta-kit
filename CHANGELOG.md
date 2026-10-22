@@ -1,3 +1,10 @@
+## [3.3.1](https://github.com/tearoom1/kirby-meta-kit/compare/v3.3.0...v3.3.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* never output the current time as modified date ([84aeaa3](https://github.com/tearoom1/kirby-meta-kit/commit/84aeaa30e6d68ae1dd91eeeab7d3a5b4205d5e69))
+
 ## [3.3.0](https://github.com/tearoom1/kirby-meta-kit/compare/v3.2.0...v3.3.0) (2026-10-22)
 
 
@@ -35,11 +42,4 @@
 ### Bug Fixes
 
 * toolbar groups Display with sort and the search with Filters ([96787bf](https://github.com/tearoom1/kirby-meta-kit/commit/96787bff0b28ef26c981073abdf1161e0e331616))
-
-## [3.1.0](https://github.com/tearoom1/kirby-meta-kit/compare/v3.0.0...v3.1.0) (2026-10-08)
-
-
-### Features
-
-* Display menu with remembered view, inheritance and page size ([0224a3e](https://github.com/tearoom1/kirby-meta-kit/commit/0224a3e8ab00b13bad813cd5603afb164a40291e))
 
