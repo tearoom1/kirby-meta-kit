@@ -34,7 +34,9 @@ class HooksTest extends KirbyTestCase
     private function hook(string $name): \Closure
     {
         $hooks = require dirname(__DIR__) . '/src/hooks.php';
-        return $hooks[$name];
+        // Events with more than one callback (e.g. the sitemap flush) are
+        // arrays; the plugin's own handler comes first
+        return is_array($hooks[$name]) ? $hooks[$name][0] : $hooks[$name];
     }
 
     public function testSettingsInitializationDoesNotKeepSuperuserImpersonation(): void

@@ -42,9 +42,54 @@ class Sitemap
         return $xml;
     }
 
+    /**
+     * Content events that can change the sitemap or llms.txt; hooks.php
+     * flushes the cache after each of them. Explicit names instead of
+     * `page.*:after`, which also matches `page.render:after` and flushed
+     * the cache on every page view.
+     */
+    public const FLUSH_EVENTS = [
+        'page.create',
+        'page.update',
+        'page.changeStatus', // also fired by changeSort()
+        'page.changeSlug',
+        'page.changeTitle',
+        'page.changeNum',
+        'page.changeTemplate',
+        'page.duplicate',
+        'page.move',
+        'page.delete',
+        'file.create',
+        'file.update',
+        'file.replace',
+        'file.changeName',
+        'file.changeSort',
+        'file.changeTemplate',
+        'file.delete',
+        'site.update',
+        'site.changeTitle',
+        'language.create',
+        'language.update',
+        'language.delete',
+    ];
+
+    /**
+     * Empty the sitemap/llms.txt cache. Never fails: another request may be
+     * removing the same cache folder at the same time, and a flush must not
+     * break the request that triggered it.
+     */
     public static function flushCache(): void
     {
-        kirby()->cache('tearoom1.meta-kit.sitemap')->flush();
+        set_error_handler(fn () => true);
+
+        try {
+            kirby()->cache('tearoom1.meta-kit.sitemap')->flush();
+        } catch (\Throwable $e) {
+            // The folder is gone or being removed elsewhere: the cache ends
+            // up empty either way
+        } finally {
+            restore_error_handler();
+        }
     }
 
     public function toXml(): string

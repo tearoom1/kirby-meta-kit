@@ -6,7 +6,7 @@
  * Defines hooks for Meta Kit plugin
  */
 
-return [
+return array_merge_recursive([
     "system.loadPlugins:after" => function () {
         // Initialize site SEO block fields on first load if they don't exist
         $site = site();
@@ -116,7 +116,6 @@ return [
     },
     "site.update:after" => function () {
         TearoomOne\ConfigHelper::clearCache();
-        TearoomOne\Sitemap::flushCache();
     },
     // Keep old URLs working with 301 redirects
     "page.changeSlug:after" => function ($newPage, $oldPage) {
@@ -133,11 +132,14 @@ return [
         $url = TearoomOne\Redirects::find(kirby()->request()->path()->toString());
         return $url ? Kirby\Http\Response::redirect($url, 301) : $result;
     },
-    // Any page or file change can alter the sitemap
-    "page.*:after" => function () {
+],
+// Content changes can alter the sitemap and llms.txt. Only real change
+// events: a wildcard like "page.*:after" also matches "page.render:after"
+// and would flush the cache on every page view. Events that already have a
+// handler above get both callbacks.
+array_fill_keys(
+    array_map(fn ($event) => $event . ":after", TearoomOne\Sitemap::FLUSH_EVENTS),
+    function () {
         TearoomOne\Sitemap::flushCache();
-    },
-    "file.*:after" => function () {
-        TearoomOne\Sitemap::flushCache();
-    },
-];
+    }
+));

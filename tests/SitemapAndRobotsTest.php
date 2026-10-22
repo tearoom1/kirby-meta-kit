@@ -277,10 +277,7 @@ class SitemapAndRobotsTest extends KirbyTestCase
     {
         // The plugin isn't registered in these tests, so the cache is
         // configured by its core key (PageMethodsTest covers the plugin setup)
-        $kirby = $this->makeKirby(
-            ['site.txt' => 'Title: Site', '1_about/default.txt' => 'Title: About'],
-            ['cache' => ['tearoom1.meta-kit.sitemap' => true]]
-        );
+        $kirby = $this->makeKirbyWithHooks();
 
         $first = $this->renderSitemap();
         $this->assertStringContainsString('/about</loc>', $first);
@@ -290,9 +287,101 @@ class SitemapAndRobotsTest extends KirbyTestCase
         $this->assertSame($first, $this->renderSitemap());
 
         // …the page/file/site hooks do
-        $hooks = require __DIR__ . '/../src/hooks.php';
-        $hooks['page.*:after']();
+        $kirby->trigger('page.update:after', ['newPage' => $kirby->page('about'), 'oldPage' => $kirby->page('about')]);
         $this->assertStringContainsString('/contact</loc>', $this->renderSitemap());
+    }
+
+    /**
+     * A Kirby instance with the plugin's hooks (minus the settings
+     * initialization, which would write to site.txt) and the sitemap cache
+     */
+    private function makeKirbyWithHooks(): \Kirby\Cms\App
+    {
+        $hooks = require __DIR__ . '/../src/hooks.php';
+        unset($hooks['system.loadPlugins:after']);
+
+        return $this->makeKirby(
+            ['site.txt' => 'Title: Site', '1_about/default.txt' => 'Title: About'],
+            ['cache' => ['tearoom1.meta-kit.sitemap' => true]],
+            extraConfig: ['hooks' => $hooks]
+        );
+    }
+
+    public function testPageRenderDoesNotFlushTheSitemapCache(): void
+    {
+        $kirby = $this->makeKirbyWithHooks();
+        $first = $this->renderSitemap();
+        $this->addPageOutsideKirby($kirby, '2_contact');
+
+        // Every page view fires page.render:after; it used to match the
+        // former "page.*:after" hook and flush the cache each time
+        $page = $kirby->page('about');
+        $kirby->trigger('page.render:after', ['contentType' => 'html', 'data' => [], 'html' => '', 'page' => $page]);
+
+        $this->assertSame($first, $this->renderSitemap());
+    }
+
+    public function testContentChangesFlushTheSitemapCache(): void
+    {
+        $hooks = require __DIR__ . '/../src/hooks.php';
+        $this->assertArrayNotHasKey('page.*:after', $hooks);
+        $this->assertArrayNotHasKey('file.*:after', $hooks);
+        $this->assertArrayNotHasKey('page.render:after', $hooks);
+
+        $kirby = $this->makeKirbyWithHooks();
+        $this->renderSitemap();
+        $this->addPageOutsideKirby($kirby, '2_contact');
+
+        // A real update through Kirby's API flushes the cache
+        $kirby->page('about')->update(['title' => 'About us']);
+
+        $this->assertStringContainsString('/contact</loc>', $this->renderSitemap());
+    }
+
+    public function testEveryFlushEventIsRegistered(): void
+    {
+        $hooks = require __DIR__ . '/../src/hooks.php';
+
+        foreach (\TearoomOne\Sitemap::FLUSH_EVENTS as $event) {
+            $this->assertArrayHasKey($event . ':after', $hooks, $event);
+        }
+
+        // Events with their own handler keep it and flush as well
+        $this->assertIsArray($hooks['page.update:after']);
+        $this->assertCount(2, $hooks['page.update:after']);
+    }
+
+    public function testFlushIsSafeWhenTheCacheFolderIsMissingOrBeingRemoved(): void
+    {
+        $kirby = $this->makeKirby(
+            ['site.txt' => 'Title: Site', '1_about/default.txt' => 'Title: About'],
+            ['cache' => ['tearoom1.meta-kit.sitemap' => true]]
+        );
+
+        // Turn warnings into exceptions, like Kirby's error handler does on
+        // a frontend request
+        set_error_handler(function (int $severity, string $message, string $file, int $line) {
+            throw new \ErrorException($message, 0, $severity, $file, $line);
+        });
+
+        try {
+            // Nothing cached yet: the folder doesn't exist
+            \TearoomOne\Sitemap::flushCache();
+
+            // Another request removes the folder while this one flushes it:
+            // the file system calls warn and the cache driver throws
+            $caches = new \ReflectionProperty($kirby, 'caches');
+            $caches->setValue($kirby, ['tearoom1.meta-kit.sitemap' => new RacingFlushCache()]);
+            $this->assertInstanceOf(RacingFlushCache::class, $kirby->cache('tearoom1.meta-kit.sitemap'));
+            \TearoomOne\Sitemap::flushCache();
+            $this->assertTrue(RacingFlushCache::$flushed);
+
+            // The handler in place before the flush is restored
+            $this->expectException(\ErrorException::class);
+            trigger_error('still converted', E_USER_WARNING);
+        } finally {
+            restore_error_handler();
+        }
     }
 
     public function testSitemapCacheCanBeDisabled(): void
@@ -306,5 +395,21 @@ class SitemapAndRobotsTest extends KirbyTestCase
         $this->addPageOutsideKirby($kirby, '2_contact');
 
         $this->assertStringContainsString('/contact</loc>', $this->renderSitemap());
+    }
+}
+
+/**
+ * A cache whose flush fails the way a concurrent removal of the same folder
+ * does: scandir() warns about the vanished folder, then an exception follows
+ */
+class RacingFlushCache extends \Kirby\Cache\MemoryCache
+{
+    public static bool $flushed = false;
+
+    public function flush(): bool
+    {
+        static::$flushed = true;
+        scandir(sys_get_temp_dir() . '/meta-kit-vanished-' . uniqid());
+        throw new \RuntimeException('Directory vanished');
     }
 }
