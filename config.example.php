@@ -114,5 +114,10 @@ return [
         // Enable/disable Schema.org JSON-LD structured data
         'schema.enabled' => true,
 
+        // Parent pages to leave out of the JSON-LD breadcrumb, e.g. grouping
+        // pages that answer with a 404 (pages without a template file are
+        // always left out)
+        'schema.breadcrumb.excludeTemplates' => [],
+
     ]
 ];

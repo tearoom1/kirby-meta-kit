@@ -202,4 +202,32 @@ class MetaHelper
     {
         return trim((string)$site->title()->value());
     }
+
+    /**
+     * Parents of a page that belong in the JSON-LD breadcrumb, top level
+     * first. Pages a visitor can't open are left out, so the breadcrumb
+     * never links to a 404:
+     * - drafts
+     * - pages without a template file (Kirby can't render them)
+     * - pages whose template is listed in `schema.breadcrumb.excludeTemplates`
+     *   (e.g. grouping pages that a route answers with a 404)
+     * Unlisted and noindex parents stay: they still return 200, and a
+     * breadcrumb item only has to be a reachable URL, not an indexed one.
+     *
+     * @return \Kirby\Cms\Page[]
+     */
+    public static function breadcrumbParents(Page $page): array
+    {
+        $excluded = array_map(
+            'strtolower',
+            (array)option('tearoom1.meta-kit.schema.breadcrumb.excludeTemplates', [])
+        );
+
+        return array_values(array_filter(
+            $page->parents()->flip()->values(),
+            fn (Page $parent) => $parent->isDraft() === false
+                && $parent->template()->exists() === true
+                && in_array(strtolower($parent->intendedTemplate()->name()), $excluded, true) === false
+        ));
+    }
 }

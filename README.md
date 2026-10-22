@@ -161,7 +161,7 @@ The **SEO tab** in the page editor (`extends: meta-kit/page`) adds slug info, me
 - `/robots.txt`: generated with sitemap reference, bad bot blocking, optional AI crawler blocking, and custom rules from the Panel under Site → Robots.txt.
 - **Redirects**: when a slug changes or a page moves, the old path and all subpaths redirect with 301 to the page's new URL. Listed and editable under Site → SEO & Sitemap → Redirects.
 - `/llms.txt`: optional Markdown overview for AI assistants, off by default.
-- **Schema.org**: Organization, WebSite, WebPage with breadcrumbs and Article markup as JSON-LD, all from the one snippet.
+- **Schema.org**: Organization, WebSite, WebPage with breadcrumbs and Article markup as JSON-LD, all from the one snippet. Breadcrumbs skip parents that can't be opened (no template file, or a template listed in `schema.breadcrumb.excludeTemplates`).
 
 Every toggle and the article fields: [docs/sitemap-robots.md](docs/sitemap-robots.md)
 

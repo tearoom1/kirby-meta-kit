@@ -278,8 +278,8 @@ if (!$page->isHomePage() && $page->parents()->count() > 0) {
         'item' => $site->url(),
     ];
 
-    // Add parents
-    foreach ($page->parents()->flip() as $parent) {
+    // Add parents a visitor can open; url() keeps model overrides
+    foreach (MetaHelper::breadcrumbParents($page) as $parent) {
         $breadcrumbItems[] = [
             '@type' => 'ListItem',
             'position' => $position++,

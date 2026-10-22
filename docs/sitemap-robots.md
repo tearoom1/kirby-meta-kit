@@ -147,6 +147,18 @@ With "Provide llms.txt" (panel, Robots.txt → Advanced) or `'llms.enabled' => t
 'schema.enabled' => true,
 ```
 
+**Breadcrumbs:** the `BreadcrumbList` links every parent with its `url()`, so URL overrides in page models come through. Parents a visitor can't open are left out, so the breadcrumb never points to a 404:
+
+- drafts
+- pages without a template file (neither their own nor `default.php`)
+- pages whose template is listed in `schema.breadcrumb.excludeTemplates`, e.g. grouping pages that a route answers with a 404
+
+```php
+'schema.breadcrumb.excludeTemplates' => ['retreat-parent', 'year'],
+```
+
+Unlisted and noindex parents stay in the breadcrumb: they still return 200, and a breadcrumb item only needs a reachable URL, not an indexed one.
+
 ## Articles
 
 Pages with an article template get `og:type` `article`, `article:published_time` (from their date field), `article:modified_time` and an `Article` schema with author (from Meta Author) and publisher:
