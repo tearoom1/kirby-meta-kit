@@ -83,6 +83,40 @@ class SitemapAndRobotsTest extends KirbyTestCase
         $this->assertStringContainsString('Sitemap is disabled', $response->body());
     }
 
+    public function testSitemapPathRedirectsToSitemapXml(): void
+    {
+        $kirby = $this->makeKirby(
+            ['site.txt' => "Title: Test Site\n"],
+            [],
+            null,
+            ['routes' => require __DIR__ . '/../src/routes/routes.php']
+        );
+
+        $response = $kirby->call('sitemap');
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertSame(301, $response->code());
+        $this->assertStringEndsWith('/sitemap.xml', $response->header('Location'));
+    }
+
+    public function testSitemapPathFallsThroughWhenSitemapIsDisabled(): void
+    {
+        $kirby = $this->makeKirby(
+            [
+                'site.txt' => "Title: Test Site\n",
+                'sitemap/default.txt' => "Title: Sitemap Page\n",
+            ],
+            ['tearoom1.meta-kit.sitemap.enabled' => false],
+            null,
+            ['routes' => require __DIR__ . '/../src/routes/routes.php']
+        );
+
+        $result = $kirby->call('sitemap');
+
+        $this->assertNotInstanceOf(Response::class, $result);
+        $this->assertSame('sitemap', $result?->id());
+    }
+
     public function testSitemapGenerateExcludesUnlistedAndNoindexByDefault(): void
     {
         $kirby = $this->makeKirby([

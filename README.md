@@ -110,7 +110,7 @@ Only admins see Meta Kit unless you list other roles in `allowedRoles`. Full det
 
 ## Validation
 
-Every title and description gets a length range: green inside the optimal range, orange inside the warning range, red outside. Slugs are checked for depth, word count and length. Title lengths include the appended site name.
+Every title and description gets a length range: green inside the optimal range, orange inside the warning range, red outside. Slugs are checked for depth, word count and length. Title lengths include the appended site name. The ranges guide editing only: a text outside them can still be saved and is rendered in full, never cut.
 
 | Field | Optimal | Still acceptable |
 |---|---|---|
@@ -157,7 +157,7 @@ The **SEO tab** in the page editor (`extends: meta-kit/page`) adds slug info, me
 
 ## Sitemap, robots.txt, Redirects, llms.txt and Schema.org
 
-- `/sitemap.xml`: all published pages, hreflang for every language, priorities and change frequencies per template, page images, styled for humans, cached and cleared on every content change. Exclude pages in the Panel or with `sitemap.exclude`.
+- `/sitemap.xml` (`/sitemap` redirects there with 301): all published pages, hreflang for every language, priorities and change frequencies per template, page images, styled for humans, cached and cleared on every content change. Exclude pages in the Panel or with `sitemap.exclude`.
 - `/robots.txt`: generated with sitemap reference, bad bot blocking, optional AI crawler blocking, and custom rules from the Panel under Site → Robots.txt.
 - **Redirects**: when a slug changes or a page moves, the old path and all subpaths redirect with 301 to the page's new URL. Listed and editable under Site → SEO & Sitemap → Redirects.
 - `/llms.txt`: optional Markdown overview for AI assistants, off by default.

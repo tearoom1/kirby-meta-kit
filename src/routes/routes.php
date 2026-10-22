@@ -16,6 +16,10 @@ return [
         "action" => require __DIR__ . "/sitemap.php",
     ],
     [
+        "pattern" => "sitemap",
+        "action" => require __DIR__ . "/sitemap-redirect.php",
+    ],
+    [
         "pattern" => "robots.txt",
         "action" => require __DIR__ . "/robots.txt.php",
     ],

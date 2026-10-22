@@ -8,7 +8,7 @@ Everything Meta Kit serves outside the Panel: the XML sitemap, a dynamic robots.
 ## Sitemap Generation
 
 **Automatic Creation:**
-XML sitemap available at `/sitemap.xml` with:
+XML sitemap available at `/sitemap.xml` (`/sitemap` redirects there with 301) with:
 - All published pages (filtered by template and status)
 - Multilingual support with hreflang
 - Configurable priorities
