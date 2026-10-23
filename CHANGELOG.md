@@ -1,3 +1,10 @@
+## [3.4.0](https://github.com/tearoom1/kirby-meta-kit/compare/v3.3.1...v3.4.0) (2026-10-23)
+
+
+### Features
+
+* Panel support link opens the central support page ([56533e1](https://github.com/tearoom1/kirby-meta-kit/commit/56533e1e2c00eddaa258c090c0c828e939548fdd))
+
 ## [3.3.1](https://github.com/tearoom1/kirby-meta-kit/compare/v3.3.0...v3.3.1) (2026-10-22)
 
 
@@ -35,11 +42,4 @@
 ### Bug Fixes
 
 * keep overview cards together on desktop ([77f5548](https://github.com/tearoom1/kirby-meta-kit/commit/77f554895ce3d0f8e4d2cd9bd65cf44b7809a3d1))
-
-## [3.1.1](https://github.com/tearoom1/kirby-meta-kit/compare/v3.1.0...v3.1.1) (2026-10-08)
-
-
-### Bug Fixes
-
-* toolbar groups Display with sort and the search with Filters ([96787bf](https://github.com/tearoom1/kirby-meta-kit/commit/96787bff0b28ef26c981073abdf1161e0e331616))
 
