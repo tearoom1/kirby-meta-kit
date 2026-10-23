@@ -207,12 +207,11 @@ This plugin is licensed under the [MIT License](LICENSE.md).
 - **Documentation**: the [docs](docs/) folder and inline code comments
 - **Support Policy**: Support is limited to public GitHub Issues. Email support, consulting, and guaranteed response times are not included.
 
-Meta Kit is fully MIT-licensed — no paywalls, no feature gates. If it saves you time and you want to keep it healthy, sponsorships are the best way to support continued development:
+Meta Kit is free and MIT licensed, and it stays that way. If it saves you time, you can help keep it maintained. Paying is voluntary and any amount is welcome.
 
-- [GitHub Sponsors](https://github.com/sponsors/tearoom1)
-- [Buy Me a Coffee](https://buymeacoffee.com/tearoom1)
+Agencies and companies that need an invoice can get a Supporter License. You choose the price and whether it covers one project or your whole company. Lemon Squeezy handles the sale as merchant of record, so you get a proper invoice with VAT. The license adds no features and no priority support.
 
-[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/tearoom1)
+[Support this plugin](https://www.tearoom.one/en/kirby-plugins/support)
 
 ## Screenshots
 

@@ -1,6 +1,6 @@
 <template>
   <k-panel-inside class="k-meta-kit-view k-mk2">
-    <!-- Top Bar: Language Switcher + Sponsor (right-aligned) -->
+    <!-- Top Bar: Language Switcher + Support link (right-aligned) -->
     <div class="k-meta-kit-topbar">
       <div
         v-if="languages && languages.length > 1"
@@ -24,40 +24,14 @@
         </k-button>
       </div>
 
-      <div class="k-meta-kit-sponsor">
-        <k-button
-          class="k-meta-kit-sponsor-button"
-          icon="heart"
-          variant="filled"
-          size="sm"
-          theme="empty"
-          :title="$t('meta-kit.sponsor.support')"
-          :aria-label="$t('meta-kit.sponsor.support')"
-          @click="$refs.sponsorDropdown.toggle()"
-        />
-        <k-dropdown-content
-          ref="sponsorDropdown"
-          align-x="end"
-        >
-          <div class="k-meta-kit-sponsor-text">
-            {{ sponsorText }}
-          </div>
-          <k-dropdown-item
-            icon="heart"
-            link="https://github.com/sponsors/tearoom1"
-            target="_blank"
-          >
-            {{ $t('meta-kit.sponsor.github') }}
-          </k-dropdown-item>
-          <k-dropdown-item
-            icon="heart"
-            link="https://buymeacoffee.com/tearoom1"
-            target="_blank"
-          >
-            {{ $t('meta-kit.sponsor.coffee') }}
-          </k-dropdown-item>
-        </k-dropdown-content>
-      </div>
+      <k-button
+        class="k-meta-kit-sponsor-button"
+        icon="heart"
+        size="sm"
+        link="https://www.tearoom.one/en/kirby-plugins/support"
+        target="_blank"
+        :text="$t('meta-kit.sponsor.support')"
+      />
     </div>
 
     <!-- Stats tiles -->
@@ -350,10 +324,6 @@ export default {
     };
   },
   computed: {
-    sponsorText() {
-      return this.$t('meta-kit.sponsor.text');
-    },
-
     // Bulk actions use the selection, or all filtered pages without one
     actionPageIds() {
       if (this.selectedPages.length > 0) {

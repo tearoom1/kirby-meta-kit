@@ -1,6 +1,6 @@
 /* Top bar and notices */
 .k-meta-kit-view {
-  /* Top Bar (Language Switcher + Sponsor, both right-aligned) */
+  /* Top Bar (Language Switcher + Support link, both right-aligned) */
 
   .k-meta-kit-topbar {
     margin-top: -1rem;
@@ -20,24 +20,13 @@
     }
   }
 
-  .k-meta-kit-sponsor {
-    position: relative;
-  }
-
   .k-meta-kit-sponsor-button {
     --button-color-icon: #e0245e;
-    color: #e0245e;
+    color: var(--color-text-dimmed);
   }
 
   .k-meta-kit-sponsor-button:hover {
     --button-color-icon: #b81d4d;
-    color: #b81d4d;
+    color: var(--color-text);
   }
-
-  .k-meta-kit-sponsor-text {
-    max-width: 17rem;
-    padding: .75rem .75rem .5rem;
-    color: var(--color-text-dimmed);
-    font-size: .8rem;
-    line-height: 1.35;
-  }}
+}

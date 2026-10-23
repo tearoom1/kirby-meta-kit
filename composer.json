@@ -26,6 +26,20 @@
     "docs": "https://github.com/tearoom1/kirby-meta-kit/blob/main/README.md",
     "source": "https://github.com/tearoom1/kirby-meta-kit"
   },
+  "funding": [
+    {
+      "type": "custom",
+      "url": "https://www.tearoom.one/en/kirby-plugins/support"
+    },
+    {
+      "type": "Buy me a coffee",
+      "url": "https://buymeacoffee.com/tearoom1"
+    },
+    {
+      "type": "Github Sponsors",
+      "url": "https://github.com/sponsors/tearoom1"
+    }
+  ],
   "require": {
     "php": "^8.2",
     "getkirby/composer-installer": "^1.2"
