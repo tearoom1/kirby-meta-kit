@@ -1,3 +1,10 @@
+## [3.4.1](https://github.com/tearoom1/kirby-meta-kit/compare/v3.4.0...v3.4.1) (2026-10-25)
+
+
+### Bug Fixes
+
+* name the site's base URL in the robots.txt header, not the language URL ([de1262d](https://github.com/tearoom1/kirby-meta-kit/commit/de1262d99f3ce02a0dc7bc389e2f14545d9728f7))
+
 ## [3.4.0](https://github.com/tearoom1/kirby-meta-kit/compare/v3.3.1...v3.4.0) (2026-10-23)
 
 
@@ -35,11 +42,4 @@
 ### Bug Fixes
 
 * render stored meta values in full and never crash without a site title ([f931209](https://github.com/tearoom1/kirby-meta-kit/commit/f93120920938f66b37edc9098b5ed5d30e929f9a))
-
-## [3.1.2](https://github.com/tearoom1/kirby-meta-kit/compare/v3.1.1...v3.1.2) (2026-10-11)
-
-
-### Bug Fixes
-
-* keep overview cards together on desktop ([77f5548](https://github.com/tearoom1/kirby-meta-kit/commit/77f554895ce3d0f8e4d2cd9bd65cf44b7809a3d1))
 
