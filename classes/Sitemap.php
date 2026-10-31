@@ -178,10 +178,11 @@ class Sitemap
             // For multilanguage sites, add entry for each language
             if ($isMultilang) {
                 $defaultLanguage = $this->kirby->defaultLanguage();
+                $languages = MetaHelper::pageLanguages($page);
 
                 // Build alternates list: one per language + x-default pointing to default language
                 $alternates = [];
-                foreach ($this->kirby->languages() as $language) {
+                foreach ($languages as $language) {
                     $alternates[] = [
                         'lang' => $language->code(),
                         'url' => $page->url($language->code())
@@ -193,7 +194,7 @@ class Sitemap
                 ];
 
                 // Add one <url> entry per language so all versions are first-class sitemap entries
-                foreach ($this->kirby->languages() as $language) {
+                foreach ($languages as $language) {
                     $sitemap[] = [
                         'url' => $page->url($language->code()),
                         'lastmod' => $this->lastmod($page, $language->code()),

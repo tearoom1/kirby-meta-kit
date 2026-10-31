@@ -142,6 +142,28 @@ class MetaHelper
     }
 
     /**
+     * Languages a page exists in: every site language, unless the site
+     * narrows them down with the `languages.available` callback. Empty on
+     * single-language sites.
+     *
+     * @return array<int, Language>
+     */
+    public static function pageLanguages(Page $page): array
+    {
+        $languages = kirby()->languages()->values();
+        $isAvailable = option('tearoom1.meta-kit.languages.available');
+
+        if (!is_callable($isAvailable)) {
+            return $languages;
+        }
+
+        return array_values(array_filter(
+            $languages,
+            fn (Language $language) => (bool)$isAvailable($page, $language->code())
+        ));
+    }
+
+    /**
      * Convert a Kirby Language to an OG locale string (e.g. "de_DE", "en_US").
      * Uses the locale defined in the language file when available; falls back
      * to repeating the language code as the region (e.g. "de" → "de_DE").

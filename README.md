@@ -100,6 +100,7 @@ The options you will most likely touch:
     'excludeTemplates' => [],         // templates hidden from the Panel table
     'validation' => [],               // length ranges, see Validation
     'sitemap.enabled' => true,
+    'languages.available' => null,    // callback: does a page exist in a language?
     'robots' => ['enabled' => true, 'blockBadBots' => true, 'blockAiCrawlers' => false],
     'redirects.enabled' => true,
     'llms.enabled' => false,
@@ -158,6 +159,7 @@ The **SEO tab** in the page editor (`extends: meta-kit/page`) adds slug info, me
 ## Sitemap, robots.txt, Redirects, llms.txt and Schema.org
 
 - `/sitemap.xml` (`/sitemap` redirects there with 301): all published pages, hreflang for every language, priorities and change frequencies per template, page images, styled for humans, cached and cleared on every content change. Exclude pages in the Panel or with `sitemap.exclude`.
+- **Pages in some languages only**: a page counts as existing in every language. If language URLs without a translation redirect on your site, set `languages.available`, a callback `fn ($page, string $languageCode): bool`. Languages it returns false for are left out of the sitemap, hreflang and `og:locale:alternate`. x-default stays on the default language.
 - `/robots.txt`: generated with sitemap reference, bad bot blocking, optional AI crawler blocking, and custom rules from the Panel under Site → Robots.txt.
 - **Redirects**: when a slug changes or a page moves, the old path and all subpaths redirect with 301 to the page's new URL. Listed and editable under Site → SEO & Sitemap → Redirects.
 - `/llms.txt`: optional Markdown overview for AI assistants, off by default.

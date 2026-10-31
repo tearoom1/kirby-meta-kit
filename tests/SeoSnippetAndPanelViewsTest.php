@@ -120,6 +120,56 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         $this->assertStringContainsString('"inLanguage": "de"', $html);
     }
 
+    public function testSeoSnippetListsEveryLanguageWithoutLanguagesAvailableOption(): void
+    {
+        $kirby = $this->makeKirby(...$this->englishOnlyArticleSite());
+
+        $kirby->setCurrentLanguage('en');
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('article'));
+
+        $this->assertStringContainsString('hreflang="en"', $html);
+        $this->assertStringContainsString('hreflang="de"', $html);
+        $this->assertStringContainsString('hreflang="x-default"', $html);
+        $this->assertStringContainsString('property="og:locale:alternate" content="de_DE"', $html);
+    }
+
+    public function testLanguagesAvailableLeavesUnavailableLanguagesOutOfHead(): void
+    {
+        $kirby = $this->makeKirby(...$this->englishOnlyArticleSite([
+            'languages.available' => fn ($page, string $languageCode): bool => $page->translation($languageCode)?->exists() === true,
+        ]));
+
+        $kirby->setCurrentLanguage('en');
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('article'));
+
+        $this->assertStringContainsString('hreflang="en"', $html);
+        $this->assertStringNotContainsString('hreflang="de"', $html);
+        $this->assertStringContainsString('hreflang="x-default" href="/en/article"', $html);
+        $this->assertStringContainsString('property="og:locale" content="en_EN"', $html);
+        $this->assertStringNotContainsString('og:locale:alternate', $html);
+    }
+
+    /**
+     * makeKirby() arguments: an article that only exists in English
+     */
+    private function englishOnlyArticleSite(array $options = []): array
+    {
+        return [
+            [
+                'site.en.txt' => "Title: Site EN\n----\nMetatitle: Site EN\n----\nAppendsitename: false\n",
+                'site.de.txt' => "Title: Site DE\n----\nMetatitle: Site DE\n----\nAppendsitename: false\n",
+                'article/default.en.txt' => "Title: Article EN\n----\nMetatitle: Meta EN\n----\nMetadescription: Description EN\n",
+            ],
+            ['tearoom1.meta-kit' => $options],
+            [
+                ['code' => 'en', 'name' => 'English', 'default' => true],
+                ['code' => 'de', 'name' => 'Deutsch'],
+            ],
+        ];
+    }
+
     public function testMetaKitAreaViewReturnsExpectedProps(): void
     {
         $kirby = $this->makeKirby(

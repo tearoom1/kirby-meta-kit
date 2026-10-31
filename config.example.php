@@ -102,6 +102,17 @@ return [
         ],
 
         // ============================================
+        // Languages
+        // ============================================
+
+        // Decide whether a page exists in a language. Languages it returns
+        // false for are left out of the sitemap, hreflang and
+        // og:locale:alternate; x-default stays on the default language.
+        // Not set = every page exists in every language.
+        // 'languages.available' => fn ($page, string $languageCode): bool =>
+        //     $page->translation($languageCode)?->exists() === true,
+
+        // ============================================
         // Feature Toggles
         // ============================================
 

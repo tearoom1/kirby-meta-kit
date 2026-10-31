@@ -212,6 +212,98 @@ class SitemapAndRobotsTest extends KirbyTestCase
         }
     }
 
+    public function testSitemapListsEveryLanguageWithoutLanguagesAvailableOption(): void
+    {
+        $kirby = $this->makeKirby(...$this->partlyTranslatedSite());
+
+        $entries = (new Sitemap($kirby))->generate();
+
+        // 2 pages × 3 languages, the missing translation makes no difference
+        $this->assertCount(6, $entries);
+
+        foreach ($entries as $entry) {
+            $this->assertSame(['en', 'de', 'it', 'x-default'], array_column($entry['alternates'], 'lang'));
+        }
+    }
+
+    public function testLanguagesAvailableLeavesUnavailableLanguagesOutOfSitemap(): void
+    {
+        $seen = [];
+        $kirby = $this->makeKirby(...$this->partlyTranslatedSite([
+            'languages.available' => function ($page, string $languageCode) use (&$seen): bool {
+                $seen[] = $languageCode;
+                return $page->translation($languageCode)?->exists() === true;
+            },
+        ]));
+
+        $entries = (new Sitemap($kirby))->generate();
+        $urls = array_column($entries, 'url');
+
+        $this->assertSame(['en', 'de', 'it'], array_values(array_unique($seen)));
+        $this->assertCount(4, $entries);
+        $this->assertContains('/en/both', $urls);
+        $this->assertContains('/de/both', $urls);
+        $this->assertContains('/it/both', $urls);
+        $this->assertContains('/en/english-only', $urls);
+        $this->assertNotContains('/de/english-only', $urls);
+        $this->assertNotContains('/it/english-only', $urls);
+
+        $englishOnly = $entries[array_search('/en/english-only', $urls, true)];
+        $this->assertSame(
+            [
+                ['lang' => 'en', 'url' => '/en/english-only'],
+                ['lang' => 'x-default', 'url' => '/en/english-only'],
+            ],
+            $englishOnly['alternates']
+        );
+
+        $both = $entries[array_search('/de/both', $urls, true)];
+        $this->assertSame(['en', 'de', 'it', 'x-default'], array_column($both['alternates'], 'lang'));
+    }
+
+    public function testXDefaultStaysOnDefaultLanguageWhenThatLanguageIsUnavailable(): void
+    {
+        $kirby = $this->makeKirby(...$this->partlyTranslatedSite([
+            'languages.available' => fn ($page, string $languageCode): bool => $languageCode === 'de',
+        ]));
+
+        $entries = (new Sitemap($kirby))->generate();
+
+        $this->assertSame(['/de/both', '/de/english-only'], array_column($entries, 'url'));
+        $this->assertSame(
+            [
+                ['lang' => 'de', 'url' => '/de/both'],
+                ['lang' => 'x-default', 'url' => '/en/both'],
+            ],
+            $entries[0]['alternates']
+        );
+    }
+
+    /**
+     * makeKirby() arguments: a site in three languages with one page that
+     * has every translation and one that only exists in English
+     */
+    private function partlyTranslatedSite(array $options = []): array
+    {
+        return [
+            [
+                'site.en.txt' => "Title: Site EN\n",
+                'site.de.txt' => "Title: Site DE\n",
+                'site.it.txt' => "Title: Site IT\n",
+                '1_both/default.en.txt' => "Title: Both EN\n",
+                '1_both/default.de.txt' => "Title: Both DE\n",
+                '1_both/default.it.txt' => "Title: Both IT\n",
+                '2_english-only/default.en.txt' => "Title: English only\n",
+            ],
+            ['tearoom1.meta-kit' => $options],
+            [
+                ['code' => 'en', 'name' => 'English', 'default' => true],
+                ['code' => 'de', 'name' => 'Deutsch'],
+                ['code' => 'it', 'name' => 'Italiano'],
+            ],
+        ];
+    }
+
     public function testSitemapLastmodFallsBackToDefaultLanguageAndIsOmittedWithoutContentFile(): void
     {
         $kirby = $this->makeKirby(

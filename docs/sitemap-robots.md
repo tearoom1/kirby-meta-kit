@@ -129,6 +129,25 @@ Entries are listed under **Site → SEO & Sitemap → Redirects**, where editors
 'redirects.enabled' => true,  // default; set to false if another plugin handles redirects
 ```
 
+## Pages in some languages only
+
+By default a page counts as existing in every site language, also without a translation, because Kirby then shows the default language. If your site redirects such URLs instead, the sitemap and hreflang would list addresses that only redirect. `languages.available` lets the site decide:
+
+```php
+'languages.available' => fn ($page, string $languageCode): bool =>
+    $page->translation($languageCode)?->exists() === true,
+```
+
+The check is yours because a missing translation file does not always mean a missing page, for example when a page keeps its text in the default language file and is meant for every language. A site can call its own page method here.
+
+Languages the callback returns false for are left out of:
+
+- the sitemap `<url>` entries and their alternates
+- the hreflang links of the `meta-kit/seo` snippet
+- the `og:locale:alternate` tags
+
+x-default always stays on the default language. Canonical URL and `og:locale` are not affected. Without the option nothing changes. A cached sitemap keeps its entries until the next content change or until `sitemap.cacheDuration` has passed, so a changed callback may take that long to show up in `/sitemap.xml`.
+
 ## llms.txt
 
 With "Provide llms.txt" (panel, Robots.txt → Advanced) or `'llms.enabled' => true`, Meta Kit serves [`/llms.txt`](https://llmstxt.org): a Markdown overview for AI assistants with the site title, the default description and a link list of the same pages as the sitemap (meta title and own meta description per page), grouped by top-level section. It is off by default and cached together with the sitemap.

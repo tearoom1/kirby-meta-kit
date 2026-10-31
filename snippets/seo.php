@@ -68,6 +68,9 @@ $modifiedTime = $modifiedTimestamp !== null ? date('c', $modifiedTimestamp) : nu
 
 // Site title may be missing (null): never pass it to esc() unchecked
 $siteTitle = MetaHelper::siteTitle($site);
+
+// Languages this page exists in, for hreflang and og:locale:alternate
+$pageLanguages = MetaHelper::pageLanguages($page);
 ?>
 
 <?php if ($enableMeta): ?>
@@ -80,7 +83,7 @@ $siteTitle = MetaHelper::siteTitle($site);
 
     <!-- Alternate language versions -->
 <?php if (kirby()->multilang()): ?>
-<?php foreach (kirby()->languages() as $language): ?>
+<?php foreach ($pageLanguages as $language): ?>
     <link rel="alternate" hreflang="<?= $language->code() ?>" href="<?= $page->url($language->code()) ?>">
 <?php endforeach; ?>
     <link rel="alternate" hreflang="x-default" href="<?= $page->url(kirby()->defaultLanguage()->code()) ?>">
@@ -130,7 +133,7 @@ $siteTitle = MetaHelper::siteTitle($site);
 <?php endif; ?>
 <?php if (kirby()->multilang()): ?>
     <meta property="og:locale" content="<?= MetaHelper::ogLocale(kirby()->language()) ?>">
-<?php foreach (kirby()->languages() as $language): ?>
+<?php foreach ($pageLanguages as $language): ?>
 <?php if ($language->code() !== kirby()->language()->code()): ?>
     <meta property="og:locale:alternate" content="<?= MetaHelper::ogLocale($language) ?>">
 <?php endif; ?>
