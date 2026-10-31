@@ -1,3 +1,10 @@
+## [3.5.0](https://github.com/tearoom1/kirby-meta-kit/compare/v3.4.1...v3.5.0) (2026-10-31)
+
+
+### Features
+
+* let a site decide which languages a page exists in ([3dc120c](https://github.com/tearoom1/kirby-meta-kit/commit/3dc120c4c13b41d1bdd501aec8bbe18ba0b096b4))
+
 ## [3.4.1](https://github.com/tearoom1/kirby-meta-kit/compare/v3.4.0...v3.4.1) (2026-10-25)
 
 
@@ -30,16 +37,4 @@
 ### Bug Fixes
 
 * flush the sitemap cache only on content changes ([4d58dea](https://github.com/tearoom1/kirby-meta-kit/commit/4d58dea7ab3744a4233de965b12ff02febb5114e))
-
-## [3.2.0](https://github.com/tearoom1/kirby-meta-kit/compare/v3.1.2...v3.2.0) (2026-10-22)
-
-
-### Features
-
-* redirect /sitemap to /sitemap.xml ([6e80cc2](https://github.com/tearoom1/kirby-meta-kit/commit/6e80cc28724914f6e51952285a2761375cafce68))
-
-
-### Bug Fixes
-
-* render stored meta values in full and never crash without a site title ([f931209](https://github.com/tearoom1/kirby-meta-kit/commit/f93120920938f66b37edc9098b5ed5d30e929f9a))
 
