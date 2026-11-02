@@ -3,6 +3,7 @@
 namespace TearoomOne;
 
 use Kirby\Cms\App as Kirby;
+use Kirby\Cms\File;
 use Kirby\Cms\Language;
 use Kirby\Cms\Page;
 use Kirby\Cms\Site;
@@ -55,6 +56,44 @@ class MetaHelper
         }
 
         return $title;
+    }
+
+    /**
+     * The value of a field on a page. Fields named in the option `inherit`
+     * come from the nearest parent that has one when the page itself has none.
+     * The result can be empty, the caller then falls back to the site.
+     */
+    public static function inherited(Page $page, string $field): Field
+    {
+        $own = $page->content()->get($field);
+
+        if ($own->isNotEmpty() || !in_array($field, (array)option('tearoom1.meta-kit.inherit', []), true)) {
+            return $own;
+        }
+
+        foreach ($page->parents() as $parent) {
+            $value = $parent->content()->get($field);
+
+            if ($value->isNotEmpty()) {
+                return $value;
+            }
+        }
+
+        return $own;
+    }
+
+    /**
+     * The share image of a page: its own, a parent's if inherited, or the site's.
+     */
+    public static function ogImageFile(Page $page, Site $site): ?File
+    {
+        $image = self::inherited($page, 'ogImage');
+
+        if ($image->isNotEmpty()) {
+            return $image->toFile();
+        }
+
+        return $site->ogImage()->isNotEmpty() ? $site->ogImage()->toFile() : null;
     }
 
     /**

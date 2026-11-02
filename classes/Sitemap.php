@@ -233,11 +233,9 @@ class Sitemap
         }
 
         // Check page's robots directive (flat field)
-        if ($page->robots()->isNotEmpty()) {
-            $robots = $page->robots()->value();
-            if (str_contains($robots, 'noindex')) {
-                return false;
-            }
+        $robots = MetaHelper::inherited($page, 'robots');
+        if ($robots->isNotEmpty() && str_contains($robots->value(), 'noindex')) {
+            return false;
         }
 
         // Check site blueprint's sitemapExclude field (pages selector)

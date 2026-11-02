@@ -59,6 +59,9 @@ return [
 
         // Templates rendered as articles (og:type article, publish/modified
         // dates and Article schema) and the field holding their publish date
+        // Fields a page takes from its nearest parent when it has none itself, before the site's.
+        // Useful: 'ogImage', 'robots', 'metaAuthor'
+        'inherit' => [],
         'opengraph.articleTemplates' => ['article', 'post'],
         'opengraph.dateField' => 'date',
 

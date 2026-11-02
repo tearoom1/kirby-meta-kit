@@ -178,6 +178,16 @@ With "Provide llms.txt" (panel, Robots.txt → Advanced) or `'llms.enabled' => t
 
 Unlisted and noindex parents stay in the breadcrumb: they still return 200, and a breadcrumb item only needs a reachable URL, not an indexed one.
 
+## Inheritance
+
+A page uses its own value, otherwise the one from the site settings. To set something for a whole section, set it on the section page and name the field here: a page without a value then takes the one of its nearest parent, before the site's.
+
+```php
+'inherit' => ['ogImage', 'robots', 'metaAuthor'],  // default: []
+```
+
+With `robots` a `noindex` on a section also hides all pages below it from the sitemap, unless a page sets its own value. Titles, descriptions and canonical URLs are left out on purpose: the same text or address on many pages harms a site in search.
+
 ## Articles
 
 Pages with an article template get `og:type` `article`, `article:published_time` (from their date field), `article:modified_time` and an `Article` schema with author (from Meta Author) and publisher:

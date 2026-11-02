@@ -30,9 +30,11 @@ if ($page->canonicalUrl()->isNotEmpty()) {
 }
 
 // Get robots directive (flat field on page, fallback to site flat field)
-$robots = $page->robots()->isNotEmpty() ? $page->robots()->value() : $site->robots()->value();
+$robots = MetaHelper::inherited($page, 'robots');
+$robots = $robots->isNotEmpty() ? $robots->value() : $site->robots()->value();
 $keywords = $page->metaKeywords()->isNotEmpty() ? $page->metaKeywords() : null;
-$author = $page->metaAuthor()->isNotEmpty() ? $page->metaAuthor() : ($site->metaAuthor()->isNotEmpty() ? $site->metaAuthor() : null);
+$author = MetaHelper::inherited($page, 'metaAuthor');
+$author = $author->isNotEmpty() ? $author : ($site->metaAuthor()->isNotEmpty() ? $site->metaAuthor() : null);
 
 // Get OG title (use custom OG title or fall back to meta title)
 $ogTitle = MetaHelper::buildTitle($page, $site, 'og');
@@ -40,11 +42,9 @@ $ogTitle = MetaHelper::buildTitle($page, $site, 'og');
 // Get OG description using helper
 $ogDescription = MetaHelper::buildOgDescription($page, $site, $metaDescription);
 
-// Get OG image (flat field on page, fallback to site flat field)
+// Get OG image (flat field on page, optionally a parent's, fallback to site flat field)
 $ogImage = null;
-$ogImageFile = $page->ogImage()->isNotEmpty()
-    ? $page->ogImage()->toFile()
-    : ($site->ogImage()->isNotEmpty() ? $site->ogImage()->toFile() : null);
+$ogImageFile = MetaHelper::ogImageFile($page, $site);
 if ($ogImageFile) {
     $ogImage = $ogImageFile->resize(1200, 630);
 }
