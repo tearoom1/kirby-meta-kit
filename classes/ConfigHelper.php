@@ -3,13 +3,119 @@
 namespace TearoomOne;
 
 use Kirby\Cms\App as Kirby;
+use Kirby\Cms\Site;
 use Kirby\Content\Field;
+use Kirby\Content\VersionCache;
+use Kirby\Content\VersionId;
 
 /**
  * Centralized configuration and field reading utilities
  */
 class ConfigHelper
 {
+    /**
+     * Site fields that hold configuration, not words: maintained once in
+     * the default language (`translate: false` in the site blueprint)
+     */
+    public const SHARED_SITE_FIELDS = [
+        'appendSiteName',
+        'appendSiteNameTo',
+        'titleSeparator',
+        'robots',
+        'schemaType',
+        'schemaName',
+        'schemaEmail',
+        'schemaJobTitle',
+        'metaKitSocialSites',
+        'metaKitOpenrouter',
+        'metaKitSitemap',
+        'metaKitRobots',
+        'metaKitRedirects',
+    ];
+
+    /**
+     * A shared site setting, read from the published default language.
+     *
+     * Kirby lets a value left in a translation file win over the default
+     * language, even for `translate: false` fields, until that translation
+     * is saved again. Reading the default language directly makes every
+     * language use the same setting at once.
+     *
+     * Single-language sites and fields a site blueprint declares as
+     * translatable are read as usual, in the current language.
+     */
+    public static function siteSetting(string $name): Field
+    {
+        $kirby = kirby();
+        $site = $kirby->site();
+
+        if ($kirby->multilang() === false || self::isSharedSiteField($site, $name) === false) {
+            return $site->content()->get($name);
+        }
+
+        return $site->version('latest')->content('default')->get($name);
+    }
+
+    /**
+     * Shared unless the site blueprint redefines the field as translatable
+     */
+    public static function isSharedSiteField(Site $site, string $name): bool
+    {
+        if (in_array(strtolower($name), array_map('strtolower', self::SHARED_SITE_FIELDS), true) === false) {
+            return false;
+        }
+
+        $field = $site->blueprint()->field($name);
+
+        return $field === null || ($field['translate'] ?? true) === false;
+    }
+
+    /**
+     * Remove copies of shared settings from the translation files (published
+     * and unsaved changes), so the Panel no longer shows them. Kirby only
+     * removes them when that very translation is saved.
+     *
+     * Writes the storage directly: Kirby's own write would also take over
+     * the lock of another editor's unsaved changes.
+     */
+    public static function removeSharedSiteCopies(Site $site): void
+    {
+        $kirby = $site->kirby();
+
+        if ($kirby->multilang() === false) {
+            return;
+        }
+
+        $shared = array_map(
+            'strtolower',
+            array_filter(self::SHARED_SITE_FIELDS, fn ($name) => self::isSharedSiteField($site, $name))
+        );
+
+        foreach ($kirby->languages() as $language) {
+            if ($language->isDefault()) {
+                continue;
+            }
+
+            foreach ([VersionId::latest(), VersionId::changes()] as $versionId) {
+                $version = $site->version($versionId);
+
+                if ($version->exists($language) === false) {
+                    continue;
+                }
+
+                $fields = $version->read($language) ?? [];
+                $kept = array_diff_key($fields, array_flip($shared));
+
+                if (count($kept) === count($fields)) {
+                    continue;
+                }
+
+                $site->storage()->update($versionId, $language, $kept);
+                VersionCache::remove($version, $language);
+            }
+        }
+    }
+
     /**
      * Site settings per language code: they include translated values
      * (site title, description), so one language must never reuse another
@@ -98,12 +204,12 @@ class ConfigHelper
         $site = kirby()->site();
 
         self::$siteSettingsCache[$languageCode] = [
-            'appendSiteName' => self::getBool($site->appendSiteName(), true),
-            'appendSiteNameTo' => self::getString($site->appendSiteNameTo(), 'meta,og'),
+            'appendSiteName' => self::getBool(self::siteSetting('appendSiteName'), true),
+            'appendSiteNameTo' => self::getString(self::siteSetting('appendSiteNameTo'), 'meta,og'),
             'siteMetaTitle' => self::getString($site->metaTitle()) ?: (string)$site->title()->value(),
             'siteMetaDescription' => self::getString($site->metaDescription()),
             'siteHasOgImage' => $site->ogImage()->isNotEmpty(),
-            'titleSeparator' => self::getString($site->titleSeparator(), '|'),
+            'titleSeparator' => self::getString(self::siteSetting('titleSeparator'), '|'),
         ];
 
         return self::$siteSettingsCache[$languageCode];
@@ -243,7 +349,7 @@ class ConfigHelper
 
         $siteSettings = [];
         $siteEndpoint = null;
-        $openrouter = MetaHelper::getSeoData(kirby()->site()->metaKitOpenrouter());
+        $openrouter = MetaHelper::getSeoData(self::siteSetting('metaKitOpenrouter'));
         if ($openrouter) {
             if ($openrouter->provider()->isNotEmpty()) {
                 $siteSettings['api.provider'] = $openrouter->provider()->value();
@@ -366,7 +472,7 @@ class ConfigHelper
         ];
 
         $siteSettings = [];
-        $siteSitemap = MetaHelper::getSeoData(kirby()->site()->metaKitSitemap());
+        $siteSitemap = MetaHelper::getSeoData(self::siteSetting('metaKitSitemap'));
         if ($siteSitemap) {
             if ($siteSitemap->exclude()->isNotEmpty()) {
                 $siteSettings['sitemap.exclude.pages'] = $siteSitemap->exclude()->toPages();

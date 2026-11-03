@@ -4,6 +4,7 @@
  * All fields are now flat fields on both pages and site
  */
 
+use TearoomOne\ConfigHelper;
 use TearoomOne\MetaHelper;
 
 $site = $site ?? site();
@@ -31,7 +32,7 @@ if ($page->canonicalUrl()->isNotEmpty()) {
 
 // Get robots directive (flat field on page, fallback to site flat field)
 $robots = MetaHelper::inherited($page, 'robots');
-$robots = $robots->isNotEmpty() ? $robots->value() : $site->robots()->value();
+$robots = $robots->isNotEmpty() ? $robots->value() : ConfigHelper::siteSetting('robots')->value();
 $keywords = $page->metaKeywords()->isNotEmpty() ? $page->metaKeywords() : null;
 $author = MetaHelper::inherited($page, 'metaAuthor');
 $author = $author->isNotEmpty() ? $author : ($site->metaAuthor()->isNotEmpty() ? $site->metaAuthor() : null);
@@ -163,9 +164,16 @@ $pageLanguages = MetaHelper::pageLanguages($page);
 
 <?php if ($enableSchema): ?>
 <?php
-// Entity Schema (Organization or Person)
-$schemaType = $site->schemaType()->isNotEmpty() ? $site->schemaType()->value() : 'Organization';
-$schemaName = $site->schemaName()->isNotEmpty() ? MetaHelper::plainText($site->schemaName()->value()) : $siteTitle;
+// Entity Schema (Organization or Person); shared settings come from the
+// default language
+$schemaTypeField = ConfigHelper::siteSetting('schemaType');
+$schemaNameField = ConfigHelper::siteSetting('schemaName');
+$schemaJobTitle = ConfigHelper::siteSetting('schemaJobTitle');
+$schemaEmail = ConfigHelper::siteSetting('schemaEmail');
+$socialSites = ConfigHelper::siteSetting('metaKitSocialSites');
+
+$schemaType = $schemaTypeField->isNotEmpty() ? $schemaTypeField->value() : 'Organization';
+$schemaName = $schemaNameField->isNotEmpty() ? MetaHelper::plainText($schemaNameField->value()) : $siteTitle;
 
 $entitySchema = [
     '@context' => 'https://schema.org',
@@ -183,17 +191,17 @@ if ($site->ogImage()->isNotEmpty()) {
     }
 }
 
-if ($schemaType === 'Person' && $site->schemaJobTitle()->isNotEmpty()) {
-    $entitySchema['jobTitle'] = MetaHelper::plainText($site->schemaJobTitle()->value());
+if ($schemaType === 'Person' && $schemaJobTitle->isNotEmpty()) {
+    $entitySchema['jobTitle'] = MetaHelper::plainText($schemaJobTitle->value());
 }
 
-if ($site->schemaEmail()->isNotEmpty()) {
-    $entitySchema['email'] = $site->schemaEmail()->value();
+if ($schemaEmail->isNotEmpty()) {
+    $entitySchema['email'] = $schemaEmail->value();
 }
 
-if ($site->metaKitSocialSites()->isNotEmpty()) {
+if ($socialSites->isNotEmpty()) {
     $socialProfiles = [];
-    foreach ($site->metaKitSocialSites()->toStructure() as $social) {
+    foreach ($socialSites->toStructure() as $social) {
         if ($social->url()->isNotEmpty()) {
             $socialProfiles[] = $social->url()->value();
         }

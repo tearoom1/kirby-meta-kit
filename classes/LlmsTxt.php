@@ -25,7 +25,7 @@ class LlmsTxt
             return (bool)$configured;
         }
 
-        $robots = MetaHelper::getSeoData(kirby()->site()->metaKitRobots());
+        $robots = MetaHelper::getSeoData(ConfigHelper::siteSetting('metaKitRobots'));
         return $robots ? $robots->llmsTxt()->toBool() : false;
     }
 

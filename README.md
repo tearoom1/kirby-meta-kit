@@ -85,7 +85,7 @@ That's it! You now have:
 
 ## Configuration
 
-Two layers: technical settings in `site/config/config.php`, content defaults in the Panel under **Site → SEO & Social Media** (default title and description, title separator, site name appending, AI provider and model, social profiles, sitemap and robots.txt). Config values win over Panel values.
+Two layers: technical settings in `site/config/config.php`, content defaults in the Panel under **Site → SEO & Social Media** (default title and description, title separator, site name appending, AI provider and model, social profiles, sitemap and robots.txt). Config values win over Panel values. On multilingual sites the settings are maintained once in the default language, while titles and descriptions stay translated: [Multilingual sites](docs/configuration.md#multilingual-sites)
 
 The options you will most likely touch:
 

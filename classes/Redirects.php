@@ -108,7 +108,7 @@ class Redirects
 
     public static function entries(): array
     {
-        $field = kirby()->site()->content(kirby()->defaultLanguage()?->code())->get('metaKitRedirects');
+        $field = ConfigHelper::siteSetting('metaKitRedirects');
         $entries = Yaml::decode($field->value() ?? '');
 
         return array_map(function ($entry) {

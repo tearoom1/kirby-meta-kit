@@ -18,6 +18,7 @@ columns:
       metaKitSocialSites:
         label: meta-kit.bp.site.social.metaKitSocialSites.label
         type: structure
+        translate: false
         fields:
           platform:
             label: meta-kit.bp.site.social.metaKitSocialSites.platform.label
@@ -60,6 +61,7 @@ columns:
       metaKitOpenrouter:
         label: meta-kit.bp.site.openrouter.metaKitOpenrouter.label
         type: blocks
+        translate: false
         fieldsets:
           - mk-openrouter
         max: 1
@@ -75,6 +77,7 @@ columns:
       metaKitSitemap:
         label: meta-kit.bp.site.sitemap.metaKitSitemap.label
         type: blocks
+        translate: false
         fieldsets:
           - mk-sitemap
         max: 1
@@ -128,6 +131,7 @@ columns:
       metaKitRobots:
         label: meta-kit.bp.site.robots.metaKitRobots.label
         type: blocks
+        translate: false
         help: meta-kit.bp.site.robots.metaKitRobots.help
         fieldsets:
           - mk-robots

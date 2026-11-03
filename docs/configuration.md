@@ -105,6 +105,35 @@ This is where editors configure site-wide content defaults and behavior:
 - Allowed and disallowed paths
 - Crawl delay settings
 
+### Multilingual Sites
+
+Settings are maintained once, in the default language, and apply to every language. Words stay translatable.
+
+| Shared by all languages | Translated per language |
+|---|---|
+| Site name appending, where it goes, title separator | Default meta title (the site name) |
+| Default robots directive | Default meta description |
+| Schema.org type, name, email and job title | Default author |
+| Social profiles | Default share image |
+| AI, Sitemap and Robots.txt settings, redirects | |
+
+In any other language the Panel shows the shared settings greyed out with the value of the default language. Meta Kit always reads them from the published default language, even when an older version left a copy in a translation file. The next save of the site removes such copies from all translations, in published content and in unsaved changes.
+
+While only a translation has unsaved changes, the Panel of that language shows the shared settings empty or switched off, and hides the fields that depend on them (separator, where the site name goes). This is how Kirby builds unsaved changes for translations; the stored settings and the website are not affected, and after saving or discarding the Panel shows the settings again.
+
+To keep a setting translatable, redefine the field in your site blueprint with `translate: true`. Meta Kit then reads and keeps it per language:
+
+```yaml
+tabs:
+  seo:
+    extends: meta-kit/site
+    columns:
+      social:
+        fields:
+          metaKitSocialSites:
+            translate: true
+```
+
 ## Settings Priority
 
 Settings merge in this order (lowest to highest priority):

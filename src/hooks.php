@@ -13,9 +13,10 @@ return array_merge_recursive([
         $needsUpdate = false;
         $updates = [];
 
-        // Site SEO settings are now flat fields, no initialization needed
+        // The settings blocks are shared by all languages: check and write
+        // the default language, whatever language is current
 
-        if ($site->metaKitOpenrouter()->isEmpty()) {
+        if (TearoomOne\ConfigHelper::siteSetting("metaKitOpenrouter")->isEmpty()) {
             $updates["metaKitOpenrouter"] = [
                 [
                     "content" => [
@@ -31,7 +32,7 @@ return array_merge_recursive([
             $needsUpdate = true;
         }
 
-        if ($site->metaKitSitemap()->isEmpty()) {
+        if (TearoomOne\ConfigHelper::siteSetting("metaKitSitemap")->isEmpty()) {
             $updates["metaKitSitemap"] = [
                 [
                     "content" => [
@@ -47,7 +48,7 @@ return array_merge_recursive([
             $needsUpdate = true;
         }
 
-        if ($site->metaKitRobots()->isEmpty()) {
+        if (TearoomOne\ConfigHelper::siteSetting("metaKitRobots")->isEmpty()) {
             $updates["metaKitRobots"] = [
                 [
                     "content" => [
@@ -67,14 +68,33 @@ return array_merge_recursive([
         }
 
         // Only update if needed and not already being updated
-        if ($needsUpdate && !defined("KIRBY_META_KIT_INITIALIZING")) {
-            define("KIRBY_META_KIT_INITIALIZING", true);
+        // Guard against running twice; a static instead of a constant keeps
+        // each loaded copy of this hook independent (tests)
+        static $initializing = false;
+
+        if ($needsUpdate && !$initializing) {
+            $initializing = true;
+            $kirby = kirby();
+            $previousLanguage = $kirby->language()?->code();
+            $defaultLanguage = $kirby->defaultLanguage()?->code();
+
             try {
+                // Blocks serialize their nested fields in the current
+                // language, which would drop the shared ones outside the
+                // default language
+                if ($defaultLanguage !== null) {
+                    $kirby->setCurrentLanguage($defaultLanguage);
+                }
+
                 // Scoped impersonation: the rest of the request must keep
                 // running as the actual visitor, even if the update fails
-                kirby()->impersonate("kirby", fn () => $site->update($updates));
+                $kirby->impersonate("kirby", fn () => $site->update($updates, $defaultLanguage));
             } catch (\Exception $e) {
                 // Silently fail - site might be read-only or in a context where updates aren't allowed
+            } finally {
+                if ($previousLanguage !== null) {
+                    $kirby->setCurrentLanguage($previousLanguage);
+                }
             }
         }
     },
@@ -114,7 +134,10 @@ return array_merge_recursive([
             }
         });
     },
-    "site.update:after" => function () {
+    "site.update:after" => function ($newSite) {
+        // Copies of shared settings left in translation files would still
+        // show in the Panel of that language
+        TearoomOne\ConfigHelper::removeSharedSiteCopies($newSite);
         TearoomOne\ConfigHelper::clearCache();
     },
     // Keep old URLs working with 301 redirects
