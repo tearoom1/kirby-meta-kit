@@ -91,8 +91,8 @@ This is where editors configure site-wide content defaults and behavior:
 - Can override config.php settings if needed
 
 **Social Media Tab:**
-- Social profile URLs (Facebook, Twitter, LinkedIn, etc.)
-- Used in Schema.org `sameAs` property
+- Social profile URLs (Facebook, Instagram, LinkedIn, YouTube, Vimeo, SoundCloud, Spotify, Bandcamp, Mastodon, Bluesky and more)
+- Used in Schema.org `sameAs` property: every URL counts, the platform only labels the row in the Panel
 
 **Sitemap Tab:**
 - Visual page selector for exclusions

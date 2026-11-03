@@ -32,6 +32,42 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         $this->assertStringNotContainsString('"SearchAction"', $html);
     }
 
+    public function testSocialProfilesBecomeSameAs(): void
+    {
+        $profiles = "\n-\n  platform: facebook\n  url: https://www.facebook.com/example/\n"
+            . "-\n  platform: soundcloud\n  url: https://soundcloud.com/example\n"
+            . "-\n  url: https://example.bandcamp.com\n";
+        $kirby = $this->makeKirby([
+            'site.txt' => "Title: Site\n----\nMetakitsocialsites: {$profiles}\n",
+            'a/default.txt' => "Title: A\n",
+        ]);
+
+        $this->resetPluginCaches();
+        $html = $this->renderSeoSnippet($kirby->page('a'));
+
+        // The platform only labels the row in the Panel: every URL counts
+        $this->assertStringContainsString(
+            '"sameAs": [' . "\n"
+            . '        "https://www.facebook.com/example/",' . "\n"
+            . '        "https://soundcloud.com/example",' . "\n"
+            . '        "https://example.bandcamp.com"' . "\n"
+            . '    ]',
+            $html
+        );
+    }
+
+    public function testSocialPlatformsIncludeMusicAndVideoProfiles(): void
+    {
+        $blueprint = \Kirby\Data\Yaml::read(dirname(__DIR__) . '/blueprints/site.yml');
+        $options = $blueprint['columns']['social']['fields']['metaKitSocialSites']['fields']['platform']['options'];
+        $values = array_column($options, 'value');
+
+        foreach (['facebook', 'instagram', 'youtube', 'linkedin', 'vimeo', 'soundcloud', 'spotify', 'bandcamp'] as $platform) {
+            $this->assertContains($platform, $values);
+        }
+        $this->assertSame($values, array_unique($values));
+    }
+
     public function testSeoSnippetAddsSearchActionWhenSearchPageExists(): void
     {
         $kirby = $this->makeKirby([

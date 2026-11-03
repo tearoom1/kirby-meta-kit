@@ -31,6 +31,12 @@ columns:
               - { value: 'tiktok', text: 'TikTok' }
               - { value: 'pinterest', text: 'Pinterest' }
               - { value: 'github', text: 'GitHub' }
+              - { value: 'vimeo', text: 'Vimeo' }
+              - { value: 'soundcloud', text: 'SoundCloud' }
+              - { value: 'spotify', text: 'Spotify' }
+              - { value: 'bandcamp', text: 'Bandcamp' }
+              - { value: 'mastodon', text: 'Mastodon' }
+              - { value: 'bluesky', text: 'Bluesky' }
           url:
             label: meta-kit.bp.site.social.metaKitSocialSites.url.label
             type: url
