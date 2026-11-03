@@ -96,17 +96,26 @@ class LlmsTxt
 
         $description = MetaHelper::buildDescription($page, $this->kirby->site());
         if ($description !== '' && $page->metaDescription()->isNotEmpty()) {
-            $line .= ': ' . $this->clean($description);
+            $line .= ': ' . $this->oneLine($description);
         }
 
         return $line;
     }
 
     /**
-     * One line of plain text, without characters that break Markdown links
+     * A stored value as one line of plain text: tags removed, entities decoded
      */
     protected function clean(string $text): string
     {
-        return trim(str_replace(['[', ']', "\n", "\r"], ['(', ')', ' ', ' '], strip_tags($text)));
+        return $this->oneLine(MetaHelper::plainText(strip_tags($text)));
+    }
+
+    /**
+     * Plain text without characters that break Markdown links. Tags are not
+     * stripped here: a literal "<" in plain text must stay.
+     */
+    protected function oneLine(string $text): string
+    {
+        return trim(str_replace(['[', ']', "\n", "\r"], ['(', ')', ' ', ' '], $text));
     }
 }

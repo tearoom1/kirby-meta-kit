@@ -31,7 +31,15 @@ class MetaHelper
         return $field->toObject();
     }
 
+    /**
+     * Title as plain text (entities decoded), escaped once by the caller
+     */
     public static function buildTitle(Page $page, Site $site, $type): string
+    {
+        return self::plainText(self::rawTitle($page, $type));
+    }
+
+    protected static function rawTitle(Page $page, $type): string
     {
         $title = $page->title()->value();
 
@@ -117,28 +125,49 @@ class MetaHelper
     }
 
     /**
-     * Plain text of a stored value, shortened only when a limit is given
+     * Plain text of a stored value, shortened only when a limit is given.
+     * $html is kirbytext output: tags are removed and entities decoded, so
+     * "&" comes back as "&" and the caller escapes exactly once (esc() in
+     * the snippet, json_encode() for JSON-LD).
      */
-    public static function outputText(string $text, ?int $maxLength = null): string
+    public static function outputText(string $html, ?int $maxLength = null): string
     {
         if ($maxLength === null) {
-            return trim(Str::excerpt($text, 0));
+            return trim(self::htmlToText($html));
         }
 
-        return self::limitText($text, $maxLength);
+        return self::limitText($html, $maxLength);
     }
 
     /**
      * Plain-text excerpt that never exceeds $maxLength, ellipsis included
      */
-    public static function limitText(string $text, int $maxLength): string
+    public static function limitText(string $html, int $maxLength): string
     {
-        $plain = Str::excerpt($text, 0);
+        $plain = self::htmlToText($html);
         if (mb_strlen($plain) <= $maxLength) {
             return $plain;
         }
 
-        return Str::excerpt($plain, $maxLength - 2, rep: ' …');
+        // The text is plain already: stripping tags again would cut a literal "<"
+        return Str::excerpt($plain, $maxLength - 2, false, ' …');
+    }
+
+    /**
+     * Plain text of an HTML string: tags removed, entities decoded
+     */
+    public static function htmlToText(string $html): string
+    {
+        return self::plainText(Str::excerpt($html, 0));
+    }
+
+    /**
+     * A stored text value without HTML entities: "&amp;" becomes "&",
+     * "&nbsp;" a non-breaking space. Output code escapes the result once.
+     */
+    public static function plainText(?string $text): string
+    {
+        return html_entity_decode((string)$text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 
     /**
@@ -281,11 +310,11 @@ class MetaHelper
     }
 
     /**
-     * Site title as a string, empty when the site has no title
+     * Site title as plain text, empty when the site has no title
      */
     public static function siteTitle(Site $site): string
     {
-        return trim((string)$site->title()->value());
+        return trim(self::plainText($site->title()->value()));
     }
 
     /**

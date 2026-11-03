@@ -35,6 +35,10 @@ $robots = $robots->isNotEmpty() ? $robots->value() : $site->robots()->value();
 $keywords = $page->metaKeywords()->isNotEmpty() ? $page->metaKeywords() : null;
 $author = MetaHelper::inherited($page, 'metaAuthor');
 $author = $author->isNotEmpty() ? $author : ($site->metaAuthor()->isNotEmpty() ? $site->metaAuthor() : null);
+// Text values below are plain text (entities decoded): esc() and
+// json_encode() escape them exactly once
+$author = $author ? MetaHelper::plainText($author->value()) : null;
+$keywords = $keywords ? MetaHelper::plainText($keywords->value()) : null;
 
 // Get OG title (use custom OG title or fall back to meta title)
 $ogTitle = MetaHelper::buildTitle($page, $site, 'og');
@@ -48,7 +52,7 @@ $ogImageFile = MetaHelper::ogImageFile($page, $site);
 if ($ogImageFile) {
     $ogImage = $ogImageFile->resize(1200, 630);
 }
-$ogImageAlt = $ogImageFile && $ogImageFile->alt()->isNotEmpty() ? $ogImageFile->alt()->value() : null;
+$ogImageAlt = $ogImageFile && $ogImageFile->alt()->isNotEmpty() ? MetaHelper::plainText($ogImageFile->alt()->value()) : null;
 
 // Articles (blog posts etc.) get og:type article, dates and Article schema
 $isArticle = in_array(
@@ -96,7 +100,7 @@ $pageLanguages = MetaHelper::pageLanguages($page);
 
     <!-- Additional meta tags -->
 <?php if ($keywords): ?>
-    <meta name="keywords" content="<?= $keywords->html() ?>">
+    <meta name="keywords" content="<?= esc($keywords) ?>">
 <?php endif; ?>
 <?php if ($author): ?>
     <meta name="author" content="<?= esc($author) ?>">
@@ -161,7 +165,7 @@ $pageLanguages = MetaHelper::pageLanguages($page);
 <?php
 // Entity Schema (Organization or Person)
 $schemaType = $site->schemaType()->isNotEmpty() ? $site->schemaType()->value() : 'Organization';
-$schemaName = $site->schemaName()->isNotEmpty() ? $site->schemaName()->value() : $siteTitle;
+$schemaName = $site->schemaName()->isNotEmpty() ? MetaHelper::plainText($site->schemaName()->value()) : $siteTitle;
 
 $entitySchema = [
     '@context' => 'https://schema.org',
@@ -180,7 +184,7 @@ if ($site->ogImage()->isNotEmpty()) {
 }
 
 if ($schemaType === 'Person' && $site->schemaJobTitle()->isNotEmpty()) {
-    $entitySchema['jobTitle'] = $site->schemaJobTitle()->value();
+    $entitySchema['jobTitle'] = MetaHelper::plainText($site->schemaJobTitle()->value());
 }
 
 if ($site->schemaEmail()->isNotEmpty()) {
@@ -249,7 +253,7 @@ if ($isArticle) {
     $articleSchema = [
         '@context' => 'https://schema.org',
         '@type' => 'Article',
-        'headline' => mb_substr($page->title()->value(), 0, 110),
+        'headline' => mb_substr(MetaHelper::plainText($page->title()->value()), 0, 110),
         'description' => $metaDescription,
         'url' => $page->url(),
         'mainEntityOfPage' => $page->url(),
@@ -267,7 +271,7 @@ if ($isArticle) {
         $articleSchema['datePublished'] = $publishedTime;
     }
     if ($author) {
-        $articleSchema['author'] = ['@type' => 'Person', 'name' => $author->value()];
+        $articleSchema['author'] = ['@type' => 'Person', 'name' => $author];
     }
     if ($ogImage) {
         $articleSchema['image'] = $ogImage->url();
@@ -283,7 +287,7 @@ if (!$page->isHomePage() && $page->parents()->count() > 0) {
     $breadcrumbItems[] = [
         '@type' => 'ListItem',
         'position' => $position++,
-        'name' => $siteTitle !== '' ? $siteTitle : (string)$site->homePage()?->title()->value(),
+        'name' => $siteTitle !== '' ? $siteTitle : MetaHelper::plainText($site->homePage()?->title()->value()),
         'item' => $site->url(),
     ];
 
@@ -292,7 +296,7 @@ if (!$page->isHomePage() && $page->parents()->count() > 0) {
         $breadcrumbItems[] = [
             '@type' => 'ListItem',
             'position' => $position++,
-            'name' => $parent->title()->value(),
+            'name' => MetaHelper::plainText($parent->title()->value()),
             'item' => $parent->url(),
         ];
     }
@@ -301,7 +305,7 @@ if (!$page->isHomePage() && $page->parents()->count() > 0) {
     $breadcrumbItems[] = [
         '@type' => 'ListItem',
         'position' => $position,
-        'name' => $page->title()->value(),
+        'name' => MetaHelper::plainText($page->title()->value()),
         'item' => $page->url(),
     ];
 
