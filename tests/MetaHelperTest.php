@@ -66,6 +66,22 @@ class MetaHelperTest extends KirbyTestCase
         $this->assertSame('Article Title', MetaHelper::buildTitle($page, $site, 'og'));
     }
 
+    public function testSiteNameGoesOnlyOnMetaTitlesByDefault(): void
+    {
+        // No stored targets: the default applies
+        $kirby = $this->makeKirby([
+            'site.txt'            => "Title: My Site\n----\nMetatitle: Brand\n----\nAppendsitename: true\n----\nTitleseparator: |\n",
+            'article/default.txt' => "Title: Page Title\n----\nMetatitle: Article Title\n",
+        ]);
+
+        ConfigHelper::clearCache();
+        $page = $kirby->page('article');
+        $site = $kirby->site();
+
+        $this->assertSame('Article Title | Brand', MetaHelper::buildTitle($page, $site, 'meta'));
+        $this->assertSame('Article Title', MetaHelper::buildTitle($page, $site, 'og'));
+    }
+
     public function testBuildTitleUsesOgTitleForOgType(): void
     {
         $kirby = $this->makeKirby([

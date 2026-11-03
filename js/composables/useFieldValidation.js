@@ -111,8 +111,8 @@ export function shouldAppendSiteName(settings = {}, fieldType = 'meta') {
   // Check appendSiteNameTo setting
   const appendTo = settings.appendSiteNameTo;
   if (!appendTo) {
-    // If not set, fallback to old behavior (append to all)
-    return true;
+    // Without targets: meta titles only, like the default of the setting
+    return fieldType === 'meta';
   }
 
   // Check if current field type is in the list

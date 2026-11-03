@@ -81,7 +81,7 @@ This is where editors configure site-wide content defaults and behavior:
 - Default meta title and description
 - Title separator (`|`, `-`, `•`, etc.)
 - Auto-append site name toggle
-- Choose which field types get site name (meta only, OG only, or both)
+- Choose which field types get site name (meta only, OG only, or both). Default: meta titles only, because Facebook and WhatsApp ask for OG titles without branding; the site name is sent separately as `og:site_name`
 - Default robots directive
 
 **AI Settings Tab:**

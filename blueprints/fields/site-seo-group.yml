@@ -25,7 +25,6 @@ fields:
       og: "OG Title"
     default:
       - meta
-      - og
     when:
       appendSiteName: true
     width: 1/4

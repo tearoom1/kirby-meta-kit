@@ -205,7 +205,9 @@ class ConfigHelper
 
         self::$siteSettingsCache[$languageCode] = [
             'appendSiteName' => self::getBool(self::siteSetting('appendSiteName'), true),
-            'appendSiteNameTo' => self::getString(self::siteSetting('appendSiteNameTo'), 'meta,og'),
+            // Meta title only by default: Facebook and WhatsApp ask for OG titles
+            // without branding, og:site_name carries the site name
+            'appendSiteNameTo' => self::getString(self::siteSetting('appendSiteNameTo'), 'meta'),
             'siteMetaTitle' => self::getString($site->metaTitle()) ?: (string)$site->title()->value(),
             'siteMetaDescription' => self::getString($site->metaDescription()),
             'siteHasOgImage' => $site->ogImage()->isNotEmpty(),

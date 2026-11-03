@@ -20,6 +20,13 @@ test('shouldAppendSiteName honors appendSiteNameTo matrix', () => {
   assert.equal(shouldAppendSiteName(siteSettings, 'og'), true);
   assert.equal(shouldAppendSiteName({ ...siteSettings, appendSiteNameTo: 'meta' }, 'og'), false);
   assert.equal(shouldAppendSiteName({ appendSiteName: false, appendSiteNameTo: '' }, 'meta'), false);
+
+  // The toggle wins over the targets, as in the output
+  assert.equal(shouldAppendSiteName({ ...siteSettings, appendSiteName: false }, 'meta'), false);
+
+  // Without targets: meta titles only
+  assert.equal(shouldAppendSiteName({ ...siteSettings, appendSiteNameTo: '' }, 'meta'), true);
+  assert.equal(shouldAppendSiteName({ ...siteSettings, appendSiteNameTo: '' }, 'og'), false);
 });
 
 test('buildTitleWithSiteName appends title + separator + site name', () => {

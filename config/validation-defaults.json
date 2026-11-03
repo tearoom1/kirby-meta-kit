@@ -3,7 +3,7 @@
     "title": { "optimal": { "min": 20, "max": 60 }, "warning": { "min": 15, "max": 75 } },
     "ogTitle": { "optimal": { "min": 20, "max": 60 }, "warning": { "min": 15, "max": 75 } },
     "description": { "optimal": { "min": 140, "max": 160 }, "warning": { "min": 126, "max": 176 } },
-    "ogDescription": { "optimal": { "min": 150, "max": 250 }, "warning": { "min": 135, "max": 300 } }
+    "ogDescription": { "optimal": { "min": 80, "max": 200 }, "warning": { "min": 50, "max": 300 } }
   },
   "slug": {
     "depth": { "optimal": { "min": 0, "max": 2 }, "warning": { "min": 0, "max": 3 } },

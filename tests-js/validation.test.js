@@ -219,6 +219,10 @@ test('edit fields use the same ranges as the table, template rules included', ()
   assert.equal(getFieldLengthStatus(28, 'article', 'ogTitle', settings), 'warning');
   assert.equal(getFieldLengthStatus(28, 'default', 'ogTitle', settings), 'success');
 
-  // OG descriptions: default optimal 150-250
+  // OG descriptions: default optimal 80-200, warning 50-300
+  assert.equal(getFieldLengthStatus(141, null, 'ogDescription', {}), 'success');
   assert.equal(getFieldLengthStatus(200, null, 'ogDescription', {}), 'success');
+  assert.equal(getFieldLengthStatus(250, null, 'ogDescription', {}), 'warning');
+  assert.equal(getFieldLengthStatus(60, null, 'ogDescription', {}), 'warning');
+  assert.equal(getFieldLengthStatus(40, null, 'ogDescription', {}), 'error');
 });

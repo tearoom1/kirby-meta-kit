@@ -1,11 +1,16 @@
 import { getEffectiveTitle } from './useInheritance.js';
 
 export function shouldAppendSiteName(siteSettings = {}, type = 'meta') {
-  const appendSiteName = !!siteSettings.appendSiteName;
   const appendTargets = siteSettings.appendSiteNameTo;
 
+  // The toggle wins over the targets, as in the output
+  if (!siteSettings.appendSiteName) {
+    return false;
+  }
+
+  // Without targets: meta titles only, like the default of the setting
   if (appendTargets === undefined || appendTargets === null || appendTargets === '') {
-    return appendSiteName;
+    return type === 'meta';
   }
 
   return appendTargets.split(',').map((s) => s.trim()).includes(type);

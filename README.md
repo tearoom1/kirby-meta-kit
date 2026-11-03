@@ -118,7 +118,7 @@ Every title and description gets a length range: green inside the optimal range,
 | Meta title | 20 to 60 | 15 to 75 |
 | Meta description | 140 to 160 | 126 to 176 |
 | OG title | 20 to 60 | 15 to 75 |
-| OG description | 150 to 250 | 135 to 300 |
+| OG description | 80 to 200 | 50 to 300 |
 
 Override globally or per template; partial rules keep the rest of the defaults:
 

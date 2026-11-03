@@ -105,7 +105,8 @@ class OutputEscapingTest extends KirbyTestCase
     public function testTitlesAreEscapedOnce(): void
     {
         $kirby = $this->makeKirby([
-            'site.txt' => "Title: Inner & Sunrise\n",
+            // Site name on OG titles too, so both get the appended name
+            'site.txt' => "Title: Inner & Sunrise\n----\nAppendsitenameto: meta,og\n",
             'parent/default.txt' => "Title: Kirtan & Mantra\n",
             'parent/child/default.txt' => "Title: Child&nbsp;Page\n----\nMetatitle: Say \"hi\" & 1 < 2\n----\nOgtitle: Share &amp; enjoy\n",
         ]);
