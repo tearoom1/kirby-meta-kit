@@ -10,7 +10,12 @@ use Kirby\Content\Field;
  */
 class ConfigHelper
 {
-    private static $siteSettingsCache = null;
+    /**
+     * Site settings per language code: they include translated values
+     * (site title, description), so one language must never reuse another
+     * language's entry within the same request
+     */
+    private static array $siteSettingsCache = [];
 
     /**
      * Supported AI providers. All of them speak the OpenAI chat completions
@@ -84,13 +89,15 @@ class ConfigHelper
      */
     public static function getSiteSettings(): array
     {
-        if (self::$siteSettingsCache !== null) {
-            return self::$siteSettingsCache;
+        $languageCode = kirby()->language()?->code() ?? '';
+
+        if (isset(self::$siteSettingsCache[$languageCode])) {
+            return self::$siteSettingsCache[$languageCode];
         }
 
         $site = kirby()->site();
 
-        self::$siteSettingsCache = [
+        self::$siteSettingsCache[$languageCode] = [
             'appendSiteName' => self::getBool($site->appendSiteName(), true),
             'appendSiteNameTo' => self::getString($site->appendSiteNameTo(), 'meta,og'),
             'siteMetaTitle' => self::getString($site->metaTitle()) ?: (string)$site->title()->value(),
@@ -99,7 +106,7 @@ class ConfigHelper
             'titleSeparator' => self::getString($site->titleSeparator(), '|'),
         ];
 
-        return self::$siteSettingsCache;
+        return self::$siteSettingsCache[$languageCode];
     }
 
     /**
@@ -107,7 +114,7 @@ class ConfigHelper
      */
     public static function clearCache(): void
     {
-        self::$siteSettingsCache = null;
+        self::$siteSettingsCache = [];
     }
 
     private static ?array $validationDefaults = null;

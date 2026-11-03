@@ -31,7 +31,34 @@ class MetaKitCoreTest extends KirbyTestCase
         ConfigHelper::clearCache();
         $reflection = new \ReflectionClass(ConfigHelper::class);
         $cache = $reflection->getProperty('siteSettingsCache');
-        $this->assertNull($cache->getValue());
+        $this->assertSame([], $cache->getValue());
+    }
+
+    public function testSiteSettingsAreCachedPerLanguage(): void
+    {
+        $kirby = $this->makeKirby(
+            [
+                'site.en.txt' => "Title: Site EN\n----\nMetatitle: Meta EN\n----\nMetadescription: Description EN\n",
+                'site.de.txt' => "Title: Site DE\n----\nMetatitle: Meta DE\n----\nMetadescription: Description DE\n",
+            ],
+            [],
+            [
+                ['code' => 'en', 'name' => 'English', 'default' => true],
+                ['code' => 'de', 'name' => 'Deutsch'],
+            ]
+        );
+
+        $kirby->setCurrentLanguage('en');
+        $this->assertSame('Meta EN', ConfigHelper::getSiteSettings()['siteMetaTitle']);
+
+        // Same request, other language: no English words from the cache
+        $kirby->setCurrentLanguage('de');
+        $settings = ConfigHelper::getSiteSettings();
+        $this->assertSame('Meta DE', $settings['siteMetaTitle']);
+        $this->assertSame('Description DE', $settings['siteMetaDescription']);
+
+        $kirby->setCurrentLanguage('en');
+        $this->assertSame('Meta EN', ConfigHelper::getSiteSettings()['siteMetaTitle']);
     }
 
     public function testIsAiEnabledWithConfig(): void
