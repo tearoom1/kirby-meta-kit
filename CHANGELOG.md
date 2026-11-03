@@ -1,3 +1,10 @@
+## [3.7.1](https://github.com/tearoom1/kirby-meta-kit/compare/v3.7.0...v3.7.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* cache site settings per language ([c7a2c77](https://github.com/tearoom1/kirby-meta-kit/commit/c7a2c77abe91b0271f8765025fd5ce8b5aaa90bf))
+
 ## [3.7.0](https://github.com/tearoom1/kirby-meta-kit/compare/v3.6.0...v3.7.0) (2026-11-03)
 
 
@@ -31,11 +38,4 @@
 ### Bug Fixes
 
 * name the site's base URL in the robots.txt header, not the language URL ([de1262d](https://github.com/tearoom1/kirby-meta-kit/commit/de1262d99f3ce02a0dc7bc389e2f14545d9728f7))
-
-## [3.4.0](https://github.com/tearoom1/kirby-meta-kit/compare/v3.3.1...v3.4.0) (2026-10-23)
-
-
-### Features
-
-* Panel support link opens the central support page ([56533e1](https://github.com/tearoom1/kirby-meta-kit/commit/56533e1e2c00eddaa258c090c0c828e939548fdd))
 
