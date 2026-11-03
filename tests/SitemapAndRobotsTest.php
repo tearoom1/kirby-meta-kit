@@ -136,6 +136,44 @@ class SitemapAndRobotsTest extends KirbyTestCase
         $this->assertStringContainsString('/listed', $urls[0]);
     }
 
+    public function testUnlistedHomePageIsAlwaysInTheSitemap(): void
+    {
+        // content/home without a number: Kirby treats it as unlisted
+        $kirby = $this->makeKirby([
+            'site.txt' => "Title: Test Site\n",
+            'home/default.txt' => "Title: Home\n",
+            '1_listed/default.txt' => "Title: Listed Page\n",
+            'unlisted/default.txt' => "Title: Unlisted Page\n",
+        ], [
+            'tearoom1.meta-kit' => [
+                'sitemap.priorityHome' => 0.9,
+                'sitemap.priorityDefault' => 0.5,
+            ],
+        ]);
+
+        $this->assertTrue($kirby->page('home')->isUnlisted());
+
+        $entries = (new Sitemap($kirby))->generate();
+        $priorities = array_column($entries, 'priority', 'url');
+
+        $this->assertEqualsCanonicalizing(['/', '/listed'], array_keys($priorities));
+        $this->assertSame(0.9, $priorities['/']);
+        $this->assertSame(0.5, $priorities['/listed']);
+    }
+
+    public function testNoindexHomePageStaysOutOfTheSitemap(): void
+    {
+        $kirby = $this->makeKirby([
+            'site.txt' => "Title: Test Site\n",
+            'home/default.txt' => "Title: Home\n----\nRobots: noindex, follow\n",
+            '1_listed/default.txt' => "Title: Listed Page\n",
+        ]);
+
+        $urls = array_column((new Sitemap($kirby))->generate(), 'url');
+
+        $this->assertSame(['/listed'], $urls);
+    }
+
     public function testSitemapRouteIncludesLanguageAlternatesInMultilang(): void
     {
         $this->makeKirby(

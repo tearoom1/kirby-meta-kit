@@ -22,7 +22,7 @@ XML sitemap available at `/sitemap.xml` (`/sitemap` redirects there with 301) wi
 ```php
 'sitemap.enabled' => true,
 'sitemap.exclude' => ['error', 'drafts', 'admin'],  // Page IDs to exclude
-'sitemap.includeUnlisted' => false,  // Include unlisted pages (default: false)
+'sitemap.includeUnlisted' => false,  // Include unlisted pages (default: false); the home page is always included unless it is noindex or excluded
 'sitemap.images' => true,  // List each page's images as <image:image> (default: true)
 'sitemap.cache' => true,  // Cache the XML (default: true)
 'sitemap.cacheDuration' => 60,  // Minutes; only matters for changes made outside Kirby, e.g. via FTP

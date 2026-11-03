@@ -226,9 +226,12 @@ class Sitemap
             return false;
         }
         
-        // Skip unlisted pages unless configured to include them
+        // Skip unlisted pages unless configured to include them. The home
+        // page is often unlisted (a folder without number, e.g. content/home)
+        // but is always reachable at the site root, so its status never
+        // keeps it out; noindex and the excludes below still do.
         $includeUnlisted = $this->options['sitemap.includeUnlisted'] ?? false;
-        if ($page->isUnlisted() && !$includeUnlisted) {
+        if ($page->isUnlisted() && !$includeUnlisted && !$page->isHomePage()) {
             return false;
         }
 
