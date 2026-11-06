@@ -109,92 +109,92 @@ return function () {
         ],
     ];
 
-    if (TearoomOne\MetaKit::isReviewEnabled()) {
-        $routes[] = [
-            "pattern" => "meta-kit/review-page",
-            "method" => "POST",
-            "auth" => true,
-            "action" => function () use ($accessGuard, $reviewGuard) {
-                if ($error = $accessGuard()) {
-                    return $error;
-                }
-                if ($error = $reviewGuard()) {
-                    return $error;
-                }
+    // Registered whatever the settings: Kirby builds the API routes before
+    // it registers plugin translations and blueprints, so reading the AI
+    // settings here loads the site too early (Panel labels then show their
+    // keys). The guards check the settings on each request instead.
+    $routes[] = [
+        "pattern" => "meta-kit/review-page",
+        "method" => "POST",
+        "auth" => true,
+        "action" => function () use ($accessGuard, $reviewGuard) {
+            if ($error = $accessGuard()) {
+                return $error;
+            }
+            if ($error = $reviewGuard()) {
+                return $error;
+            }
 
-                $pageId = get("pageId");
-                return TearoomOne\SeoReview::reviewPage($pageId);
-            },
-        ];
-    }
+            $pageId = get("pageId");
+            return TearoomOne\SeoReview::reviewPage($pageId);
+        },
+    ];
 
-    if (TearoomOne\MetaKit::isAiEnabled()) {
-        $routes[] = [
-            "pattern" => "meta-kit/generate",
-            "method" => "POST",
-            "auth" => true,
-            "action" => function () use ($accessGuard, $aiGuard) {
-                if ($error = $accessGuard()) {
-                    return $error;
-                }
-                if ($error = $aiGuard()) {
-                    return $error;
-                }
+    $routes[] = [
+        "pattern" => "meta-kit/generate",
+        "method" => "POST",
+        "auth" => true,
+        "action" => function () use ($accessGuard, $aiGuard) {
+            if ($error = $accessGuard()) {
+                return $error;
+            }
+            if ($error = $aiGuard()) {
+                return $error;
+            }
 
-                $action = require __DIR__ . "/generate.php";
-                return $action();
-            },
-        ];
-        $routes[] = [
-            "pattern" => "meta-kit/generate-all",
-            "method" => "POST",
-            "auth" => true,
-            "action" => function () use ($accessGuard, $aiGuard) {
-                if ($error = $accessGuard()) {
-                    return $error;
-                }
-                if ($error = $aiGuard()) {
-                    return $error;
-                }
+            $action = require __DIR__ . "/generate.php";
+            return $action();
+        },
+    ];
+    $routes[] = [
+        "pattern" => "meta-kit/generate-all",
+        "method" => "POST",
+        "auth" => true,
+        "action" => function () use ($accessGuard, $aiGuard) {
+            if ($error = $accessGuard()) {
+                return $error;
+            }
+            if ($error = $aiGuard()) {
+                return $error;
+            }
 
-                $generateTitle = get("generateTitle", false);
-                $generateDescription = get("generateDescription", false);
-                $generateOgTitle = get("generateOgTitle", false);
-                $generateOgDescription = get("generateOgDescription", false);
-                $pageIds = get("pageIds", []);
+            $generateTitle = get("generateTitle", false);
+            $generateDescription = get("generateDescription", false);
+            $generateOgTitle = get("generateOgTitle", false);
+            $generateOgDescription = get("generateOgDescription", false);
+            $pageIds = get("pageIds", []);
 
-                return TearoomOne\MetaKitController::generateAllFields(
-                    $generateTitle,
-                    $generateDescription,
-                    $generateOgTitle,
-                    $generateOgDescription,
-                    $pageIds
-                );
-            },
-        ];
-        $routes[] = [
-            "pattern" => "meta-kit/generate-field",
-            "method" => "POST",
-            "auth" => true,
-            "action" => function () use ($accessGuard, $aiGuard) {
-                if ($error = $accessGuard()) {
-                    return $error;
-                }
-                if ($error = $aiGuard()) {
-                    return $error;
-                }
+            return TearoomOne\MetaKitController::generateAllFields(
+                $generateTitle,
+                $generateDescription,
+                $generateOgTitle,
+                $generateOgDescription,
+                $pageIds
+            );
+        },
+    ];
+    $routes[] = [
+        "pattern" => "meta-kit/generate-field",
+        "method" => "POST",
+        "auth" => true,
+        "action" => function () use ($accessGuard, $aiGuard) {
+            if ($error = $accessGuard()) {
+                return $error;
+            }
+            if ($error = $aiGuard()) {
+                return $error;
+            }
 
-                $pageId = get("pageId");
-                $fieldName = get("fieldName");
-                $language = get("language");
-                return TearoomOne\MetaKitController::generateField(
-                    $pageId,
-                    $fieldName,
-                    $language,
-                );
-            },
-        ];
-    }
+            $pageId = get("pageId");
+            $fieldName = get("fieldName");
+            $language = get("language");
+            return TearoomOne\MetaKitController::generateField(
+                $pageId,
+                $fieldName,
+                $language,
+            );
+        },
+    ];
 
     return $routes;
 };

@@ -49,10 +49,7 @@ App::plugin(
             'autoGenerate' => false,
         ],
         // Panel texts; blueprints and components use the `meta-kit.*` keys
-        'translations' => [
-            'en' => json_decode(file_get_contents(__DIR__ . '/translations/en.json'), true),
-            'de' => json_decode(file_get_contents(__DIR__ . '/translations/de.json'), true),
-        ],
+        'translations' => require __DIR__ . '/src/translations.php',
         'blueprints' => [
             'meta-kit/site' => __DIR__ . '/blueprints/site.yml',
             'meta-kit/page' => __DIR__ . '/blueprints/page.yml',
