@@ -1,3 +1,10 @@
+## [4.0.1](https://github.com/tearoom1/kirby-meta-kit/compare/v4.0.0...v4.0.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* translate Panel labels with AI enabled and in every Panel language ([904e597](https://github.com/tearoom1/kirby-meta-kit/commit/904e59793acd96e7e445322abe72f811606c1e9e)), closes [#4](https://github.com/tearoom1/kirby-meta-kit/issues/4)
+
 ## [4.0.0](https://github.com/tearoom1/kirby-meta-kit/compare/v3.7.1...v4.0.0) (2026-11-03)
 
 
@@ -48,11 +55,4 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ### Features
 
 * let pages inherit fields from their parents ([895d9f9](https://github.com/tearoom1/kirby-meta-kit/commit/895d9f9be22b5d85d77cadf400f9f28792003b2e))
-
-## [3.5.0](https://github.com/tearoom1/kirby-meta-kit/compare/v3.4.1...v3.5.0) (2026-10-31)
-
-
-### Features
-
-* let a site decide which languages a page exists in ([3dc120c](https://github.com/tearoom1/kirby-meta-kit/commit/3dc120c4c13b41d1bdd501aec8bbe18ba0b096b4))
 
