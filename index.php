@@ -6,7 +6,8 @@ if (!option('tearoom1.meta-kit.enabled', true)) {
     return;
 }
 
-@include_once __DIR__ . '/vendor/autoload.php';
+// Own classes are listed below; the plugin's vendor/ folder is not loaded,
+// as in a development checkout it holds a second copy of Kirby
 
 $classes = [
     'TearoomOne\ConfigHelper' => 'classes/ConfigHelper.php',
