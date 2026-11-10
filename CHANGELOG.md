@@ -1,3 +1,10 @@
+## [4.0.2](https://github.com/tearoom1/kirby-meta-kit/compare/v4.0.1...v4.0.2) (2026-11-10)
+
+
+### Bug Fixes
+
+* stop loading the plugin's own vendor autoloader ([e861240](https://github.com/tearoom1/kirby-meta-kit/commit/e8612406ee6a5d90c0bd1153660c609ce6558154))
+
 ## [4.0.1](https://github.com/tearoom1/kirby-meta-kit/compare/v4.0.0...v4.0.1) (2026-11-06)
 
 
@@ -48,11 +55,4 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 
 * always list the home page in the sitemap ([680c40a](https://github.com/tearoom1/kirby-meta-kit/commit/680c40a38bfdd1a71465affb50d010ad3f5a9a72))
 * escape titles and descriptions exactly once ([553b243](https://github.com/tearoom1/kirby-meta-kit/commit/553b2432fb5c1573b4be31d6e5cd7593049911cb))
-
-## [3.6.0](https://github.com/tearoom1/kirby-meta-kit/compare/v3.5.0...v3.6.0) (2026-11-02)
-
-
-### Features
-
-* let pages inherit fields from their parents ([895d9f9](https://github.com/tearoom1/kirby-meta-kit/commit/895d9f9be22b5d85d77cadf400f9f28792003b2e))
 
