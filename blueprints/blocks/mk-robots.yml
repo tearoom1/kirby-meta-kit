@@ -120,9 +120,7 @@ tabs:
       customDirectives:
         label: meta-kit.bp.robots.advanced.customDirectives.label
         type: textarea
-        placeholder: |
-          Host: example.com
-          Request-rate: 1/1
+        placeholder: "Host: example.com\nRequest-rate: 1/1"
         help: meta-kit.bp.robots.advanced.customDirectives.help
         font: monospace
         when:

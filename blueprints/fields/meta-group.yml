@@ -53,7 +53,7 @@ fields:
     translate: false
 
   seoSocialSeparator:
-    label:
+    label: ""
     type: info
     text: meta-kit.bp.meta-group.seoSocialSeparator.text
     theme: positive

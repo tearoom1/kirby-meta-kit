@@ -49,7 +49,7 @@ fields:
     translate: false
 
   seoSocialSeparator:
-    label:
+    label: ""
     type: info
     text: meta-kit.bp.meta-group.seoSocialSeparator.text
     theme: positive
@@ -79,7 +79,7 @@ fields:
     help: meta-kit.bp.meta-group.ogImage.help
 
   sitemapSeparator:
-    label:
+    label: ""
     type: info
     text: meta-kit.bp.sitemap.name
     theme: positive
@@ -87,8 +87,8 @@ fields:
   sitemapPriority:
     label: meta-kit.bp.seo-group.sitemapPriority.label
     type: number
-    min: 0.0
-    max: 1.0
+    min: 0
+    max: 1
     step: 0.1
     width: 1/2
     placeholder: meta-kit.bp.seo-group.sitemapPriority.placeholder

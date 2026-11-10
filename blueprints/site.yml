@@ -47,7 +47,7 @@ columns:
     type: fields
     fields:
       otherSettings:
-        label:
+        label: ""
         type: info
         text: meta-kit.bp.site.otherSettings.otherSettings.text
         theme: positive
