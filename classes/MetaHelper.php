@@ -73,14 +73,14 @@ class MetaHelper
      */
     public static function inherited(Page $page, string $field): Field
     {
-        $own = $page->content()->get($field);
+        $own = self::field($page, $field);
 
         if ($own->isNotEmpty() || !in_array($field, (array)option('tearoom1.meta-kit.inherit', []), true)) {
             return $own;
         }
 
         foreach ($page->parents() as $parent) {
-            $value = $parent->content()->get($field);
+            $value = self::field($parent, $field);
 
             if ($value->isNotEmpty()) {
                 return $value;
@@ -88,6 +88,18 @@ class MetaHelper
         }
 
         return $own;
+    }
+
+    /**
+     * A field through the page, so a page model can compute it (a scheduled
+     * post that returns `noindex`, a cover as share image); the stored value
+     * when a Kirby method of that name returns something else
+     */
+    protected static function field(Page $page, string $field): Field
+    {
+        $value = $page->$field();
+
+        return $value instanceof Field ? $value : $page->content()->get($field);
     }
 
     /**

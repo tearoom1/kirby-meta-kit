@@ -78,4 +78,57 @@ class InheritanceTest extends KirbyTestCase
 
         $this->assertSame('noindex, nofollow', MetaHelper::inherited(page('hidden/below'), 'robots')->value());
     }
+
+    public function testPageModelMethodsAreUsed(): void
+    {
+        \Kirby\Cms\Page::extendModels(['article' => ScheduledArticlePage::class]);
+
+        try {
+            $this->makeKirby([
+                'site.txt' => "Title: Site\n\n----\n\nOgimage: - site.png\n",
+                'site.png' => 'x',
+                '1_post/article.txt' => "Title: Post\n\n----\n\nCover: - cover.png\n",
+                '1_post/cover.png' => 'x',
+            ]);
+
+            $this->assertSame('noindex', MetaHelper::inherited(page('post'), 'robots')->value());
+            $this->assertSame('cover.png', $this->fileFor('post'));
+        } finally {
+            \Kirby\Cms\Page::$models = [];
+        }
+    }
+
+    public function testParentPageModelMethodsAreInherited(): void
+    {
+        \Kirby\Cms\Page::extendModels(['article' => ScheduledArticlePage::class]);
+
+        try {
+            $this->makeKirby([
+                'site.txt' => "Title: Site\n",
+                '1_post/article.txt' => "Title: Post\n",
+                '1_post/1_note/default.txt' => "Title: Note\n",
+            ], ['tearoom1.meta-kit' => ['inherit' => ['robots']]]);
+
+            $this->assertSame('noindex', MetaHelper::inherited(page('post/note'), 'robots')->value());
+        } finally {
+            \Kirby\Cms\Page::$models = [];
+        }
+    }
+}
+
+/**
+ * A page model that computes SEO fields, like a scheduled blog post that
+ * stays out of search engines and shares its cover
+ */
+class ScheduledArticlePage extends \Kirby\Cms\Page
+{
+    public function robots(): \Kirby\Content\Field
+    {
+        return new \Kirby\Content\Field($this, 'robots', 'noindex');
+    }
+
+    public function ogImage(): \Kirby\Content\Field
+    {
+        return $this->content()->get('cover');
+    }
 }
