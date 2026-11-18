@@ -1,3 +1,10 @@
+## [4.0.3](https://github.com/tearoom1/kirby-meta-kit/compare/v4.0.2...v4.0.3) (2026-11-18)
+
+
+### Bug Fixes
+
+* use page model methods for robots, share image and author again ([8fd2205](https://github.com/tearoom1/kirby-meta-kit/commit/8fd22057a8be7134c56b1cfe55b7d6a58e62a34b))
+
 ## [4.0.2](https://github.com/tearoom1/kirby-meta-kit/compare/v4.0.1...v4.0.2) (2026-11-10)
 
 
@@ -42,17 +49,4 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ### Bug Fixes
 
 * cache site settings per language ([c7a2c77](https://github.com/tearoom1/kirby-meta-kit/commit/c7a2c77abe91b0271f8765025fd5ce8b5aaa90bf))
-
-## [3.7.0](https://github.com/tearoom1/kirby-meta-kit/compare/v3.6.0...v3.7.0) (2026-11-03)
-
-
-### Features
-
-* add SoundCloud, Spotify, Bandcamp, Vimeo, Mastodon and Bluesky profiles ([c5467dd](https://github.com/tearoom1/kirby-meta-kit/commit/c5467dd9498daf391946b9a9d6490c9b648d7fe0))
-
-
-### Bug Fixes
-
-* always list the home page in the sitemap ([680c40a](https://github.com/tearoom1/kirby-meta-kit/commit/680c40a38bfdd1a71465affb50d010ad3f5a9a72))
-* escape titles and descriptions exactly once ([553b243](https://github.com/tearoom1/kirby-meta-kit/commit/553b2432fb5c1573b4be31d6e5cd7593049911cb))
 
