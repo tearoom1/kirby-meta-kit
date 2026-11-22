@@ -51,7 +51,8 @@ class Robots
     public function __construct(Kirby $kirby)
     {
         $this->kirby = $kirby;
-        $this->config = $kirby->option('tearoom1.meta-kit.robots', []);
+        // Nested 'robots' => [...] and flat 'robots.enabled' keys both work
+        $this->config = ConfigHelper::optionGroup('robots');
     }
 
     /**

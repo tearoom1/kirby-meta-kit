@@ -7,6 +7,7 @@ use Kirby\Cms\Site;
 use Kirby\Content\Field;
 use Kirby\Content\VersionCache;
 use Kirby\Content\VersionId;
+use Kirby\Toolkit\A;
 
 /**
  * Centralized configuration and field reading utilities
@@ -180,14 +181,66 @@ class ConfigHelper
     /**
      * Merge configuration with priority: defaults < site settings < config.php
      */
-    public static function mergeOptions(array $defaults, array $siteSettings): array
+    public static function mergeOptions(array $defaults, array $siteSettings, array $keys = []): array
     {
+        $configSettings = kirby()->option('tearoom1.meta-kit', []);
+        $configSettings = is_array($configSettings) ? $configSettings : [];
+
+        // Callers read flat keys like 'ai.tone'. config.php may also write
+        // them nested ('ai' => ['tone' => ...]), mixed or with the full
+        // prefix ('tearoom1.meta-kit.ai.tone'), so every known key is looked
+        // up through Kirby's option() and stored flat. Array values such as
+        // 'sitemap.exclude' stay whole values.
+        $knownKeys = array_unique([...array_keys($defaults), ...array_keys($siteSettings), ...$keys]);
+
+        foreach ($knownKeys as $key) {
+            $value = kirby()->option('tearoom1.meta-kit.' . $key);
+
+            if ($value !== null) {
+                $configSettings[$key] = $value;
+            }
+        }
+
         // null in config.php means "not set" and must not hide a panel value
-        $configSettings = array_filter(
-            kirby()->option('tearoom1.meta-kit', []),
-            fn ($value) => $value !== null
-        );
+        $configSettings = array_filter($configSettings, fn ($value) => $value !== null);
+
         return array_merge($defaults, $siteSettings, $configSettings);
+    }
+
+    /**
+     * An option group as one nested array, e.g. 'robots'. Accepts the
+     * nested notation ('robots' => ['enabled' => false]) as well as flat
+     * keys ('robots.enabled' => false, also with the full plugin prefix);
+     * flat keys win, as they do in Kirby's option().
+     */
+    public static function optionGroup(string $group): array
+    {
+        $prefix = 'tearoom1.meta-kit.';
+
+        // Nested notation, also found under the prefixed top-level key
+        $nested = kirby()->option($prefix . $group, []);
+        $nested = is_array($nested) ? $nested : [];
+
+        // Flat keys inside the plugin array and with the full prefix
+        $pluginOptions = kirby()->option('tearoom1.meta-kit', []);
+        $candidates = [
+            $group . '.' => is_array($pluginOptions) ? $pluginOptions : [],
+            $prefix . $group . '.' => kirby()->options(),
+        ];
+
+        $flat = [];
+        foreach ($candidates as $keyPrefix => $options) {
+            foreach ($options as $key => $value) {
+                if (is_string($key) && str_starts_with($key, $keyPrefix) && $value !== null) {
+                    $flat = array_replace_recursive(
+                        $flat,
+                        A::nest([substr($key, strlen($keyPrefix)) => $value])
+                    );
+                }
+            }
+        }
+
+        return array_replace_recursive($nested, $flat);
     }
 
     /**
@@ -247,8 +300,7 @@ class ConfigHelper
      */
     public static function getValidationSettings(): array
     {
-        $validation = option('tearoom1.meta-kit.validation', []);
-        $validation = is_array($validation) ? $validation : [];
+        $validation = self::optionGroup('validation');
         $defaults = self::getValidationDefaults();
 
         $ranges = self::mergeRules($defaults['ranges'], $validation['ranges'] ?? []);
@@ -374,7 +426,8 @@ class ConfigHelper
             }
         }
 
-        $options = self::mergeOptions($defaults, $siteSettings);
+        // Config-only keys without a default, read in any notation
+        $options = self::mergeOptions($defaults, $siteSettings, ['api.key', 'api.model', 'api.endpoint']);
 
         // Unknown provider names are treated as a custom endpoint
         $provider = (string)$options['api.provider'];
@@ -493,6 +546,6 @@ class ConfigHelper
             }
         }
 
-        return self::mergeOptions($defaults, $siteSettings);
+        return self::mergeOptions($defaults, $siteSettings, ['sitemap.priorityHome', 'sitemap.priorityDefault']);
     }
 }

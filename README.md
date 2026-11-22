@@ -107,6 +107,8 @@ The options you will most likely touch:
 ]
 ```
 
+Options work in flat notation (`'ai.enabled' => false`) as well as nested (`'ai' => ['enabled' => false]`) or mixed.
+
 Only admins see Meta Kit unless you list other roles in `allowedRoles`. Full details, every option and the Panel tabs: [docs/configuration.md](docs/configuration.md)
 
 ## Validation

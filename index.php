@@ -38,15 +38,25 @@ App::plugin(
                 'sitemap' => true
             ],
             'allowedRoles' => [], // Additional Kirby roles allowed to use the plugin (admins always allowed). Example: ['editor', 'client']
-            'ai.enabled' => true,
-            'review.enabled' => false,
-            'ai.tone' => 'formal',
+            // Grouped defaults are nested on purpose: Kirby's option lookup
+            // prefers an exact flat key, so a flat default like 'ai.enabled'
+            // would hide a site's nested 'ai' => ['enabled' => false].
+            // Nested defaults let both notations in config.php win.
+            'ai' => [
+                'enabled' => true,
+                'tone' => 'formal',
+            ],
+            'review' => [
+                'enabled' => false,
+            ],
             // api.* defaults live in ConfigHelper::getAiSettings(); defining
             // them here would override the AI settings made in the panel
             // validation defaults live in config/validation-defaults.json
             'excludeTemplates' => [],
             'excludeStatus' => [],
-            'sitemap.exclude' => ['error'],
+            'sitemap' => [
+                'exclude' => ['error'],
+            ],
             'autoGenerate' => false,
         ],
         // Panel texts; blueprints and components use the `meta-kit.*` keys
