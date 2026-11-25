@@ -160,7 +160,7 @@ export default {
     display: none;
     margin-top: 0.5rem;
     padding: 0.2rem 1rem 0;
-    background: var(--color-background);
+    background: var(--panel-color-back);
     border-radius: var(--rounded-xs);
     font-size: 0.875rem;
     color: var(--color-text-dimmed);

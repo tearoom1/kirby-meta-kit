@@ -23,7 +23,7 @@
   }
 
   .k-meta-kit-loading-content {
-    background: var(--color-background);
+    background: var(--panel-color-back);
     border-radius: var(--rounded);
     padding: 2rem 3rem;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);

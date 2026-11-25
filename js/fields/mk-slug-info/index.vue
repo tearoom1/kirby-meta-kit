@@ -198,7 +198,7 @@ export default {
 
 .k-mk-slug-validation-box {
   border-radius: var(--rounded-xs);
-  background: var(--color-background);
+  background: var(--panel-color-back);
   display: flex;
   flex-direction: column;
   align-items: start;
@@ -256,7 +256,7 @@ export default {
   gap: 1rem;
 }
 .k-mk-slug-message {
-  background: var(--color-background);
+  background: var(--panel-color-back);
   border-radius: var(--rounded-xs);
   font-size: 0.875rem;
   color: var(--color-text);

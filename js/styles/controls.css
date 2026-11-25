@@ -147,7 +147,7 @@
     right: 0;
     width: 290px;
     max-width: min(290px, calc(100vw - 2rem));
-    background: var(--color-background);
+    background: var(--panel-color-back);
     border: 1px solid var(--color-border);
     border-radius: var(--rounded);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -195,7 +195,7 @@
   }
 
   .k-meta-kit-filter-option:hover {
-    background: var(--color-background);
+    background: var(--panel-color-back);
   }
 
   .k-meta-kit-filter-option input[type="checkbox"] {

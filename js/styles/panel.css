@@ -254,9 +254,9 @@
 .k-mk2-title { display: inline-flex; align-items: center; gap: 0.4rem; }
 .k-mk2-page .k-mk2-sub { display: flex; align-items: center; gap: 0.35rem; }
 .k-mk2-status { --icon-size: 0.75rem; flex-shrink: 0; display: inline-flex; }
-.k-mk2-status.is-listed { color: var(--color-positive, #5d800d); }
+.k-mk2-status.is-listed { color: var(--color-green-700); }
 .k-mk2-status.is-unlisted { color: var(--color-blue-500, #4271ae); }
-.k-mk2-status.is-draft { color: var(--color-negative, #c82829); }
+.k-mk2-status.is-draft { color: var(--color-red-700); }
 
 /* Sub-dialogs in the style of the review dialog */
 .k-meta-kit-dialog.k-mk2-dialog {
@@ -562,7 +562,7 @@
 }
 .k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-review-summary-card { border-top: 0; padding-top: 0; }
 .k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-review-summary-header { padding: 0; }
-.k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-review-summary-text { font-size: var(--text-base); line-height: 1.55; }
+.k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-review-summary-text { font-size: var(--text-md); line-height: 1.55; }
 .k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-review-summary-meta { border: 0; padding: var(--spacing-3) 0 0; }
 .k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-review-meta-label { color: var(--mk2-muted); font-weight: 400; }
 .k-meta-kit-dialog.k-mk2-dialog .k-meta-kit-review-warning {
