@@ -153,11 +153,13 @@ export default {
 
       await this.load();
 
-      // Refresh based on current inputs (important if there are unsaved changes)
+      // Refresh based on current inputs (important if there are unsaved changes);
+      // take the fallback image from the loaded preview first, otherwise the
+      // refresh replaces it with null and the card loses its image
       this.$nextTick(() => {
         setTimeout(() => {
-          this.updatePreviewFromDOM();
           this.determineSiteDefaultImage();
+          this.updatePreviewFromDOM();
         }, 800);
       });
       }, 50);
@@ -357,8 +359,11 @@ export default {
       // Handle OG image: use page image if exists, fall back to site default, or null
       let ogImage;
       if (seoData.ogimage !== undefined) {
-        // Empty string means no page-specific image, use site default
-        ogImage = seoData.ogimage === '' ? (this.siteOgImage || null) : seoData.ogimage;
+        // Empty string means no page-specific image, use the fallback image.
+        // Until it is determined (right after a language switch) keep the one
+        // the server sent, otherwise an early refresh drops it for good
+        const fallback = this.siteOgImageDetermined ? this.siteOgImage : this.meta?.ogImage;
+        ogImage = seoData.ogimage === '' ? (fallback || null) : seoData.ogimage;
       } else {
         // undefined means preserve existing
         ogImage = this.meta?.ogImage || null;
