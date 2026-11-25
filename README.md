@@ -217,7 +217,7 @@ Page methods, endpoints, custom templates and troubleshooting: [docs/developers.
        type: seo-preview
    ```
 
-   A preview left under `sections` keeps working for now, but the `fields` form is the one to use.
+   A preview left under `sections` keeps working for now, but the `fields` form is the one to use. Kirby 6 puts sections and fields in one namespace, so such a section becomes the field `metaKitSection<Name>` (`seoPreview` becomes `metaKitSectionSeoPreview`) and cannot clash with a content field of the same name. When you move it to `fields`, give it a name no other field uses.
 3. Settings, content and config options are unchanged.
 
 ## License
