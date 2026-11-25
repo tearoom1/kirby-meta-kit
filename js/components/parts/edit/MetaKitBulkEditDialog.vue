@@ -126,7 +126,7 @@
         </div>
         <div class="k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-end">
           <k-button @click="close">{{ $t('meta-kit.close') }}</k-button>
-          <k-button v-if="hasAnyChanges" icon="check" theme="positive" @click="saveAll">{{ $t('meta-kit.bulkEdit.apply') }}</k-button>
+          <k-button v-if="hasAnyChanges" :disabled="isSaving" icon="check" theme="positive" @click="saveAll">{{ $t('meta-kit.bulkEdit.apply') }}</k-button>
         </div>
       </div>
     </div>
@@ -139,11 +139,12 @@
 </template>
 
 <script>
-// Opened with openDialog(panel, 'bulk-edit', { pageIds, … }, { saved })
+// Opened with openEditDialog(panel, 'bulk-edit', { pageIds, … }, onSaved)
 import MetaKitTitleField from '../field/MetaKitTitleField.vue';
 import MetaKitDescriptionField from '../field/MetaKitDescriptionField.vue';
 import { hasAnyBulkChanges } from '../../../composables/panelState.js';
 import { applySingleFieldUpdate } from '../../../composables/saveFields.js';
+import { runExclusiveSave } from '../../../composables/dialogs.js';
 
 export default {
   components: {
@@ -170,11 +171,17 @@ export default {
     visible: {
       type: Boolean,
       default: false
+    },
+    // Called after a save; a prop instead of an emit, so it still runs
+    // when the dialog was closed (and unmounted) while saving
+    onSaved: {
+      type: Function,
+      default: () => {}
     }
   },
   // The Panel's own dialog listeners (submit, input …) must not reach <k-dialog>
   inheritAttrs: false,
-  emits: ['cancel', 'close', 'saved'],
+  emits: ['cancel', 'close'],
   data() {
     return {
       pages: [],
@@ -186,7 +193,8 @@ export default {
         type: '',
         text: ''
       },
-      saveFeedbackTimer: null
+      saveFeedbackTimer: null,
+      isSaving: false
     };
   },
   computed: {
@@ -282,7 +290,12 @@ export default {
       }
     },
 
-    async saveAll() {
+    // Enter, the save button and Cmd+S can submit at the same time
+    saveAll() {
+      return runExclusiveSave(this, () => this.saveChanges());
+    },
+
+    async saveChanges() {
       if (!this.hasAnyChanges) return;
 
       let totalSaved = 0;
@@ -343,7 +356,7 @@ export default {
         });
 
         this.setSaveFeedback('success', this.$t('meta-kit.bulkEdit.saved', { count: totalSaved, pages: this.pages.length }));
-        this.$emit('saved', {
+        this.onSaved({
           pages: this.pages,
           siteSettings: latestSiteSettings
         });

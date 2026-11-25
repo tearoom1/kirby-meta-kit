@@ -120,7 +120,7 @@
         </div>
         <div class="k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-end">
           <k-button @click="close">{{ $t('meta-kit.close') }}</k-button>
-          <k-button v-if="hasChanges" icon="check" theme="positive" @click="save">
+          <k-button v-if="hasChanges" :disabled="isSaving" icon="check" theme="positive" @click="save">
             {{ $t('meta-kit.saveFields', { count: changedFieldCount }) }}
           </k-button>
         </div>
@@ -130,10 +130,11 @@
 </template>
 
 <script>
-// Opened with openDialog(panel, 'single-page', { pageId, … }, { saved })
+// Opened with openEditDialog(panel, 'single-page', { pageId, … }, onSaved)
 import MetaKitTitleField from '../field/MetaKitTitleField.vue';
 import MetaKitDescriptionField from '../field/MetaKitDescriptionField.vue';
 import { applySingleFieldUpdate } from '../../../composables/saveFields.js';
+import { runExclusiveSave } from '../../../composables/dialogs.js';
 
 export default {
   components: {
@@ -160,11 +161,17 @@ export default {
     visible: {
       type: Boolean,
       default: false
+    },
+    // Called after a save; a prop instead of an emit, so it still runs
+    // when the dialog was closed (and unmounted) while saving
+    onSaved: {
+      type: Function,
+      default: () => {}
     }
   },
   // The Panel's own dialog listeners (submit, input …) must not reach <k-dialog>
   inheritAttrs: false,
-  emits: ['cancel', 'close', 'saved'],
+  emits: ['cancel', 'close'],
   data() {
     return {
       page: null,
@@ -185,7 +192,8 @@ export default {
         type: '',
         text: ''
       },
-      saveFeedbackTimer: null
+      saveFeedbackTimer: null,
+      isSaving: false
     };
   },
   computed: {
@@ -271,7 +279,12 @@ export default {
       }
     },
 
-    async save() {
+    // Enter, the save button and Cmd+S can submit at the same time
+    save() {
+      return runExclusiveSave(this, () => this.saveChanges());
+    },
+
+    async saveChanges() {
       if (!this.page || !this.hasChanges) return;
 
       const changedFields = this.changedFields.map(name => ({
@@ -318,7 +331,7 @@ export default {
           this.editedFields.ogDescription = this.page.ogDescription || '';
         }
 
-        this.$emit('saved', {
+        this.onSaved({
           page: latestPage,
           siteSettings: latestSiteSettings
         });

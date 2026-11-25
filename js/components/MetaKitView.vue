@@ -160,7 +160,7 @@ import MetaKitTable from './parts/table/MetaKitTable.vue';
 import MetaKitSelectionBar from './parts/table/MetaKitSelectionBar.vue';
 
 // Dialogs are global components, opened through the Panel's dialog state
-import { openDialog } from '../composables/dialogs.js';
+import { openDialog, openEditDialog as openEditDialogInPanel } from '../composables/dialogs.js';
 import {
   GENERATION_FIELDS,
   planGeneration,
@@ -557,16 +557,15 @@ export default {
       });
     },
 
-    // Props shared by the edit dialogs; `saved` keeps the table up to date
+    // Props shared by the edit dialogs; `onSaved` keeps the table up to date,
+    // also when the dialog was closed while the save was still running
     openEditDialog(name, props) {
-      openDialog(this.$panel, name, {
+      openEditDialogInPanel(this.$panel, name, {
         ...props,
         validationSettings: this.validationSettingsData,
         siteSettings: this.siteSettingsData,
         aiEnabled: this.aiEnabled
-      }, {
-        saved: (payload) => this.handleSavedUpdates(payload)
-      });
+      }, (payload) => this.handleSavedUpdates(payload));
     },
 
     async performBulkGeneration(options) {
