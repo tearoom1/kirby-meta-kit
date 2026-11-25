@@ -2,6 +2,8 @@
 
 An SEO workflow plugin for Kirby CMS: one Panel area for all metadata, validation that shows what to fix, AI generation that follows your rules, previews, sitemap, robots.txt and structured data.
 
+This is the Kirby 5 line (bug fixes only). For Kirby 6, use version 5 (branch `main`).
+
 [![Screenshot](screenshot.jpg)](https://github.com/tearoom1/kirby-meta-kit)
 
 ## What you get
@@ -187,8 +189,12 @@ Page methods, endpoints, custom templates and troubleshooting: [docs/developers.
 
 ## Requirements
 
+| Kirby | Plugin version | Branch |
+|---|---|---|
+| 6 | 5.x (since 5.0.0) | `main` |
+| 5 | 4.x (bug fixes only, latest 4.0.5) | `kirby-5` |
+
 - **PHP**: 8.1 or higher
-- **Kirby**: 5.0+
 - **Composer**: For dependency management
 - **AI Provider API Key**: Optional, only needed for AI features (OpenRouter has a free tier)
 
