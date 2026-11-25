@@ -1,3 +1,10 @@
+## [4.0.4](https://github.com/tearoom1/kirby-meta-kit/compare/v4.0.3...v4.0.4) (2026-11-22)
+
+
+### Bug Fixes
+
+* accept flat and nested notation for every option ([392afbc](https://github.com/tearoom1/kirby-meta-kit/commit/392afbc778089613b7a11132180e21e7e7d01bd9))
+
 ## [4.0.3](https://github.com/tearoom1/kirby-meta-kit/compare/v4.0.2...v4.0.3) (2026-11-18)
 
 
@@ -42,11 +49,4 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 
 * maintain site settings once for all languages ([5dbd844](https://github.com/tearoom1/kirby-meta-kit/commit/5dbd84464ccc1e8c3d2e24a55b546e0b13bba9c8))
 * OG description ranges from the platforms, site name on meta titles only ([0349707](https://github.com/tearoom1/kirby-meta-kit/commit/0349707bf9a50c296c3ced4834639f96a716bc93))
-
-## [3.7.1](https://github.com/tearoom1/kirby-meta-kit/compare/v3.7.0...v3.7.1) (2026-11-03)
-
-
-### Bug Fixes
-
-* cache site settings per language ([c7a2c77](https://github.com/tearoom1/kirby-meta-kit/commit/c7a2c77abe91b0271f8765025fd5ce8b5aaa90bf))
 
