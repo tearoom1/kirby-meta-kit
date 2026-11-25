@@ -1,6 +1,12 @@
 <?php
 
+use Kirby\Blueprint\Normalizer;
 use Kirby\Cms\App;
+use TearoomOne\Fields\DescriptionField;
+use TearoomOne\Fields\PreviewField;
+use TearoomOne\Fields\ReviewField;
+use TearoomOne\Fields\SlugInfoField;
+use TearoomOne\Fields\TitleField;
 
 if (!option('tearoom1.meta-kit.enabled', true)) {
     return;
@@ -22,9 +28,22 @@ $classes = [
     'TearoomOne\PageDataBuilder' => 'classes/PageDataBuilder.php',
     'TearoomOne\ApiResponse' => 'classes/ApiResponse.php',
     'TearoomOne\SeoReview' => 'classes/SeoReview.php',
+    'TearoomOne\Fields\FieldContext' => 'classes/Fields/FieldContext.php',
+    'TearoomOne\Fields\TitleField' => 'classes/Fields/TitleField.php',
+    'TearoomOne\Fields\DescriptionField' => 'classes/Fields/DescriptionField.php',
+    'TearoomOne\Fields\SlugInfoField' => 'classes/Fields/SlugInfoField.php',
+    'TearoomOne\Fields\ReviewField' => 'classes/Fields/ReviewField.php',
+    'TearoomOne\Fields\PreviewField' => 'classes/Fields/PreviewField.php',
 ];
 
 load($classes, __DIR__);
+
+// Blueprints of Meta Kit 4 placed the preview in a `sections` list. Kirby 6
+// only converts its own section types into fields, so the preview is mapped
+// onto its field here. Kirby marks this map as unstable, hence the check.
+if (property_exists(Normalizer::class, 'sectionFields') === true) {
+    Normalizer::$sectionFields['seo-preview'] ??= 'seo-preview';
+}
 
 
 App::plugin(
@@ -74,14 +93,12 @@ App::plugin(
             'blocks/mk-sitemap' => __DIR__ . '/blueprints/blocks/mk-sitemap.yml',
             'blocks/mk-robots' => __DIR__ . '/blueprints/blocks/mk-robots.yml',
         ],
-        'sections' => [
-            'seo-preview' => __DIR__ . '/sections/preview.php',
-        ],
         'fields' => [
-            'mk-title' => __DIR__ . '/fields/mk-title/index.php',
-            'mk-description' => __DIR__ . '/fields/mk-description/index.php',
-            'mk-slug-info' => __DIR__ . '/fields/mk-slug-info/index.php',
-            'mk-review' => __DIR__ . '/fields/mk-review/index.php',
+            'mk-title' => TitleField::class,
+            'mk-description' => DescriptionField::class,
+            'mk-slug-info' => SlugInfoField::class,
+            'mk-review' => ReviewField::class,
+            'seo-preview' => PreviewField::class,
         ],
         'snippets' => [
             'meta-kit/seo' => __DIR__ . '/snippets/seo.php',

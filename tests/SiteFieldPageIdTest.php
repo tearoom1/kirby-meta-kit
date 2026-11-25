@@ -2,7 +2,8 @@
 
 namespace TearoomOne\Tests;
 
-use Kirby\Form\Field;
+use TearoomOne\Fields\DescriptionField;
+use TearoomOne\Fields\TitleField;
 
 /**
  * The generate button of the site-level mk-title/mk-description fields
@@ -12,23 +13,21 @@ class SiteFieldPageIdTest extends KirbyTestCase
 {
     public static function fieldTypes(): array
     {
-        return [['mk-title'], ['mk-description']];
+        return [['mk-title', TitleField::class], ['mk-description', DescriptionField::class]];
     }
 
     /**
      * @dataProvider fieldTypes
      */
-    public function testSiteFieldSendsSiteAsPageId(string $type): void
+    public function testSiteFieldSendsSiteAsPageId(string $type, string $class): void
     {
         $kirby = $this->makeKirby([
             'site.txt' => 'Title: Test Site',
             'about/default.txt' => 'Title: About',
         ]);
 
-        Field::$types[$type] = require dirname(__DIR__) . '/fields/' . $type . '/index.php';
-
-        $siteField = new Field($type, ['name' => 'metaTitle', 'model' => $kirby->site()]);
-        $pageField = new Field($type, ['name' => 'metaTitle', 'model' => $kirby->page('about')]);
+        $siteField = new $class(model: $kirby->site(), name: 'metaTitle');
+        $pageField = new $class(model: $kirby->page('about'), name: 'metaTitle');
 
         $this->assertSame('site', $siteField->toArray()['validationSettings']['pageId']);
         $this->assertSame('about', $pageField->toArray()['validationSettings']['pageId']);

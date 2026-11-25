@@ -40,7 +40,8 @@ class SharedSiteSettingsTest extends KirbyTestCase
             'Schemaname' => 'Schema DE',
             'Metakitsocialsites' => Yaml::encode([['platform' => 'instagram', 'url' => 'https://example.com/de']]),
             'Metakitsitemap' => $this->makeBlocksJson('mk-sitemap', ['priorityhome' => 0.5], 'sitemap-settings'),
-            'Metakitopenrouter' => $this->makeBlocksJson('mk-openrouter', ['model' => 'de/model'], 'openrouter-settings'),
+            // Options of the select field: Kirby 6 validates blocks on publish
+            'Metakitopenrouter' => $this->makeBlocksJson('mk-openrouter', ['model' => 'openai/gpt-5'], 'openrouter-settings'),
             'Metakitrobots' => $this->makeBlocksJson('mk-robots', [
                 'enabled' => true,
                 'customdirectives' => '# from DE',
@@ -62,7 +63,7 @@ class SharedSiteSettingsTest extends KirbyTestCase
             'Schemaname' => 'Schema EN',
             'Metakitsocialsites' => Yaml::encode([['platform' => 'instagram', 'url' => 'https://example.com/en']]),
             'Metakitsitemap' => $this->makeBlocksJson('mk-sitemap', ['priorityhome' => 0.1], 'sitemap-settings'),
-            'Metakitopenrouter' => $this->makeBlocksJson('mk-openrouter', ['model' => 'en/model'], 'openrouter-settings'),
+            'Metakitopenrouter' => $this->makeBlocksJson('mk-openrouter', ['model' => 'openai/gpt-4o'], 'openrouter-settings'),
             'Metakitrobots' => $this->makeBlocksJson('mk-robots', [
                 'enabled' => true,
                 'customdirectives' => '# from EN',
@@ -133,7 +134,7 @@ class SharedSiteSettingsTest extends KirbyTestCase
 
         // Settings blocks
         $this->assertEquals(0.5, ConfigHelper::getSitemapSettings()['sitemap.priorityHome']);
-        $this->assertSame('de/model', ConfigHelper::getAiSettings()['api.model']);
+        $this->assertSame('openai/gpt-5', ConfigHelper::getAiSettings()['api.model']);
         $this->assertTrue(LlmsTxt::isEnabled());
         $robotsTxt = (new Robots($kirby))->generate();
         $this->assertStringContainsString('# from DE', $robotsTxt);
@@ -302,7 +303,7 @@ class SharedSiteSettingsTest extends KirbyTestCase
         $settings = ConfigHelper::getSiteSettings();
         $this->assertSame('–', $settings['titleSeparator']);
         $this->assertSame('Meta DE', $settings['siteMetaTitle']);
-        $this->assertSame('de/model', ConfigHelper::getAiSettings()['api.model']);
+        $this->assertSame('openai/gpt-5', ConfigHelper::getAiSettings()['api.model']);
 
         $kirby->impersonate('kirby', fn () => $kirby->site()->update(['metaDescription' => 'Beschreibung']));
         $this->assertSame('–', $this->rawFields($kirby, 'site.txt')['titleseparator']);

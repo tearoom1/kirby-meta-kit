@@ -46,9 +46,9 @@ class TextsTest extends KirbyTestCase
         $kirby = $this->germanPanel();
         $blueprint = \Kirby\Data\Yaml::read(dirname(__DIR__) . '/blueprints/fields/meta-group.yml');
 
-        $field = new \Kirby\Form\Field('select', [
-            'name' => 'robots',
+        $field = new \Kirby\Form\Field\SelectField(...[
             'model' => $kirby->page('about'),
+            'name' => 'robots',
             ...array_intersect_key($blueprint['fields']['robots'], ['label' => 1, 'options' => 1]),
         ]);
         $options = $field->toArray()['options'];
@@ -57,16 +57,14 @@ class TextsTest extends KirbyTestCase
         $this->assertSame('Indexieren, Links folgen', $options[0]['text']);
     }
 
-    public function testCustomFieldAndSectionLabelsAreTranslated(): void
+    public function testCustomFieldLabelsAreTranslated(): void
     {
         $kirby = $this->germanPanel();
 
-        \Kirby\Form\Field::$types['mk-review'] = require dirname(__DIR__) . '/fields/mk-review/index.php';
-        $review = new \Kirby\Form\Field('mk-review', ['name' => 'review', 'model' => $kirby->page('about')]);
+        $review = new \TearoomOne\Fields\ReviewField(model: $kirby->page('about'), name: 'review');
         $this->assertSame('KI-Inhaltsprüfung', $review->toArray()['label']);
 
-        \Kirby\Cms\Section::$types['seo-preview'] = require dirname(__DIR__) . '/sections/preview.php';
-        $section = new \Kirby\Cms\Section('seo-preview', ['name' => 'preview', 'model' => $kirby->page('about')]);
-        $this->assertSame('SEO-Vorschau', $section->label());
+        $preview = new \TearoomOne\Fields\PreviewField(model: $kirby->page('about'), name: 'preview');
+        $this->assertSame('SEO-Vorschau', $preview->toArray()['label']);
     }
 }

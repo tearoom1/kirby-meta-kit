@@ -20,6 +20,7 @@ class ContentExtractionTest extends KirbyTestCase
             'pages/article' => ['fields' => [
                 'intro' => ['type' => 'textarea'],
                 'website' => ['type' => 'url'],
+                'related' => ['type' => 'pages'],
             ]],
             // Like a home page that only lists other pages
             'pages/listing' => ['sections' => [
@@ -50,6 +51,21 @@ class ContentExtractionTest extends KirbyTestCase
         $this->assertStringContainsString('paragraph about tea', $content);
         $this->assertStringNotContainsString('retreat', $content);
         $this->assertStringNotContainsString('example.com', $content);
+    }
+
+    /**
+     * Kirby 6 reports `pages` fields as `pagepicker`; their page ids are no text
+     */
+    public function testPickerFieldsAreNotPageText(): void
+    {
+        $kirby = $this->makeKirby([
+            'post/article.txt' => "Title: Post\n----\nIntro: " . self::TEXT . "\n----\nRelated: - page://abcdefghijklmnop\n",
+        ], extraConfig: $this->blueprints());
+
+        $content = $this->extract($kirby->page('post'));
+
+        $this->assertStringContainsString('paragraph about tea', $content);
+        $this->assertStringNotContainsString('page://', $content);
     }
 
     public function testPagesWithoutOwnBlueprintStillUseAllFields(): void

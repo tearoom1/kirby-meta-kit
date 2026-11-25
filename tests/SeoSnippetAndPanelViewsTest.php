@@ -240,7 +240,7 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         $this->assertSame('meta-kit', $area['link']);
     }
 
-    public function testSeoPreviewSectionComputedMetaUsesHelperOutput(): void
+    public function testSeoPreviewFieldMetaUsesHelperOutput(): void
     {
         $kirby = $this->makeKirby([
             'site.txt' => "Title: Site Title\n----\nMetatitle: Site Meta\n----\nMetadescription: Site Description\n----\nAppendsitename: true\n----\nAppendsitenameto: meta,og\n----\nTitleseparator: |\n",
@@ -248,23 +248,8 @@ class SeoSnippetAndPanelViewsTest extends KirbyTestCase
         ]);
 
         $this->resetPluginCaches();
-        $sectionConfig = require __DIR__ . '/../sections/preview.php';
-        $computeMeta = $sectionConfig['computed']['meta'];
         $page = $kirby->page('article');
-
-        $fakeSection = new class($page)
-        {
-            public function __construct(private $model)
-            {
-            }
-
-            public function model()
-            {
-                return $this->model;
-            }
-        };
-
-        $meta = $computeMeta->call($fakeSection);
+        $meta = (new \TearoomOne\Fields\PreviewField(model: $page, name: 'preview'))->meta();
 
         $this->assertSame($page->url(), $meta['url']);
         $this->assertSame('Fish & Chips | Site Meta', $meta['title']);

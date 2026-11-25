@@ -13,7 +13,7 @@ columns:
   preview:
     width: 1/3
     sticky: true
-    sections:
+    fields:
       seoPreview:
         type: seo-preview
         label: meta-kit.bp.page.preview.seoPreview.label

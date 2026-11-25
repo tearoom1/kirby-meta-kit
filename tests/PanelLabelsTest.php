@@ -3,7 +3,7 @@
 namespace TearoomOne\Tests;
 
 use Kirby\Data\Yaml;
-use Kirby\Form\Field;
+use Kirby\Form\Field\TextField;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 
 /**
@@ -35,11 +35,11 @@ class PanelLabelsTest extends KirbyTestCase
     {
         $blueprint = Yaml::read(dirname(__DIR__) . '/blueprints/fields/meta-group.yml');
 
-        $field = new Field('text', [
-            'name' => $name,
-            'model' => $kirby->page('about'),
-            'label' => $blueprint['fields'][$name]['label'],
-        ]);
+        $field = new TextField(
+            model: $kirby->page('about'),
+            name: $name,
+            label: $blueprint['fields'][$name]['label'],
+        );
 
         return $field->toArray()['label'];
     }

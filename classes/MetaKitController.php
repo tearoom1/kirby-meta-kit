@@ -449,7 +449,11 @@ class MetaKitController
         'hidden', 'info', 'line', 'link', 'multiselect', 'number', 'pages',
         'radio', 'range', 'select', 'slug', 'tel', 'time', 'toggle', 'toggles',
         'url', 'users',
-        'mk-title', 'mk-description', 'mk-review', 'mk-slug-info',
+        // Kirby 6 names: `files`, `pages` and `users` are aliases of the
+        // pickers, and former sections are fields of their own
+        'buttons', 'filelist', 'filepicker', 'pagelist', 'pagepicker',
+        'password', 'stats', 'userpicker',
+        'mk-title', 'mk-description', 'mk-review', 'mk-slug-info', 'seo-preview',
     ];
 
     /**
@@ -457,14 +461,14 @@ class MetaKitController
      * in the page's blueprint count, so leftovers from an earlier blueprint
      * that are still in the content file are ignored. Pages without a
      * blueprint of their own use all their fields: Kirby then falls back to
-     * its core default, which has neither fields nor sections.
+     * its core default, which has no fields. Kirby 6 turns sections into
+     * fields, so a blueprint with only a pages section still has fields.
      */
     private static function textFieldKeys($page): array
     {
-        $blueprint = $page->blueprint();
-        $fields = $blueprint->fields();
+        $fields = $page->blueprint()->fields();
 
-        if ($fields === [] && $blueprint->sections() === []) {
+        if ($fields === []) {
             return array_keys($page->content()->fields());
         }
 
