@@ -148,7 +148,7 @@
   "meta-kit.bp.site.label": "SEO & Sitemap",
   "meta-kit.bp.site.openrouter.label": "AI Settings",
   "meta-kit.bp.site.openrouter.metaKitOpenrouter.label": "AI Provider",
-  "meta-kit.bp.site.otherSettings.otherSettings.text": "The following settings are language independent. Please set the in the default language. You can also set them in the options (e.g. config.php).",
+  "meta-kit.bp.site.otherSettings.otherSettings.text": "The following settings are language independent. Please set them in the default language. You can also set them in the options (e.g. config.php).",
   "meta-kit.bp.site.redirects.metaKitRedirects.created.label": "Created",
   "meta-kit.bp.site.redirects.metaKitRedirects.from.label": "Old path",
   "meta-kit.bp.site.redirects.metaKitRedirects.help": "Added automatically when a page gets a new URL (new slug or moved). Old URLs, including those of subpages, redirect with 301 to the page's current URL. Delete an entry to stop redirecting.",
