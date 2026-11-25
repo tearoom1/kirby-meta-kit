@@ -34,11 +34,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v7
         with:
           node-version: 22
       - name: Run JavaScript tests
-        run: npm run test:js
+        run: pnpm run test:js
 
   changelog:
     needs:

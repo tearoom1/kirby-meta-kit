@@ -4,10 +4,10 @@
   "type": "module",
   "description": "AI-powered SEO plugin for Kirby with meta descriptions, previews, and Schema.org",
   "scripts": {
-    "dev": "npx -y kirbyup js/index.js --watch",
-    "build": "npx -y kirbyup js/index.js",
+    "dev": "kirbyup js/index.js --watch",
+    "build": "kirbyup js/index.js",
     "test:js": "node --test tests-js/*.test.js",
-    "test:all": "composer test && npm run test:js"
+    "test:all": "composer test && pnpm run test:js"
   },
   "keywords": [
     "kirby",
@@ -16,5 +16,9 @@
     "opengraph"
   ],
   "author": "TearoomOne",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "kirbyup": "4.0.0"
+  },
+  "packageManager": "pnpm@10.32.1"
 }
