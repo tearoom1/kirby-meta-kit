@@ -189,8 +189,12 @@ Page methods, endpoints, custom templates and troubleshooting: [docs/developers.
 
 ## Requirements
 
+| Kirby | Plugin version | Branch |
+|---|---|---|
+| 6 | 5.x (since 5.0.0) | `main` |
+| 5 | 4.x (bug fixes only, latest 4.0.5) | `kirby-5` |
+
 - **PHP**: 8.3 or higher
-- **Kirby**: 6 (Meta Kit 4 is the version for Kirby 5)
 - **Composer**: For dependency management
 - **AI Provider API Key**: Optional, only needed for AI features (OpenRouter has a free tier)
 
