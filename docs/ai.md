@@ -177,18 +177,15 @@ Add the `mk-review` field anywhere in your page blueprint. It renders as a singl
 tabs:
   seo:
     label: SEO
-    sections:
-      seo:
-        type: fields
-        fields:
-          review:
-            type: mk-review
-          metaTitle:
-            type: mk-title
-            # ...
+    fields:
+      review:
+        type: mk-review
+      metaTitle:
+        type: mk-title
+        # ...
 ```
 
-A good place is directly above the `seo-preview` section so the button appears right before the live preview. The button is automatically hidden when AI is not configured or `review.enabled` is `false`.
+A good place is directly above the `seo-preview` field so the button appears right before the live preview. The button is automatically hidden when AI is not configured or `review.enabled` is `false`.
 
 ## Disabling AI
 

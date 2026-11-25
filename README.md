@@ -12,7 +12,7 @@ An SEO workflow plugin for Kirby CMS: one Panel area for all metadata, validatio
 - **Previews.** Google, Facebook and Twitter cards in the page editor.
 - **Everything in the head.** One snippet outputs meta tags, canonical, robots, Open Graph, Twitter Cards, hreflang and Schema.org JSON-LD.
 - **Sitemap and robots.txt.** A styled multilingual sitemap with priorities, a dynamic robots.txt with bad bot and AI crawler blocking, redirects after slug changes, llms.txt.
-- **Multilingual and Kirby 5.** Works with language fallbacks and inherited values, Panel in English and German, dark mode.
+- **Multilingual and Kirby 6.** Works with language fallbacks and inherited values, Panel in English and German, dark mode.
 
 ## Installation
 
@@ -21,6 +21,8 @@ An SEO workflow plugin for Kirby CMS: one Panel area for all metadata, validatio
 ```bash
 composer require tearoom1/kirby-meta-kit
 ```
+
+Meta Kit 5 needs Kirby 6. On a Kirby 5 site Composer keeps Meta Kit 4, which still gets bug fixes.
 
 ### Manual Installation
 
@@ -187,10 +189,30 @@ Page methods, endpoints, custom templates and troubleshooting: [docs/developers.
 
 ## Requirements
 
-- **PHP**: 8.1 or higher
-- **Kirby**: 5.0+
+- **PHP**: 8.3 or higher
+- **Kirby**: 6 (Meta Kit 4 is the version for Kirby 5)
 - **Composer**: For dependency management
 - **AI Provider API Key**: Optional, only needed for AI features (OpenRouter has a free tier)
+
+## Upgrading from Meta Kit 4 (Kirby 5)
+
+1. Update Kirby to version 6 first, then run `composer update tearoom1/kirby-meta-kit`.
+2. The SEO preview is a field now. Blueprints that extend `meta-kit/page` need no change. In own blueprints, move it from `sections` to `fields`; the type stays `seo-preview`:
+
+   ```yaml
+   # Meta Kit 4
+   sections:
+     seoPreview:
+       type: seo-preview
+
+   # Meta Kit 5
+   fields:
+     seoPreview:
+       type: seo-preview
+   ```
+
+   A preview left under `sections` keeps working for now, but the `fields` form is the one to use.
+3. Settings, content and config options are unchanged.
 
 ## License
 
