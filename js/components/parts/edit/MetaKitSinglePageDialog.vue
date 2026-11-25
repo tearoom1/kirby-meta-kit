@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" size="large" class="k-mk2-dialog k-meta-kit-dialog" :cancel-button="false"  :submit-button="false" @submit.prevent="save">
+  <k-dialog :visible="visible" size="large" class="k-mk2-dialog k-meta-kit-dialog" :cancel-button="false" :submit-button="false" @submit="save">
     <k-headline v-if="page">{{ $t('meta-kit.edit.title', { page: page.title }) }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -130,6 +130,7 @@
 </template>
 
 <script>
+// Opened with openDialog(panel, 'single-page', { pageId, … }, { saved })
 import MetaKitTitleField from '../field/MetaKitTitleField.vue';
 import MetaKitDescriptionField from '../field/MetaKitDescriptionField.vue';
 import { applySingleFieldUpdate } from '../../../composables/saveFields.js';
@@ -140,13 +141,13 @@ export default {
     MetaKitDescriptionField
   },
   props: {
+    pageId: {
+      type: String,
+      required: true
+    },
     validationSettings: {
       type: Object,
       default: () => ({})
-    },
-    api: {
-      type: Object,
-      required: true
     },
     siteSettings: {
       type: Object,
@@ -155,8 +156,15 @@ export default {
     aiEnabled: {
       type: Boolean,
       default: true
+    },
+    visible: {
+      type: Boolean,
+      default: false
     }
   },
+  // The Panel's own dialog listeners (submit, input …) must not reach <k-dialog>
+  inheritAttrs: false,
+  emits: ['cancel', 'close', 'saved'],
   data() {
     return {
       page: null,
@@ -196,15 +204,15 @@ export default {
       return this.page?.id === 'site';
     }
   },
+  created() {
+    this.load();
+  },
   methods: {
-    async open(pageId) {
+    async load() {
       this.isLoading = true;
-      this.resetSaveFeedback();
-      this.$refs.dialog.open();
-      document.addEventListener('keydown', this.handleKeydown);
 
       try {
-        const response = await this.api.get('meta-kit/single-page', { pageId });
+        const response = await this.$api.get('meta-kit/single-page', { pageId: this.pageId });
         if (response.status === 'success') {
           this.page = response.data;
           this.editedFields.metaTitle = this.page.metaTitle || '';
@@ -220,11 +228,7 @@ export default {
     },
 
     close() {
-      document.removeEventListener('keydown', this.handleKeydown);
-      this.resetSaveFeedback();
-      // Kirby 5: the dialog lives in the panel-wide dialog state; k-dialog.close() only emits
       this.$panel.dialog.close();
-      this.page = null;
     },
 
     resetSaveFeedback() {
@@ -245,24 +249,12 @@ export default {
       }, 3200);
     },
 
-    handleKeydown(event) {
-      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 's') {
-        return;
-      }
-
-      event.preventDefault();
-
-      if (this.page && this.hasChanges) {
-        this.save();
-      }
-    },
-
     async generate(fieldName) {
       if (!this.page) return;
 
       this.generating[fieldName] = true;
       try {
-        const response = await this.api.post('meta-kit/generate-field', {
+        const response = await this.$api.post('meta-kit/generate-field', {
           pageId: this.page.id,
           fieldName
         });
@@ -291,7 +283,7 @@ export default {
 
       for (const field of changedFields) {
         try {
-          const response = await applySingleFieldUpdate(this.api, {
+          const response = await applySingleFieldUpdate(this.$api, {
             pageId: this.page.id,
             fieldName: field.name,
             value: field.value
@@ -333,8 +325,8 @@ export default {
       }
     },
   },
-  beforeDestroy() {
-    document.removeEventListener('keydown', this.handleKeydown);
+  // Cmd+S submits the dialog's form, which calls save()
+  beforeUnmount() {
     this.resetSaveFeedback();
   }
 };

@@ -54,6 +54,7 @@
 const INFO_CARDS = ['noindex'];
 
 export default {
+  emits: ['select-area'],
   props: {
     cards: { type: Array, required: true },
     totalCount: { type: Number, required: true },

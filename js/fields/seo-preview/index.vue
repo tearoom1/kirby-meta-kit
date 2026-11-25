@@ -1,18 +1,22 @@
 <template>
-  <section class="k-seo-preview-section">
-    <header class="k-section-header">
-      <h2 class="k-headline">{{ headline || $t('meta-kit.preview.title') }}</h2>
-    </header>
+  <k-field
+    :label="headline || label || $t('meta-kit.preview.title')"
+    :help="help"
+    :name="name"
+    :input="false"
+    type="seo-preview"
+    class="k-seo-preview-section"
+  >
 
-    <div v-if="meta" class="k-seo-previews">
+    <div v-if="preview" class="k-seo-previews">
       <!-- Google Preview -->
       <div class="k-seo-preview k-seo-preview--google">
         <h3 class="k-seo-preview__title">{{ $t('meta-kit.preview.google') }}</h3>
         <div class="k-seo-preview__content">
           <div class="k-google-preview">
-            <cite class="k-google-preview__url">{{ displayUrl(meta.url) }}</cite>
-            <h3 class="k-google-preview__title">{{ meta.title || $t('meta-kit.preview.pageTitle') }}</h3>
-            <p class="k-google-preview__description">{{ meta.description || $t('meta-kit.preview.noDescription') }}</p>
+            <cite class="k-google-preview__url">{{ displayUrl(preview.url) }}</cite>
+            <h3 class="k-google-preview__title">{{ preview.title || $t('meta-kit.preview.pageTitle') }}</h3>
+            <p class="k-google-preview__description">{{ preview.description || $t('meta-kit.preview.noDescription') }}</p>
           </div>
         </div>
       </div>
@@ -22,11 +26,11 @@
         <h3 class="k-seo-preview__title">{{ $t('meta-kit.preview.share') }}</h3>
         <div class="k-seo-preview__content">
           <div class="k-twitter-preview">
-            <div v-if="meta.ogImage" class="k-twitter-preview__image" :style="{ backgroundImage: 'url(' + meta.ogImage + ')' }"></div>
+            <div v-if="preview.ogImage" class="k-twitter-preview__image" :style="{ backgroundImage: 'url(' + preview.ogImage + ')' }"></div>
             <div class="k-twitter-preview__body">
-              <cite class="k-twitter-preview__url">{{ displayUrl(meta.url) }}</cite>
-              <h4 class="k-twitter-preview__title">{{ meta.ogTitle || meta.title || $t('meta-kit.preview.pageTitle') }}</h4>
-              <p class="k-twitter-preview__description">{{ truncate(meta.ogDescription || meta.description, 140) || $t('meta-kit.preview.noDescription') }}</p>
+              <cite class="k-twitter-preview__url">{{ displayUrl(preview.url) }}</cite>
+              <h4 class="k-twitter-preview__title">{{ preview.ogTitle || preview.title || $t('meta-kit.preview.pageTitle') }}</h4>
+              <p class="k-twitter-preview__description">{{ truncate(preview.ogDescription || preview.description, 140) || $t('meta-kit.preview.noDescription') }}</p>
             </div>
           </div>
         </div>
@@ -36,35 +40,43 @@
     <div v-else class="k-seo-preview-loading">
       {{ $t('meta-kit.preview.loading') }}
     </div>
-  </section>
+  </k-field>
 </template>
 
 <script>
+// The SEO preview field (a section up to Meta Kit 4): starts with the
+// preview the server built and follows the inputs of the SEO fields
 export default {
+  inheritAttrs: false,
   props: {
     label: String,
-    parent: String,
-    name: String
+    help: String,
+    name: String,
+    // Field routes, e.g. `pages/blog+post/fields/seopreview`
+    endpoints: {
+      type: Object,
+      default: () => ({})
+    },
+    // Preview built by the server, including unsaved changes
+    meta: {
+      type: Object,
+      default: null
+    }
   },
   computed: {
     currentLanguage() {
-      return (
-        this.$language?.code ||
-        window.panel?.view?.props?.language ||
-        window.panel?.language?.code ||
-        null
-      );
+      return this.$panel?.language?.code || null;
     }
   },
   watch: {
-    parent() {
+    'endpoints.field'() {
       this.handleContextChange();
     },
-    name() {
-      this.handleContextChange();
-    },
-    '$route.fullPath'() {
-      this.handleContextChange();
+    // A reloaded view sends a new server preview
+    meta(newMeta) {
+      if (!newMeta) return;
+      this.preview = newMeta;
+      this.extractSiteInfo();
     },
     currentLanguage(newLang, oldLang) {
       if (!newLang || newLang === oldLang) return;
@@ -74,7 +86,7 @@ export default {
   data() {
     return {
       headline: null,
-      meta: null,
+      preview: this.meta,
       siteName: null,
       separator: '|',
       siteOgImage: null,
@@ -87,7 +99,11 @@ export default {
     }
   },
   async mounted() {
-    await this.load();
+    if (this.preview) {
+      this.extractSiteInfo();
+    } else {
+      await this.load();
+    }
 
     // Listen for custom SEO field updates from AI generator
     document.addEventListener('seo-field-updated', this.handleSeoFieldUpdate, true);
@@ -113,7 +129,7 @@ export default {
       }, 1000);
     });
   },
-  beforeDestroy() {
+  beforeUnmount() {
     // Clean up event listeners
     document.removeEventListener('seo-field-updated', this.handleSeoFieldUpdate, true);
     document.removeEventListener('meta-kit-field-change', this.handleMetaKitFieldChange, true);
@@ -144,7 +160,7 @@ export default {
       this.contextChangeTimeout = setTimeout(async () => {
       // Language switching in the Panel typically triggers a route change.
       // The section component can stay mounted, so we explicitly refetch.
-      this.meta = null;
+      this.preview = null;
       this.siteName = null;
       this.separator = '|';
       this.siteOgImage = null;
@@ -337,7 +353,7 @@ export default {
         seoData.ogdescription
       ].every(v => !v || !String(v).trim());
       const isPlaceholderTitle = !pageTitleValue;
-      if (allEmpty && isPlaceholderTitle && this.meta) {
+      if (allEmpty && isPlaceholderTitle && this.preview) {
         return;
       }
 
@@ -345,7 +361,7 @@ export default {
     },
     updatePreviewFromData(seoData, pageTitle) {
       // Use stored site name and separator (extracted from initial load)
-      const siteName = this.siteName || this.$store?.state?.system?.title || this.$t('meta-kit.preview.siteName');
+      const siteName = this.siteName || this.$panel?.system?.title || this.$t('meta-kit.preview.siteName');
       const separator = this.separator || '|';
 
       // Get page meta title from SEO data or use page title
@@ -361,7 +377,7 @@ export default {
         ogImage = seoData.ogimage === '' ? (this.siteOgImage || null) : seoData.ogimage;
       } else {
         // undefined means preserve existing
-        ogImage = this.meta?.ogImage || null;
+        ogImage = this.preview?.ogImage || null;
       }
 
       // Get descriptions - handle empty strings as fallback
@@ -373,8 +389,9 @@ export default {
         ? seoData.ogdescription
         : metaDesc;
 
-      this.meta = {
-        url: window.location.origin,
+      this.preview = {
+        // Keep the page URL from the server; the origin is only a fallback
+        url: this.preview?.url || window.location.origin,
         title: fullTitle,
         description: metaDesc,
         ogTitle: seoData.ogtitle || pageMetaTitle,
@@ -383,26 +400,16 @@ export default {
       };
     },
     async load() {
+      if (!this.endpoints?.field) return;
+
       try {
-        const baseUrl = this.parent + '/sections/' + this.name;
-        const lang = this.currentLanguage;
-        const url = lang ? `${baseUrl}?language=${encodeURIComponent(lang)}` : baseUrl;
-        const response = await this.$api.get(url);
+        // The Panel sends the current language with every API request
+        const response = await this.$api.get(this.endpoints.field + '/meta');
 
-        // The label prop is the raw blueprint value; the section API
-        // returns it translated
-        this.headline = response.label || response.data?.label || null;
+        this.headline = response.label || null;
 
-        // Get meta from response
-        let newMeta = null;
         if (response.meta) {
-          newMeta = response.meta;
-        } else if (response.data && response.data.meta) {
-          newMeta = response.data.meta;
-        }
-
-        if (newMeta) {
-          this.meta = newMeta;
+          this.preview = response.meta;
 
           // Extract and store site name from the title on first load
           if (!this.siteName) {
@@ -419,9 +426,9 @@ export default {
       const pageImage = ogImageField?.querySelector('img');
       const hasPageImage = pageImage && pageImage.srcset;
 
-      if (!hasPageImage && this.meta?.ogImage) {
+      if (!hasPageImage && this.preview?.ogImage) {
         // No page-specific image, so the loaded image is the site default
-        this.siteOgImage = this.meta.ogImage;
+        this.siteOgImage = this.preview.ogImage;
       } else if (hasPageImage) {
         // There is a page image, we need to fetch site default separately
         // For now, set to null (no fallback available)
@@ -434,15 +441,15 @@ export default {
     extractSiteInfo() {
       // Extract site name and separator from the loaded title
       // Title format: "Page Title | Site Name"
-      if (this.meta && this.meta.title) {
+      if (this.preview && this.preview.title) {
         // Try to find separator - prefer | first as it's most common
         const separators = ['|', '–', '—', '-', '•', '/'];
         for (const sep of separators) {
           const searchPattern = ` ${sep} `;
-          if (this.meta.title.includes(searchPattern)) {
+          if (this.preview.title.includes(searchPattern)) {
             this.separator = sep;
             // Split and take the last part as site name
-            const parts = this.meta.title.split(searchPattern);
+            const parts = this.preview.title.split(searchPattern);
             if (parts.length > 1) {
               this.siteName = parts[parts.length - 1].trim();
             }
@@ -452,7 +459,7 @@ export default {
       }
       // Fallback
       if (!this.siteName) {
-        this.siteName = this.$store?.state?.system?.title || this.$t('meta-kit.preview.siteName');
+        this.siteName = this.$panel?.system?.title || this.$t('meta-kit.preview.siteName');
       }
       if (!this.separator) {
         this.separator = '|';

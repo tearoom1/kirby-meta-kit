@@ -40,6 +40,7 @@ import MetaKitLengthMeter from '../common/MetaKitLengthMeter.vue';
 import { getFieldTitleDisplay, shouldAppendSiteName } from '../../../composables/panelDisplay.js';
 
 export default {
+  emits: ['generate', 'input'],
   props: {
     value: String,
     label: {

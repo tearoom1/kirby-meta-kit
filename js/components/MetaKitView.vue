@@ -57,13 +57,13 @@
     >
       <template #filters>
         <meta-kit-filters
-          :show-preview.sync="showPreviewInTable"
-          :preview-mode.sync="previewMode"
-          :search-query.sync="searchQuery"
-          :active-filters.sync="activeFilters"
-          :sort-by.sync="sortBy"
-          :inheritance.sync="inheritance"
-          :page-size.sync="pageSize"
+          v-model:showPreview="showPreviewInTable"
+          v-model:previewMode="previewMode"
+          v-model:searchQuery="searchQuery"
+          v-model:activeFilters="activeFilters"
+          v-model:sortBy="sortBy"
+          v-model:inheritance="inheritance"
+          v-model:pageSize="pageSize"
         />
       </template>
     </meta-kit-actions>
@@ -113,48 +113,6 @@
       </div>
     </div>
 
-    <!-- Bulk Edit Dialog -->
-    <meta-kit-bulk-edit-dialog
-      ref="allPagesDialog"
-      :validation-settings="validationSettingsData"
-      :api="$api"
-      :site-settings="siteSettingsData"
-      :ai-enabled="aiEnabled"
-      @saved="handleSavedUpdates"
-    />
-
-    <!-- Single Page Edit Dialog -->
-    <meta-kit-single-page-dialog
-      ref="singlePageDialog"
-      :validation-settings="validationSettingsData"
-      :api="$api"
-      :site-settings="siteSettingsData"
-      :ai-enabled="aiEnabled"
-      @saved="handleSavedUpdates"
-    />
-
-    <meta-kit-review-dialog
-      ref="reviewDialog"
-      :api="$api"
-    />
-
-    <!-- Bulk Generation Dialog (used for both bulk and single-page AI generate) -->
-    <meta-kit-bulk-generate-dialog
-      ref="bulkGenerateDialog"
-      :selected-count="singleGeneratePageId ? 1 : actionPageIds.length"
-      @generate="performBulkGeneration"
-    />
-
-    <!-- Review generated suggestions before saving -->
-    <meta-kit-suggestions-dialog
-      ref="suggestionsDialog"
-      :language="language"
-      :pages="pagesData"
-      :site-settings="siteSettingsData"
-      :validation-settings="validationSettingsData"
-      @save="saveSuggestions"
-    />
-
     <!-- Actions for the selected pages -->
     <meta-kit-selection-bar
       v-if="selectedPages.length > 0"
@@ -201,12 +159,8 @@ import MetaKitActions from './parts/table/MetaKitActions.vue';
 import MetaKitTable from './parts/table/MetaKitTable.vue';
 import MetaKitSelectionBar from './parts/table/MetaKitSelectionBar.vue';
 
-// Edit/Dialog components
-import MetaKitBulkGenerateDialog from './parts/edit/MetaKitBulkGenerateDialog.vue';
-import MetaKitSinglePageDialog from './parts/edit/MetaKitSinglePageDialog.vue';
-import MetaKitBulkEditDialog from './parts/edit/MetaKitBulkEditDialog.vue';
-import MetaKitReviewDialog from './parts/edit/MetaKitReviewDialog.vue';
-import MetaKitSuggestionsDialog from './parts/edit/MetaKitSuggestionsDialog.vue';
+// Dialogs are global components, opened through the Panel's dialog state
+import { openDialog } from '../composables/dialogs.js';
 import {
   GENERATION_FIELDS,
   planGeneration,
@@ -259,11 +213,6 @@ const AREA_FILTERS = {
 export default {
   components: {
     MetaKitTable,
-    MetaKitBulkGenerateDialog,
-    MetaKitSinglePageDialog,
-    MetaKitBulkEditDialog,
-    MetaKitReviewDialog,
-    MetaKitSuggestionsDialog,
     MetaKitOverview,
     MetaKitSelectionBar,
     MetaKitFilters,
@@ -540,7 +489,7 @@ export default {
       const existingIndex = this.pagesData.findIndex((page) => page.id === updatedPage.id);
       if (existingIndex === -1) return;
 
-      this.$set(this.pagesData, existingIndex, updatedPage);
+      this.pagesData[existingIndex] = updatedPage;
     },
 
     handleSavedUpdates(payload = {}) {
@@ -593,13 +542,31 @@ export default {
     // Open the field-selection dialog for a single page's AI generation
     openSinglePageGenerate(pageId) {
       this.singleGeneratePageId = pageId;
-      this.$refs.bulkGenerateDialog.open();
+      this.openGenerateDialog(1);
     },
 
     // Open the field-selection dialog for bulk (selected pages) generation
     generateAllDescriptions() {
       this.singleGeneratePageId = null;
-      this.$refs.bulkGenerateDialog.open();
+      this.openGenerateDialog(this.actionPageIds.length);
+    },
+
+    openGenerateDialog(selectedCount) {
+      openDialog(this.$panel, 'bulk-generate', { selectedCount }, {
+        generate: (options) => this.performBulkGeneration(options)
+      });
+    },
+
+    // Props shared by the edit dialogs; `saved` keeps the table up to date
+    openEditDialog(name, props) {
+      openDialog(this.$panel, name, {
+        ...props,
+        validationSettings: this.validationSettingsData,
+        siteSettings: this.siteSettingsData,
+        aiEnabled: this.aiEnabled
+      }, {
+        saved: (payload) => this.handleSavedUpdates(payload)
+      });
     },
 
     async performBulkGeneration(options) {
@@ -648,7 +615,15 @@ export default {
       }
 
       if (options.review && result.suggestions.length > 0) {
-        this.$refs.suggestionsDialog.open(result);
+        openDialog(this.$panel, 'suggestions', {
+          result,
+          language: this.language,
+          pages: this.pagesData,
+          siteSettings: this.siteSettingsData,
+          validationSettings: this.validationSettingsData
+        }, {
+          save: (suggestions) => this.saveSuggestions(suggestions)
+        });
         return;
       }
 
@@ -691,12 +666,12 @@ export default {
       await this.refreshPages();
     },
 
-    async editSinglePageMetadata(pageId) {
-      this.$refs.singlePageDialog.open(pageId);
+    editSinglePageMetadata(pageId) {
+      this.openEditDialog('single-page', { pageId });
     },
 
     reviewSinglePage(pageId, title = this.$t('meta-kit.review.title')) {
-      this.$refs.reviewDialog.openPage(pageId, title);
+      openDialog(this.$panel, 'review', { pageId, title });
     },
 
     goToLanguage(langCode) {
@@ -732,7 +707,7 @@ export default {
     },
     async showSelectedPagesDialog() {
       if (this.actionPageIds.length === 0) return;
-      this.$refs.allPagesDialog.open(this.actionPageIds);
+      this.openEditDialog('bulk-edit', { pageIds: [...this.actionPageIds] });
     }
   }
 };

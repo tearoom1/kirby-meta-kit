@@ -1,8 +1,5 @@
 <template>
   <k-field v-bind="$props" class="k-mk-description-field">
-    <template #options>
-      <k-field-options />
-    </template>
       <k-input type="textarea" class="k-mk-description-textarea"
                :value="value"
                @input="onInput"
@@ -46,6 +43,7 @@ import { getDescriptionValidation } from '../../composables/useFieldValidation.j
 
 export default {
   inheritAttrs: false,
+  emits: ['input'],
   props: {
     value: String,
     fieldType: {

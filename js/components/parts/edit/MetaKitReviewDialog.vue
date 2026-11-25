@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" class="k-mk2-dialog k-meta-kit-dialog k-meta-kit-view" size="huge" :cancel-button="false" :submit-button="false">
+  <k-dialog :visible="visible" class="k-mk2-dialog k-meta-kit-dialog k-meta-kit-view" size="huge" :cancel-button="false" :submit-button="false">
     <k-headline>{{ headline }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -113,7 +113,7 @@
           >
             {{ $t('meta-kit.editInPanel') }}
           </a>
-          <button class="k-link k-meta-kit-dialog-panel-link" @click="print">{{ $t('meta-kit.review.print') }}</button>
+          <button type="button" class="k-link k-meta-kit-dialog-panel-link" @click="print">{{ $t('meta-kit.review.print') }}</button>
         </div>
         <div class="k-meta-kit-dialog-footer-meta"></div>
         <div class="k-meta-kit-dialog-footer-actions k-meta-kit-dialog-footer-actions-end">
@@ -125,13 +125,25 @@
 </template>
 
 <script>
+// Opened with openDialog(panel, 'review', { pageId, title })
 export default {
   props: {
-    api: {
-      type: Object,
+    pageId: {
+      type: String,
       required: true
+    },
+    title: {
+      type: String,
+      default: null
+    },
+    visible: {
+      type: Boolean,
+      default: false
     }
   },
+  // The Panel's own dialog listeners (submit, input …) must not reach <k-dialog>
+  inheritAttrs: false,
+  emits: ['cancel', 'close'],
   data() {
     return {
       reviewData: null,
@@ -145,19 +157,18 @@ export default {
       return this.$t('meta-kit.review.failedGeneric');
     }
   },
+  created() {
+    this.fetchReview('meta-kit/review-page', { pageId: this.pageId }, this.title || this.$t('meta-kit.review.title'));
+  },
   methods: {
-    async openPage(pageId, title = this.$t('meta-kit.review.title')) {
-      await this.fetchReview('meta-kit/review-page', { pageId }, title);
-    },
     async fetchReview(route, payload, title) {
       this.headline = title;
       this.reviewData = null;
       this.error = '';
       this.isLoading = true;
-      this.$refs.dialog.open();
 
       try {
-        const response = await this.api.post(route, payload);
+        const response = await this.$api.post(route, payload);
         if (response.status === 'success') {
           this.reviewData = response.data;
         } else {
@@ -170,10 +181,7 @@ export default {
       }
     },
     close() {
-      // Kirby 5: the dialog lives in the panel-wide dialog state; k-dialog.close() only emits
       this.$panel.dialog.close();
-      this.reviewData = null;
-      this.error = '';
     },
     print() {
       const win = window.open('', '_blank', 'width=900,height=700');

@@ -191,6 +191,7 @@ const STATUS_LABELS = {
 
 export default {
   components: { Tooltip, MetaKitFieldTip },
+  emits: ['edit-page', 'generate-page', 'review-page', 'toggle-page', 'toggle-select-all'],
   props: {
     pages: { type: Array, required: true },
     // All pages (not only this page of the table), to name duplicates

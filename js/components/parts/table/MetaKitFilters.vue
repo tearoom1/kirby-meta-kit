@@ -28,7 +28,7 @@
         <div class="k-meta-kit-filter-group">
           <div class="k-meta-kit-filter-group-title">{{ $t('meta-kit.pagination.perPageLabel') }}</div>
           <div class="k-mk2-seg" role="radiogroup">
-            <button v-for="option in PAGE_SIZES" :key="option" type="button" :class="{ 'is-on': pageSize === option }" @click="$emit('update:page-size', option)">{{ option === ALL_PAGES ? $t('meta-kit.pagination.all') : option }}</button>
+            <button v-for="option in PAGE_SIZES" :key="option" type="button" :class="{ 'is-on': pageSize === option }" @click="$emit('update:pageSize', option)">{{ option === ALL_PAGES ? $t('meta-kit.pagination.all') : option }}</button>
           </div>
         </div>
         <div class="k-meta-kit-filter-group k-mk2-display-foot">{{ $t('meta-kit.display.remembered') }}</div>
@@ -42,7 +42,7 @@
         id="k-meta-kit-sort-mode"
         class="k-meta-kit-view-select-input"
         :value="sortBy"
-        @change="$emit('update:sort-by', $event.target.value)"
+        @change="$emit('update:sortBy', $event.target.value)"
         :title="$t('meta-kit.sort.choose')"
       >
         <option value="default">{{ $t('meta-kit.sort.default') }}</option>
@@ -60,14 +60,14 @@
       <k-search-input
         icon="search"
         :value="searchQuery"
-        @input="$emit('update:search-query', $event)"
+        @input="$emit('update:searchQuery', $event)"
         :placeholder="$t('meta-kit.search.placeholder')"
         class="k-meta-kit-search"
       />
       <button
         v-if="searchQuery"
         class="k-meta-kit-search-clear"
-        @click="$emit('update:search-query', '')"
+        @click="$emit('update:searchQuery', '')"
         :title="$t('meta-kit.search.clear')"
       >
         <k-icon type="cancel"/>
@@ -298,6 +298,15 @@ export default {
       default: 25
     }
   },
+  emits: [
+    'update:activeFilters',
+    'update:inheritance',
+    'update:pageSize',
+    'update:previewMode',
+    'update:searchQuery',
+    'update:showPreview',
+    'update:sortBy'
+  ],
   data() {
     return {
       VIEW_OPTIONS,
@@ -320,12 +329,12 @@ export default {
   methods: {
     updateViewMode(mode) {
       if (mode === 'count') {
-        this.$emit('update:show-preview', false);
+        this.$emit('update:showPreview', false);
         return;
       }
 
-      this.$emit('update:preview-mode', mode);
-      this.$emit('update:show-preview', true);
+      this.$emit('update:previewMode', mode);
+      this.$emit('update:showPreview', true);
     },
     toggleMenu(menu) {
       this.openMenu = this.openMenu === menu ? null : menu;
@@ -355,12 +364,12 @@ export default {
         }
       }
 
-      this.$emit('update:active-filters', Array.from(filters));
+      this.$emit('update:activeFilters', Array.from(filters));
     },
     // Clears the filters and the search; the display preferences stay
     clearFilters() {
-      this.$emit('update:active-filters', []);
-      this.$emit('update:search-query', '');
+      this.$emit('update:activeFilters', []);
+      this.$emit('update:searchQuery', '');
       this.openMenu = null;
     }
   },
@@ -372,7 +381,7 @@ export default {
     };
     document.addEventListener('click', this._outsideClickHandler);
   },
-  beforeDestroy() {
+  beforeUnmount() {
     document.removeEventListener('click', this._outsideClickHandler);
   }
 };

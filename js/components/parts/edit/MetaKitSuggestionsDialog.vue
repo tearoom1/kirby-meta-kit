@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" class="k-mk2-review" size="huge">
+  <k-dialog :visible="visible" class="k-mk2-review" size="huge">
     <header class="k-mk2-review-head">
       <div>
         <h2>{{ $t('meta-kit.v2.review.title') }}</h2>
@@ -64,6 +64,7 @@
 </template>
 
 <script>
+// Opened with openDialog(panel, 'suggestions', { result, pages, … }, { save })
 import MetaKitLengthMeter from '../common/MetaKitLengthMeter.vue';
 import { getRangesForPageAndType } from '../../../composables/useValidation.js';
 import { getEffectiveDescription, getInheritanceSource } from '../../../composables/useInheritance.js';
@@ -89,13 +90,20 @@ export default {
     pages: { type: Array, default: () => [] },
     siteSettings: { type: Object, default: () => ({}) },
     validationSettings: { type: Object, default: () => ({}) },
-    language: { type: String, default: null }
+    language: { type: String, default: null },
+    // Result of runGeneration(): { suggestions, errors, cancelled }
+    result: { type: Object, default: () => ({}) },
+    visible: { type: Boolean, default: false }
   },
+  // The Panel's own dialog listeners (submit, input …) must not reach <k-dialog>
+  inheritAttrs: false,
+  emits: ['cancel', 'close', 'save'],
   data() {
+    // Copies, so editing a suggestion does not change the result
     return {
-      suggestions: [],
-      errors: [],
-      cancelled: false
+      suggestions: (this.result.suggestions || []).map((suggestion) => ({ ...suggestion })),
+      errors: this.result.errors || [],
+      cancelled: this.result.cancelled || false
     };
   },
   computed: {
@@ -122,14 +130,7 @@ export default {
     }
   },
   methods: {
-    open({ suggestions = [], errors = [], cancelled = false } = {}) {
-      this.suggestions = suggestions.map((suggestion) => ({ ...suggestion }));
-      this.errors = errors;
-      this.cancelled = cancelled;
-      this.$refs.dialog.open();
-    },
     close() {
-      // Kirby 5: the dialog lives in the panel-wide dialog state; k-dialog.close() only emits
       this.$panel.dialog.close();
     },
     save() {

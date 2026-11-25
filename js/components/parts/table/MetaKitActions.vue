@@ -29,6 +29,7 @@
 
 <script>
 export default {
+  emits: ['edit-selected', 'generate-missing', 'refresh'],
   props: {
     selectedCount: {
       type: Number,

@@ -9,6 +9,7 @@
 
 <script>
 export default {
+  emits: ['clear', 'edit', 'generate'],
   props: {
     count: { type: Number, required: true },
     aiEnabled: { type: Boolean, default: true }

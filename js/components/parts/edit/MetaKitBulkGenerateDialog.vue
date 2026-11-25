@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" class="k-mk2-dialog k-meta-kit-dialog" size="medium">
+  <k-dialog :visible="visible" class="k-mk2-dialog k-meta-kit-dialog" size="medium">
     <k-headline>{{ $t('meta-kit.generate.title') }}</k-headline>
     <k-text>{{ $t('meta-kit.v2.generate.intro', { count: selectedCount }) }}</k-text>
 
@@ -74,13 +74,21 @@
 </template>
 
 <script>
+// Opened with openDialog(panel, 'bulk-generate', { selectedCount }, { generate })
 export default {
   props: {
     selectedCount: {
       type: Number,
       default: 0
+    },
+    visible: {
+      type: Boolean,
+      default: false
     }
   },
+  // The Panel's own dialog listeners (submit, input …) must not reach <k-dialog>
+  inheritAttrs: false,
+  emits: ['cancel', 'close', 'generate'],
   data() {
     return {
       options: {
@@ -98,20 +106,12 @@ export default {
     }
   },
   methods: {
-    open() {
-      // Reset to defaults
-      this.options.title = false;
-      this.options.description = true;
-      this.options.ogTitle = false;
-      this.options.ogDescription = false;
-      this.options.review = true;
-      this.$refs.dialog.open();
-    },
     close() {
-      // Kirby 5: the dialog lives in the panel-wide dialog state; k-dialog.close() only emits
       this.$panel.dialog.close();
     },
     generate() {
+      // The listener runs until its first await, then this dialog is
+      // closed before the generation may open the suggestions dialog
       this.$emit('generate', { ...this.options });
       this.close();
     }

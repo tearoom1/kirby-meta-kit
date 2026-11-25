@@ -1,5 +1,5 @@
 <template>
-  <k-dialog ref="dialog" class="k-mk2-dialog k-meta-kit-dialog k-meta-kit-dialog-bulk" size="huge" :cancel-button="false" :submit-button="false" @submit.prevent="saveAll">
+  <k-dialog :visible="visible" class="k-mk2-dialog k-meta-kit-dialog k-meta-kit-dialog-bulk" size="huge" :cancel-button="false" :submit-button="false" @submit="saveAll">
     <k-headline>{{ $t('meta-kit.bulkEdit.title', { count: pages.length }) }}</k-headline>
 
     <div v-if="isLoading" class="k-meta-kit-loading">
@@ -139,6 +139,7 @@
 </template>
 
 <script>
+// Opened with openDialog(panel, 'bulk-edit', { pageIds, … }, { saved })
 import MetaKitTitleField from '../field/MetaKitTitleField.vue';
 import MetaKitDescriptionField from '../field/MetaKitDescriptionField.vue';
 import { hasAnyBulkChanges } from '../../../composables/panelState.js';
@@ -150,13 +151,13 @@ export default {
     MetaKitDescriptionField
   },
   props: {
+    pageIds: {
+      type: Array,
+      default: () => []
+    },
     validationSettings: {
       type: Object,
       default: () => ({})
-    },
-    api: {
-      type: Object,
-      required: true
     },
     siteSettings: {
       type: Object,
@@ -165,8 +166,15 @@ export default {
     aiEnabled: {
       type: Boolean,
       default: true
+    },
+    visible: {
+      type: Boolean,
+      default: false
     }
   },
+  // The Panel's own dialog listeners (submit, input …) must not reach <k-dialog>
+  inheritAttrs: false,
+  emits: ['cancel', 'close', 'saved'],
   data() {
     return {
       pages: [],
@@ -189,17 +197,16 @@ export default {
       return this.pages.filter(page => page.id !== 'site');
     }
   },
+  created() {
+    this.load();
+  },
   methods: {
-    async open(pageIds) {
+    async load() {
       this.isLoading = true;
-      this.activeTab = 'meta';
-      this.resetSaveFeedback();
-      this.$refs.dialog.open();
-      document.addEventListener('keydown', this.handleKeydown);
 
       try {
-        const response = await this.api.get('meta-kit/pages-with-content', {
-          pageIds: Array.isArray(pageIds) ? pageIds.join(',') : pageIds
+        const response = await this.$api.get('meta-kit/pages-with-content', {
+          pageIds: this.pageIds.join(',')
         });
         if (response.status === 'success' && response.data) {
           this.pages = response.data;
@@ -209,19 +216,19 @@ export default {
           this.generating = {};
 
           this.pages.forEach(page => {
-            this.$set(this.editedFields, page.id, {
+            this.editedFields[page.id] = {
               metaTitle: page.metaTitle || '',
               metaDescription: page.metaDescription || '',
               ogTitle: page.ogTitle || '',
               ogDescription: page.ogDescription || ''
-            });
+            };
 
-            this.$set(this.generating, page.id, {
+            this.generating[page.id] = {
               metaTitle: false,
               metaDescription: false,
               ogTitle: false,
               ogDescription: false
-            });
+            };
           });
         }
       } catch (error) {
@@ -232,13 +239,7 @@ export default {
     },
 
     close() {
-      document.removeEventListener('keydown', this.handleKeydown);
-      this.resetSaveFeedback();
-      // Kirby 5: the dialog lives in the panel-wide dialog state; k-dialog.close() only emits
       this.$panel.dialog.close();
-      this.pages = [];
-      this.editedFields = {};
-      this.generating = {};
     },
 
     resetSaveFeedback() {
@@ -259,24 +260,12 @@ export default {
       }, 3200);
     },
 
-    handleKeydown(event) {
-      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 's') {
-        return;
-      }
-
-      event.preventDefault();
-
-      if (this.pages.length > 0 && this.hasAnyChanges) {
-        this.saveAll();
-      }
-    },
-
     async generate(pageId, fieldName) {
       if (!this.generating[pageId]) return;
 
       this.generating[pageId][fieldName] = true;
       try {
-        const response = await this.api.post('meta-kit/generate-field', {
+        const response = await this.$api.post('meta-kit/generate-field', {
           pageId,
           fieldName
         });
@@ -317,7 +306,7 @@ export default {
         for (const field of fields) {
           if (field.value !== field.original) {
             try {
-              const response = await applySingleFieldUpdate(this.api, {
+              const response = await applySingleFieldUpdate(this.$api, {
                 pageId: page.id,
                 fieldName: field.name,
                 value: field.value
@@ -345,12 +334,12 @@ export default {
             return;
           }
 
-          this.$set(this.editedFields, page.id, {
+          this.editedFields[page.id] = {
             metaTitle: page.metaTitle || '',
             metaDescription: page.metaDescription || '',
             ogTitle: page.ogTitle || '',
             ogDescription: page.ogDescription || ''
-          });
+          };
         });
 
         this.setSaveFeedback('success', this.$t('meta-kit.bulkEdit.saved', { count: totalSaved, pages: this.pages.length }));
@@ -361,8 +350,8 @@ export default {
       }
     }
   },
-  beforeDestroy() {
-    document.removeEventListener('keydown', this.handleKeydown);
+  // Cmd+S submits the dialog's form, which calls saveAll()
+  beforeUnmount() {
     this.resetSaveFeedback();
   }
 };

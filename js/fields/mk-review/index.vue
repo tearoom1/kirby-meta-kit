@@ -10,16 +10,13 @@
         @click="reviewSeo"
       />
     </div>
-
-    <meta-kit-review-dialog ref="dialog" :api="$api" />
   </k-field>
 </template>
 
 <script>
-import MetaKitReviewDialog from '../../components/parts/edit/MetaKitReviewDialog.vue';
+import { openDialog } from '../../composables/dialogs.js';
 
 export default {
-  components: { MetaKitReviewDialog },
   inheritAttrs: false,
   props: {
     label: String,
@@ -47,7 +44,7 @@ export default {
   methods: {
     reviewSeo() {
       if (!this.pageId || !this.canReview) return;
-      this.$refs.dialog.openPage(this.pageId, 'SEO Review');
+      openDialog(this.$panel, 'review', { pageId: this.pageId, title: this.label || 'SEO Review' });
     }
   }
 };

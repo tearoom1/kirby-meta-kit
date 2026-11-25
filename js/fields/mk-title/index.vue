@@ -1,8 +1,5 @@
 <template>
   <k-field v-bind="$props" class="k-mk-title-field">
-    <template #options>
-      <k-field-options />
-    </template>
     <k-input
       :value="value"
       type="text"
@@ -56,6 +53,7 @@ import {
 
 export default {
   inheritAttrs: false,
+  emits: ['input'],
   props: {
     value: String,
     fieldType: {

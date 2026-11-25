@@ -43,7 +43,7 @@ export default {
   computed: {
     // Rich content passed via the "tip" slot (design v2)
     hasTip() {
-      return !!this.$scopedSlots.tip;
+      return !!this.$slots.tip;
     },
     formattedContent() {
       const escaped = escapeHtml(this.content);

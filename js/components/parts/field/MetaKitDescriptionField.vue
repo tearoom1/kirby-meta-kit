@@ -38,6 +38,7 @@ import { getRangesForPageAndType } from '../../../composables/useValidation.js';
 import MetaKitLengthMeter from '../common/MetaKitLengthMeter.vue';
 
 export default {
+  emits: ['generate', 'input'],
   props: {
     value: String,
     label: {
