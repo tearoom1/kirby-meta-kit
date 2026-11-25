@@ -69,14 +69,11 @@ export default {
     }
   },
   watch: {
+    // Another page or language: reload the preview. A plain view refresh
+    // (save, discard) does not replace it with the server's `meta`; the
+    // inputs are newer, and the preview follows them on its own.
     'endpoints.field'() {
       this.handleContextChange();
-    },
-    // A reloaded view sends a new server preview
-    meta(newMeta) {
-      if (!newMeta) return;
-      this.preview = newMeta;
-      this.extractSiteInfo();
     },
     currentLanguage(newLang, oldLang) {
       if (!newLang || newLang === oldLang) return;
@@ -159,8 +156,10 @@ export default {
       clearTimeout(this.contextChangeTimeout);
       this.contextChangeTimeout = setTimeout(async () => {
       // Language switching in the Panel typically triggers a route change.
-      // The section component can stay mounted, so we explicitly refetch.
-      this.preview = null;
+      // The field component can stay mounted, so we explicitly refetch.
+      // Until then it shows the preview the view sent along, not a
+      // loading state, so the preview does not flicker.
+      this.preview = this.meta || this.preview;
       this.siteName = null;
       this.separator = '|';
       this.siteOgImage = null;
