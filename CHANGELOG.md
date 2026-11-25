@@ -4,13 +4,9 @@
 ### ⚠ BREAKING CHANGES
 
 * the Panel bundle needs Kirby 6 (Vue 3).
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 * Meta Kit 5 requires Kirby 6 and PHP 8.3 or newer. Sites
 on Kirby 5 stay on Meta Kit 4. Own blueprints should place the preview
 under `fields` instead of `sections` (type `seo-preview`, unchanged).
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 
 ### Features
 
