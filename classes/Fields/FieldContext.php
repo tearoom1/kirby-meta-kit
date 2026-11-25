@@ -29,4 +29,18 @@ class FieldContext
 
         return 'site';
     }
+
+    /**
+     * Template whose validation rules apply: the page's template, null
+     * (global rules) for the site and other models. A page template may be
+     * called `site` too, so the model decides, not the name.
+     */
+    public static function rulesTemplate(ModelWithContent $model): string|null
+    {
+        if (method_exists($model, 'intendedTemplate') === true) {
+            return $model->intendedTemplate()->name();
+        }
+
+        return null;
+    }
 }

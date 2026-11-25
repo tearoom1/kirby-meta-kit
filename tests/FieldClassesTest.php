@@ -175,6 +175,45 @@ class FieldClassesTest extends KirbyTestCase
         $this->assertSame('Unsaved title | Site', $meta['title']);
     }
 
+    /**
+     * A page template may be called `site`; only the site model itself
+     * uses the global ranges, as the overview does
+     */
+    #[RunInSeparateProcess]
+    public function testPageTemplateNamedSiteUsesItsTemplateRanges(): void
+    {
+        require_once dirname(__DIR__) . '/index.php';
+
+        $kirby = $this->makeKirby([
+            'site.txt' => "Title: Site\n",
+            'article/site.txt' => "Title: Article\n",
+        ], [
+            'tearoom1.meta-kit.validation' => ['templates' => ['site' => ['ranges' => [
+                'title' => ['optimal' => ['min' => 18]],
+                'description' => ['optimal' => ['min' => 90]],
+            ]]]],
+        ], extraConfig: ['blueprints' => [
+            'pages/site' => ['fields' => [
+                'metaTitle' => ['type' => 'mk-title'],
+                'metaDescription' => ['type' => 'mk-description'],
+            ]],
+            'site' => ['fields' => [
+                'metaTitle' => ['type' => 'mk-title'],
+                'metaDescription' => ['type' => 'mk-description'],
+            ]],
+        ]]);
+
+        $page = Form::for($kirby->page('article'))->fields();
+        $this->assertSame('site', $page->get('metatitle')->toArray()['validationSettings']['template']);
+        $this->assertSame(18, $page->get('metatitle')->toArray()['validationSettings']['ranges']['optimal']['min']);
+        $this->assertSame(90, $page->get('metadescription')->toArray()['validationSettings']['ranges']['optimal']['min']);
+
+        // The site itself keeps the global ranges
+        $site = Form::for($kirby->site())->fields();
+        $this->assertSame(20, $site->get('metatitle')->toArray()['validationSettings']['ranges']['optimal']['min']);
+        $this->assertSame(140, $site->get('metadescription')->toArray()['validationSettings']['ranges']['optimal']['min']);
+    }
+
     #[RunInSeparateProcess]
     public function testReviewFieldProps(): void
     {

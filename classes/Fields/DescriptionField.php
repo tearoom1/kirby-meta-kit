@@ -44,7 +44,7 @@ class DescriptionField extends TextareaField
         $rangeType = $this->fieldType === 'og' ? 'ogDescription' : 'description';
 
         return [
-            'ranges' => ConfigHelper::getValidationRanges($rangeType, $template === 'site' ? null : $template),
+            'ranges' => ConfigHelper::getValidationRanges($rangeType, FieldContext::rulesTemplate($model)),
             'fieldType' => $this->fieldType,
             'pageId' => $this->pageId ?? FieldContext::pageId($model),
             'template' => $template,

@@ -45,7 +45,7 @@ class TitleField extends TextField
         $rangeType = $this->fieldType === 'og' ? 'ogTitle' : 'title';
 
         return [
-            'ranges' => ConfigHelper::getValidationRanges($rangeType, $template === 'site' ? null : $template),
+            'ranges' => ConfigHelper::getValidationRanges($rangeType, FieldContext::rulesTemplate($model)),
             'appendSiteName' => $siteSettings['appendSiteName'],
             'appendSiteNameTo' => $siteSettings['appendSiteNameTo'],
             'siteMetaTitle' => $siteSettings['siteMetaTitle'],
