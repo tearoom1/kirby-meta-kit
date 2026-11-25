@@ -196,7 +196,13 @@ Page methods, endpoints, custom templates and troubleshooting: [docs/developers.
 
 ## Upgrading from Meta Kit 4 (Kirby 5)
 
-1. Update Kirby to version 6 first, then run `composer update tearoom1/kirby-meta-kit`.
+1. Update Kirby and Meta Kit together. Meta Kit 4 refuses Kirby 6 and Meta Kit 5 refuses Kirby 5, so Composer cannot update one of them alone:
+
+   ```bash
+   composer require getkirby/cms:^6.0 tearoom1/kirby-meta-kit:^5.0 --with-all-dependencies
+   ```
+
+   Without Composer, replace the `kirby` folder and the plugin folder in the same step.
 2. The SEO preview is a field now. Blueprints that extend `meta-kit/page` need no change. In own blueprints, move it from `sections` to `fields`; the type stays `seo-preview`:
 
    ```yaml
