@@ -34,7 +34,6 @@ $classes = [
     'TearoomOne\Fields\SlugInfoField' => 'classes/Fields/SlugInfoField.php',
     'TearoomOne\Fields\ReviewField' => 'classes/Fields/ReviewField.php',
     'TearoomOne\Fields\PreviewField' => 'classes/Fields/PreviewField.php',
-    'TearoomOne\LegacyPreviewSections' => 'classes/LegacyPreviewSections.php',
 ];
 
 load($classes, __DIR__);
@@ -42,7 +41,6 @@ load($classes, __DIR__);
 // Blueprints of Meta Kit 4 placed the preview in a `sections` list. Kirby 6
 // only converts its own section types into fields, so the preview is mapped
 // onto its field here. Kirby marks this map as unstable, hence the check.
-// LegacyPreviewSections (hook below) gives such sections a name of their own.
 if (property_exists(Normalizer::class, 'sectionFields') === true) {
     Normalizer::$sectionFields['seo-preview'] ??= 'seo-preview';
 }

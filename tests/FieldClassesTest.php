@@ -2,11 +2,8 @@
 
 namespace TearoomOne\Tests;
 
-use Kirby\Filesystem\Dir;
-use Kirby\Filesystem\F;
 use Kirby\Form\Field;
 use Kirby\Form\Form;
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use TearoomOne\Fields\DescriptionField;
 use TearoomOne\Fields\PreviewField;
@@ -77,86 +74,10 @@ class FieldClassesTest extends KirbyTestCase
             'preview' => ['type' => 'seo-preview', 'label' => 'Preview'],
         ]]);
 
-        $field = Form::for($kirby->page('article'))->fields()->get('metaKitSectionPreview');
+        $field = Form::for($kirby->page('article'))->fields()->get('preview');
 
         $this->assertInstanceOf(PreviewField::class, $field);
         $this->assertSame('Preview', $field->toArray()['label']);
-    }
-
-    public static function sectionOrders(): array
-    {
-        return [
-            'preview section first' => [true],
-            'content field first' => [false],
-        ];
-    }
-
-    /**
-     * Kirby 5 kept sections and fields apart, so a preview section could
-     * share its name with a content field. Kirby 6 has one namespace.
-     */
-    #[RunInSeparateProcess]
-    #[DataProvider('sectionOrders')]
-    public function testPreviewSectionDoesNotCollideWithAFieldOfTheSameName(bool $previewFirst): void
-    {
-        $preview = ['preview' => ['type' => 'seo-preview', 'label' => 'SEO']];
-        $content = ['content' => ['type' => 'fields', 'fields' => ['preview' => ['type' => 'text', 'label' => 'Teaser']]]];
-        $sections = $previewFirst ? [...$preview, ...$content] : [...$content, ...$preview];
-
-        $kirby = $this->makeSite(['columns' => [['width' => '1/1', 'sections' => $sections]]]);
-        $fields = Form::for($kirby->page('article'))->fields();
-
-        // The content field keeps its name and stays editable…
-        $this->assertSame('text', $fields->get('preview')->type());
-        $this->assertSame('Teaser', $fields->get('preview')->toArray()['label']);
-
-        // …and the preview gets a stable name of its own
-        $field = $fields->get('metaKitSectionPreview');
-        $this->assertInstanceOf(PreviewField::class, $field);
-        $this->assertSame('SEO', $field->toArray()['label']);
-
-        foreach ($fields as $field) {
-            $this->assertStringNotContainsString('duplicate', $field->name());
-        }
-    }
-
-    /**
-     * Blueprint files in site/blueprints, also with the section in a mixin
-     */
-    #[RunInSeparateProcess]
-    public function testPreviewSectionInABlueprintFileIsRenamed(): void
-    {
-        require_once dirname(__DIR__) . '/index.php';
-
-        // Own roots: the blueprint files must exist before the plugins load
-        $root = sys_get_temp_dir() . '/kirby-test-' . uniqid();
-        $files = [
-            'content/site.txt' => "Title: Site\n",
-            'content/article/article.txt' => "Title: Article\n",
-            'content/note/note.txt' => "Title: Note\n",
-            'site/blueprints/pages/article.yml' => "sections:\n  preview:\n    type: seo-preview\n  content:\n    type: fields\n    fields:\n      preview:\n        type: text\n",
-            'site/blueprints/sections/seo.yml' => "type: seo-preview\n",
-            'site/blueprints/pages/note.yml' => "sections:\n  seo: sections/seo\n  content:\n    type: fields\n    fields:\n      seo:\n        type: text\n",
-        ];
-
-        foreach ($files as $path => $text) {
-            F::write($root . '/' . $path, $text);
-        }
-
-        $kirby = $this->makeKirby([], extraConfig: ['roots' => [
-            'index' => $root,
-            'content' => $root . '/content',
-            'site' => $root . '/site',
-            'plugins' => $root . '/site/plugins',
-        ]]);
-
-        foreach (['article' => 'preview', 'note' => 'seo'] as $id => $name) {
-            $fields = Form::for($kirby->page($id))->fields();
-            $this->assertSame('text', $fields->get($name)->type(), $id);
-            $this->assertInstanceOf(PreviewField::class, $fields->get('metaKitSection' . ucfirst($name)), $id);
-        }
-
-        Dir::remove($root);
     }
 
     #[RunInSeparateProcess]

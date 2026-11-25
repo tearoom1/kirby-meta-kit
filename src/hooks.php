@@ -8,9 +8,6 @@
 
 return array_merge_recursive([
     "system.loadPlugins:after" => function () {
-        // Old preview sections must not take the name of a content field
-        TearoomOne\LegacyPreviewSections::preload(kirby());
-
         // Initialize site SEO block fields on first load if they don't exist
         $site = site();
 
