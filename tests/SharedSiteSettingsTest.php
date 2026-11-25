@@ -236,6 +236,79 @@ class SharedSiteSettingsTest extends KirbyTestCase
         $this->assertTrue(ConfigHelper::getSiteSettings()['appendSiteName']);
     }
 
+    public static function retiredModelVersions(): array
+    {
+        return [
+            'published settings' => ['site.de.txt'],
+            'unsaved changes' => ['_changes/site.de.txt'],
+        ];
+    }
+
+    /**
+     * A model an older Meta Kit offered in its select field is no longer
+     * an option. Kirby 6 validates the whole settings block on publish, so
+     * the stored ID moves to the "Other model" field.
+     */
+    #[RunInSeparateProcess]
+    #[DataProvider('retiredModelVersions')]
+    public function testRetiredModelsMoveToTheCustomModelAndTheSiteCanBePublished(string $file): void
+    {
+        $retired = 'nvidia/nemotron-3-nano-30b-a3b:free';
+        $settings = [
+            ...$this->defaultSettings(),
+            'Metakitopenrouter' => $this->makeBlocksJson('mk-openrouter', ['model' => $retired, 'temperature' => 0.7], 'openrouter-settings'),
+        ];
+
+        $files = ['site.de.txt' => $settings, 'site.en.txt' => ['Title' => 'Site']];
+
+        if ($file !== 'site.de.txt') {
+            $files['site.de.txt']['Metakitopenrouter'] = $this->makeBlocksJson('mk-openrouter', ['model' => 'openai/gpt-5'], 'openrouter-settings');
+            $files[$file] = [...$settings, 'Lock' => ''];
+        }
+
+        // Loading the plugin migrates the stored model
+        $kirby = $this->makeSite($files);
+
+        $content = json_decode($this->rawFields($kirby, $file)['metakitopenrouter'], true)[0]['content'];
+        $this->assertSame('custom', $content['model']);
+        $this->assertSame($retired, $content['custommodel']);
+        $this->assertEquals(0.7, $content['temperature']);
+
+        // Panel flow: change only the meta description, then publish. The
+        // Panel starts the changes version from the published content.
+        $kirby->impersonate('kirby', function () use ($kirby) {
+            $changes = $kirby->site()->version('changes');
+            $base = $changes->exists('de') ? [] : $kirby->site()->version('latest')->read('de');
+            $changes->save([...$base, 'metadescription' => 'Beschreibung'], 'de');
+            $changes->publish('de');
+        });
+
+        $this->assertSame('Beschreibung', $this->rawFields($kirby, 'site.de.txt')['metadescription']);
+
+        if ($file === 'site.de.txt') {
+            ConfigHelper::clearCache();
+            $this->assertSame($retired, ConfigHelper::getAiSettings()['api.model']);
+        }
+    }
+
+    /**
+     * Offered models, "Other model" and an empty value stay as they are
+     */
+    #[RunInSeparateProcess]
+    public function testOfferedModelsAreNotMigrated(): void
+    {
+        foreach ([
+            ['model' => 'openai/gpt-5'],
+            ['model' => 'custom', 'custommodel' => 'x/y'],
+            ['model' => ''],
+        ] as $content) {
+            $json = $this->makeBlocksJson('mk-openrouter', $content, 'openrouter-settings');
+            $kirby = $this->makeSite(['site.txt' => [...$this->defaultSettings(), 'Metakitopenrouter' => $json]], languages: null);
+
+            $this->assertSame($content, json_decode($this->rawFields($kirby, 'site.txt')['metakitopenrouter'], true)[0]['content']);
+        }
+    }
+
     #[RunInSeparateProcess]
     public function testInitializationWritesTheDefaultLanguageWhileAnotherIsCurrent(): void
     {

@@ -2,11 +2,14 @@
 
 namespace TearoomOne;
 
+use Kirby\Blueprint\Blueprint;
 use Kirby\Cms\App as Kirby;
+use Kirby\Cms\Language;
 use Kirby\Cms\Site;
 use Kirby\Content\Field;
 use Kirby\Content\VersionCache;
 use Kirby\Content\VersionId;
+use Kirby\Data\Json;
 use Kirby\Toolkit\A;
 
 /**
@@ -115,6 +118,80 @@ class ConfigHelper
                 VersionCache::remove($version, $language);
             }
         }
+    }
+
+    /**
+     * Move a model ID that the AI settings block no longer offers (older
+     * Meta Kit versions offered other OpenRouter models) to "Other model".
+     * Kirby 6 validates the whole block when the site is published, so a
+     * retired option would block publishing any site change.
+     *
+     * Covers the published content and unsaved changes of the default
+     * language, where the shared block lives. Writes the storage directly,
+     * like removeSharedSiteCopies(), to keep another editor's lock.
+     */
+    public static function migrateRetiredAiModel(Site $site): void
+    {
+        $offered = self::offeredAiModels();
+
+        if ($offered === []) {
+            return;
+        }
+
+        $language = Language::ensure('default');
+
+        foreach ([VersionId::latest(), VersionId::changes()] as $versionId) {
+            $version = $site->version($versionId);
+
+            if ($version->exists($language) === false) {
+                continue;
+            }
+
+            $fields = $version->read($language) ?? [];
+            $blocks = json_decode((string)($fields['metakitopenrouter'] ?? ''), true);
+
+            if (is_array($blocks) === false) {
+                continue;
+            }
+
+            $changed = false;
+
+            foreach ($blocks as $index => $block) {
+                $content = array_change_key_case((array)($block['content'] ?? []));
+                $model = trim((string)($content['model'] ?? ''));
+
+                if ($model === '' || in_array($model, $offered, true) === true) {
+                    continue;
+                }
+
+                $content['model'] = 'custom';
+                $content['custommodel'] = $model;
+                $blocks[$index]['content'] = $content;
+                $changed = true;
+            }
+
+            if ($changed === false) {
+                continue;
+            }
+
+            $fields['metakitopenrouter'] = Json::encode($blocks);
+            $site->storage()->update($versionId, $language, $fields);
+            VersionCache::remove($version, $language);
+        }
+    }
+
+    /**
+     * Values of the model select in the AI settings block, "custom" included
+     */
+    private static function offeredAiModels(): array
+    {
+        $blueprint = Blueprint::find('blocks/mk-openrouter');
+        $options = $blueprint['fields']['model']['options'] ?? [];
+
+        return array_values(array_filter(array_map(
+            fn ($option) => is_array($option) ? (string)($option['value'] ?? '') : (string)$option,
+            $options
+        ), fn ($value) => $value !== ''));
     }
 
     /**

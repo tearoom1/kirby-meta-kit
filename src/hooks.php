@@ -10,6 +10,14 @@ return array_merge_recursive([
     "system.loadPlugins:after" => function () {
         // Initialize site SEO block fields on first load if they don't exist
         $site = site();
+
+        // A model ID that is no longer offered would block publishing the
+        // site in Kirby 6
+        try {
+            TearoomOne\ConfigHelper::migrateRetiredAiModel($site);
+        } catch (\Exception $e) {
+            // Read-only content or no site yet: try again on the next request
+        }
         $needsUpdate = false;
         $updates = [];
 
